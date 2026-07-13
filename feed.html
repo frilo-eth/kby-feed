@@ -226,7 +226,9 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
 .uname:hover{opacity:.8;text-decoration:underline;}
 .desc{font-size:13.5px;line-height:1.4;color:var(--ink-soft);max-width:100%;margin-bottom:9px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .meta-tags{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
-.token-mini{width:22px;height:22px;object-fit:cover;flex-shrink:0;background:var(--line);box-shadow:0 1px 4px rgba(0,0,0,.15);cursor:pointer;}
+.token-mini{width:22px;height:22px;object-fit:cover;flex-shrink:0;background:var(--line);box-shadow:0 1px 4px rgba(0,0,0,.15);cursor:pointer;transition:transform .28s cubic-bezier(.22,1.4,.36,1), box-shadow .22s ease, filter .2s ease;}
+.token-mini:hover{transform:scale(1.14);box-shadow:0 0 0 2px rgba(255,102,34,.35), 0 4px 12px rgba(0,0,0,.2);filter:brightness(1.05);}
+.token-mini:active{transform:scale(.96);transition-duration:.1s;}
 .tag-ticker{font-weight:700;font-size:13px;color:var(--coffee);cursor:pointer;transition:color .15s;text-shadow:none;}
 .tag-ticker:hover{color:var(--coffee-hover);}
 .pill{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:4px 10px;border-radius:20px;border:none;cursor:pointer;}
@@ -250,15 +252,40 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
 
 /* ---- action rail ---- */
 .action-rail{display:flex;flex-direction:column;align-items:center;gap:16px;}
-.avatar-plus{position:relative;width:52px;height:52px;cursor:pointer;transition:transform .28s cubic-bezier(.22,1.4,.36,1);margin-top:-20px;margin-left:-8px;z-index:6;align-self:flex-start;}
-.avatar-plus:hover{transform:scale(1.03) translateY(-1px);}
-.avatar-plus:active{transform:scale(.95);transition-duration:.1s;}
-.avatar-plus-inner{width:100%;height:100%;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,.18);transition:box-shadow .28s ease;}
-.avatar-plus:hover .avatar-plus-inner{box-shadow:0 8px 18px rgba(0,0,0,.2);}
+.avatar-plus{position:relative;width:52px;height:52px;cursor:pointer;margin-top:-20px;margin-left:-8px;z-index:6;align-self:flex-start;}
+.avatar-plus-inner{
+  width:100%;height:100%;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,.18);
+  transition:box-shadow .28s ease, filter .22s ease;
+}
 .avatar-plus-inner img{width:100%;height:100%;object-fit:cover;}
-.plus-badge{position:absolute;bottom:-6px;right:-6px;width:22px;height:22px;background:var(--orange);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:15px;line-height:1;z-index:2;box-shadow:0 2px 8px rgba(255,102,34,.45);transition:transform .32s cubic-bezier(.22,1.5,.36,1),box-shadow .22s ease;}
-.avatar-plus:hover .plus-badge{transform:scale(1.06);box-shadow:0 3px 10px rgba(255,102,34,.5);}
-.avatar-plus:active .plus-badge{transform:scale(.92);}
+/* token avatar: soft orange ring on hover (no whole-card scale) */
+.avatar-plus:hover .avatar-plus-inner{
+  box-shadow:0 0 0 2px var(--orange), 0 8px 20px rgba(255,102,34,.28);
+  filter:brightness(1.04);
+}
+.avatar-plus:active .avatar-plus-inner{filter:brightness(.96);}
+.plus-badge{
+  position:absolute;bottom:-6px;right:-6px;width:22px;height:22px;border-radius:8px;
+  background:var(--orange);display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:900;font-size:15px;line-height:1;z-index:2;
+  box-shadow:0 2px 8px rgba(255,102,34,.45);
+  transition:transform .4s cubic-bezier(.22,1.5,.36,1), box-shadow .28s ease, background .2s ease;
+  transform-origin:center;
+}
+.plus-badge::before{
+  content:'';position:absolute;inset:-4px;border-radius:10px;
+  border:2px solid rgba(255,102,34,.45);opacity:0;transform:scale(.6);
+  transition:opacity .28s ease, transform .4s cubic-bezier(.22,1.45,.36,1);
+  pointer-events:none;
+}
+/* embellishment: + rotates to × orientation, pops, and rings out */
+.avatar-plus:hover .plus-badge{
+  transform:scale(1.18) rotate(90deg);
+  background:#FF7A3D;
+  box-shadow:0 0 0 5px rgba(255,102,34,.22), 0 6px 16px rgba(255,102,34,.5);
+}
+.avatar-plus:hover .plus-badge::before{opacity:1;transform:scale(1.35);border-color:rgba(255,102,34,.35);}
+.avatar-plus:active .plus-badge{transform:scale(1.02) rotate(90deg);transition-duration:.1s;}
 
 .react-col{display:flex;flex-direction:column;align-items:center;gap:5px;width:46px;}
 .react-btn{
@@ -267,26 +294,13 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
   background:var(--card);color:var(--ink);
   flex-shrink:0;overflow:visible;
   box-shadow:0 2px 8px rgba(40,30,20,.06);
-  transition:
-    transform .32s cubic-bezier(.22,1.45,.36,1),
-    background .22s ease,
-    color .22s ease,
-    box-shadow .28s ease,
-    filter .2s ease;
+  transition:background .22s ease, color .22s ease, box-shadow .22s ease, filter .2s ease;
 }
 .react-btn svg{
   display:block;flex-shrink:0;pointer-events:none;width:24px;height:24px;
-  transition:transform .32s cubic-bezier(.22,1.45,.36,1), filter .2s ease;
+  transition:filter .2s ease, opacity .2s ease;
 }
 .react-btn svg path,.react-btn svg circle{stroke:currentColor;}
-/* soft wash behind icon — mirrors kbd helper rest→active language */
-.react-btn::before{
-  content:'';position:absolute;inset:0;border-radius:50%;
-  background:transparent;pointer-events:none;z-index:0;
-  transition:background .22s ease, transform .32s cubic-bezier(.22,1.45,.36,1), opacity .22s ease;
-  opacity:0;transform:scale(.72);
-}
-.react-btn svg{position:relative;z-index:1;}
 
 .meta-overlay-mode .react-btn{
   background:var(--glass-dark);color:#fff;
@@ -294,59 +308,43 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
   box-shadow:none;
 }
 
+/* color-only hover — no scale / translate */
 @media (hover:hover) and (pointer:fine){
-  .react-btn:hover{
-    transform:scale(1.04) translateY(-1px);
-    box-shadow:0 6px 16px rgba(40,30,20,.1);
-  }
-  .react-btn:hover svg{transform:scale(1.03);}
-  .react-btn:hover::before{opacity:1;transform:scale(1);background:var(--line);}
-  /* desktop solid rail: hover softens into a tinted disc */
   .react-btn:not(.active):hover{background:var(--line);color:var(--ink);}
   html.dark .react-btn:not(.active):hover{background:rgba(255,255,255,.08);color:var(--ink);}
-  /* glass / overlay rail: brighten the frosted disc */
   .meta-overlay-mode .react-btn:not(.active):hover{
     background:rgba(30,26,20,.72);color:#fff;
-    box-shadow:0 4px 14px rgba(0,0,0,.2);
   }
-  .meta-overlay-mode .react-btn:hover::before{background:rgba(255,255,255,.08);}
   html.dark .meta-overlay-mode .react-btn:not(.active):hover{
     background:rgba(255,255,255,.2);color:#fff;
   }
-  /* semantic active — keep color, slight lift */
-  .react-btn.active:hover{filter:brightness(1.03);transform:scale(1.04) translateY(-1px);}
-  .react-btn.active:hover::before{opacity:0;}
-  .react-col:hover .react-count{color:var(--ink);transform:none;}
+  .react-btn.active:hover{filter:brightness(1.06);}
+  .react-col:hover .react-count{color:var(--ink);}
   .meta-overlay-mode .react-col:hover .react-count{color:#fff;}
 }
 
-.react-btn:active{
-  transform:scale(.86)!important;
-  transition-duration:.1s!important;
-  filter:brightness(.97);
-}
+.react-btn:active{filter:brightness(.94);}
 .react-btn:focus-visible{
   outline:2px solid var(--orange);
   outline-offset:3px;
 }
+/* click feedback stays (not hover) */
 .react-btn.pulse{animation:reactPulse .48s cubic-bezier(.22,1.5,.36,1);}
 .react-btn.pulse svg{animation:reactIconPop .48s cubic-bezier(.22,1.5,.36,1);}
 @keyframes reactPulse{
-  0%{transform:scale(1);}
-  28%{transform:scale(1.22);}
-  55%{transform:scale(.9);}
-  100%{transform:scale(1);}
+  0%{filter:brightness(1);}
+  28%{filter:brightness(1.12);}
+  100%{filter:brightness(1);}
 }
 @keyframes reactIconPop{
-  0%{transform:scale(1) rotate(0deg);}
-  30%{transform:scale(1.18) rotate(-6deg);}
-  55%{transform:scale(.94) rotate(3deg);}
-  100%{transform:scale(1) rotate(0deg);}
+  0%{opacity:1;}
+  30%{opacity:.85;}
+  100%{opacity:1;}
 }
 
 .react-count{
   font-size:11px;font-weight:700;color:var(--ink-faint);text-align:center;width:100%;line-height:1;
-  transition:color .2s ease, transform .28s cubic-bezier(.22,1.4,.36,1), opacity .2s ease;
+  transition:color .2s ease, opacity .2s ease;
 }
 .react-count:empty{display:none;}
 .meta-overlay-mode .react-count{color:rgba(255,255,255,.75);}
@@ -364,19 +362,16 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
   background:var(--red)!important;color:#fff!important;
   box-shadow:0 6px 18px rgba(229,69,63,.35)!important;
 }
-.react-btn.active::before{opacity:0;}
-/* tip lock: already tipped — no hover grow fight, just settle */
 .react-btn.tip.active{cursor:default;}
-.react-btn.tip.active:hover{filter:none;transform:none;}
-.react-btn.tip.active:active{transform:none!important;}
+.react-btn.tip.active:hover{filter:none;}
 
 .tip-float{position:fixed;font-weight:800;font-size:14px;color:var(--orange);pointer-events:none;animation:tipFloat 1s ease-out forwards;white-space:nowrap;z-index:80;}
 @keyframes tipFloat{0%{opacity:0;transform:translateY(0) scale(.7);}15%{opacity:1;transform:translateY(-6px) scale(1.1);}100%{opacity:0;transform:translateY(-52px) scale(1);}}
 
 .chevron-nav{position:absolute;right:20px;top:50%;transform:translateY(-50%);z-index:20;display:flex;flex-direction:column;gap:14px;}
-.chev-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);box-shadow:var(--shadow);transition:transform .14s, background .15s, color .15s;}
+.chev-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);box-shadow:var(--shadow);transition:background .15s, color .15s;}
 .chev-btn:hover{background:var(--line);color:var(--ink);}
-.chev-btn:active{transform:scale(.88);}
+.chev-btn:active{filter:brightness(.95);}
 
 .kbd-btn{
   position:absolute;right:20px;bottom:22px;z-index:20;
@@ -384,17 +379,19 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
   background:transparent;display:flex;align-items:center;justify-content:center;
   cursor:pointer;color:var(--ink-soft);
   box-shadow:none;clip-path:none;
-  transition:transform .15s, background .2s ease, color .2s ease;
+  transition:background .2s ease, color .2s ease;
 }
 .kbd-btn svg{width:24px;height:24px;display:block;}
-.kbd-btn:hover{color:var(--ink);transform:scale(1.04);}
-.kbd-btn:active{transform:scale(.92);}
+.kbd-btn:hover{color:var(--ink);background:var(--line);}
+.kbd-btn:active{filter:brightness(.95);}
 /* ACTIVE — soft circle behind the icon while the panel is open */
 .kbd-btn.active{
   background:var(--line);
   color:var(--ink);
 }
 html.dark .kbd-btn.active{background:rgba(255,255,255,.08);}
+.kbd-btn.active:hover{background:var(--line);color:var(--ink);}
+html.dark .kbd-btn.active:hover{background:rgba(255,255,255,.1);}
 .kbd-panel{position:absolute;right:20px;bottom:82px;z-index:25;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-width:200px;transform-origin:bottom right;transform:scale(.9) translateY(10px);opacity:0;pointer-events:none;transition:transform .2s cubic-bezier(.22,1,.36,1), opacity .18s;}
 .kbd-panel.show{transform:scale(1) translateY(0);opacity:1;pointer-events:auto;}
 .kbd-row{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--ink-soft);font-weight:600;}
@@ -534,7 +531,7 @@ html.dark .comment-skel-line::after{background:linear-gradient(105deg,transparen
 .comment-attach-thumb img,.comment-attach-thumb video{width:100%;height:100%;object-fit:cover;display:block;}
 .comment-attach-remove{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;border:2px solid var(--card);background:var(--ink);color:var(--bg);cursor:pointer;flex-shrink:0;font-size:11px;line-height:1;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 8px rgba(0,0,0,.18);z-index:3;opacity:0;transform:scale(.7);transition:transform .28s cubic-bezier(.22,1.5,.36,1),background .15s,opacity .24s ease;}
 .comment-attach.show .comment-attach-remove{opacity:1;transform:scale(1);transition-delay:.18s;}
-.comment-attach-remove:hover{transform:scale(1.08);background:var(--red);color:#fff;border-color:var(--card);}
+.comment-attach-remove:hover{background:var(--red);color:#fff;border-color:var(--card);}
 @keyframes attachPopIn{
   0%{transform:scale(.55);opacity:0;filter:blur(6px);box-shadow:0 0 0 rgba(0,0,0,0);}
   55%{transform:scale(1.07);opacity:1;filter:blur(0);box-shadow:0 10px 28px rgba(42,36,28,.18);}
@@ -889,11 +886,8 @@ body.cfx-on #commentsDrawer{z-index:50;}
   }
   .react-btn svg{filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));}
   .react-count{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.55);}
-  /* touch: press feedback without sticky hover */
-  .react-btn:active{
-    transform:scale(.88)!important;
-    background:rgba(30,26,20,.82);
-  }
+  /* touch: press feedback without sticky hover — color only */
+  .react-btn:active{background:rgba(30,26,20,.82);filter:brightness(.96);}
   .react-btn.tip.active:active,
   .react-btn.like.active:active,
   .react-btn.dislike.active:active{background:inherit;}
@@ -3638,7 +3632,7 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
     const btn = e.target.closest('button[data-more]');
     if(!btn) return;
     handleMoreAction(btn.dataset.more);
-    if(btn.dataset.more !== 'theme') closeMoreSheet();
+    closeMoreSheet();
   });
   if(moreSheet && typeof enableSheetDrag === 'function'){
     enableSheetDrag(moreSheet, document.getElementById('moreSheetHandle'), closeMoreSheet, moreSheetScrim);
