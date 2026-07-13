@@ -4,7 +4,6 @@
   "framework": null,
   "outputDirectory": ".",
   "rewrites": [
-    { "source": "/", "destination": "/feed.html" },
-    { "source": "/cheatsheet", "destination": "/cheatsheet.html" }
+    { "source": "/", "destination": "/feed.html" }
   ]
 }

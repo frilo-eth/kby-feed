@@ -11,8 +11,7 @@ TikTok-style doomscroll feed prototype with spring physics, haptics, comments, a
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) (`/` → feed).  
-Cheatsheet: [http://localhost:3000/cheatsheet](http://localhost:3000/cheatsheet)
+Open [http://localhost:3000](http://localhost:3000) (`/` → feed).
 
 ## Controls
 
@@ -58,7 +57,7 @@ Most motion reuses a small set of curves. Durations are wall-clock; springs are 
 | Kbd panel open | — | `scale(.9)→1`, opacity | `.2s` `(.22,1,.36,1)` |
 | **Reaction rail** | outside: `#FAFAFA→#FFF` / dark `#130A07→#251D18`; on-media glass tint; active `brightness(1.06)` | `brightness(.94)` | bg/color `.22s` |
 | Reaction count | ink / white | — | color `.2s` |
-| **Mute / unmute** | pathLength draw morph (waves ↔ slash), stroke `2.35` (~rail weight); unmute bloom / mute cut sounds + haptic | — | `.2s` ease-in-out (+`.1s` outer) |
+| **Mute / unmute** | pathLength draw morph — see below | — | `.2s` ease-in-out (+`.1s` outer) |
 | **Hover cards** | user + token preview portals (no Buy CTA); desktop `pointer:fine` only | — | show `.18s`, delay 280ms |
 | New posts pill | brightness `.98` | `scale(.95)` | opacity `.3s`, transform `.38s` pop |
 | Tag / uname | color / underline | — | `.15s` |
@@ -66,6 +65,35 @@ Most motion reuses a small set of curves. Durations are wall-clock; springs are 
 | **Trade plus** *(embellished)* | see below | settle | pop curve |
 
 Desktop reaction hover gated: `@media (hover:hover) and (pointer:fine)`.
+
+#### Mute / unmute SVG morph
+
+WebHaptics-style pathLength draw — one SVG, no hard icon swap. Cone stays; waves or slash sketch in.
+
+| Piece | Detail |
+|-------|--------|
+| SVG | `.mute-icon` · viewBox `0 0 28 28` · stroke `2.35` (~rail weight) |
+| Cone | `.mute-cone` — always visible |
+| Sound on | `.mute-waves` shown · `data-sound="1"` · waves draw via `@keyframes muteDraw` |
+| Muted | `.mute-slash` shown · `data-sound="0"` · X lines draw the same way |
+| Draw | `pathLength="1"` + `stroke-dasharray:1` / `stroke-dashoffset:1→0` · outer path `.mute-draw-delay` (+`.1s`) |
+| Settled | `.is-settled` skips animation (`stroke-dashoffset:0`) |
+| API | `muteIconHtml()` · `applyMuteButtonState(btn, on, {animate})` · `setFeedSound` / `syncMuteButtons` |
+| Feedback | haptic + sound presets `unmute` / `mute` · session key `kb_feed_sound` |
+
+```html
+<svg class="mute-icon" width="24" height="24" viewBox="0 0 28 28" fill="none">
+  <path class="mute-cone" d="M13 7L8 11H4V17H8L13 21V7Z"/>
+  <g class="mute-waves">
+    <path class="mute-draw mute-draw-delay" pathLength="1" d="M21.07 7C…21.14"/>
+    <path class="mute-draw" pathLength="1" d="M17.54 10.53C…17.6"/>
+  </g>
+  <g class="mute-slash">
+    <path class="mute-draw mute-draw-delay" pathLength="1" d="M25 11L19 17"/>
+    <path class="mute-draw" pathLength="1" d="M19 11L25 17"/>
+  </g>
+</svg>
+```
 
 #### Trade plus embellishment
 
