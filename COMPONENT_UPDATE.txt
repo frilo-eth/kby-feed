@@ -1,4 +1,4 @@
-feed: component behaviour update
+feed: component behaviour update — v0.1.0
 
 Navigation
 - Sidebar — 220↔76 collapse; active nav; More pop (Signals, Tip Jar, Notifications, Profile, Account)
@@ -11,7 +11,7 @@ Feed
 - Media card — shimmer→ready|error; hover topctl; drag-to-comment ghost; aspect --ar
 - Glass mute/more — 46px; pathLength mute↔sound morph; unmute/mute haptics+sounds; session persist
 - React rail — tip (immutable +$5 float); like↔dislike exclusive; comment; share; pulse + haptics
-- Meta — pinned | float-on-media | overlay-mode; bottom flush with media card (`layoutMeta`)
+- Meta — pinned | float-on-media | overlay-mode (`layoutMeta`); pinned flush with media bottom; float inset by PAD (18px)
 - Buy CTA — `Buy $ticker` pill CSS-anchored to `.token-anchor` + avatar+; hover or ~3.5s engage; opens trade
 - Trade entry — avatar+ / buy CTA / ticker / mini / pill → trade drawer (not hover card)
 - Hover cards (desktop) — user on uname/avatar; token chart on plus/buy/ticker/mini/pill (no CTA)

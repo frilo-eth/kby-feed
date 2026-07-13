@@ -1,9 +1,10 @@
 # Kumbaya Feed
 
-TikTok-style doomscroll feed prototype with spring physics, haptics, comments, trade drawer, and mobile-first overlays.
+**Version 0.1.0** — TikTok-style doomscroll feed prototype with spring physics, haptics, comments, trade drawer, and mobile-first overlays.
 
 **Live:** [https://kby-feed.vercel.app](https://kby-feed.vercel.app)  
-**Repo:** [frilo-eth/kby-feed](https://github.com/frilo-eth/kby-feed)
+**Repo:** [frilo-eth/kby-feed](https://github.com/frilo-eth/kby-feed)  
+**Tag:** [`v0.1.0`](https://github.com/frilo-eth/kby-feed/releases/tag/v0.1.0)
 
 ## Run locally
 
@@ -229,7 +230,7 @@ pos  += v * dt
 | Topbar auto-hide (mobile) | after settle; `max-height` + pad + opacity, `(.32,.72,0,1)` | `.38s` (page-step locked during swipe) |
 | Chrome reflow | `reflowDuringChrome()` rAF loop | **440ms** |
 | Search marquee | `@keyframes searchMarquee` | `--mq-dur` (~overflow/45), ease-in-out alternate |
-| Meta bottom | `layoutMeta` — pinned/float meta bottom flush with media card | — |
+| Meta bottom | `layoutMeta` — pinned: flush with media bottom; float (`.meta-float`): inset by `PAD` (18px) | — |
 
 ---
 
@@ -311,3 +312,19 @@ Portal: `#kbHoverPortal`. Stats/chart are deterministic from `hashSeed(user|tick
 ## Breakpoint
 
 **860px** — mobile full-bleed feed, bottom nav, sheets; desktop sidebar + side drawers + kbd helper + new-pill + hover cards.
+
+---
+
+## Version 0.1.0
+
+First tagged snapshot of the single-file prototype (`feed.html` + `public/`).
+
+| Area | Included |
+|------|----------|
+| Feed | Spring doomscroll, infinite wrap, pull-to-refresh (mobile), mute morph, Buy CTA, hover cards, 2× hold, new-pill, first-visit hint |
+| Meta | Pinned left (flush) or float-on-media (padded inset) via `layoutMeta` |
+| Comments | Anon/public, attach + fly-in, CFX gallery (desktop stage / mobile pinch-rotate-pan) |
+| Sheets | Trade, share (auto-close on X/copy), more (auto-close incl. theme), sheet-colored close targets |
+| System | Light/dark tokens, web-haptics + WebAudio, session keys for hint / sound / sidebar |
+
+See `COMPONENT_UPDATE.txt` for the compact behaviour checklist and [CHANGELOG.md](CHANGELOG.md) for release notes.
