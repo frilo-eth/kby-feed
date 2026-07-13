@@ -1923,9 +1923,10 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     ci.style.bottom = bottomAlign + 'px';
     // fits fully in the left gutter (with a little breathing room before the media)?
     if(cardLeft < PIN + metaW + 12){
-      // not enough room -> overlay on the media's bottom-left; keep bottom flush with media
+      // not enough room -> overlay on the media's bottom-left with inset padding
       item.classList.add('meta-float');
       ci.style.left = Math.round(cardLeft + PAD) + 'px';
+      ci.style.bottom = Math.round(bottomAlign + PAD) + 'px';
       ci.style.maxWidth = Math.round(Math.max(160, cardW - PAD * 2)) + 'px';
     }
   }
