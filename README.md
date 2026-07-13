@@ -47,22 +47,31 @@ Most motion reuses a small set of curves. Durations are wall-clock; springs are 
 
 ---
 
-### 1. Simple hover / press (CSS)
+### 1. Hover / press (CSS)
 
-| Target | Hover | Active (press) | Transition |
-|--------|-------|----------------|------------|
-| Nav item | bg + color | — | `.15s` |
-| Icon / launch / chevron | `scale(1.04–1.06)` | `scale(.88)` | `.14–.15s` |
-| Glass mute/more | bg brighten | `scale(.88)` | transform `.12s`, bg `.15s` |
-| **Kbd helper** | rest = icon only; **active** = soft circle `var(--line)` | `scale(.92)` | `.15–.2s` |
-| Kbd panel open | — | `scale(.9)→1`, `opacity 0→1` | `.2s` `(.22,1,.36,1)` |
-| **Reaction rail** | `scale(1.04) translateY(-1px)`, soft disc wash | `scale(.86)` | `.32s` `(.22,1.45,.36,1)` |
-| Avatar+ | `scale(1.03) translateY(-1px)` | `scale(.95)` | `.28s` `(.22,1.4,.36,1)` |
-| Plus badge | `scale(1.06)` | `scale(.92)` | `.32s` `(.22,1.5,.36,1)` |
+**Rule:** hover is **color-graded only** (background, color, brightness, shadow tint). No scale / translate on hover — except token chip + trade plus.
+
+| Target | Hover | Press | Transition |
+|--------|-------|-------|------------|
+| Nav / icon / chevron / glass | bg + color | brightness dip | `.15s` |
+| **Kbd helper** | rest = icon; hover/active = soft circle `var(--line)` + ink | brightness | `.2s` |
+| Kbd panel open | — | `scale(.9)→1`, opacity | `.2s` `(.22,1,.36,1)` |
+| **Reaction rail** | tinted disc (`var(--line)` / brighter glass); active = `brightness(1.06)` | `brightness(.94)` | bg/color `.22s` |
+| Reaction count | ink / white | — | color `.2s` |
 | New posts pill | brightness `.98` | `scale(.95)` | opacity `.3s`, transform `.38s` pop |
 | Tag / uname | color / underline | — | `.15s` |
+| **Token mini** *(size allowed)* | `scale(1.14)` + orange ring | `scale(.96)` | `.28s` `(.22,1.4,.36,1)` |
+| **Trade plus** *(embellished)* | see below | settle | pop curve |
 
-Desktop reaction hover is gated: `@media (hover:hover) and (pointer:fine)`.
+Desktop reaction hover gated: `@media (hover:hover) and (pointer:fine)`.
+
+#### Trade plus embellishment
+
+| Piece | Hover |
+|-------|--------|
+| Avatar | orange `2px` ring + slight brightness |
+| Plus badge | `scale(1.18) rotate(90deg)`, brighter orange, glow `0 0 0 5px rgba(255,102,34,.22)` |
+| Plus `::before` ring | opacity `0→1`, `scale(.6→1.35)` — `.4s` `(.22,1.45,.36,1)` |
 
 ---
 
@@ -70,11 +79,11 @@ Desktop reaction hover is gated: `@media (hover:hover) and (pointer:fine)`.
 
 | Motion | Code | Timing |
 |--------|------|--------|
-| Click pulse (btn) | `@keyframes reactPulse` | `.48s` `(.22,1.5,.36,1)` — scale `1 → 1.22 → .9 → 1` |
-| Click pulse (icon) | `@keyframes reactIconPop` | same — scale + slight rotate |
+| Click pulse (btn) | `@keyframes reactPulse` | `.48s` `(.22,1.5,.36,1)` — brightness flash (no size) |
+| Click pulse (icon) | `@keyframes reactIconPop` | same — opacity dip |
 | Tip float `+$5` | `@keyframes tipFloat` | `1s ease-out` — rise `−52px`, fade |
 | Active fill | tip `orange` / like `green` / dislike `red` | bg/color `.22s`, glow shadow |
-| Tip lock | once tipped, no hover grow | cursor `default` |
+| Tip lock | once tipped, no hover brighten | cursor `default` |
 
 ---
 
@@ -142,6 +151,7 @@ pos  += v * dt
 | Drawer open (desktop) | width `0→360`, `(.22,1,.36,1)` | `.38s` |
 | Mobile sheet open | `translateY(100%→0)`, `(.32,.72,0,1)` | `.44s` |
 | Sheet scrim | opacity | `.35s ease` |
+| More sheet | same vaul curve; **closes after any action including Toggle theme** | `.44s` |
 | Topbar auto-hide (mobile) | `max-height` + pad + opacity, `(.32,.72,0,1)` | `.38s` |
 | Chrome reflow | `reflowDuringChrome()` rAF loop | **440ms** |
 | Search marquee | `@keyframes searchMarquee` | `--mq-dur` (~overflow/45), ease-in-out alternate |
