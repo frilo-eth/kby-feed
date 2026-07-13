@@ -150,25 +150,35 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
 .media-error .media-retry{margin-top:4px;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:12px;font-weight:700;padding:8px 16px;border-radius:20px;cursor:pointer;pointer-events:auto;transition:background .15s;}
 .media-error .media-retry:hover{background:rgba(255,255,255,.2);}
 
-/* TikTok-style Buy $ticker CTA — overlays media, Y-aligned with rail token avatar */
+/* TikTok-style Buy $ticker CTA — stable bottom-right on media (no JS Y sync → no jump) */
 .buy-cta{
-  position:absolute;right:14px;z-index:8;
+  --buy-rail-stack: calc(62px * 5 + 16px * 5 + 26px + 6px); /* 5 react cols + gaps + half avatar + pad */
+  position:absolute;right:14px;bottom:min(var(--buy-rail-stack), 42%);
+  z-index:8;top:auto;
   display:inline-flex;align-items:center;gap:8px;
   max-width:min(220px,calc(100% - 28px));
   padding:6px 14px 6px 6px;margin:0;border:none;
   border-radius:999px;
   background:rgba(42,42,42,.9);color:#fff;
   font-size:13.5px;font-weight:700;letter-spacing:-.01em;line-height:1;
-  white-space:nowrap;cursor:pointer;pointer-events:auto;
+  white-space:nowrap;cursor:pointer;pointer-events:none;
   backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);
   box-shadow:0 0 0 3px rgba(0,0,0,.28), 0 6px 18px rgba(0,0,0,.28);
-  opacity:0;transform:translateY(-50%);
-  transition:opacity .22s ease, background .15s ease, box-shadow .15s ease, filter .12s ease;
-  --buy-y:50%;
-  top:var(--buy-y);
+  opacity:0;transform:none;
+  transition:opacity .3s ease, background .15s ease, box-shadow .15s ease, filter .12s ease;
 }
-.feed-item.media-ready .buy-cta{opacity:1;}
-.feed-item:not(.media-ready) .buy-cta{pointer-events:none;}
+.feed-item:not(.media-ready) .buy-cta{opacity:0!important;pointer-events:none!important;}
+/* Desktop: show on media hover */
+@media (hover:hover) and (pointer:fine){
+  .media-card:hover .buy-cta,
+  .media-card.media-hover .buy-cta{
+    opacity:1;pointer-events:auto;
+  }
+}
+/* After a few seconds watching the active post (all viewports) */
+.feed-item.active.media-ready.buy-cta-engaged .buy-cta{
+  opacity:1;pointer-events:auto;
+}
 .buy-cta:hover{background:rgba(58,58,58,.94);box-shadow:0 0 0 3px rgba(0,0,0,.32), 0 8px 22px rgba(0,0,0,.32);}
 .buy-cta:active{filter:brightness(.94);}
 .buy-cta-av{
@@ -959,8 +969,9 @@ body.cfx-on #commentsDrawer{z-index:50;}
   .feed-item.active .media-topctl .glass-btn{pointer-events:auto;}
   .media-topctl{top:14px;}
 
-  /* Buy CTA sits left of the overlaid rail, Y-matched to token avatar */
+  /* Buy CTA: same rail-relative bottom math; sits left of overlaid rail */
   .buy-cta{
+    --buy-rail-stack: calc(62px * 5 + 18px * 5 + 24px + 14px);
     right:72px;font-size:13px;padding:5px 12px 5px 5px;
     box-shadow:0 0 0 3px rgba(0,0,0,.35), 0 6px 16px rgba(0,0,0,.35);
   }
@@ -1854,7 +1865,6 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     }
     fitMediaBox(inner, dims);
     if(window.innerWidth > 860) layoutMeta(item);
-    layoutBuyCta(item);
   }
 
   function clearMetaInline(item){
@@ -1865,21 +1875,6 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     ci.style.left = '';
     ci.style.bottom = '';
     ci.style.maxWidth = '';
-  }
-
-  // Align Buy $ticker pill with the rail token avatar (same horizontal centerline).
-  function layoutBuyCta(item){
-    if(!item) return;
-    const btn = item.querySelector('.buy-cta');
-    const avatar = item.querySelector('.avatar-plus');
-    const inner = item.querySelector('.media-inner');
-    if(!btn || !avatar || !inner) return;
-    const ir = inner.getBoundingClientRect();
-    const ar = avatar.getBoundingClientRect();
-    if(ir.height < 8 || ar.height < 8) return;
-    const y = ar.top + ar.height / 2 - ir.top;
-    const clamped = Math.max(40, Math.min(ir.height - 40, y));
-    btn.style.setProperty('--buy-y', `${Math.round(clamped)}px`);
   }
 
   // Decide where the meta block lives: pinned in the left gutter of the feed body when there's
@@ -1894,7 +1889,6 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     // Mobile CSS owns meta placement — don't bake desktop gutter math into inline styles.
     if(window.innerWidth <= 860){
       clearMetaInline(item);
-      layoutBuyCta(item);
       return;
     }
     // reset to the pinned baseline so we can measure the meta's natural width
@@ -1920,24 +1914,19 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
       ci.style.bottom = Math.round(padBoxH - cardBottom + PAD) + 'px';
       ci.style.maxWidth = Math.round(Math.max(160, cardW - PAD * 2)) + 'px';
     }
-    layoutBuyCta(item);
   }
   function markMediaReady(inner){
     if(!inner) return;
     inner.classList.remove('is-error');
     inner.classList.add('is-ready');
-    const item = inner.closest('.feed-item');
-    item?.classList.add('media-ready');
-    if(item) requestAnimationFrame(()=>layoutBuyCta(item));
+    inner.closest('.feed-item')?.classList.add('media-ready');
   }
   function markMediaError(inner){
     if(!inner) return;
     inner.classList.remove('is-ready');
     inner.classList.add('is-error');
     // still unlock the rail so the post isn't stuck inert
-    const item = inner.closest('.feed-item');
-    item?.classList.add('media-ready');
-    if(item) requestAnimationFrame(()=>layoutBuyCta(item));
+    inner.closest('.feed-item')?.classList.add('media-ready');
   }
   function attachImage(img, eager){
     const inner = img.closest('.media-inner');
@@ -2069,13 +2058,13 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     itemEls().forEach((it,i)=>it.classList.toggle('active', i===0));
     lastActiveIdx = 0;
     applyTransform(); applyParallax();
+    armBuyCtaEngage(0);
     // Second pass after layout so scroller.clientHeight is real (avoids undersized skeleton)
     requestAnimationFrame(()=>{
       itemEls().forEach(it=>{
         const p = posts[+it.dataset.index];
         fitMediaBox(it.querySelector('.media-inner'), p);
         layoutMeta(it);
-        layoutBuyCta(it);
       });
       applyTransform(); applyParallax();
     });
@@ -2417,6 +2406,7 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
   function cancelAnim(){ if(animRAF){ cancelAnimationFrame(animRAF); animRAF=null; } }
   function springTo(target, initialVel){
     cancelAnim();
+    clearBuyCtaEngage();
     lockPageStep();
     targetIndex = target;
     let v = initialVel||0;
@@ -2432,6 +2422,26 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     animRAF = requestAnimationFrame(frame);
   }
   let pendingTopbarAutohide = null;
+  const BUY_CTA_ENGAGE_MS = 3500;
+  let buyCtaEngageTimer = 0;
+  function clearBuyCtaEngage(){
+    if(buyCtaEngageTimer){ clearTimeout(buyCtaEngageTimer); buyCtaEngageTimer = 0; }
+    itemEls().forEach(it=>it.classList.remove('buy-cta-engaged'));
+  }
+  function armBuyCtaEngage(idx){
+    clearBuyCtaEngage();
+    const item = itemEls()[idx];
+    if(!item?.classList.contains('media-ready')){
+      // retry shortly if media still skeleton
+      buyCtaEngageTimer = setTimeout(()=>armBuyCtaEngage(idx), 400);
+      return;
+    }
+    buyCtaEngageTimer = setTimeout(()=>{
+      buyCtaEngageTimer = 0;
+      if(lastActiveIdx !== idx) return;
+      itemEls()[idx]?.classList.add('buy-cta-engaged');
+    }, BUY_CTA_ENGAGE_MS);
+  }
   function onSettled(rawTarget){
     const wrapped = ((rawTarget % N)+N)%N;
     pos = wrapped; targetIndex = wrapped;
@@ -2461,7 +2471,7 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     requestAnimationFrame(()=>syncMediaHover(lastPointerX, lastPointerY));
     positionNewPill();
     syncCommentMediaDrag();
-    layoutBuyCta(itemEls()[idx]);
+    armBuyCtaEngage(idx);
   }
   /* ---- mobile topbar auto-hide (next → hide, prev/pull → show) ---- */
   const mainEl = document.querySelector('.main');
@@ -2735,6 +2745,7 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     if(refreshing) return;
     clearMediaHover();
     state.dragging=true; scroller.classList.add('grabbing'); cancelAnim();
+    clearBuyCtaEngage();
     lockPageStep();
     dragStartY=e.clientY; dragStartPos=pos; lastY=e.clientY; lastT=performance.now(); velocity=0;
     lastTickStep = Math.floor(pos);
@@ -2906,7 +2917,6 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     }
     measureSearchMarquee();
     positionNewPill();
-    itemEls().forEach(layoutBuyCta);
   }
   function scheduleFeedReflow(){
     if(feedReflowRaf) cancelAnimationFrame(feedReflowRaf);
