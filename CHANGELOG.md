@@ -8,7 +8,7 @@ First production snapshot of the Kumbaya doomscroll feed prototype.
 - Spring-based vertical doomscroll with infinite wrap both ways
 - Mobile pull-to-refresh (short pull) vs wrap-to-previous (longer drag)
 - Mute / unmute pathLength SVG morph; session-persisted sound
-- Buy `$ticker` CTA CSS-anchored to the rail token avatar
+- Buy `$ticker` CTA — theme crystal glass, text-only, CSS-anchored to rail avatar (no media hover)
 - Desktop user / token hover cards (preview only)
 - Video 2× hold, new-posts pill, first-visit hand hint
 
