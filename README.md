@@ -58,6 +58,7 @@ Most motion reuses a small set of curves. Durations are wall-clock; springs are 
 | **Reaction rail** | outside: `#FAFAFA→#FFF` / dark `#130A07→#251D18`; on-media glass tint; active `brightness(1.06)` | `brightness(.94)` | bg/color `.22s` |
 | Reaction count | ink / white | — | color `.2s` |
 | **Mute / unmute** | pathLength draw morph — see below | — | `.2s` ease-in-out (+`.1s` outer) |
+| **Buy $ticker** | dark glass pill on media (`Buy $TICKER` + token av); Y-aligned with rail `.avatar-plus` via `layoutBuyCta` | brightness | opacity `.22s`; opens trade |
 | **Hover cards** | user + token preview portals (no Buy CTA); desktop `pointer:fine` only | — | show `.18s`, delay 280ms |
 | New posts pill | brightness `.98` | `scale(.95)` | opacity `.3s`, transform `.38s` pop |
 | Tag / uname | color / underline | — | `.15s` |
@@ -239,7 +240,7 @@ Preview-only popovers. **No CTA on the card** — click the underlying zone stil
 
 | | User card (`#userHoverCard`) | Token card (`#tokenHoverCard`) |
 |--|--|--|
-| **Triggers** | `.uname`, `.avatar-sm` | `.avatar-plus`, `.token-mini`, `.tag-ticker`, `.pill` (280ms) |
+| **Triggers** | `.uname`, `.avatar-sm` | `.avatar-plus`, `.buy-cta`, `.token-mini`, `.tag-ticker`, `.pill` (280ms) |
 | **Content** | blockie, name, Mirror+X icons, Launches, Global PnL | avatar, ticker+cat, name, MCAP, seeded SVG chart + markers, buyers / comments / tips / heat |
 | **Gate** | `width > 860` and `(hover:hover) and (pointer:fine)` — hidden on mobile | same |
 | **API** | `bindHoverCard(el, 'user'\|'token', post, delayMs)` · `hideHoverCards(immediate?)` · `mockUserStats` / `mockTokenStats` / `buildTokenChartSvg` | |
