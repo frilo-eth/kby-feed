@@ -108,9 +108,9 @@ Desktop reaction hover gated: `@media (hover:hover) and (pointer:fine)`.
 | Motion | Code | Timing |
 |--------|------|--------|
 | Overlay in | `.feed-hint.show` | opacity/bg/blur `.45s ease` |
-| Thumb + rings travel | `@keyframes hintThumbDrag` | `1.8s` `(.65,0,.35,1)` infinite |
-| Ripple circles | `@keyframes hintRipple` | `1.8s` `(.22,.7,.36,1)`, delays `0 / .22 / .44s` |
-| Auto-dismiss | `kb_feed_hint_v6` | ~9s or on feed navigate |
+| Hand Lottie | `lottie-web` → `/public/hand-helper/Hand.json` | 700×700, 30fps, 110f (~3.7s), loop |
+| Lottie enter | `.hint-lottie` | `.55s` `(.22,1.4,.36,1)` scale `.94→1` |
+| Auto-dismiss | `kb_feed_hint_v7` | ~10s or on feed navigate |
 
 ---
 

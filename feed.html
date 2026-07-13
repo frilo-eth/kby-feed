@@ -397,41 +397,17 @@ html.dark .kbd-btn.active:hover{background:rgba(255,255,255,.1);}
 .kbd-row{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--ink-soft);font-weight:600;}
 .kbd-key{min-width:24px;height:24px;padding:0 5px;border-radius:6px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--ink);background:var(--bg);flex-shrink:0;}
 
-.feed-hint{position:absolute;inset:0;z-index:24;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;background:rgba(10,8,6,0);backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);opacity:0;pointer-events:none;transition:opacity .45s ease,background .45s ease,backdrop-filter .45s ease;}
+.feed-hint{position:absolute;inset:0;z-index:24;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:rgba(10,8,6,0);backdrop-filter:blur(0);-webkit-backdrop-filter:blur(0);opacity:0;pointer-events:none;transition:opacity .45s ease,background .45s ease,backdrop-filter .45s ease;}
 .feed-hint.show{opacity:1;background:rgba(10,8,6,.52);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);pointer-events:none;}
-.hint-track{position:relative;width:72px;height:168px;display:flex;justify-content:center;}
-.hint-track::before{content:'';position:absolute;top:0;bottom:0;left:50%;width:3px;margin-left:-1.5px;background:linear-gradient(rgba(255,255,255,0),rgba(255,255,255,.7),rgba(255,255,255,0));border-radius:3px;}
-.hint-thumb,.hint-rings{
-  position:absolute;left:50%;top:126px;width:42px;height:42px;margin-left:-21px;
-  animation:hintThumbDrag 1.8s cubic-bezier(.65,0,.35,1) infinite;
+.hint-lottie{
+  width:min(240px,62vw);height:min(240px,62vw);
+  filter:drop-shadow(0 14px 32px rgba(0,0,0,.4));
+  transform:translateY(4px) scale(.94);
+  opacity:.9;
+  transition:opacity .45s ease, transform .55s cubic-bezier(.22,1.4,.36,1);
 }
-.hint-thumb{
-  z-index:2;border-radius:50%;background:#fff;
-  box-shadow:0 8px 28px rgba(0,0,0,.45);border:3px solid var(--orange);
-}
-.hint-rings{z-index:1;pointer-events:none;}
-.hint-ring{
-  position:absolute;left:50%;top:50%;width:18px;height:18px;margin:0;
-  border-radius:50%;border:2px solid rgba(255,255,255,.9);
-  opacity:0;transform:translate(-50%,-50%);
-}
-.feed-hint.show .hint-ring{animation:hintRipple 1.8s cubic-bezier(.22,.7,.36,1) infinite;}
-.feed-hint.show .hint-ring:nth-child(1){animation-delay:0s;}
-.feed-hint.show .hint-ring:nth-child(2){animation-delay:.22s;}
-.feed-hint.show .hint-ring:nth-child(3){animation-delay:.44s;}
-@keyframes hintThumbDrag{
-  0%{top:126px;opacity:0;transform:scale(.85);}
-  20%{opacity:1;transform:scale(1);}
-  58%{top:0;opacity:1;transform:scale(1);}
-  80%{opacity:0;transform:scale(.92);}
-  100%{top:126px;opacity:0;transform:scale(.85);}
-}
-@keyframes hintRipple{
-  0%{opacity:0;width:18px;height:18px;border-color:rgba(255,255,255,.9);}
-  18%{opacity:.85;}
-  70%{opacity:.18;width:78px;height:78px;border-color:rgba(255,160,100,.4);}
-  100%{opacity:0;width:92px;height:92px;border-color:rgba(255,102,34,0);}
-}
+.feed-hint.show .hint-lottie{opacity:1;transform:translateY(0) scale(1);}
+.hint-lottie svg{display:block;width:100%!important;height:100%!important;}
 .hint-label{font-size:14px;font-weight:700;color:#fff;background:rgba(255,255,255,.18);padding:10px 18px;border-radius:22px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);letter-spacing:.01em;box-shadow:0 4px 20px rgba(0,0,0,.2);}
 
 
@@ -1008,10 +984,7 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
       <div class="pull-spin" id="pullSpin" aria-hidden="true"><svg viewBox="0 0 36 36"><circle class="pull-ring" cx="18" cy="18" r="14"/></svg></div>
       <button type="button" class="new-pill" id="newPill" aria-label="Load new posts"><svg viewBox="0 0 24 24" fill="none"><path d="M12 19V5M12 5l-6 6M12 5l6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>New posts</button>
       <div class="feed-hint" id="feedHint" aria-hidden="true">
-        <div class="hint-track">
-          <div class="hint-rings" aria-hidden="true"><span class="hint-ring"></span><span class="hint-ring"></span><span class="hint-ring"></span></div>
-          <div class="hint-thumb"></div>
-        </div>
+        <div class="hint-lottie" id="hintLottie" aria-hidden="true"></div>
         <div class="hint-label">Swipe up for more</div>
       </div>
       <div class="chevron-nav">
@@ -2474,13 +2447,37 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
 
   let feedHintDismissed = false;
   let feedHintTimer = null;
-  const FEED_HINT_KEY = 'kb_feed_hint_v6';
+  let hintAnim = null;
+  let hintLottiePromise = null;
+  const FEED_HINT_KEY = 'kb_feed_hint_v7';
   try{ feedHintDismissed = localStorage.getItem(FEED_HINT_KEY) === '1'; }catch(e){}
+  function ensureHintLottie(){
+    if(hintAnim) return Promise.resolve(hintAnim);
+    if(hintLottiePromise) return hintLottiePromise;
+    const el = document.getElementById('hintLottie');
+    if(!el) return Promise.resolve(null);
+    hintLottiePromise = import('https://esm.sh/lottie-web@5.12.2')
+      .then((mod)=>{
+        const lottie = mod.default || mod;
+        hintAnim = lottie.loadAnimation({
+          container: el,
+          renderer: 'svg',
+          loop: true,
+          autoplay: false,
+          path: '/public/hand-helper/Hand.json',
+          rendererSettings: { progressiveLoad: true, hideOnTransparent: true }
+        });
+        return hintAnim;
+      })
+      .catch(()=>{ hintLottiePromise = null; return null; });
+    return hintLottiePromise;
+  }
   function dismissFeedHint(){
     const overlay = document.getElementById('feedHint');
     if(feedHintDismissed || !overlay) return;
     feedHintDismissed = true;
     clearTimeout(feedHintTimer);
+    try{ hintAnim?.pause(); }catch(_){}
     overlay.classList.remove('show');
     overlay.setAttribute('aria-hidden', 'true');
     try{ localStorage.setItem(FEED_HINT_KEY,'1'); }catch(e){}
@@ -2490,13 +2487,16 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
     const overlay = document.getElementById('feedHint');
     if(!overlay || feedHintDismissed) return;
     overlay.style.display = '';
+    ensureHintLottie().then((anim)=>{
+      if(feedHintDismissed || !overlay) return;
+      try{ anim?.goToAndPlay(0, true); }catch(_){}
+    });
     requestAnimationFrame(()=>{
       if(feedHintDismissed) return;
       overlay.classList.add('show');
       overlay.setAttribute('aria-hidden', 'false');
-      // auto-fade if they never interact with the feed
       clearTimeout(feedHintTimer);
-      feedHintTimer = setTimeout(dismissFeedHint, 9000);
+      feedHintTimer = setTimeout(dismissFeedHint, 10000);
     });
   }
   // Dismiss on intentional feed navigation (wheel / chevrons); swipe settles via onSettled
