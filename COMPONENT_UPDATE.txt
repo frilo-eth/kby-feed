@@ -5,16 +5,19 @@ Navigation
 - Topbar — search (marquee overflow); theme; Launch; wallet (label desktop / avatar mobile)
 - Mobile nav — home/feed/tokens/launch/swap/pools/more; launch CTA; more-open chrome
 - More sheet (≤860) — theme + profile/signals/notifications/tipjar/account; scrim; drag dismiss
+- More sheet — auto-closes after ANY action including Toggle theme (don't leave sheet open after theme flip)
 
 Feed
 - Media card — shimmer→ready|error; hover topctl; drag-to-comment ghost; aspect --ar
 - Glass mute/more — 46px; pathLength mute↔sound morph; unmute/mute haptics+sounds; session persist
 - React rail — tip (immutable +$5 float); like↔dislike exclusive; comment; share; pulse + haptics
-- Meta — pinned | float-on-media | overlay-mode (narrow / drawer thresholds)
-- Buy CTA — `Buy $ticker` pill CSS-anchored to rail token avatar; hover or ~3.5s engage; opens trade
-- Hover cards (desktop) — user preview on uname/avatar; token chart preview on plus/buy/ticker/mini/pill (no CTA)
-- Motion — spring doomscroll; peek; parallax; pull-refresh (active-card only, peeks hidden); new-pill (desktop ~3m); tap pause; 2× hold
+- Meta — pinned | float-on-media | overlay-mode; bottom flush with media card (`layoutMeta`)
+- Buy CTA — `Buy $ticker` pill CSS-anchored to `.token-anchor` + avatar+; hover or ~3.5s engage; opens trade
+- Trade entry — avatar+ / buy CTA / ticker / mini / pill → trade drawer (not hover card)
+- Hover cards (desktop) — user on uname/avatar; token chart on plus/buy/ticker/mini/pill (no CTA)
+- Motion — spring doomscroll; infinite wrap both ways; peek; parallax; pull-refresh (short) vs wrap (longer)
 - Topbar — mobile auto-hide after settle (page-step locked mid-swipe)
+- New-pill — desktop ~3m; first-visit hint Lottie `kb_feed_hint_v8`
 
 Comments
 - Drawer — desktop 360 side panel; mobile 86vh sheet + scrim + drag dismiss
@@ -22,11 +25,17 @@ Comments
 - Ctx menu — … → not interested / copy / report
 - Compose — identity chevron; anon pop+switch; pill input rest→focus→ready; send.show when ready
 - Attach — file pop-in; feed fly-in; drop stage hides list; ✕ dismiss; anon auto-exits for media
-- CFX — desktop stage beside drawer; mobile lightbox; caption reacts; pinch zoom+idle spring (mobile)
+- CFX (comment media focus) — tap comment thumb → gallery
+  · desktop: stage beside comments drawer
+  · mobile: full-screen lightbox ABOVE comments sheet; pinch / rotate / pan; idle spring-back to fit
+  · caption tip/like/dislike stay synced with the comment row
 
 Overlays
-- Trade drawer — buy/sell token sheet (same chrome as comments); opened from token click (not hover card)
+- Trade drawer — buy/sell token sheet (same chrome as comments)
 - Share — desktop modal; mobile sheet; X intent + copy url
+  · auto-dismiss after Share on X or Copy url (copy flashes “Copied!” then closes)
+  · scrim / ✕ / drag-dismiss also close
+- Sheet close btns — `var(--card)` bg; 40px / 44px mobile thumb targets
 - First-visit hint — Lottie hand (`/public/hand-helper/Hand.json`); key `kb_feed_hint_v8`
 
 System

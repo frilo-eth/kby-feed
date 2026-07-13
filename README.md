@@ -1,6 +1,6 @@
 # Kumbaya Feed
 
-TikTok-style doomscroll feed prototype with spring physics, haptics, comments, and trade drawer.
+TikTok-style doomscroll feed prototype with spring physics, haptics, comments, trade drawer, and mobile-first overlays.
 
 **Live:** [https://kby-feed.vercel.app](https://kby-feed.vercel.app)  
 **Repo:** [frilo-eth/kby-feed](https://github.com/frilo-eth/kby-feed)
@@ -25,7 +25,49 @@ Open [http://localhost:3000](http://localhost:3000) (`/` → feed).
 | `C` | Comment |
 | `S` | Share |
 
-Swipe / wheel on desktop. Hold video ≥240ms for 2×. Pull down on mobile for refresh.
+Swipe / wheel on desktop. Hold video ≥240ms for 2×. Pull down on mobile for refresh (short pull) or wrap to previous (longer drag — infinite loop).
+
+---
+
+## Feature map (for production ports)
+
+Use this as the checklist when reimplementing — these are the UX details that are easy to drop.
+
+### Feed
+
+| Feature | Behavior |
+|---------|----------|
+| Infinite wrap | Both directions; first-post down-swipe wraps to previous (TikTok trap) |
+| Pull-to-refresh | Mobile only; short deliberate pull at top; longer drag hands off to wrap scroll |
+| Mute morph | pathLength SVG draw (waves ↔ slash); session `kb_feed_sound` |
+| Buy `$ticker` | Pill CSS-anchored to rail token avatar (`.token-anchor`); show on media hover or ~3.5s engage |
+| Trade entry points | Avatar+, Buy CTA, ticker, token mini, category pill → trade drawer |
+| Hover cards | Desktop only — user / token preview portals (no Buy on the card) |
+| 2× hold | ≥240ms on video; badge + haptic |
+| New posts pill | Desktop; ~3 min delay (`NEW_PILL_DELAY`) |
+| First-visit hint | Hand Lottie; `kb_feed_hint_v8` |
+| Topbar auto-hide | Mobile; after settle on next; page-step locked mid-swipe |
+
+### Comments
+
+| Feature | Behavior |
+|---------|----------|
+| Drawer / sheet | Desktop 360 side panel; mobile 86vh bottom sheet + scrim + drag dismiss |
+| Anon vs public | Anon: no reacts/media; public: X-proof tip + reacts |
+| Attach | File pop-in or drag media from feed; drop stage; anon auto-exits for media |
+| **Comment media focus (CFX)** | Tap a comment thumb → gallery focus overlay |
+| CFX desktop | Stage beside the open comments drawer |
+| **CFX mobile** | Full-screen lightbox **above** the comments sheet; two-finger **pinch / rotate / pan**; idle spring-back to fit; Photos-like |
+| CFX caption | Tip / like / dislike stay in sync with the comment row |
+
+### Sheets & modals (auto-dismiss details)
+
+| Surface | Dismiss behavior |
+|---------|------------------|
+| **More sheet** (mobile) | Closes after **any** row action — including **Toggle theme**. Do not leave it open after theme flip. |
+| **Share** | Desktop modal / mobile sheet. **Share on X** and **Copy url** auto-close after success (copy shows “Copied!” ~800ms then closes). Scrim / ✕ / drag-dismiss also close. |
+| Trade / comments | Scrim tap, ✕, Escape, drag handle (mobile) |
+| Sheet close buttons | Sheet-colored bg (`var(--card)`), 40px desktop / 44px mobile thumb target |
 
 ---
 
@@ -182,14 +224,16 @@ pos  += v * dt
 | Drawer open (desktop) | width `0→360`, `(.22,1,.36,1)` | `.38s` |
 | Mobile sheet open | `translateY(100%→0)`, `(.32,.72,0,1)` | `.44s` |
 | Sheet scrim | opacity | `.35s ease` |
-| More sheet | same vaul curve; **closes after any action including Toggle theme** | `.44s` |
+| **More sheet** | same vaul curve; **auto-closes after every action including Toggle theme** | `.44s` |
+| **Share** | modal (desktop) / sheet (mobile); **auto-closes after Share on X or Copy url** | — |
 | Topbar auto-hide (mobile) | after settle; `max-height` + pad + opacity, `(.32,.72,0,1)` | `.38s` (page-step locked during swipe) |
 | Chrome reflow | `reflowDuringChrome()` rAF loop | **440ms** |
 | Search marquee | `@keyframes searchMarquee` | `--mq-dur` (~overflow/45), ease-in-out alternate |
+| Meta bottom | `layoutMeta` — pinned/float meta bottom flush with media card | — |
 
 ---
 
-### 7. Comments & attach
+### 7. Comments, attach & media focus (CFX)
 
 | Motion | Curve | Duration |
 |--------|-------|----------|
@@ -203,6 +247,20 @@ pos  += v * dt
 | Anon exit | `anonExit*` keyframes `(.22,1.4–1.5,.36,1)` | `.42–.45s` |
 | Send btn show | `(.22,1.5,.36,1)` | `.18s` |
 | Compose lift on drop | `(.22,1.3,.36,1)` | `.36s` |
+
+#### Comment media gallery focus (`#cfx`)
+
+Selecting a comment’s media thumb opens a focused gallery — not a plain `<img>` enlarge.
+
+| Viewport | Behavior |
+|----------|----------|
+| **Desktop** | `#cfx` stage sits beside the open comments drawer; caption + tip/like/dislike under media |
+| **Mobile** | Full-screen lightbox **above** comments sheet + scrim (`z-index` bump); comments stay parked underneath |
+| **Gestures (mobile)** | Two-finger **pinch** (scale), **rotate**, and **pan** when zoomed; `touch-action: none` on `#cfx` |
+| **Idle spring** | After gesture ends, soft spring-back toward fit (`is-settling`, ~`.55s` `(.22,1.25,.36,1)`) — Photos-like |
+| **Sync** | Caption reacts mirror the focused comment row; closing returns to the list |
+
+API surface: open via `.comment-thumb`; close `#cfxClose` / backdrop / Escape. Keep feed video paused while focused.
 
 ---
 
