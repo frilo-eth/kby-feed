@@ -56,7 +56,7 @@ Most motion reuses a small set of curves. Durations are wall-clock; springs are 
 | Nav / icon / chevron / glass | bg + color | brightness dip | `.15s` |
 | **Kbd helper** | rest = icon; hover/active = soft circle `var(--line)` + ink | brightness | `.2s` |
 | Kbd panel open | — | `scale(.9)→1`, opacity | `.2s` `(.22,1,.36,1)` |
-| **Reaction rail** | tinted disc (`var(--line)` / brighter glass); active = `brightness(1.06)` | `brightness(.94)` | bg/color `.22s` |
+| **Reaction rail** | outside: `#FAFAFA→#FFF` / dark `#130A07→#251D18`; on-media glass tint; active `brightness(1.06)` | `brightness(.94)` | bg/color `.22s` |
 | Reaction count | ink / white | — | color `.2s` |
 | New posts pill | brightness `.98` | `scale(.95)` | opacity `.3s`, transform `.38s` pop |
 | Tag / uname | color / underline | — | `.15s` |
@@ -152,7 +152,7 @@ pos  += v * dt
 | Mobile sheet open | `translateY(100%→0)`, `(.32,.72,0,1)` | `.44s` |
 | Sheet scrim | opacity | `.35s ease` |
 | More sheet | same vaul curve; **closes after any action including Toggle theme** | `.44s` |
-| Topbar auto-hide (mobile) | `max-height` + pad + opacity, `(.32,.72,0,1)` | `.38s` |
+| Topbar auto-hide (mobile) | after settle; `max-height` + pad + opacity, `(.32,.72,0,1)` | `.38s` (page-step locked during swipe) |
 | Chrome reflow | `reflowDuringChrome()` rAF loop | **440ms** |
 | Search marquee | `@keyframes searchMarquee` | `--mq-dur` (~overflow/45), ease-in-out alternate |
 

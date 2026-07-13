@@ -291,7 +291,7 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
 .react-btn{
   width:46px;height:46px;border-radius:50%;clip-path:none;border:none;cursor:pointer;
   position:relative;display:flex;align-items:center;justify-content:center;
-  background:var(--card);color:var(--ink);
+  background:#FAFAFA;color:var(--ink);
   flex-shrink:0;overflow:visible;
   box-shadow:0 2px 8px rgba(40,30,20,.06);
   transition:background .22s ease, color .22s ease, box-shadow .22s ease, filter .2s ease;
@@ -301,17 +301,29 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
   transition:filter .2s ease, opacity .2s ease;
 }
 .react-btn svg path,.react-btn svg circle{stroke:currentColor;}
+html.dark .react-btn{
+  background:#130A07;color:var(--ink);
+  box-shadow:0 2px 8px rgba(0,0,0,.28);
+}
 
 .meta-overlay-mode .react-btn{
   background:var(--glass-dark);color:#fff;
   backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);
   box-shadow:none;
 }
+html.dark .meta-overlay-mode .react-btn{
+  background:var(--glass-dark);color:#fff;
+  box-shadow:none;
+}
 
-/* color-only hover — no scale / translate */
+/* color-only hover — no scale / translate; outside media: lighten */
 @media (hover:hover) and (pointer:fine){
-  .react-btn:not(.active):hover{background:var(--line);color:var(--ink);}
-  html.dark .react-btn:not(.active):hover{background:rgba(255,255,255,.08);color:var(--ink);}
+  .react-btn:not(.active):hover{
+    background:#FFFFFF;color:var(--ink);
+  }
+  html.dark .react-btn:not(.active):hover{
+    background:#251D18;color:var(--ink);
+  }
   .meta-overlay-mode .react-btn:not(.active):hover{
     background:rgba(30,26,20,.72);color:#fff;
   }
@@ -835,7 +847,7 @@ body.cfx-on #commentsDrawer{z-index:50;}
   .btn-wallet-avatar{display:block;}
 
   .feed-wrap{position:relative;flex:1;min-height:0;inset:auto;margin-bottom:calc(var(--mobile-nav-h) + env(safe-area-inset-bottom));}
-  .feed-item{padding:0;height:100%;align-items:stretch;justify-content:stretch;}
+  .feed-item{padding:0;height:100%;align-items:stretch;justify-content:stretch;overflow:hidden;}
   .stage{width:100%;height:100%;max-height:none;gap:0;align-items:stretch;justify-content:stretch;}
   .media-card{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;border-radius:0;align-self:stretch;}
   .media-inner{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;border-radius:0!important;box-shadow:none;min-width:0!important;}
@@ -2030,8 +2042,20 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
     const v = getComputedStyle(document.documentElement).getPropertyValue('--feed-peek').trim();
     return parseFloat(v) || 58;
   }
-  function pageStep(){
+  // Freeze page height while dragging / springing so chrome changes (topbar
+  // auto-hide) can't resize the scroller mid-swipe and overlap neighboring posts.
+  let lockedPageStep = 0;
+  function measurePageStep(){
     return Math.max(280, scroller.clientHeight - peekPx());
+  }
+  function pageStep(){
+    return lockedPageStep || measurePageStep();
+  }
+  function lockPageStep(){
+    lockedPageStep = measurePageStep();
+  }
+  function unlockPageStep(){
+    lockedPageStep = 0;
   }
   function applyTransform(){
     const step = pageStep();
@@ -2057,6 +2081,7 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
   function cancelAnim(){ if(animRAF){ cancelAnimationFrame(animRAF); animRAF=null; } }
   function springTo(target, initialVel){
     cancelAnim();
+    lockPageStep();
     targetIndex = target;
     let v = initialVel||0;
     const stiffness=280, damping=30, mass=0.8, dt=1/60;
@@ -2070,6 +2095,7 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
     }
     animRAF = requestAnimationFrame(frame);
   }
+  let pendingTopbarAutohide = null;
   function onSettled(rawTarget){
     const wrapped = ((rawTarget % N)+N)%N;
     pos = wrapped; targetIndex = wrapped;
@@ -2080,6 +2106,16 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
     activateVideo(idx);
     warmMedia(idx);
     lastWarmIdx = idx;
+    unlockPageStep();
+    // Apply chrome after the swipe finishes so scroller height stays stable mid-gesture
+    if(pendingTopbarAutohide !== null){
+      const hide = pendingTopbarAutohide;
+      pendingTopbarAutohide = null;
+      setTopbarAutohide(hide);
+    } else {
+      applyTransform();
+      applyParallax();
+    }
     if(changed){
       haptic('settle');
       dismissFeedHint();
@@ -2113,12 +2149,15 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
     mainEl.classList.toggle('topbar-autohide', hidden);
     if(hidden) topbarEl.setAttribute('aria-hidden', 'true');
     else topbarEl.removeAttribute('aria-hidden');
-    // Keep page-step in sync while the topbar height animates (~380ms)
+    // Keep page-step in sync while the topbar height animates (~380ms) —
+    // only while settled (page step is unlocked).
     if(topbarReflowTimer) cancelAnimationFrame(topbarReflowTimer);
     const start = performance.now();
     (function tick(now){
-      applyTransform();
-      applyParallax();
+      if(!lockedPageStep){
+        applyTransform();
+        applyParallax();
+      }
       if(now - start < 420) topbarReflowTimer = requestAnimationFrame(tick);
       else {
         topbarReflowTimer = 0;
@@ -2128,7 +2167,8 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
   }
   function noteFeedNav(dir){
     if(!dir || !isMobileFeed()) return;
-    setTopbarAutohide(dir > 0);
+    // Defer chrome change until onSettled — resizing mid-swipe overlaps posts
+    pendingTopbarAutohide = dir > 0;
   }
   function goToIndex(delta){
     if(state.feedLocked) return;
@@ -2233,10 +2273,11 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
       }, 380);
     }
   }
+  const NEW_PILL_DELAY = 3 * 60 * 1000; // simmer ~3 min before offering new posts
   function armNewContent(delay){ clearTimeout(newTimer); newTimer=setTimeout(()=>{ newContentReady=true; if(!refreshing){ newPill.classList.add('show'); positionNewPill(); } }, delay); }
-  function clearNewContent(){ newContentReady=false; newPill.classList.remove('show'); armNewContent(16000); }
+  function clearNewContent(){ newContentReady=false; newPill.classList.remove('show'); armNewContent(NEW_PILL_DELAY); }
   newPill.addEventListener('click', ()=>{ if(refreshing) return; haptic('light'); doRefresh(false); });
-  armNewContent(4500);
+  armNewContent(NEW_PILL_DELAY);
   const kbdPanel = document.getElementById('kbdPanel');
   const kbdBtn = document.getElementById('kbdBtn');
   function setKbdOpen(open){
@@ -2266,6 +2307,7 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
     if(refreshing) return;
     clearMediaHover();
     state.dragging=true; scroller.classList.add('grabbing'); cancelAnim();
+    lockPageStep();
     dragStartY=e.clientY; dragStartPos=pos; lastY=e.clientY; lastT=performance.now(); velocity=0;
     lastTickStep = Math.floor(pos);
     dragPointerType = e.pointerType || 'mouse';
@@ -2314,8 +2356,8 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
     if(!state.dragging) return;
     if(e){ lastPointerX=e.clientX; lastPointerY=e.clientY; }
     clearGestureHold();
-    if(pulling){ state.dragging=false; scroller.classList.remove('grabbing'); endSpeedHold(); gItem=gVideo=null; finishPull(); return; }
-    if(state.feedLocked){ state.dragging=false; scroller.classList.remove('grabbing'); endSpeedHold(); gItem=gVideo=null; return; }
+    if(pulling){ state.dragging=false; scroller.classList.remove('grabbing'); unlockPageStep(); endSpeedHold(); gItem=gVideo=null; finishPull(); return; }
+    if(state.feedLocked){ state.dragging=false; scroller.classList.remove('grabbing'); unlockPageStep(); endSpeedHold(); gItem=gVideo=null; return; }
     state.dragging=false; scroller.classList.remove('grabbing');
     // release a 2x hold without treating it as a tap
     if(gHoldActive){ endSpeedHold(); springTo(Math.round(pos),0); gItem=gVideo=null; return; }
@@ -2325,6 +2367,7 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
     // paused. Correcting pos in place keeps the pause (or play) the user asked for.
     if(!gMoved && gVideo && (performance.now()-gStartT)<400 && !e?.target?.closest?.('.col-info')){
       pos = Math.round(pos); targetIndex = pos;
+      unlockPageStep();
       applyTransform(); applyParallax();
       togglePlayPause(gItem);
       gItem=gVideo=null; return;
@@ -2419,8 +2462,10 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
       });
     }
     checkOverlayMode();
-    applyTransform();
-    applyParallax();
+    if(!lockedPageStep){
+      applyTransform();
+      applyParallax();
+    }
     measureSearchMarquee();
     positionNewPill();
   }
