@@ -150,13 +150,22 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
 .media-error .media-retry{margin-top:4px;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:12px;font-weight:700;padding:8px 16px;border-radius:20px;cursor:pointer;pointer-events:auto;transition:background .15s;}
 .media-error .media-retry:hover{background:rgba(255,255,255,.2);}
 
-/* TikTok-style Buy $ticker CTA — right edge of media, Y locked to rail avatar (settle-only) */
+/* TikTok-style Buy $ticker — CSS-anchored to rail token avatar (no JS Y sync) */
+.token-anchor{
+  position:relative;
+  width:52px;height:52px;flex-shrink:0;
+  margin-top:-20px;margin-left:-8px;
+  align-self:flex-start;z-index:6;
+}
+.token-anchor .avatar-plus{
+  position:relative;width:100%;height:100%;
+  margin:0;align-self:auto;z-index:1;
+}
 .buy-cta{
-  position:absolute;right:14px;z-index:8;
-  top:var(--buy-y, 72%);
-  bottom:auto;
+  position:absolute;right:calc(100% + 12px);top:50%;
+  z-index:2;
   display:inline-flex;align-items:center;gap:8px;
-  max-width:min(220px,calc(100% - 28px));
+  max-width:min(220px,42vw);
   padding:6px 14px 6px 6px;margin:0;border:none;
   border-radius:999px;
   background:rgba(42,42,42,.9);color:#fff;
@@ -168,10 +177,11 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
   transition:opacity .3s ease, background .15s ease, box-shadow .15s ease, filter .12s ease;
 }
 .feed-item:not(.media-ready) .buy-cta{opacity:0!important;pointer-events:none!important;}
-/* Desktop: show on media hover */
+/* Desktop: show when hovering the media (or the CTA itself) */
 @media (hover:hover) and (pointer:fine){
-  .media-card:hover .buy-cta,
-  .media-card.media-hover .buy-cta{
+  .feed-item:has(.media-card:hover) .buy-cta,
+  .feed-item:has(.media-card.media-hover) .buy-cta,
+  .buy-cta:hover{
     opacity:1;pointer-events:auto;
   }
 }
@@ -318,7 +328,7 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
 
 /* ---- action rail ---- */
 .action-rail{display:flex;flex-direction:column;align-items:center;gap:16px;}
-.avatar-plus{position:relative;width:52px;height:52px;cursor:pointer;margin-top:-20px;margin-left:-8px;z-index:6;align-self:flex-start;}
+.avatar-plus{position:relative;width:52px;height:52px;cursor:pointer;z-index:6;}
 .avatar-plus-inner{
   width:100%;height:100%;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,.18);
   transition:box-shadow .28s ease, filter .22s ease;
@@ -969,9 +979,12 @@ body.cfx-on #commentsDrawer{z-index:50;}
   .feed-item.active .media-topctl .glass-btn{pointer-events:auto;}
   .media-topctl{top:14px;}
 
-  /* Buy CTA: clear of overlaid rail; Y set via --buy-y from avatar */
+  /* Buy CTA: anchored to token avatar; sits over media to the left of the rail */
+  .token-anchor{
+    width:48px;height:48px;margin:0 0 2px 0;align-self:center;
+  }
   .buy-cta{
-    right:72px;font-size:13px;padding:5px 12px 5px 5px;
+    right:calc(100% + 10px);font-size:13px;padding:5px 12px 5px 5px;
     box-shadow:0 0 0 3px rgba(0,0,0,.35), 0 6px 16px rgba(0,0,0,.35);
   }
   .buy-cta-av{width:24px;height:24px;}
@@ -981,7 +994,7 @@ body.cfx-on #commentsDrawer{z-index:50;}
 
   /* action rail: overlaid bottom-right, translucent, sitting above the nav (thumb zone) */
   .col-actions{position:absolute;right:10px;left:auto;top:auto;bottom:14px;transform:none;flex-direction:column;align-items:center;justify-content:flex-end;gap:18px;z-index:12;padding-bottom:0;}
-  .avatar-plus{margin:0 0 2px 0;align-self:center;width:48px;height:48px;}
+  .avatar-plus{margin:0;align-self:auto;width:100%;height:100%;}
   .react-btn{
     background:var(--glass-dark);color:#fff;
     backdrop-filter:blur(10px) saturate(150%);-webkit-backdrop-filter:blur(10px) saturate(150%);
@@ -1864,7 +1877,6 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     }
     fitMediaBox(inner, dims);
     if(window.innerWidth > 860) layoutMeta(item);
-    scheduleBuyCtaLayout(item);
   }
 
   function clearMetaInline(item){
@@ -1875,28 +1887,6 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     ci.style.left = '';
     ci.style.bottom = '';
     ci.style.maxWidth = '';
-  }
-
-  // Pin Buy CTA to the rail token avatar's centerline. Only while idle — measuring mid-swipe
-  // (parallax scale on the card) made it jump. Store as % of media height so parent translate is stable.
-  function layoutBuyCta(item){
-    if(!item) return;
-    if(state.dragging || animRAF || pulling || refreshing) return;
-    const btn = item.querySelector('.buy-cta');
-    const avatar = item.querySelector('.avatar-plus');
-    const inner = item.querySelector('.media-inner');
-    if(!btn || !avatar || !inner) return;
-    const ir = inner.getBoundingClientRect();
-    const ar = avatar.getBoundingClientRect();
-    if(ir.height < 40 || ar.height < 8) return;
-    const y = (ar.top + ar.height * 0.5) - ir.top;
-    const clamped = Math.max(28, Math.min(ir.height - 28, y));
-    btn.style.setProperty('--buy-y', `${((clamped / ir.height) * 100).toFixed(3)}%`);
-  }
-  function scheduleBuyCtaLayout(item){
-    requestAnimationFrame(()=>{
-      requestAnimationFrame(()=>layoutBuyCta(item || itemEls()[lastActiveIdx]));
-    });
   }
 
   // Decide where the meta block lives: pinned in the left gutter of the feed body when there's
@@ -1911,7 +1901,6 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     // Mobile CSS owns meta placement — don't bake desktop gutter math into inline styles.
     if(window.innerWidth <= 860){
       clearMetaInline(item);
-      scheduleBuyCtaLayout(item);
       return;
     }
     // reset to the pinned baseline so we can measure the meta's natural width
@@ -1939,24 +1928,19 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
       ci.style.left = Math.round(cardLeft + PAD) + 'px';
       ci.style.maxWidth = Math.round(Math.max(160, cardW - PAD * 2)) + 'px';
     }
-    scheduleBuyCtaLayout(item);
   }
   function markMediaReady(inner){
     if(!inner) return;
     inner.classList.remove('is-error');
     inner.classList.add('is-ready');
-    const item = inner.closest('.feed-item');
-    item?.classList.add('media-ready');
-    scheduleBuyCtaLayout(item);
+    inner.closest('.feed-item')?.classList.add('media-ready');
   }
   function markMediaError(inner){
     if(!inner) return;
     inner.classList.remove('is-ready');
     inner.classList.add('is-error');
     // still unlock the rail so the post isn't stuck inert
-    const item = inner.closest('.feed-item');
-    item?.classList.add('media-ready');
-    scheduleBuyCtaLayout(item);
+    inner.closest('.feed-item')?.classList.add('media-ready');
   }
   function attachImage(img, eager){
     const inner = img.closest('.media-inner');
@@ -2044,10 +2028,6 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
               </span>
               <span class="speed-label">2x</span>
             </div>
-            <button type="button" class="buy-cta" aria-label="Buy ${p.ticker}">
-              <span class="buy-cta-av"><img src="${p.avatar}" alt=""></span>
-              <span class="buy-cta-label">Buy ${p.ticker}</span>
-            </button>
             <div class="media-error" aria-hidden="true">
               ${svgIcon('broken')}
               <div class="media-error-title">Media unavailable</div>
@@ -2058,7 +2038,13 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
             <div class="media-meta-scrim" aria-hidden="true"></div>
           </div>
           <div class="col-actions">
-            <div class="avatar-plus"><div class="avatar-plus-inner squircle"><img src="${p.avatar}" alt=""></div><div class="plus-badge" aria-hidden="true"><svg viewBox="0 0 12 12" fill="none"><path d="M6 2.25v7.5M2.25 6h7.5" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg></div></div>
+            <div class="token-anchor">
+              <button type="button" class="buy-cta" aria-label="Buy ${p.ticker}">
+                <span class="buy-cta-av"><img src="${p.avatar}" alt=""></span>
+                <span class="buy-cta-label">Buy ${p.ticker}</span>
+              </button>
+              <div class="avatar-plus"><div class="avatar-plus-inner squircle"><img src="${p.avatar}" alt=""></div><div class="plus-badge" aria-hidden="true"><svg viewBox="0 0 12 12" fill="none"><path d="M6 2.25v7.5M2.25 6h7.5" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg></div></div>
+            </div>
             <div class="react-col"><button type="button" class="react-btn tip" data-tips="${p.tips}">${svgIcon('tip')}</button><div class="react-count tip-count">${fmt(p.tips)}</div></div>
             <div class="react-col"><button type="button" class="react-btn comment">${svgIcon('comment')}</button><div class="react-count comment-count">${fmt(p.comments)}</div></div>
             <div class="react-col"><button type="button" class="react-btn like" data-likes="${p.likes}">${svgIcon('like')}</button><div class="react-count like-count">${fmt(p.likes)}</div></div>
@@ -2501,7 +2487,6 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     requestAnimationFrame(()=>syncMediaHover(lastPointerX, lastPointerY));
     positionNewPill();
     syncCommentMediaDrag();
-    scheduleBuyCtaLayout(itemEls()[idx]);
     armBuyCtaEngage(idx);
   }
   /* ---- mobile topbar auto-hide (next → hide, prev/pull → show) ---- */
@@ -2948,7 +2933,6 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     }
     measureSearchMarquee();
     positionNewPill();
-    if(!state.dragging && !animRAF) scheduleBuyCtaLayout();
   }
   function scheduleFeedReflow(){
     if(feedReflowRaf) cancelAnimationFrame(feedReflowRaf);

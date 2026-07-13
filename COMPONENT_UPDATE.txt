@@ -11,7 +11,7 @@ Feed
 - Glass mute/more — 46px; pathLength mute↔sound morph; unmute/mute haptics+sounds; session persist
 - React rail — tip (immutable +$5 float); like↔dislike exclusive; comment; share; pulse + haptics
 - Meta — pinned | float-on-media | overlay-mode (narrow / drawer thresholds)
-- Buy CTA — `Buy $ticker` pill on media right edge, Y-synced to rail avatar when idle; hover or ~3.5s engage; opens trade
+- Buy CTA — `Buy $ticker` pill CSS-anchored to rail token avatar; hover or ~3.5s engage; opens trade
 - Hover cards (desktop) — user preview on uname/avatar; token chart preview on plus/buy/ticker/mini/pill (no CTA)
 - Motion — spring doomscroll; peek; parallax; pull-refresh (active-card only, peeks hidden); new-pill (desktop ~3m); tap pause; 2× hold
 - Topbar — mobile auto-hide after settle (page-step locked mid-swipe)

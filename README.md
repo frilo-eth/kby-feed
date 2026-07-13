@@ -58,7 +58,7 @@ Most motion reuses a small set of curves. Durations are wall-clock; springs are 
 | **Reaction rail** | outside: `#FAFAFA→#FFF` / dark `#130A07→#251D18`; on-media glass tint; active `brightness(1.06)` | `brightness(.94)` | bg/color `.22s` |
 | Reaction count | ink / white | — | color `.2s` |
 | **Mute / unmute** | pathLength draw morph — see below | — | `.2s` ease-in-out (+`.1s` outer) |
-| **Buy $ticker** | dark glass pill on media right edge; `--buy-y` synced to rail `.avatar-plus` only while idle | brightness | opacity `.3s` (hover / ~3.5s engage) |
+| **Buy $ticker** | pill CSS-anchored to rail `.token-anchor` / `.avatar-plus` (`right: calc(100% + 12px)`, `top:50%`) | brightness | opacity `.3s` (hover / ~3.5s engage) |
 | **Hover cards** | user + token preview portals (no Buy CTA); desktop `pointer:fine` only | — | show `.18s`, delay 280ms |
 | New posts pill | brightness `.98` | `scale(.95)` | opacity `.3s`, transform `.38s` pop |
 | Tag / uname | color / underline | — | `.15s` |
