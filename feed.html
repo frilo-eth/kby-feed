@@ -407,7 +407,8 @@ html.dark .kbd-btn.active:hover{background:rgba(255,255,255,.1);}
   transition:opacity .45s ease, transform .55s cubic-bezier(.22,1.4,.36,1);
 }
 .feed-hint.show .hint-lottie{opacity:1;transform:translateY(0) scale(1);}
-.hint-lottie svg{display:block;width:100%!important;height:100%!important;}
+.hint-lottie svg,
+.hint-lottie video{display:block;width:100%!important;height:100%!important;object-fit:contain;}
 .hint-label{font-size:14px;font-weight:700;color:#fff;background:rgba(255,255,255,.18);padding:10px 18px;border-radius:22px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);letter-spacing:.01em;box-shadow:0 4px 20px rgba(0,0,0,.2);}
 
 
@@ -2447,34 +2448,103 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
 
   let feedHintDismissed = false;
   let feedHintTimer = null;
+  let feedHintShownAt = 0;
   let hintAnim = null;
   let hintLottiePromise = null;
-  const FEED_HINT_KEY = 'kb_feed_hint_v7';
+  const FEED_HINT_KEY = 'kb_feed_hint_v8';
+  const FEED_HINT_GRACE_MS = 900;
   try{ feedHintDismissed = localStorage.getItem(FEED_HINT_KEY) === '1'; }catch(e){}
+
+  function loadLottiePlayer(){
+    if(window.lottie?.loadAnimation) return Promise.resolve(window.lottie);
+    return new Promise((resolve, reject)=>{
+      const existing = document.querySelector('script[data-kb-lottie]');
+      if(existing){
+        existing.addEventListener('load', ()=> window.lottie ? resolve(window.lottie) : reject(new Error('lottie missing')));
+        existing.addEventListener('error', ()=> reject(new Error('lottie script error')));
+        return;
+      }
+      const s = document.createElement('script');
+      s.src = '/public/vendor/lottie.min.js';
+      s.async = true;
+      s.dataset.kbLottie = '1';
+      s.onload = ()=> window.lottie ? resolve(window.lottie) : reject(new Error('lottie missing'));
+      s.onerror = ()=> reject(new Error('lottie script error'));
+      document.head.appendChild(s);
+    });
+  }
+
+  function mountHintVideoFallback(el){
+    el.innerHTML = '';
+    const vid = document.createElement('video');
+    vid.src = '/public/hand-helper/Hand.mp4';
+    vid.autoplay = true;
+    vid.loop = true;
+    vid.muted = true;
+    vid.playsInline = true;
+    vid.setAttribute('playsinline', '');
+    vid.setAttribute('aria-hidden', 'true');
+    el.appendChild(vid);
+    const play = ()=> { try{ vid.play(); }catch(_){} };
+    play();
+    return {
+      goToAndPlay(){ play(); },
+      pause(){ try{ vid.pause(); }catch(_){} },
+      destroy(){ try{ vid.pause(); }catch(_){} el.innerHTML = ''; }
+    };
+  }
+
   function ensureHintLottie(){
     if(hintAnim) return Promise.resolve(hintAnim);
     if(hintLottiePromise) return hintLottiePromise;
     const el = document.getElementById('hintLottie');
     if(!el) return Promise.resolve(null);
-    hintLottiePromise = import('https://esm.sh/lottie-web@5.12.2')
-      .then((mod)=>{
-        const lottie = mod.default || mod;
-        hintAnim = lottie.loadAnimation({
-          container: el,
-          renderer: 'svg',
-          loop: true,
-          autoplay: false,
-          path: '/public/hand-helper/Hand.json',
-          rendererSettings: { progressiveLoad: true, hideOnTransparent: true }
-        });
-        return hintAnim;
+    hintLottiePromise = Promise.all([
+      loadLottiePlayer(),
+      fetch('/public/hand-helper/Hand.json').then((r)=>{
+        if(!r.ok) throw new Error('hint json ' + r.status);
+        return r.json();
       })
-      .catch(()=>{ hintLottiePromise = null; return null; });
+    ]).then(([lottie, data])=> new Promise((resolve)=>{
+      el.innerHTML = '';
+      const anim = lottie.loadAnimation({
+        container: el,
+        renderer: 'svg',
+        loop: true,
+        autoplay: false,
+        animationData: data,
+        rendererSettings: { preserveAspectRatio: 'xMidYMid meet' }
+      });
+      const ready = ()=>{
+        hintAnim = anim;
+        resolve(anim);
+      };
+      if(anim.isLoaded) ready();
+      else{
+        anim.addEventListener('DOMLoaded', ready);
+        anim.addEventListener('data_failed', ()=>{
+          hintAnim = mountHintVideoFallback(el);
+          resolve(hintAnim);
+        });
+        // Safety: never leave the overlay empty
+        setTimeout(()=>{
+          if(hintAnim) return;
+          if(el.childElementCount){ hintAnim = anim; resolve(anim); }
+          else{ hintAnim = mountHintVideoFallback(el); resolve(hintAnim); }
+        }, 2500);
+      }
+    })).catch(()=>{
+      hintAnim = mountHintVideoFallback(el);
+      return hintAnim;
+    });
     return hintLottiePromise;
   }
+
   function dismissFeedHint(){
     const overlay = document.getElementById('feedHint');
     if(feedHintDismissed || !overlay) return;
+    // Ignore dismiss while still loading, and briefly after show
+    if(!feedHintShownAt || (performance.now() - feedHintShownAt) < FEED_HINT_GRACE_MS) return;
     feedHintDismissed = true;
     clearTimeout(feedHintTimer);
     try{ hintAnim?.pause(); }catch(_){}
@@ -2483,6 +2553,7 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
     try{ localStorage.setItem(FEED_HINT_KEY,'1'); }catch(e){}
     setTimeout(()=>{ overlay.style.display='none'; }, 450);
   }
+
   function showHintOnce(){
     const overlay = document.getElementById('feedHint');
     if(!overlay || feedHintDismissed) return;
@@ -2490,9 +2561,7 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
     ensureHintLottie().then((anim)=>{
       if(feedHintDismissed || !overlay) return;
       try{ anim?.goToAndPlay(0, true); }catch(_){}
-    });
-    requestAnimationFrame(()=>{
-      if(feedHintDismissed) return;
+      feedHintShownAt = performance.now();
       overlay.classList.add('show');
       overlay.setAttribute('aria-hidden', 'false');
       clearTimeout(feedHintTimer);
