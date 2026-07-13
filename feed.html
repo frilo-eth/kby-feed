@@ -283,7 +283,7 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
 /* ---- post info: pinned to a fixed spot near the left edge of the feed body so it never
    shifts horizontally as the media width changes between posts (no scroll fatigue) ---- */
 .media-meta-scrim{display:none;position:absolute;left:0;right:0;bottom:0;height:52%;pointer-events:none;z-index:6;border-radius:0 0 16px 16px;background:linear-gradient(180deg,rgba(0,0,0,0) 0%,rgba(0,0,0,.28) 40%,rgba(0,0,0,.7) 100%);}
-.col-info{position:absolute;left:24px;right:auto;bottom:40px;width:auto;max-width:min(280px,24vw);z-index:8;text-align:left;pointer-events:none;}
+.col-info{position:absolute;left:24px;right:auto;bottom:0;width:auto;max-width:min(280px,24vw);z-index:8;text-align:left;pointer-events:none;}
 .col-info .meta-block{pointer-events:auto;}
 .meta-block{max-width:100%;color:var(--ink);text-shadow:none;}
 .meta-block .row1{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
@@ -1925,16 +1925,18 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     // padding vary post-to-post. offset* is transform-independent, so the inset is always exact.
     const cardLeft = card.offsetLeft;               // card left within the feed-item padding box
     const cardW = card.offsetWidth;
+    // Align meta bottom edge flush with the media container bottom
     const cardBottom = card.offsetTop + card.offsetHeight;
     const padBoxH = item.clientHeight;              // feed-item padding-box height
+    const bottomAlign = Math.max(0, Math.round(padBoxH - cardBottom));
     const PIN = 24, PAD = 18;
     const metaW = ci.offsetWidth;
+    ci.style.bottom = bottomAlign + 'px';
     // fits fully in the left gutter (with a little breathing room before the media)?
     if(cardLeft < PIN + metaW + 12){
-      // not enough room -> overlay on the media's bottom-left with a uniform inset on every post
+      // not enough room -> overlay on the media's bottom-left; keep bottom flush with media
       item.classList.add('meta-float');
       ci.style.left = Math.round(cardLeft + PAD) + 'px';
-      ci.style.bottom = Math.round(padBoxH - cardBottom + PAD) + 'px';
       ci.style.maxWidth = Math.round(Math.max(160, cardW - PAD * 2)) + 'px';
     }
     scheduleBuyCtaLayout(item);
@@ -2499,6 +2501,7 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     requestAnimationFrame(()=>syncMediaHover(lastPointerX, lastPointerY));
     positionNewPill();
     syncCommentMediaDrag();
+    scheduleBuyCtaLayout(itemEls()[idx]);
     armBuyCtaEngage(idx);
   }
   /* ---- mobile topbar auto-hide (next → hide, prev/pull → show) ---- */
@@ -2945,6 +2948,7 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     }
     measureSearchMarquee();
     positionNewPill();
+    if(!state.dragging && !animRAF) scheduleBuyCtaLayout();
   }
   function scheduleFeedReflow(){
     if(feedReflowRaf) cancelAnimationFrame(feedReflowRaf);
