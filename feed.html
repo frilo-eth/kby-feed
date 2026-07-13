@@ -6,7 +6,7 @@
 <title>Kumbaya — Feed</title>
 <style>
 :root{
-  --bg:#F4F1EA;--card:#ffffff;--ink:#2A241C;--ink-soft:#6D6153;--ink-faint:#948A7B;
+  --bg:#F2EEEA;--card:#ffffff;--ink:#2A241C;--ink-soft:#6D6153;--ink-faint:#948A7B;
   --orange:#FF6622;--orange-dim:#FFE4D6;--coffee:#A9906F;--coffee-hover:#8A7452;
   --green:#1FA463;--red:#E5453F;--line:rgba(80,70,59,0.12);
   --glass-light:rgba(255,255,255,0.68);--glass-dark:rgba(30,26,20,0.55);
@@ -19,7 +19,7 @@
   color-scheme: light;
 }
 html.dark{
-  --bg:#161310;--card:#211D18;--ink:#F4EFE7;--ink-soft:#B3A895;--ink-faint:#7A7062;
+  --bg:#070403;--card:#211D18;--ink:#F4EFE7;--ink-soft:#B3A895;--ink-faint:#7A7062;
   --orange:#FF7A3D;--orange-dim:#3A2418;--coffee:#C7B291;--coffee-hover:#E4D4B8;
   --green:#33C285;--red:#FF6A63;--line:rgba(255,255,255,0.10);
   --glass-light:rgba(255,255,255,0.14);--glass-dark:rgba(10,8,6,0.55);
@@ -90,8 +90,8 @@ input{font-family:inherit;}
 /* ================= FEED ================= */
 .feed-wrap{flex:1;position:relative;overflow:hidden;display:flex;user-select:none;-webkit-user-select:none;}
 .feed-scroller{flex:1;position:relative;overflow:hidden;touch-action:none;cursor:grab;}
-.feed-scroller::after{content:'';position:absolute;left:0;right:0;bottom:0;height:var(--feed-peek);pointer-events:none;background:linear-gradient(to bottom,transparent,rgba(244,241,234,.55));z-index:3;}
-html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent,rgba(22,19,16,.55));}
+.feed-scroller::after{content:'';position:absolute;left:0;right:0;bottom:0;height:var(--feed-peek);pointer-events:none;background:linear-gradient(to bottom,transparent,rgba(242,238,234,.55));z-index:3;}
+html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent,rgba(7,4,3,.55));}
 .feed-scroller.grabbing{cursor:grabbing;}
 /* the media itself reads as clickable (tap to pause/play); dragging still works */
 .media-inner{cursor:pointer;}
