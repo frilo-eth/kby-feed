@@ -15,8 +15,8 @@ Feed
 - Buy CTA — crystal glass `Buy $ticker` pill CSS-anchored to `.token-anchor` (text-only, no thumb); visible on active ready; opens trade
 - Trade entry — avatar+ / buy CTA / ticker / mini / pill → trade drawer (not hover card)
 - Hover cards (desktop) — user on uname/avatar; token chart on plus/buy/ticker/mini/pill (no CTA)
-- Motion — spring doomscroll; infinite wrap both ways; peek; parallax; mid-swipe hides meta/rail/topctl so chrome never overlays the next media; pull-refresh (short) vs wrap (longer)
-- Topbar — mobile auto-hide after settle (page-step locked mid-swipe)
+- Motion — spring doomscroll; infinite wrap both ways; peek; mid-swipe hides meta/rail/topctl; no mid-swipe/mobile media scale; pull-refresh (short) vs wrap (longer)
+- Topbar — mobile overlay auto-hide after settle (never resizes feed; page-step locked mid-swipe)
 - New-pill — desktop ~3m; first-visit hint Lottie `kb_feed_hint_v8`
 
 Comments

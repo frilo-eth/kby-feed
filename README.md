@@ -47,7 +47,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | 2× hold | ≥240ms on video; badge + haptic |
 | New posts pill | Desktop; ~3 min delay (`NEW_PILL_DELAY`) |
 | First-visit hint | Hand Lottie; `kb_feed_hint_v8` |
-| Topbar auto-hide | Mobile; after settle on next; page-step locked mid-swipe |
+| Topbar auto-hide | Mobile; overlays feed (no layout resize); after settle on next; page-step locked mid-swipe |
 
 ### Comments
 
@@ -227,7 +227,8 @@ pos  += v * dt
 | Sheet scrim | opacity | `.35s ease` |
 | **More sheet** | same vaul curve; **auto-closes after every action including Toggle theme** | `.44s` |
 | **Share** | modal (desktop) / sheet (mobile); **auto-closes after Share on X or Copy url** | — |
-| Topbar auto-hide (mobile) | after settle; `max-height` + pad + opacity, `(.32,.72,0,1)` | `.38s` (page-step locked during swipe) |
+| Topbar auto-hide (mobile) | overlays feed (never resizes scroller); after settle; `(.32,.72,0,1)` | `.38s` (page-step locked during swipe) |
+| Parallax | desktop settled peek only — **no mid-swipe / mobile scale** (keeps full-bleed 1:1) | — |
 | Chrome reflow | `reflowDuringChrome()` rAF loop | **440ms** |
 | Search marquee | `@keyframes searchMarquee` | `--mq-dur` (~overflow/45), ease-in-out alternate |
 | Meta bottom | `layoutMeta` — pinned: flush with media bottom; float (`.meta-float`): inset by `PAD` (18px) | — |
