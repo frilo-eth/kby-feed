@@ -251,6 +251,33 @@ html.dark .demo-anon-pop .lbl{color:#E8A090;}
 
 .demo-glass{width:46px;height:46px;border-radius:50%;border:none;background:var(--glass-dark);color:#fff;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;}
 .demo-glass:active{transform:scale(.88);}
+.demo-glass svg{width:24px;height:24px;display:block;}
+
+/* mute ↔ sound morph (match feed.html) */
+.mute-icon{overflow:visible;}
+.mute-icon .mute-cone{
+  fill:none;stroke:currentColor;stroke-width:2.35;stroke-linecap:round;stroke-linejoin:round;
+}
+.mute-icon .mute-draw{
+  fill:none;stroke:currentColor;stroke-width:2.35;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:1;stroke-dashoffset:1;
+}
+.mute-btn[data-sound="1"] .mute-slash{display:none;}
+.mute-btn[data-sound="0"] .mute-waves{display:none;}
+.mute-btn[data-sound="1"] .mute-waves .mute-draw,
+.mute-btn[data-sound="0"] .mute-slash .mute-draw{
+  animation:muteDraw .2s ease-in-out forwards;
+}
+.mute-btn[data-sound="1"] .mute-waves .mute-draw-delay,
+.mute-btn[data-sound="0"] .mute-slash .mute-draw-delay{animation-delay:.1s;}
+.mute-btn.is-settled[data-sound="1"] .mute-waves .mute-draw,
+.mute-btn.is-settled[data-sound="0"] .mute-slash .mute-draw{
+  animation:none;stroke-dashoffset:0;
+}
+@keyframes muteDraw{to{stroke-dashoffset:0;}}
+@media (prefers-reduced-motion:reduce){
+  .mute-btn .mute-draw{animation:none!important;stroke-dashoffset:0;}
+}
 
 .demo-mnav{display:flex;align-items:center;justify-content:space-around;gap:2px;padding:8px 6px;background:var(--card);border:1px solid var(--line);border-radius:16px;}
 .demo-mnav button{flex:1;height:40px;border:none;background:none;color:var(--ink-soft);border-radius:12px;cursor:pointer;}

@@ -293,6 +293,33 @@
     });
   }
 
+  function bindMuteMorph() {
+    main.addEventListener('click', (e) => {
+      const btn = e.target.closest('.mute-btn');
+      if (!btn || !main.contains(btn)) return;
+      e.preventDefault();
+      const on = btn.getAttribute('data-sound') !== '1';
+      const next = on ? '1' : '0';
+      if (btn._muteSettleTimer) {
+        clearTimeout(btn._muteSettleTimer);
+        btn._muteSettleTimer = 0;
+      }
+      btn.classList.remove('is-settled');
+      btn.setAttribute('data-sound', next);
+      btn.setAttribute('aria-label', on ? 'Mute' : 'Unmute');
+      const sel = on ? '.mute-waves .mute-draw' : '.mute-slash .mute-draw';
+      btn.querySelectorAll(sel).forEach((p) => {
+        p.style.animation = 'none';
+        void p.getBoundingClientRect();
+        p.style.animation = '';
+      });
+      btn._muteSettleTimer = setTimeout(() => {
+        btn.classList.add('is-settled');
+        btn._muteSettleTimer = 0;
+      }, 320);
+    });
+  }
+
   /* ---------- scroll spy + chrome ---------- */
   function bindScrollSpy() {
     const links = [...nav.querySelectorAll('a[data-id]')];
@@ -327,6 +354,7 @@
   renderAll();
   bindPanels();
   bindHaptics();
+  bindMuteMorph();
   bindDemoReacts();
   bindScrollSpy();
 })();

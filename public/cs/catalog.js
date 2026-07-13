@@ -1,7 +1,4 @@
-/* kby-feed cheatsheet catalog — sourced from feed.html patterns */
-(function () {
-'use strict';
-
+/* Auto-synced component catalog for /cheatsheet — keep in lockstep with feed.html */
 window.CS_NAV = [
   {
     "id": "sidebar",
@@ -114,7 +111,6 @@ window.CS_NAV = [
     "group": "Systems"
   }
 ];
-
 window.CS_CATALOG = [
   {
     "id": "sidebar",
@@ -355,7 +351,7 @@ window.CS_CATALOG = [
     ],
     "preview": {
       "desktop": "<div class=\"cs-grid cols-3\">\n<div class=\"cs-state\"><div class=\"cap\">Loading</div>\n<div style=\"aspect-ratio:3/4;border-radius:12px;background:#111;position:relative;overflow:hidden;max-width:120px\">\n  <div style=\"position:absolute;inset:0;background:linear-gradient(105deg,transparent 42%,rgba(255,255,255,.07) 50%,transparent 58%);background-size:220% 100%;animation:mediaShimmer 1.1s ease infinite\"></div>\n</div></div>\n<div class=\"cs-state\"><div class=\"cap\">Ready</div>\n<img src=\"/public/tabasco2.png\" alt=\"\" style=\"width:120px;border-radius:12px;display:block;box-shadow:0 8px 24px rgba(0,0,0,.2)\">\n</div>\n<div class=\"cs-state\"><div class=\"cap\">Error</div>\n<div style=\"width:120px;aspect-ratio:3/4;border-radius:12px;background:#14110d;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.45);font-size:11px;font-weight:700\">Broken</div>\n</div>\n</div>\n<style>@keyframes mediaShimmer{0%{background-position:120% 0}100%{background-position:-120% 0}}</style>",
-      "mobile": "<div class=\"cs-state media-stage\"><div class=\"cap\">Hover / active controls</div>\n<div style=\"position:relative;border-radius:12px;overflow:hidden;max-width:200px;margin:0 auto\">\n  <img src=\"/public/tabasco2.png\" alt=\"\" style=\"width:100%;display:block\">\n  <div style=\"position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between\">\n    <button class=\"demo-glass\" type=\"button\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\"><path d=\"M11 5L6 9H2v6h4l5 4V5z\" fill=\"currentColor\"/><path d=\"M23 9l-6 6M17 9l6 6\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/></svg></button>\n    <button class=\"demo-glass\" type=\"button\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\"><circle cx=\"12\" cy=\"5\" r=\"1.8\" fill=\"currentColor\"/><circle cx=\"12\" cy=\"12\" r=\"1.8\" fill=\"currentColor\"/><circle cx=\"12\" cy=\"19\" r=\"1.8\" fill=\"currentColor\"/></svg></button>\n  </div>\n</div></div>",
+      "mobile": "<div class=\"cs-state media-stage\"><div class=\"cap\">Hover / active controls</div>\n<div style=\"position:relative;border-radius:12px;overflow:hidden;max-width:200px;margin:0 auto\">\n  <img src=\"/public/tabasco2.png\" alt=\"\" style=\"width:100%;display:block\">\n  <div style=\"position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between\">\n    <button type=\"button\" class=\"demo-glass mute-btn is-settled\" data-sound=\"0\" aria-label=\"Unmute\"><svg class=\"mute-icon\" width=\"24\" height=\"24\" viewBox=\"0 0 28 28\" fill=\"none\" aria-hidden=\"true\">\n  <path class=\"mute-cone\" d=\"M13 7L8 11H4V17H8L13 21V7Z\"/>\n  <g class=\"mute-waves\">\n    <path class=\"mute-draw mute-draw-delay\" pathLength=\"1\" d=\"M21.07 7C22.9447 8.87528 23.9979 11.4184 23.9979 14.07C23.9979 16.7216 22.9447 19.2647 21.07 21.14\"/>\n    <path class=\"mute-draw\" pathLength=\"1\" d=\"M17.54 10.53C18.4773 11.4676 19.0039 12.7392 19.0039 14.065C19.0039 15.3908 18.4773 16.6624 17.54 17.6\"/>\n  </g>\n  <g class=\"mute-slash\">\n    <path class=\"mute-draw mute-draw-delay\" pathLength=\"1\" d=\"M25 11L19 17\"/>\n    <path class=\"mute-draw\" pathLength=\"1\" d=\"M19 11L25 17\"/>\n  </g>\n</svg></button>\n    <button class=\"demo-glass\" type=\"button\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\"><circle cx=\"12\" cy=\"5\" r=\"1.8\" fill=\"currentColor\"/><circle cx=\"12\" cy=\"12\" r=\"1.8\" fill=\"currentColor\"/><circle cx=\"12\" cy=\"19\" r=\"1.8\" fill=\"currentColor\"/></svg></button>\n  </div>\n</div></div>",
       "dual": true,
       "desktopFrame": "",
       "mobileFrame": "media-stage"
@@ -368,7 +364,7 @@ window.CS_CATALOG = [
   {
     "id": "glass-controls",
     "title": "Glass controls",
-    "blurb": "Mute + more — 46px frosted circles on media.",
+    "blurb": "Mute + more — 46px frosted circles. Mute uses pathLength draw morph (waves ↔ slash).",
     "tags": [
       "feed",
       "desktop",
@@ -382,10 +378,22 @@ window.CS_CATALOG = [
         "selector": ".media-topctl"
       },
       {
-        "state": "mute",
-        "desktop": "videos only (not gif)",
+        "state": "muted",
+        "desktop": "slash settled (data-sound=0)",
         "mobile": "same",
-        "selector": ".glass-btn.mute-btn"
+        "selector": ".mute-btn[data-sound=\"0\"]"
+      },
+      {
+        "state": "unmuted",
+        "desktop": "waves settled (data-sound=1)",
+        "mobile": "same",
+        "selector": ".mute-btn[data-sound=\"1\"]"
+      },
+      {
+        "state": "morph",
+        "desktop": "pathLength draw .2s (+.1s outer)",
+        "mobile": "same",
+        "selector": ".mute-draw / muteDraw"
       },
       {
         "state": "more",
@@ -395,20 +403,22 @@ window.CS_CATALOG = [
       }
     ],
     "interactions": [
-      "active scale .88",
-      "mute ↔ setFeedSound",
-      "haptic: toggle / selection"
+      "click mute → applyMuteButtonState (no hard icon swap)",
+      "cone stays; waves or slash sketch in",
+      "haptic+sound: unmute / mute",
+      "active scale .88"
     ],
     "preview": {
-      "desktop": "<div class=\"cs-frame dark-stage\" style=\"border:none;box-shadow:none\"><div class=\"stage\" style=\"display:flex;gap:16px;padding:20px;background:#0c0b0a;border-radius:12px\">\n  <button class=\"demo-glass\" type=\"button\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\"><path d=\"M11 5L6 9H2v6h4l5 4V5z\" fill=\"currentColor\"/><path d=\"M23 9l-6 6M17 9l6 6\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/></svg></button>\n  <button class=\"demo-glass\" type=\"button\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\"><circle cx=\"12\" cy=\"5\" r=\"1.8\" fill=\"currentColor\"/><circle cx=\"12\" cy=\"12\" r=\"1.8\" fill=\"currentColor\"/><circle cx=\"12\" cy=\"19\" r=\"1.8\" fill=\"currentColor\"/></svg></button>\n</div></div>",
-      "mobile": "<div style=\"display:flex;gap:12px;justify-content:center;padding:16px;background:#111;border-radius:12px\">\n  <button class=\"demo-glass\" type=\"button\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\"><path d=\"M11 5L6 9H2v6h4l5 4V5z\" fill=\"currentColor\"/><path d=\"M23 9l-6 6M17 9l6 6\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/></svg></button>\n  <button class=\"demo-glass\" type=\"button\"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\"><circle cx=\"12\" cy=\"5\" r=\"1.8\" fill=\"currentColor\"/><circle cx=\"12\" cy=\"12\" r=\"1.8\" fill=\"currentColor\"/><circle cx=\"12\" cy=\"19\" r=\"1.8\" fill=\"currentColor\"/></svg></button>\n</div>",
+      "desktop": "<div class=\"cs-note\" style=\"margin-bottom:10px\">Click mute to morph</div>\n<div style=\"display:flex;gap:16px;padding:20px;background:#0c0b0a;border-radius:12px;align-items:center\">\n  <button type=\"button\" class=\"demo-glass mute-btn is-settled\" data-sound=\"0\" aria-label=\"Unmute\"><svg class=\"mute-icon\" width=\"24\" height=\"24\" viewBox=\"0 0 28 28\" fill=\"none\" aria-hidden=\"true\">\n  <path class=\"mute-cone\" d=\"M13 7L8 11H4V17H8L13 21V7Z\"/>\n  <g class=\"mute-waves\">\n    <path class=\"mute-draw mute-draw-delay\" pathLength=\"1\" d=\"M21.07 7C22.9447 8.87528 23.9979 11.4184 23.9979 14.07C23.9979 16.7216 22.9447 19.2647 21.07 21.14\"/>\n    <path class=\"mute-draw\" pathLength=\"1\" d=\"M17.54 10.53C18.4773 11.4676 19.0039 12.7392 19.0039 14.065C19.0039 15.3908 18.4773 16.6624 17.54 17.6\"/>\n  </g>\n  <g class=\"mute-slash\">\n    <path class=\"mute-draw mute-draw-delay\" pathLength=\"1\" d=\"M25 11L19 17\"/>\n    <path class=\"mute-draw\" pathLength=\"1\" d=\"M19 11L25 17\"/>\n  </g>\n</svg></button>\n  <button type=\"button\" class=\"demo-glass mute-btn is-settled\" data-sound=\"1\" aria-label=\"Mute\"><svg class=\"mute-icon\" width=\"24\" height=\"24\" viewBox=\"0 0 28 28\" fill=\"none\" aria-hidden=\"true\">\n  <path class=\"mute-cone\" d=\"M13 7L8 11H4V17H8L13 21V7Z\"/>\n  <g class=\"mute-waves\">\n    <path class=\"mute-draw mute-draw-delay\" pathLength=\"1\" d=\"M21.07 7C22.9447 8.87528 23.9979 11.4184 23.9979 14.07C23.9979 16.7216 22.9447 19.2647 21.07 21.14\"/>\n    <path class=\"mute-draw\" pathLength=\"1\" d=\"M17.54 10.53C18.4773 11.4676 19.0039 12.7392 19.0039 14.065C19.0039 15.3908 18.4773 16.6624 17.54 17.6\"/>\n  </g>\n  <g class=\"mute-slash\">\n    <path class=\"mute-draw mute-draw-delay\" pathLength=\"1\" d=\"M25 11L19 17\"/>\n    <path class=\"mute-draw\" pathLength=\"1\" d=\"M19 11L25 17\"/>\n  </g>\n</svg></button>\n  <button type=\"button\" class=\"demo-glass more-btn\" aria-label=\"More\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\"><circle cx=\"12\" cy=\"5\" r=\"1.8\" fill=\"currentColor\"/><circle cx=\"12\" cy=\"12\" r=\"1.8\" fill=\"currentColor\"/><circle cx=\"12\" cy=\"19\" r=\"1.8\" fill=\"currentColor\"/></svg></button>\n</div>",
+      "mobile": "<div class=\"cs-note\" style=\"margin-bottom:10px\">Tap mute to morph</div>\n<div style=\"display:flex;gap:12px;justify-content:center;padding:16px;background:#111;border-radius:12px;align-items:center\">\n  <button type=\"button\" class=\"demo-glass mute-btn is-settled\" data-sound=\"0\" aria-label=\"Unmute\"><svg class=\"mute-icon\" width=\"24\" height=\"24\" viewBox=\"0 0 28 28\" fill=\"none\" aria-hidden=\"true\">\n  <path class=\"mute-cone\" d=\"M13 7L8 11H4V17H8L13 21V7Z\"/>\n  <g class=\"mute-waves\">\n    <path class=\"mute-draw mute-draw-delay\" pathLength=\"1\" d=\"M21.07 7C22.9447 8.87528 23.9979 11.4184 23.9979 14.07C23.9979 16.7216 22.9447 19.2647 21.07 21.14\"/>\n    <path class=\"mute-draw\" pathLength=\"1\" d=\"M17.54 10.53C18.4773 11.4676 19.0039 12.7392 19.0039 14.065C19.0039 15.3908 18.4773 16.6624 17.54 17.6\"/>\n  </g>\n  <g class=\"mute-slash\">\n    <path class=\"mute-draw mute-draw-delay\" pathLength=\"1\" d=\"M25 11L19 17\"/>\n    <path class=\"mute-draw\" pathLength=\"1\" d=\"M19 11L25 17\"/>\n  </g>\n</svg></button>\n  <button type=\"button\" class=\"demo-glass more-btn\" aria-label=\"More\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\"><circle cx=\"12\" cy=\"5\" r=\"1.8\" fill=\"currentColor\"/><circle cx=\"12\" cy=\"12\" r=\"1.8\" fill=\"currentColor\"/><circle cx=\"12\" cy=\"19\" r=\"1.8\" fill=\"currentColor\"/></svg></button>\n</div>",
       "dual": true,
       "desktopFrame": "dark-stage",
       "mobileFrame": "dark-stage"
     },
     "code": {
-      "css": ".glass-btn{\n  width:46px;height:46px;border-radius:50%!important;\n  color:#fff;background:var(--glass-dark);\n  backdrop-filter:blur(10px) saturate(160%);\n}\n.glass-btn:active{transform:scale(.88);}\n@media (max-width:860px){\n  html.dark .glass-btn{background:rgba(255,255,255,.16);}\n}",
-      "html": "<div class=\"media-topctl\">\n  <div class=\"topctl-left\">\n    <button type=\"button\" class=\"glass-btn mute-btn\" aria-label=\"Toggle mute\">…</button>\n  </div>\n  <button type=\"button\" class=\"glass-btn more-btn\" aria-label=\"More options\">…</button>\n</div>\n<div class=\"more-menu\">\n  <button type=\"button\" data-act=\"notinterested\">Not interested</button>\n  <button type=\"button\" data-act=\"report\">Report</button>\n</div>"
+      "html": "<button type=\"button\" class=\"glass-btn mute-btn is-settled\" data-sound=\"0\" aria-label=\"Unmute\">\n  <svg class=\"mute-icon\" width=\"24\" height=\"24\" viewBox=\"0 0 28 28\" fill=\"none\" aria-hidden=\"true\">\n    <path class=\"mute-cone\" d=\"M13 7L8 11H4V17H8L13 21V7Z\"/>\n    <g class=\"mute-waves\">\n      <path class=\"mute-draw mute-draw-delay\" pathLength=\"1\" d=\"M21.07 7C22.9447 8.87528 23.9979 11.4184 23.9979 14.07C23.9979 16.7216 22.9447 19.2647 21.07 21.14\"/>\n      <path class=\"mute-draw\" pathLength=\"1\" d=\"M17.54 10.53C18.4773 11.4676 19.0039 12.7392 19.0039 14.065C19.0039 15.3908 18.4773 16.6624 17.54 17.6\"/>\n    </g>\n    <g class=\"mute-slash\">\n      <path class=\"mute-draw mute-draw-delay\" pathLength=\"1\" d=\"M25 11L19 17\"/>\n      <path class=\"mute-draw\" pathLength=\"1\" d=\"M19 11L25 17\"/>\n    </g>\n  </svg>\n</button>",
+      "css": ".mute-icon{overflow:visible;}\n.mute-icon .mute-cone{\n  fill:none;stroke:currentColor;stroke-width:2.35;stroke-linecap:round;stroke-linejoin:round;\n}\n.mute-icon .mute-draw{\n  fill:none;stroke:currentColor;stroke-width:2.35;stroke-linecap:round;stroke-linejoin:round;\n  stroke-dasharray:1;stroke-dashoffset:1;\n}\n.mute-btn[data-sound=\"1\"] .mute-slash{display:none;}\n.mute-btn[data-sound=\"0\"] .mute-waves{display:none;}\n.mute-btn[data-sound=\"1\"] .mute-waves .mute-draw,\n.mute-btn[data-sound=\"0\"] .mute-slash .mute-draw{\n  animation:muteDraw .2s ease-in-out forwards;\n}\n.mute-btn[data-sound=\"1\"] .mute-waves .mute-draw-delay,\n.mute-btn[data-sound=\"0\"] .mute-slash .mute-draw-delay{animation-delay:.1s;}\n.mute-btn.is-settled[data-sound=\"1\"] .mute-waves .mute-draw,\n.mute-btn.is-settled[data-sound=\"0\"] .mute-slash .mute-draw{\n  animation:none;stroke-dashoffset:0;\n}\n@keyframes muteDraw{to{stroke-dashoffset:0;}}",
+      "js": "function muteIconHtml(){\n  return `<svg class=\"mute-icon\" …>`; // cone + waves + slash groups\n}\nfunction applyMuteButtonState(btn, on, {animate=true}={}){\n  const next = on ? '1' : '0';\n  btn.classList.toggle('is-settled', !animate);\n  btn.setAttribute('data-sound', next);\n  if(animate){\n    const sel = on ? '.mute-waves .mute-draw' : '.mute-slash .mute-draw';\n    btn.querySelectorAll(sel).forEach(p=>{\n      p.style.animation = 'none'; void p.getBoundingClientRect(); p.style.animation = '';\n    });\n    setTimeout(()=>btn.classList.add('is-settled'), 320);\n  }\n}"
     }
   },
   {
@@ -1050,7 +1060,7 @@ window.CS_CATALOG = [
       "systems"
     ],
     "preview": {
-      "desktop": "<table class=\"cs-matrix\"><thead><tr><th>Key</th><th>Store</th><th>Values</th><th>Purpose</th></tr></thead><tbody>\n<tr><td class=\"mono\">kb_sidebar_collapsed</td><td>localStorage</td><td>'1' / absent</td><td>Sidebar icon rail</td></tr>\n<tr><td class=\"mono\">kb_feed_hint_v6</td><td>localStorage</td><td>'1'</td><td>Dismiss swipe hint</td></tr>\n<tr><td class=\"mono\">kb_feed_sound</td><td>sessionStorage</td><td>'1' / '0'</td><td>Video unmuted for session</td></tr>\n</tbody></table>\n<div class=\"cs-note\">Theme (<code>html.dark</code>) is not persisted in feed.html — toggled live only.</div>",
+      "desktop": "<table class=\"cs-matrix\"><thead><tr><th>Key</th><th>Store</th><th>Values</th><th>Purpose</th></tr></thead><tbody>\n<tr><td class=\"mono\">kb_sidebar_collapsed</td><td>localStorage</td><td>'1' / absent</td><td>Sidebar icon rail</td></tr>\n<tr><td class=\"mono\">kb_feed_hint_v8</td><td>localStorage</td><td>'1'</td><td>Dismiss swipe hint</td></tr>\n<tr><td class=\"mono\">kb_feed_sound</td><td>sessionStorage</td><td>'1' / '0'</td><td>Video unmuted for session</td></tr>\n</tbody></table>\n<div class=\"cs-note\">Theme (<code>html.dark</code>) is not persisted in feed.html — toggled live only.</div>",
       "mobile": "<div class=\"cs-note\">Same keys on mobile.</div>",
       "dual": false,
       "desktopFrame": "",
@@ -1061,5 +1071,3 @@ window.CS_CATALOG = [
     }
   }
 ];
-
-})();
