@@ -58,6 +58,8 @@ Most motion reuses a small set of curves. Durations are wall-clock; springs are 
 | Kbd panel open | — | `scale(.9)→1`, opacity | `.2s` `(.22,1,.36,1)` |
 | **Reaction rail** | outside: `#FAFAFA→#FFF` / dark `#130A07→#251D18`; on-media glass tint; active `brightness(1.06)` | `brightness(.94)` | bg/color `.22s` |
 | Reaction count | ink / white | — | color `.2s` |
+| **Mute / unmute** | pathLength draw morph (waves ↔ slash), stroke `2.35` (~rail weight); unmute bloom / mute cut sounds + haptic | — | `.2s` ease-in-out (+`.1s` outer) |
+| **Hover cards** | user + token preview portals (no Buy CTA); desktop `pointer:fine` only | — | show `.18s`, delays 280/450ms |
 | New posts pill | brightness `.98` | `scale(.95)` | opacity `.3s`, transform `.38s` pop |
 | Tag / uname | color / underline | — | `.15s` |
 | **Token mini** *(size allowed)* | `scale(1.14)` + orange ring | `scale(.96)` | `.28s` `(.22,1.4,.36,1)` |
@@ -70,8 +72,8 @@ Desktop reaction hover gated: `@media (hover:hover) and (pointer:fine)`.
 | Piece | Hover |
 |-------|--------|
 | Avatar | orange `2px` ring + slight brightness |
-| Plus badge | `scale(1.18) rotate(90deg)`, brighter orange, glow `0 0 0 5px rgba(255,102,34,.22)` |
-| Plus `::before` ring | opacity `0→1`, `scale(.6→1.35)` — `.4s` `(.22,1.45,.36,1)` |
+| Plus badge | SVG `+` (grid-centered); `scale(1.1) rotate(90deg)`, `.28s` `(.22,1.2,.36,1)` |
+| Plus `::before` ring | opacity `0→1`, `scale(.85→1.2)` — same curve |
 
 ---
 
@@ -193,12 +195,28 @@ pos  += v * dt
 
 Presets via [web-haptics](https://haptics.lochie.me/) + `navigator.vibrate` fallback:
 
-`light` · `selection` · `nudge` · `settle` · `dragtick` · `toggle` · `open` · `comment` · `share` · `tip` · `like` · `dislike` · `attach`
+`light` · `selection` · `nudge` · `settle` · `dragtick` · `toggle` · `unmute` · `mute` · `open` · `comment` · `share` · `tip` · `like` · `dislike` · `attach`
 
 Each can fire a matching WebAudio one-shot (no ambient loop).
 
 ---
 
+### 10. Hover info cards (desktop)
+
+Preview-only popovers. **No CTA on the card** — click the underlying zone still opens the trade drawer / existing actions.
+
+| | User card (`#userHoverCard`) | Token card (`#tokenHoverCard`) |
+|--|--|--|
+| **Triggers** | `.uname`, `.avatar-sm` | `.media-card` (450ms), `.avatar-plus`, `.token-mini`, `.tag-ticker`, `.pill` (280ms) |
+| **Content** | blockie, name, Mirror+X icons, Launches, Global PnL | avatar, ticker+cat, name, MCAP, seeded SVG chart + markers, buyers / comments / tips / heat |
+| **Gate** | `width > 860` and `(hover:hover) and (pointer:fine)` — hidden on mobile | same |
+| **API** | `bindHoverCard(el, 'user'\|'token', post, delayMs)` · `hideHoverCards(immediate?)` · `mockUserStats` / `mockTokenStats` / `buildTokenChartSvg` | |
+| **Hide** | leave trigger (160ms bridge onto card), Escape, scroll, resize, open drawer/comments/share | |
+
+Portal: `#kbHoverPortal`. Stats/chart are deterministic from `hashSeed(user|ticker)` — swap those helpers for live API data later.
+
+---
+
 ## Breakpoint
 
-**860px** — mobile full-bleed feed, bottom nav, sheets; desktop sidebar + side drawers + kbd helper + new-pill.
+**860px** — mobile full-bleed feed, bottom nav, sheets; desktop sidebar + side drawers + kbd helper + new-pill + hover cards.

@@ -173,6 +173,34 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
 .glass-btn:hover{background:rgba(30,26,20,0.72);}
 .glass-btn:active{transform:scale(.88);}
 
+/* mute ↔ sound morph (pathLength draw, WebHaptics-style) */
+.mute-icon{overflow:visible;}
+.mute-icon .mute-cone{
+  fill:none;stroke:currentColor;stroke-width:2.35;stroke-linecap:round;stroke-linejoin:round;
+}
+.mute-icon .mute-draw{
+  fill:none;stroke:currentColor;stroke-width:2.35;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:1;stroke-dashoffset:1;
+}
+.mute-btn[data-sound="1"] .mute-slash{display:none;}
+.mute-btn[data-sound="0"] .mute-waves{display:none;}
+.mute-btn[data-sound="1"] .mute-waves .mute-draw,
+.mute-btn[data-sound="0"] .mute-slash .mute-draw{
+  animation:muteDraw .2s ease-in-out forwards;
+}
+.mute-btn[data-sound="1"] .mute-waves .mute-draw-delay,
+.mute-btn[data-sound="0"] .mute-slash .mute-draw-delay{
+  animation-delay:.1s;
+}
+.mute-btn.is-settled[data-sound="1"] .mute-waves .mute-draw,
+.mute-btn.is-settled[data-sound="0"] .mute-slash .mute-draw{
+  animation:none;stroke-dashoffset:0;
+}
+@keyframes muteDraw{to{stroke-dashoffset:0;}}
+@media (prefers-reduced-motion:reduce){
+  .mute-btn .mute-draw{animation:none!important;stroke-dashoffset:0;}
+}
+
 .center-flash{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:6;}
 .flash-btn{width:132px;height:132px;border-radius:50%;background:var(--glass-dark);backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 8px 30px rgba(0,0,0,.28);opacity:0;transform:scale(.55);will-change:transform,opacity;}
 .flash-btn svg{width:62px;height:62px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.35));}
@@ -265,27 +293,39 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
 }
 .avatar-plus:active .avatar-plus-inner{filter:brightness(.96);}
 .plus-badge{
-  position:absolute;bottom:-6px;right:-6px;width:22px;height:22px;border-radius:8px;
-  background:var(--orange);display:flex;align-items:center;justify-content:center;
-  color:#fff;font-weight:900;font-size:15px;line-height:1;z-index:2;
+  position:absolute;right:-3px;bottom:-5px;
+  width:20px;height:20px;margin:0;padding:0;border:none;
+  border-radius:7px;
+  background:var(--orange);color:#fff;
+  display:grid;place-items:center;
+  z-index:2;
   box-shadow:0 2px 8px rgba(255,102,34,.45);
-  transition:transform .4s cubic-bezier(.22,1.5,.36,1), box-shadow .28s ease, background .2s ease;
-  transform-origin:center;
+  transform:none;
+  transform-origin:center center;
+  transition:transform .28s cubic-bezier(.22,1.2,.36,1), box-shadow .22s ease, background .18s ease;
+  will-change:transform;
 }
-.plus-badge::before{
-  content:'';position:absolute;inset:-4px;border-radius:10px;
-  border:2px solid rgba(255,102,34,.45);opacity:0;transform:scale(.6);
-  transition:opacity .28s ease, transform .4s cubic-bezier(.22,1.45,.36,1);
+.plus-badge svg{
+  display:block;width:11px;height:11px;flex-shrink:0;
   pointer-events:none;
 }
-/* embellishment: + rotates to × orientation, pops, and rings out */
-.avatar-plus:hover .plus-badge{
-  transform:scale(1.18) rotate(90deg);
-  background:#FF7A3D;
-  box-shadow:0 0 0 5px rgba(255,102,34,.22), 0 6px 16px rgba(255,102,34,.5);
+.plus-badge::before{
+  content:'';position:absolute;inset:-3px;border-radius:9px;
+  border:1.5px solid rgba(255,102,34,.4);opacity:0;transform:scale(.85);
+  transition:opacity .22s ease, transform .28s cubic-bezier(.22,1.2,.36,1);
+  pointer-events:none;
 }
-.avatar-plus:hover .plus-badge::before{opacity:1;transform:scale(1.35);border-color:rgba(255,102,34,.35);}
-.avatar-plus:active .plus-badge{transform:scale(1.02) rotate(90deg);transition-duration:.1s;}
+/* embellishment: + rotates to ×, soft pop + ring */
+.avatar-plus:hover .plus-badge{
+  transform:scale(1.1) rotate(90deg);
+  background:#FF7A3D;
+  box-shadow:0 0 0 4px rgba(255,102,34,.18), 0 4px 12px rgba(255,102,34,.42);
+}
+.avatar-plus:hover .plus-badge::before{opacity:1;transform:scale(1.2);}
+.avatar-plus:active .plus-badge{
+  transform:scale(.96) rotate(90deg);
+  transition-duration:.1s;
+}
 
 .react-col{display:flex;flex-direction:column;align-items:center;gap:5px;width:46px;}
 .react-btn{
@@ -939,6 +979,97 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
 
 @media (max-width:860px){ .new-pill{display:none;} }
 @media (min-width:861px){ .pull-spin{display:none;} }
+
+/* ---- hover info cards (desktop) ---- */
+.kb-hover-portal{position:fixed;inset:0;z-index:60;pointer-events:none;}
+.kb-hover-card{
+  position:fixed;left:0;top:0;z-index:61;pointer-events:auto;
+  background:var(--card);color:var(--ink);
+  border:1px solid var(--line);border-radius:18px;
+  box-shadow:0 18px 48px rgba(40,30,20,.16), 0 2px 8px rgba(40,30,20,.06);
+  opacity:0;transform:translateY(6px) scale(.98);
+  transition:opacity .18s ease, transform .2s cubic-bezier(.22,1,.36,1);
+  visibility:hidden;
+}
+.kb-hover-card.show{opacity:1;transform:translateY(0) scale(1);visibility:visible;}
+html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(0,0,0,.3);}
+
+.user-hover-card{width:280px;padding:14px;display:flex;gap:12px;align-items:stretch;}
+.uhc-avatar{width:72px;height:72px;flex-shrink:0;overflow:hidden;background:var(--line);}
+.uhc-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+.uhc-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;}
+.uhc-name{font-size:15px;font-weight:800;letter-spacing:-.01em;line-height:1.2;}
+.uhc-socials{display:flex;align-items:center;gap:6px;}
+.uhc-social{
+  width:22px;height:22px;border-radius:50%;border:1px solid var(--line);
+  display:inline-flex;align-items:center;justify-content:center;
+  color:var(--ink-soft);background:transparent;padding:0;cursor:default;
+}
+.uhc-social svg{width:11px;height:11px;display:block;}
+.uhc-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:auto;}
+.uhc-stat-label{font-size:11px;font-weight:600;color:var(--ink-faint);margin-bottom:3px;}
+.uhc-stat-val{font-size:14px;font-weight:800;display:inline-flex;align-items:center;gap:5px;color:var(--ink);}
+.uhc-stat-val.is-pos{color:var(--green);}
+.uhc-stat-val svg{width:13px;height:13px;flex-shrink:0;}
+
+.token-hover-card{width:440px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:12px;}
+.thc-head{display:flex;align-items:flex-start;gap:10px;}
+.thc-token-av{width:40px;height:40px;flex-shrink:0;overflow:hidden;background:var(--line);}
+.thc-token-av img{width:100%;height:100%;object-fit:cover;display:block;}
+.thc-token-meta{flex:1;min-width:0;}
+.thc-ticker-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.thc-ticker{font-size:13px;font-weight:800;}
+.thc-name{font-size:16px;font-weight:800;letter-spacing:-.01em;margin-top:2px;line-height:1.2;}
+.thc-mcap{text-align:right;flex-shrink:0;}
+.thc-mcap-label{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--ink-faint);}
+.thc-mcap-label svg{width:12px;height:12px;}
+.thc-mcap-val{font-size:18px;font-weight:800;color:var(--green);margin-top:2px;letter-spacing:-.02em;}
+
+.thc-chart{position:relative;height:168px;border-radius:12px;background:color-mix(in srgb, var(--bg) 70%, var(--card));overflow:hidden;}
+.thc-chart svg{display:block;width:100%;height:100%;}
+.thc-chart-ylabels,.thc-chart-xlabels{position:absolute;pointer-events:none;font-size:9px;font-weight:600;color:var(--ink-faint);}
+.thc-chart-ylabels{right:8px;top:8px;bottom:22px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;}
+.thc-chart-xlabels{left:8px;right:44px;bottom:6px;display:flex;justify-content:space-between;}
+.thc-price-pill{
+  position:absolute;right:8px;padding:3px 8px;border-radius:999px;
+  background:#1A6B45;color:#fff;font-size:11px;font-weight:800;
+  box-shadow:0 2px 8px rgba(26,107,69,.35);transform:translateY(-50%);
+  pointer-events:none;z-index:2;
+}
+.thc-marker{position:absolute;z-index:3;transform:translate(-50%,-50%);pointer-events:none;}
+.thc-marker-av{width:18px;height:18px;border-radius:50%;overflow:hidden;border:1.5px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.2);}
+.thc-marker-av img{width:100%;height:100%;object-fit:cover;display:block;}
+.thc-marker-chip{
+  display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:999px;
+  font-size:10px;font-weight:800;white-space:nowrap;box-shadow:0 3px 10px rgba(0,0,0,.12);
+  transform:translate(-50%,calc(-100% - 8px));
+}
+.thc-marker-chip svg{width:11px;height:11px;flex-shrink:0;}
+.thc-marker-chip.rocket{background:var(--orange);color:#fff;}
+.thc-marker-chip.comment{background:#7B6CF0;color:#fff;border-radius:10px 10px 10px 4px;}
+.thc-marker-chip.tip{background:#E8D5B5;color:#5C4030;}
+.thc-marker-chip.pnl{background:#C8F0D8;color:#1A6B45;}
+
+.thc-foot{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.thc-buyers{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--ink-soft);}
+.thc-buyer-stack{display:inline-flex;}
+.thc-buyer-stack img{
+  width:18px;height:18px;border-radius:50%;object-fit:cover;
+  border:1.5px solid var(--card);margin-left:-6px;background:var(--line);
+}
+.thc-buyer-stack img:first-child{margin-left:0;}
+.thc-foot-stat{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--ink-soft);}
+.thc-foot-stat svg{width:13px;height:13px;}
+.thc-heat{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--ink-soft);}
+.thc-heat-bar{width:52px;height:6px;border-radius:999px;background:var(--line);overflow:hidden;}
+.thc-heat-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#4BA3F0,#F5D76E,#FF6622);}
+
+@media (max-width:860px){
+  .kb-hover-portal{display:none!important;}
+}
+@media (hover:none){
+  .kb-hover-portal{display:none!important;}
+}
 </style>
 </head>
 <body>
@@ -1127,6 +1258,11 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
   </div>
 </div>
 
+<div class="kb-hover-portal" id="kbHoverPortal" aria-hidden="true">
+  <div class="kb-hover-card user-hover-card" id="userHoverCard" role="dialog" aria-label="User preview"></div>
+  <div class="kb-hover-card token-hover-card" id="tokenHoverCard" role="dialog" aria-label="Token preview"></div>
+</div>
+
 <script>
 (function(){
   const M = '/public';
@@ -1277,7 +1413,7 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
   }).catch(()=>{});
   const WEB_HAPTIC_PRESETS = {
     light:'light', selection:'selection', nudge:'nudge', settle:'success',
-    dragtick:'soft', toggle:'rigid', open:'medium', comment:'success',
+    dragtick:'soft', toggle:'rigid', unmute:'nudge', mute:'rigid', open:'medium', comment:'success',
     tip:'success', like:'medium', dislike:'warning', share:'soft', attach:'success',
   };
   const HAPTIC_PATTERNS = {
@@ -1288,6 +1424,8 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
     attach:    { vibrate: [10, 28, 14, 40, 18], taps: 2, tapGap: 36 },
     dragtick:  { vibrate: [3], taps: 0 },
     toggle:    { vibrate: [5, 18, 5], taps: 1 },
+    unmute:    { vibrate: [8, 26, 12, 36, 10], taps: 2, tapGap: 40 },
+    mute:      { vibrate: [14, 22, 8], taps: 1 },
     open:      { vibrate: [8, 28, 9], taps: 1 },
     comment:   { vibrate: [9, 30, 9], taps: 2, tapGap: 38 },
     share:     { vibrate: [7, 32, 7], taps: 2, tapGap: 36 },
@@ -1297,7 +1435,7 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
   };
   const PRESET_SOUND = {
     light:'light', selection:'light', nudge:'light', settle:'settle', attach:'settle', dragtick:'dragtick',
-    toggle:'toggle', open:'open', comment:'comment', share:'share',
+    toggle:'toggle', unmute:'unmute', mute:'mute', open:'open', comment:'comment', share:'share',
     tip:'tip', like:'like', dislike:'dislike',
   };
   function ensureAudio(){
@@ -1433,6 +1571,35 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
   function reactToggleSound(ctx){
     microClick(ctx, feedSoundOn ? 980 : 640);
   }
+  function reactUnmuteSound(ctx){
+    const t0 = ctx.currentTime;
+    // soft rising bloom — sound coming back
+    [520, 760, 1040].forEach((f, i)=>{
+      const t = t0 + i * 0.032;
+      const osc = ctx.createOscillator(); osc.type = 'sine'; osc.frequency.value = f;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.085 - i * 0.018, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+      osc.connect(g); g.connect(masterGain);
+      osc.start(t); osc.stop(t + 0.15);
+    });
+    setTimeout(()=>microClick(ctx, 1180), 70);
+  }
+  function reactMuteSound(ctx){
+    const t0 = ctx.currentTime;
+    // descending cut — sound shut off
+    const osc = ctx.createOscillator(); osc.type = 'triangle';
+    osc.frequency.setValueAtTime(480, t0);
+    osc.frequency.exponentialRampToValueAtTime(150, t0 + 0.1);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.1, t0 + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(t0); osc.stop(t0 + 0.13);
+    setTimeout(()=>microClick(ctx, 420), 55);
+  }
   function reactOpenSound(ctx){ microClick(ctx, 760); }
   function playSound(kind, arg){
     unlockAudio();
@@ -1450,6 +1617,8 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
     else if(kind==='comment') reactCommentSound(ctx);
     else if(kind==='share') reactShareSound(ctx);
     else if(kind==='toggle') reactToggleSound(ctx);
+    else if(kind==='unmute') reactUnmuteSound(ctx);
+    else if(kind==='mute') reactMuteSound(ctx);
     else if(kind==='open') reactOpenSound(ctx);
     else if(kind==='light') microClick(ctx);
   }
@@ -1487,10 +1656,51 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
 
   function fmt(n){ if(n>=1000000) return (n/1000000).toFixed(1)+'M'; if(n>=1000) return (n/1000).toFixed(1)+'K'; return n; }
 
+  function muteIconHtml(){
+    // Dual-state speaker: cone stays; waves / slash draw via pathLength (WebHaptics morph)
+    return `<svg class="mute-icon" width="24" height="24" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+      <path class="mute-cone" d="M13 7L8 11H4V17H8L13 21V7Z"/>
+      <g class="mute-waves">
+        <path class="mute-draw mute-draw-delay" pathLength="1" d="M21.07 7C22.9447 8.87528 23.9979 11.4184 23.9979 14.07C23.9979 16.7216 22.9447 19.2647 21.07 21.14"/>
+        <path class="mute-draw" pathLength="1" d="M17.54 10.53C18.4773 11.4676 19.0039 12.7392 19.0039 14.065C19.0039 15.3908 18.4773 16.6624 17.54 17.6"/>
+      </g>
+      <g class="mute-slash">
+        <path class="mute-draw mute-draw-delay" pathLength="1" d="M25 11L19 17"/>
+        <path class="mute-draw" pathLength="1" d="M19 11L25 17"/>
+      </g>
+    </svg>`;
+  }
+  function applyMuteButtonState(btn, on, {animate=true}={}){
+    if(!btn) return;
+    const next = on ? '1' : '0';
+    const prev = btn.getAttribute('data-sound');
+    btn.setAttribute('aria-label', on ? 'Mute' : 'Unmute');
+    if(!btn.querySelector('.mute-icon')) btn.innerHTML = muteIconHtml();
+    if(prev === next){
+      if(!animate) btn.classList.add('is-settled');
+      return;
+    }
+    if(btn._muteSettleTimer){ clearTimeout(btn._muteSettleTimer); btn._muteSettleTimer = 0; }
+    btn.classList.toggle('is-settled', !animate);
+    btn.setAttribute('data-sound', next);
+    if(animate){
+      const sel = on ? '.mute-waves .mute-draw' : '.mute-slash .mute-draw';
+      btn.querySelectorAll(sel).forEach((p)=>{
+        p.style.animation = 'none';
+        void p.getBoundingClientRect();
+        p.style.animation = '';
+      });
+      btn._muteSettleTimer = setTimeout(()=>{
+        btn.classList.add('is-settled');
+        btn._muteSettleTimer = 0;
+      }, 320);
+    }
+  }
+
   function svgIcon(name){
     const icons = {
-      mute:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor"/><path d="M23 9l-6 6M17 9l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
-      sound:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 010 7M18.5 5.5a9 9 0 010 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+      mute: muteIconHtml(),
+      sound: muteIconHtml(),
       more:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="19" r="1.8" fill="currentColor"/></svg>',
       play:'<svg viewBox="0 0 24 24" fill="none"><path d="M8 5.5v13l11-6.5-11-6.5z" fill="currentColor"/></svg>',
       pause:'<svg viewBox="0 0 24 24" fill="none"><rect x="6.5" y="5" width="4" height="14" rx="1.4" fill="currentColor"/><rect x="13.5" y="5" width="4" height="14" rx="1.4" fill="currentColor"/></svg>',
@@ -1692,7 +1902,7 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
             ${mediaTag}
             ${p.type==='video' ? '<div class="video-progress"><div class="video-progress-fill"></div></div>' : ''}
             <div class="media-topctl">
-              <div class="topctl-left">${isVideo && p.type!=='gif' ? `<button type="button" class="glass-btn mute-btn" aria-label="Toggle mute">${svgIcon('mute')}</button>` : ''}</div>
+              <div class="topctl-left">${isVideo && p.type!=='gif' ? `<button type="button" class="glass-btn mute-btn is-settled" data-sound="${feedSoundOn ? '1' : '0'}" aria-label="${feedSoundOn ? 'Mute' : 'Unmute'}">${muteIconHtml()}</button>` : ''}</div>
               <button type="button" class="glass-btn more-btn" aria-label="More options">${svgIcon('more')}</button>
             </div>
             <div class="more-menu"><button type="button" data-act="notinterested">Not interested</button><button type="button" data-act="report">Report</button></div>
@@ -1715,7 +1925,7 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
             <div class="media-meta-scrim" aria-hidden="true"></div>
           </div>
           <div class="col-actions">
-            <div class="avatar-plus"><div class="avatar-plus-inner squircle"><img src="${p.avatar}" alt=""></div><div class="plus-badge squircle">+</div></div>
+            <div class="avatar-plus"><div class="avatar-plus-inner squircle"><img src="${p.avatar}" alt=""></div><div class="plus-badge" aria-hidden="true"><svg viewBox="0 0 12 12" fill="none"><path d="M6 2.25v7.5M2.25 6h7.5" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/></svg></div></div>
             <div class="react-col"><button type="button" class="react-btn tip" data-tips="${p.tips}">${svgIcon('tip')}</button><div class="react-count tip-count">${fmt(p.tips)}</div></div>
             <div class="react-col"><button type="button" class="react-btn comment">${svgIcon('comment')}</button><div class="react-count comment-count">${fmt(p.comments)}</div></div>
             <div class="react-col"><button type="button" class="react-btn like" data-likes="${p.likes}">${svgIcon('like')}</button><div class="react-count like-count">${fmt(p.likes)}</div></div>
@@ -1773,14 +1983,14 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
     if(feedSoundOn) v.removeAttribute('muted');
     else v.setAttribute('muted','');
   }
-  function syncMuteButtons(){
+  function syncMuteButtons(opts){
+    const animate = !opts || opts.animate !== false;
     itemEls().forEach(it=>{
       const btn = it.querySelector('.mute-btn');
       if(!btn) return;
       const p = posts[it.dataset.index];
-      const on = p && p.type!=='gif' && feedSoundOn;
-      btn.innerHTML = svgIcon(on ? 'sound' : 'mute');
-      btn.setAttribute('aria-label', on ? 'Mute' : 'Unmute');
+      const on = !!(p && p.type!=='gif' && feedSoundOn);
+      applyMuteButtonState(btn, on, {animate});
     });
   }
   function setFeedSound(on){
@@ -1893,12 +2103,12 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
 
       const muteBtn = item.querySelector('.mute-btn');
       if(muteBtn){
-        muteBtn.innerHTML = svgIcon(feedSoundOn ? 'sound' : 'mute');
-        muteBtn.setAttribute('aria-label', feedSoundOn ? 'Mute' : 'Unmute');
+        applyMuteButtonState(muteBtn, feedSoundOn, {animate:false});
         muteBtn.addEventListener('click',(e)=>{
           e.stopPropagation();
-          setFeedSound(!feedSoundOn);
-          haptic('toggle');
+          const next = !feedSoundOn;
+          setFeedSound(next);
+          haptic(next ? 'unmute' : 'mute');
         });
       }
 
@@ -1985,6 +2195,15 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
       item.querySelector('.tag-ticker').addEventListener('click',(e)=>{ e.stopPropagation(); openDrawer(posts[item.dataset.index]); haptic('open'); });
       item.querySelector('.token-mini')?.addEventListener('click',(e)=>{ e.stopPropagation(); openDrawer(posts[item.dataset.index]); haptic('open'); });
       item.querySelector('.pill')?.addEventListener('click',(e)=>{ e.stopPropagation(); openDrawer(posts[item.dataset.index]); haptic('open'); });
+
+      const postRef = posts[item.dataset.index];
+      bindHoverCard(item.querySelector('.avatar-plus'), 'token', postRef, 280);
+      bindHoverCard(item.querySelector('.tag-ticker'), 'token', postRef, 280);
+      bindHoverCard(item.querySelector('.token-mini'), 'token', postRef, 280);
+      bindHoverCard(item.querySelector('.pill'), 'token', postRef, 280);
+      bindHoverCard(item.querySelector('.media-card'), 'token', postRef, 450);
+      bindHoverCard(item.querySelector('.uname'), 'user', postRef, 280);
+      bindHoverCard(item.querySelector('.avatar-sm'), 'user', postRef, 280);
       item.querySelector('.react-btn.comment').addEventListener('click',(e)=>{
         e.stopPropagation(); if(state.feedLocked) return;
         const btn = e.currentTarget;
@@ -2884,14 +3103,270 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
       else clearCommentDropActive();
     });
   }
-  function closeTrade(){ drawer.classList.remove('open'); state.tradeOpen=false; syncSheetScrim(); reflowDuringChrome(); }
+  function closeTrade(){ drawer.classList.remove('open'); state.tradeOpen=false; syncSheetScrim(); reflowDuringChrome(); hideHoverCards(true); }
   function openDrawer(post){
+    hideHoverCards(true);
     commentsDrawer.classList.remove('open'); state.commentsOpen=false;
     document.getElementById('drawerName').textContent = post.user;
     document.getElementById('drawerTicker').textContent = post.ticker;
     document.getElementById('drawerAvatar').src = post.avatar;
     drawer.classList.add('open'); state.tradeOpen=true; syncSheetScrim(); reflowDuringChrome();
   }
+
+  /* ---------------- hover info cards (desktop) ---------------- */
+  const userHoverCard = document.getElementById('userHoverCard');
+  const tokenHoverCard = document.getElementById('tokenHoverCard');
+  const TOKEN_NAME_MAP = {
+    $THINCK:'Thinck Boutit', $LOOP:'Loop Girl', $FRY:'Deep Fry', $SAUCE:'Hot Sauce',
+    $WHALE:'Quiet Whale', $GM:'Gm Club', $PEEK:'Peekaboo'
+  };
+  function hashSeed(str){
+    let h = 2166136261 >>> 0;
+    const s = String(str || '');
+    for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+  function seededRand(seed){
+    let s = seed >>> 0;
+    return ()=>{ s = (Math.imul(s, 1664525) + 1013904223) >>> 0; return s / 4294967296; };
+  }
+  function tokenDisplayName(post){
+    if(TOKEN_NAME_MAP[post.ticker]) return TOKEN_NAME_MAP[post.ticker];
+    const raw = String(post.ticker || '').replace(/^\$/, '');
+    if(!raw) return 'Token';
+    return raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase() + ' Token';
+  }
+  function mockUserStats(user){
+    const r = seededRand(hashSeed(user || 'anon'));
+    const launches = 40 + Math.floor(r() * 220);
+    const pnl = (20 + r() * 180).toFixed(2);
+    return { launches, pnl: pnl + 'K%' };
+  }
+  function mockTokenStats(post){
+    const r = seededRand(hashSeed(post.ticker || post.user));
+    const mcapK = 40 + r() * 520;
+    const price = 80 + r() * 60;
+    const buyers = 400 + Math.floor(r() * 2800);
+    const comments = 40 + Math.floor(r() * 220);
+    const tips = 200 + Math.floor(r() * 2200);
+    const heat = 28 + Math.floor(r() * 62);
+    const series = [];
+    let v = price * (0.82 + r() * 0.1);
+    for(let i=0;i<28;i++){
+      v += (r() - 0.42) * (2.2 + r() * 3.5);
+      v = Math.max(price * 0.7, Math.min(price * 1.28, v));
+      series.push(v);
+    }
+    series[series.length - 1] = price;
+    const baseMin = new Date();
+    baseMin.setSeconds(0, 0);
+    baseMin.setMinutes(baseMin.getMinutes() - 3);
+    const times = [0, 6, 12, 18, 24].map((i)=>{
+      const d = new Date(baseMin.getTime() + i * 8000);
+      return d.toTimeString().slice(0, 8);
+    });
+    return {
+      name: tokenDisplayName(post),
+      mcap: '$' + (mcapK >= 100 ? mcapK.toFixed(0) : mcapK.toFixed(2)) + 'K',
+      price: price.toFixed(2),
+      buyers, comments, tips, heat,
+      series, times,
+      yMin: Math.floor(Math.min(...series) / 10) * 10,
+      yMax: Math.ceil(Math.max(...series) / 10) * 10
+    };
+  }
+  function fmtHoverCount(n){
+    if(n >= 1000) return (n / 1000).toFixed(n >= 10000 ? 0 : 2).replace(/\.00$/, '') + 'K';
+    return String(n);
+  }
+  function renderUserHoverCard(post){
+    const stats = mockUserStats(post.user);
+    const av = userAvatar(post.user);
+    userHoverCard.innerHTML = `
+      <div class="uhc-avatar squircle"><img src="${av}" alt=""></div>
+      <div class="uhc-body">
+        <div class="uhc-name">${post.user}</div>
+        <div class="uhc-socials">
+          <span class="uhc-social" title="Mirror" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6 7.5h5.2c2.6 0 4.3 1.5 4.3 3.7 0 2.4-1.8 3.9-4.5 3.9H9.2V18H6V7.5Zm3.2 2.3v3.1h1.7c1.2 0 1.9-.6 1.9-1.55 0-.95-.7-1.55-1.9-1.55H9.2Z" fill="currentColor"/></svg></span>
+          <span class="uhc-social" title="X" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span>
+        </div>
+        <div class="uhc-stats">
+          <div>
+            <div class="uhc-stat-label">Launches</div>
+            <div class="uhc-stat-val">${stats.launches}<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13.5 4.5c2.4-1.5 5-1.2 6-1c.2 1 .5 3.6-1 6L14 14l-4-4l3.5-5.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 14l-1.5 1.5M6.5 12.5C5 13.5 4.5 16.5 4.5 19.5c3 0 6-.5 7-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+          </div>
+          <div>
+            <div class="uhc-stat-label">Global PnL</div>
+            <div class="uhc-stat-val is-pos">${stats.pnl}<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 16l5-5 3.5 3.5L20 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 7h6v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+        </div>
+      </div>`;
+  }
+  function buildTokenChartSvg(stats){
+    const W = 412, H = 168, padL = 8, padR = 48, padT = 16, padB = 24;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const minV = Math.min(...stats.series), maxV = Math.max(...stats.series);
+    const span = Math.max(1e-6, maxV - minV);
+    const pts = stats.series.map((v, i)=>{
+      const x = padL + (i / (stats.series.length - 1)) * plotW;
+      const y = padT + (1 - (v - minV) / span) * plotH;
+      return { x, y, v };
+    });
+    const line = pts.map((p,i)=> (i ? 'L' : 'M') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
+    const area = line + ` L${pts[pts.length-1].x.toFixed(1)},${(padT+plotH).toFixed(1)} L${pts[0].x.toFixed(1)},${(padT+plotH).toFixed(1)} Z`;
+    const last = pts[pts.length - 1];
+    const yTop = stats.yMax, yMid = Math.round((stats.yMin + stats.yMax) / 2), yBot = stats.yMin;
+    const uid = 'thc' + (hashSeed(stats.mcap + stats.price) % 99991);
+    return {
+      svg: `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+        <defs>
+          <linearGradient id="${uid}g" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#1FA463" stop-opacity=".28"/>
+            <stop offset="100%" stop-color="#1FA463" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="${area}" fill="url(#${uid}g)"/>
+        <path d="${line}" fill="none" stroke="#1FA463" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <line x1="${padL}" y1="${last.y.toFixed(1)}" x2="${(W-padR).toFixed(1)}" y2="${last.y.toFixed(1)}" stroke="#1FA463" stroke-width="1" stroke-dasharray="4 4" opacity=".55"/>
+        <circle cx="${last.x.toFixed(1)}" cy="${last.y.toFixed(1)}" r="3.5" fill="#1FA463" stroke="#fff" stroke-width="1.5"/>
+      </svg>`,
+      lastYPct: (last.y / H) * 100,
+      pts,
+      yLabels: [yTop.toFixed(2), yMid.toFixed(2), yBot.toFixed(2)]
+    };
+  }
+  function renderTokenHoverCard(post){
+    const stats = mockTokenStats(post);
+    const chart = buildTokenChartSvg(stats);
+    const catClass = (post.cat || 'meme').toLowerCase();
+    const markerIdx = [
+      { i: 3, kind: 'rocket' },
+      { i: 9, kind: 'comment' },
+      { i: 14, kind: 'av' },
+      { i: 18, kind: 'tip' },
+      { i: 22, kind: 'pnl' }
+    ];
+    const tipVal = (40 + (hashSeed(post.ticker) % 200)).toFixed(2);
+    const pnlVal = (8 + (hashSeed(post.ticker + 'p') % 40)).toFixed(2);
+    const markers = markerIdx.map(({i, kind})=>{
+      const p = chart.pts[Math.min(i, chart.pts.length - 1)];
+      const left = (p.x / 412) * 100;
+      const top = (p.y / 168) * 100;
+      if(kind === 'av'){
+        return `<div class="thc-marker" style="left:${left}%;top:${top}%"><div class="thc-marker-av"><img src="${userAvatar(post.user + i)}" alt=""></div></div>`;
+      }
+      if(kind === 'rocket'){
+        return `<div class="thc-marker" style="left:${left}%;top:${top}%"><div class="thc-marker-av" style="background:var(--orange);display:grid;place-items:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M13.5 4.5c2.4-1.5 5-1.2 6-1c.2 1 .5 3.6-1 6L14 14l-4-4l3.5-5.5Z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg></div></div>`;
+      }
+      if(kind === 'comment'){
+        return `<div class="thc-marker" style="left:${left}%;top:${top}%"><div class="thc-marker-chip comment">cool! that'…</div><div class="thc-marker-av"><img src="${userAvatar('commenter')}" alt=""></div></div>`;
+      }
+      if(kind === 'tip'){
+        return `<div class="thc-marker" style="left:${left}%;top:${top}%"><div class="thc-marker-chip tip"><svg viewBox="0 0 24 24" fill="none"><path d="M12 6.4C18.5-.3 29.7 12.1 12 22C-5.7 12.1 5.5-.3 12 6.4Z" stroke="currentColor" stroke-width="2"/></svg>$${tipVal}</div><div class="thc-marker-av"><img src="${post.avatar}" alt=""></div></div>`;
+      }
+      return `<div class="thc-marker" style="left:${left}%;top:${top}%"><div class="thc-marker-chip pnl">+$${pnlVal}</div><div class="thc-marker-av"><img src="${userAvatar('pnl'+post.ticker)}" alt=""></div></div>`;
+    }).join('');
+    const buyerImgs = [0,1,2].map(i=>`<img src="${userAvatar(post.ticker + '-b' + i)}" alt="">`).join('');
+    tokenHoverCard.innerHTML = `
+      <div class="thc-head">
+        <div class="thc-token-av squircle"><img src="${post.avatar}" alt=""></div>
+        <div class="thc-token-meta">
+          <div class="thc-ticker-row"><span class="thc-ticker">${post.ticker}</span><span class="pill ${catClass}">${post.cat || 'Meme'}</span></div>
+          <div class="thc-name">${stats.name}</div>
+        </div>
+        <div class="thc-mcap">
+          <div class="thc-mcap-label"><svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="14" r="3" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="10" r="3" stroke="currentColor" stroke-width="1.6"/><circle cx="15" cy="17" r="2.2" stroke="currentColor" stroke-width="1.6"/></svg>MCAP</div>
+          <div class="thc-mcap-val">${stats.mcap}</div>
+        </div>
+      </div>
+      <div class="thc-chart">
+        ${chart.svg}
+        <div class="thc-chart-ylabels">${chart.yLabels.map(l=>`<span>${l}</span>`).join('')}</div>
+        <div class="thc-chart-xlabels">${stats.times.map(t=>`<span>${t}</span>`).join('')}</div>
+        <div class="thc-price-pill" style="top:${chart.lastYPct}%">${stats.price}</div>
+        ${markers}
+      </div>
+      <div class="thc-foot">
+        <div class="thc-buyers"><span class="thc-buyer-stack">${buyerImgs}</span>${fmtHoverCount(stats.buyers)} Buyers</div>
+        <div class="thc-foot-stat"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21C16.97 21 21 16.97 21 12S16.97 3 12 3 3 7.03 3 12c0 1.49.36 2.89 1 4.13L3 21l5-.94A8.96 8.96 0 0 0 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg>${fmtHoverCount(stats.comments)}</div>
+        <div class="thc-foot-stat"><svg viewBox="0 0 24 24" fill="none"><path d="M12 6.4C18.5-.3 29.7 12.1 12 22C-5.7 12.1 5.5-.3 12 6.4Z" stroke="currentColor" stroke-width="1.8"/></svg>${fmtHoverCount(stats.tips)}</div>
+        <div class="thc-heat"><svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M12 3c2.2 3.2 4 5.4 4 8.2A4 4 0 1 1 8 11.2C8 8.4 9.8 6.2 12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>${stats.heat}%<span class="thc-heat-bar"><span class="thc-heat-fill" style="width:${stats.heat}%"></span></span></div>
+      </div>`;
+  }
+
+  let hoverShowTimer = 0, hoverHideTimer = 0, hoverActive = null, hoverAnchor = null, hoverPost = null;
+  function hoverCardsEnabled(){
+    return window.innerWidth > 860 && matchMedia('(hover:hover) and (pointer:fine)').matches;
+  }
+  function hideHoverCards(immediate){
+    clearTimeout(hoverShowTimer); clearTimeout(hoverHideTimer);
+    hoverShowTimer = hoverHideTimer = 0;
+    const doHide = ()=>{
+      userHoverCard.classList.remove('show');
+      tokenHoverCard.classList.remove('show');
+      hoverActive = null; hoverAnchor = null; hoverPost = null;
+    };
+    if(immediate) doHide();
+    else hoverHideTimer = setTimeout(doHide, 160);
+  }
+  function positionHoverCard(card, anchor){
+    const pad = 10;
+    const ar = anchor.getBoundingClientRect();
+    const w = card.offsetWidth || (card.classList.contains('token-hover-card') ? 440 : 280);
+    const h = card.offsetHeight || (card.classList.contains('token-hover-card') ? 320 : 110);
+    let left = ar.right + 8;
+    let top = ar.top < window.innerHeight * 0.55
+      ? ar.top - 8
+      : ar.bottom - h;
+    if(left + w > window.innerWidth - pad) left = ar.left - w - 8;
+    if(left < pad) left = Math.max(pad, Math.min(window.innerWidth - w - pad, ar.left));
+    if(top + h > window.innerHeight - pad) top = window.innerHeight - h - pad;
+    if(top < pad) top = pad;
+    card.style.left = Math.round(left) + 'px';
+    card.style.top = Math.round(top) + 'px';
+  }
+  function showHoverCard(type, post, anchor){
+    if(!hoverCardsEnabled() || !post || !anchor) return;
+    clearTimeout(hoverHideTimer); hoverHideTimer = 0;
+    const card = type === 'user' ? userHoverCard : tokenHoverCard;
+    const other = type === 'user' ? tokenHoverCard : userHoverCard;
+    other.classList.remove('show');
+    if(type === 'user') renderUserHoverCard(post);
+    else renderTokenHoverCard(post);
+    hoverActive = type; hoverAnchor = anchor; hoverPost = post;
+    card.classList.add('show');
+    // measure after paint
+    requestAnimationFrame(()=> positionHoverCard(card, anchor));
+  }
+  function scheduleShowHover(type, post, anchor, delay){
+    if(!hoverCardsEnabled()) return;
+    clearTimeout(hoverHideTimer); hoverHideTimer = 0;
+    clearTimeout(hoverShowTimer);
+    hoverShowTimer = setTimeout(()=> showHoverCard(type, post, anchor), delay);
+  }
+  function bindHoverCard(el, type, post, delay){
+    if(!el || el._kbHoverBound) return;
+    el._kbHoverBound = true;
+    const showDelay = delay ?? (type === 'token' && el.classList?.contains?.('media-card') ? 450 : 280);
+    el.addEventListener('pointerenter', (e)=>{
+      if(e.pointerType && e.pointerType !== 'mouse') return;
+      if(type === 'token' && e.target.closest?.('.glass-btn, .more-menu, .media-topctl')) return;
+      scheduleShowHover(type, post, el, showDelay);
+    });
+    el.addEventListener('pointerleave', (e)=>{
+      if(e.pointerType && e.pointerType !== 'mouse') return;
+      clearTimeout(hoverShowTimer); hoverShowTimer = 0;
+      hideHoverCards(false);
+    });
+  }
+  [userHoverCard, tokenHoverCard].forEach(card=>{
+    card.addEventListener('pointerenter', ()=>{ clearTimeout(hoverHideTimer); hoverHideTimer = 0; });
+    card.addEventListener('pointerleave', ()=> hideHoverCards(false));
+  });
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') hideHoverCards(true); });
+  scroller.addEventListener('scroll', ()=> hideHoverCards(true), {passive:true});
+  window.addEventListener('resize', ()=> hideHoverCards(true));
+
   document.getElementById('drawerClose').addEventListener('click', closeTrade);
   enableSheetDrag(drawer, drawer.querySelector('.sheet-handle'), closeTrade, sheetScrim);
   enableSheetDrag(drawer, drawer.querySelector('.drawer-head'), closeTrade, sheetScrim);
@@ -3575,6 +4050,7 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
   syncCommentSendReady();
 
   function openComments(post){
+    hideHoverCards(true);
     drawer.classList.remove('open'); state.tradeOpen=false;
     if(!state.focusedComment) closeCommentMedia();
     setCommentAnon(false);
@@ -3613,6 +4089,7 @@ html.dark .new-pill{box-shadow:0 8px 28px rgba(0,0,0,.45);}
   function prettyToken(ticker){ const t=(ticker||'').replace(/^\$/,''); return t ? t.charAt(0).toUpperCase()+t.slice(1).toLowerCase() : 'Token'; }
   function closeShare(){ shareOverlay.classList.remove('show'); }
   function openShare(post){
+    hideHoverCards(true);
     if(post){
       const title = post.name || prettyToken(post.ticker);
       document.getElementById('sharePill').textContent = post.cat || 'Post';

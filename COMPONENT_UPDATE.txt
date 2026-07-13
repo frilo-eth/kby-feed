@@ -8,10 +8,12 @@ Navigation
 
 Feed
 - Media card — shimmer→ready|error; hover topctl; drag-to-comment ghost; aspect --ar
-- Glass mute/more — 46px; sound session persist; more menu (not interested / report)
+- Glass mute/more — 46px; pathLength mute↔sound morph; unmute/mute haptics+sounds; session persist
 - React rail — tip (immutable +$5 float); like↔dislike exclusive; comment; share; pulse + haptics
 - Meta — pinned | float-on-media | overlay-mode (narrow / drawer thresholds)
-- Motion — spring doomscroll; peek; parallax; pull-refresh (mobile); new-pill (desktop); tap pause; 2× hold
+- Hover cards (desktop) — user preview on uname/avatar; token chart preview on media/plus/ticker/mini/pill (no CTA)
+- Motion — spring doomscroll; peek; parallax; pull-refresh (mobile); new-pill (desktop ~3m); tap pause; 2× hold
+- Topbar — mobile auto-hide after settle (page-step locked mid-swipe)
 
 Comments
 - Drawer — desktop 360 side panel; mobile 86vh sheet + scrim + drag dismiss
@@ -22,10 +24,12 @@ Comments
 - CFX — desktop stage beside drawer; mobile lightbox; caption reacts; pinch zoom+idle spring (mobile)
 
 Overlays
-- Trade drawer — buy/sell token sheet (same chrome as comments)
+- Trade drawer — buy/sell token sheet (same chrome as comments); opened from token click (not hover card)
 - Share — desktop modal; mobile sheet; X intent + copy url
+- First-visit hint — Lottie hand (`/public/hand-helper/Hand.json`); key `kb_feed_hint_v8`
 
 System
-- Haptics — light/selection/nudge/settle/attach/dragtick/toggle/open/comment/share/tip/like/dislike (web-haptics + vibrate)
+- Tokens — `--bg` light `#F2EEEA` / dark `#070403`; rail outside `#FAFAFA→#FFF` / `#130A07→#251D18`
+- Haptics — light/selection/nudge/settle/attach/dragtick/toggle/unmute/mute/open/comment/share/tip/like/dislike
 - Sounds — WebAudio map per preset (no ambient)
-- Persist — kb_sidebar_collapsed; kb_feed_hint_v6; kb_feed_sound
+- Persist — kb_sidebar_collapsed; kb_feed_hint_v8; kb_feed_sound
