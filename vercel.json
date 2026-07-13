@@ -1,0 +1,10 @@
+{
+  "buildCommand": "",
+  "installCommand": "",
+  "framework": null,
+  "outputDirectory": ".",
+  "rewrites": [
+    { "source": "/", "destination": "/feed.html" },
+    { "source": "/cheatsheet", "destination": "/cheatsheet.html" }
+  ]
+}

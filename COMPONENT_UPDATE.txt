@@ -1,0 +1,31 @@
+feed: component behaviour update
+
+Navigation
+- Sidebar — 220↔76 collapse; active nav; More pop (Signals, Tip Jar, Notifications, Profile, Account)
+- Topbar — search (marquee overflow); theme; Launch; wallet (label desktop / avatar mobile)
+- Mobile nav — home/feed/tokens/launch/swap/pools/more; launch CTA; more-open chrome
+- More sheet (≤860) — theme + profile/signals/notifications/tipjar/account; scrim; drag dismiss
+
+Feed
+- Media card — shimmer→ready|error; hover topctl; drag-to-comment ghost; aspect --ar
+- Glass mute/more — 46px; sound session persist; more menu (not interested / report)
+- React rail — tip (immutable +$5 float); like↔dislike exclusive; comment; share; pulse + haptics
+- Meta — pinned | float-on-media | overlay-mode (narrow / drawer thresholds)
+- Motion — spring doomscroll; peek; parallax; pull-refresh (mobile); new-pill (desktop); tap pause; 2× hold
+
+Comments
+- Drawer — desktop 360 side panel; mobile 86vh sheet + scrim + drag dismiss
+- List — skeleton; empty; staggered enter; anon (no reacts/media) vs public (+ X-proof tip)
+- Ctx menu — … → not interested / copy / report
+- Compose — identity chevron; anon pop+switch; pill input rest→focus→ready; send.show when ready
+- Attach — file pop-in; feed fly-in; drop stage hides list; ✕ dismiss; anon auto-exits for media
+- CFX — desktop stage beside drawer; mobile lightbox; caption reacts; pinch zoom+idle spring (mobile)
+
+Overlays
+- Trade drawer — buy/sell token sheet (same chrome as comments)
+- Share — desktop modal; mobile sheet; X intent + copy url
+
+System
+- Haptics — light/selection/nudge/settle/attach/dragtick/toggle/open/comment/share/tip/like/dislike (web-haptics + vibrate)
+- Sounds — WebAudio map per preset (no ambient)
+- Persist — kb_sidebar_collapsed; kb_feed_hint_v6; kb_feed_sound
