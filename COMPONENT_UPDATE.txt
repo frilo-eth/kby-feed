@@ -11,7 +11,7 @@ Feed
 - Glass mute/more — 46px; pathLength mute↔sound morph; unmute/mute haptics+sounds; session persist
 - React rail — tip (immutable +$5 float); like↔dislike exclusive; comment; share; pulse + haptics
 - Meta — pinned | float-on-media | overlay-mode (narrow / drawer thresholds)
-- Hover cards (desktop) — user preview on uname/avatar; token chart preview on media/plus/ticker/mini/pill (no CTA)
+- Hover cards (desktop) — user preview on uname/avatar; token chart preview on plus/ticker/mini/pill (no CTA)
 - Motion — spring doomscroll; peek; parallax; pull-refresh (mobile); new-pill (desktop ~3m); tap pause; 2× hold
 - Topbar — mobile auto-hide after settle (page-step locked mid-swipe)
 
