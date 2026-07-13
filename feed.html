@@ -2441,6 +2441,14 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     // Defer chrome change until onSettled — resizing mid-swipe overlaps posts
     pendingTopbarAutohide = dir > 0;
   }
+  function wrapNavDir(from, to){
+    const a = ((from % N) + N) % N;
+    const b = ((to % N) + N) % N;
+    if(a === b) return 0;
+    const forward = (b - a + N) % N;
+    const backward = (a - b + N) % N;
+    return forward <= backward ? 1 : -1;
+  }
   function goToIndex(delta){
     if(state.feedLocked) return;
     unlockAudio();
@@ -2456,6 +2464,8 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
   /* ---------------- pull-to-refresh + new-content ---------------- */
   const PULL_THRESHOLD = 68;
   const PULL_HOLD = 56;
+  // Past this finger travel, a top-of-feed down-drag becomes infinite wrap (prev), not refresh
+  const PULL_SCROLL_BREAK = 0.24;
   const pullSpin = document.getElementById('pullSpin');
   const newPill = document.getElementById('newPill');
   function positionNewPill(){
@@ -2496,9 +2506,29 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     pullSpin.style.setProperty('--p', String(Math.min(1, prog)));
     pullSpin.style.setProperty('--rot', (Math.min(prog, 1.25) * 180) + 'deg');
   }
+  function abortPullForScroll(dy){
+    const step = pageStep();
+    const keep = pullOffset;
+    if(!pulling && keep <= 0) return;
+    pulling = false;
+    pullArmed = false;
+    pullDist = 0;
+    pullSpin.style.transition = 'opacity .15s ease';
+    pullSpin.style.opacity = '0';
+    pullSpin.classList.remove('spinning');
+    scroller.classList.remove('is-pull-settle');
+    setPullOffset(0);
+    setPullChrome(false);
+    // Keep the card where the rubber-band left it, then continue as wrap-scroll
+    if(typeof dy === 'number' && step > 0){
+      dragStartPos = (-keep + dy) / step;
+    }
+    setTimeout(()=>{ pullSpin.style.transition = ''; }, 160);
+  }
   function beginPull(){
     pulling = true;
     pullArmed = false;
+    clearGestureHold();
     pullSpin.style.transition = '';
     pullSpin.classList.remove('spinning');
     scroller.classList.remove('is-pull-settle');
@@ -2651,9 +2681,9 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     gItem=e.target.closest('.feed-item');
     gVideo=gItem?.querySelector('.media-inner video') || null;
     clearGestureHold();
-    if(gVideo && !pullEligible){
+    if(gVideo){
       gHoldTimer=setTimeout(()=>{
-        if(gMoved || !state.dragging) return;
+        if(gMoved || !state.dragging || pulling) return;
         gHoldActive=true; gVideo.playbackRate=2;
         gItem.querySelector('.speed-badge')?.classList.add('show'); haptic('nudge');
       }, 240);
@@ -2671,9 +2701,19 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
       if(dx > 28 && Math.abs(dx) > Math.abs(e.clientY - gStartY) * 1.05) setCommentDropActive(true);
       else if(commentsInner?.classList.contains('is-drop') && !commentDropCommitted && dx < 12) clearCommentDropActive();
     }
-    if(pullEligible && !refreshing && (pulling || dy>0)){
-      if(dy>2){ if(!pulling) beginPull(); movePull(dy); return; }
-      if(pulling){ pulling=false; pullArmed=false; pullDist=0; setPullOffset(0); renderPull(0); dragStartY=e.clientY; dragStartPos=pos; }
+    // At first post: short deliberate pull → refresh; further drag → infinite wrap to previous
+    if(pullEligible && !refreshing && dy > 0){
+      const breakPx = pageStep() * PULL_SCROLL_BREAK;
+      if(dy >= breakPx){
+        abortPullForScroll(dy);
+        // fall through to wrap scroll
+      } else if(dy > 2){
+        if(!pulling) beginPull();
+        movePull(dy);
+        return;
+      } else if(pulling){
+        abortPullForScroll(dy);
+      }
     }
     const step = pageStep();
     pos = dragStartPos - dy/step;
@@ -2726,7 +2766,7 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     let target = Math.round(pos);
     if(Math.abs(velocity)>0.7) target = velocity>0 ? Math.ceil(pos-0.001) : Math.floor(pos+0.001);
     const didScroll = gMoved;
-    if(didScroll && target !== lastActiveIdx) noteFeedNav(target > lastActiveIdx ? 1 : -1);
+    if(didScroll) noteFeedNav(wrapNavDir(lastActiveIdx, target));
     springTo(target, velocity);
     if(didScroll) requestAnimationFrame(()=>syncMediaHover(lastPointerX, lastPointerY));
   }

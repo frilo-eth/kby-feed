@@ -207,17 +207,18 @@ pos  += v * dt
 
 ### 8. Pull-to-refresh → spring settle (mobile)
 
-Only the **active** card rubber-bands down. Peek neighbors stay hidden so nothing overlaps into the gap (TikTok/IG style).
+Infinite wrap both ways (TikTok trap). At the first post, a **short** down-pull still refreshes; drag further and it hands off to previous-post scroll.
 
 | Step | Code | Detail |
 |------|------|--------|
+| Infinite wrap | `wrappedOffset` / `springTo` | swipe down on first → previous (`N-1`); never hard-stops |
+| Pull vs scroll | `PULL_SCROLL_BREAK = 0.24` page | below → rubber-band refresh; at/above → `abortPullForScroll` → wrap |
 | Rubber-band | `dampPull(dy)` | `max=112`, `k=0.48`, asymptotic |
-| Offset | `pullOffset` via `setPullOffset` → `applyTransform` | active item only: `translateY(step*0 + pull)` |
-| Mask | `.is-pulling` / `.is-refreshing` | non-active items `visibility:hidden`; peek gradient off |
+| Offset | `pullOffset` via `setPullOffset` → `applyTransform` | active item only |
+| Mask | `.is-pulling` / `.is-refreshing` | non-active hidden; peek gradient off |
 | Threshold | `PULL_THRESHOLD = 68` | haptic `nudge` on arm |
-| Spinner | centered in gap (`y = pull*0.5`) | `--p` progress + `@keyframes pullspin` `.65s` |
-| Hold / settle | `PULL_HOLD = 56` · `.is-pull-settle` | `.42s` `(.22,1,.36,1)` — no bounce |
-| Content swap | `.refresh-fade` | brief opacity dip → rotate posts → release |
+| Spinner | centered in gap (`y = pull*0.5`) | `--p` + `pullspin` `.65s` |
+| Hold / settle | `PULL_HOLD = 56` · `.is-pull-settle` | `.42s` `(.22,1,.36,1)` |
 | Desktop alternate | `#newPill` | opacity `.3s`, transform `.38s` pop |
 
 ---
