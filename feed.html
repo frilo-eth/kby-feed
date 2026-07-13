@@ -150,11 +150,11 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
 .media-error .media-retry{margin-top:4px;background:rgba(255,255,255,.12);border:none;color:#fff;font-size:12px;font-weight:700;padding:8px 16px;border-radius:20px;cursor:pointer;pointer-events:auto;transition:background .15s;}
 .media-error .media-retry:hover{background:rgba(255,255,255,.2);}
 
-/* TikTok-style Buy $ticker CTA — stable bottom-right on media (no JS Y sync → no jump) */
+/* TikTok-style Buy $ticker CTA — right edge of media, Y locked to rail avatar (settle-only) */
 .buy-cta{
-  --buy-rail-stack: calc(62px * 5 + 16px * 5 + 26px + 6px); /* 5 react cols + gaps + half avatar + pad */
-  position:absolute;right:14px;bottom:min(var(--buy-rail-stack), 42%);
-  z-index:8;top:auto;
+  position:absolute;right:14px;z-index:8;
+  top:var(--buy-y, 72%);
+  bottom:auto;
   display:inline-flex;align-items:center;gap:8px;
   max-width:min(220px,calc(100% - 28px));
   padding:6px 14px 6px 6px;margin:0;border:none;
@@ -164,7 +164,7 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
   white-space:nowrap;cursor:pointer;pointer-events:none;
   backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);
   box-shadow:0 0 0 3px rgba(0,0,0,.28), 0 6px 18px rgba(0,0,0,.28);
-  opacity:0;transform:none;
+  opacity:0;transform:translateY(-50%);
   transition:opacity .3s ease, background .15s ease, box-shadow .15s ease, filter .12s ease;
 }
 .feed-item:not(.media-ready) .buy-cta{opacity:0!important;pointer-events:none!important;}
@@ -969,9 +969,8 @@ body.cfx-on #commentsDrawer{z-index:50;}
   .feed-item.active .media-topctl .glass-btn{pointer-events:auto;}
   .media-topctl{top:14px;}
 
-  /* Buy CTA: same rail-relative bottom math; sits left of overlaid rail */
+  /* Buy CTA: clear of overlaid rail; Y set via --buy-y from avatar */
   .buy-cta{
-    --buy-rail-stack: calc(62px * 5 + 18px * 5 + 24px + 14px);
     right:72px;font-size:13px;padding:5px 12px 5px 5px;
     box-shadow:0 0 0 3px rgba(0,0,0,.35), 0 6px 16px rgba(0,0,0,.35);
   }
@@ -1865,6 +1864,7 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     }
     fitMediaBox(inner, dims);
     if(window.innerWidth > 860) layoutMeta(item);
+    scheduleBuyCtaLayout(item);
   }
 
   function clearMetaInline(item){
@@ -1875,6 +1875,28 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     ci.style.left = '';
     ci.style.bottom = '';
     ci.style.maxWidth = '';
+  }
+
+  // Pin Buy CTA to the rail token avatar's centerline. Only while idle — measuring mid-swipe
+  // (parallax scale on the card) made it jump. Store as % of media height so parent translate is stable.
+  function layoutBuyCta(item){
+    if(!item) return;
+    if(state.dragging || animRAF || pulling || refreshing) return;
+    const btn = item.querySelector('.buy-cta');
+    const avatar = item.querySelector('.avatar-plus');
+    const inner = item.querySelector('.media-inner');
+    if(!btn || !avatar || !inner) return;
+    const ir = inner.getBoundingClientRect();
+    const ar = avatar.getBoundingClientRect();
+    if(ir.height < 40 || ar.height < 8) return;
+    const y = (ar.top + ar.height * 0.5) - ir.top;
+    const clamped = Math.max(28, Math.min(ir.height - 28, y));
+    btn.style.setProperty('--buy-y', `${((clamped / ir.height) * 100).toFixed(3)}%`);
+  }
+  function scheduleBuyCtaLayout(item){
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>layoutBuyCta(item || itemEls()[lastActiveIdx]));
+    });
   }
 
   // Decide where the meta block lives: pinned in the left gutter of the feed body when there's
@@ -1889,6 +1911,7 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     // Mobile CSS owns meta placement — don't bake desktop gutter math into inline styles.
     if(window.innerWidth <= 860){
       clearMetaInline(item);
+      scheduleBuyCtaLayout(item);
       return;
     }
     // reset to the pinned baseline so we can measure the meta's natural width
@@ -1914,19 +1937,24 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
       ci.style.bottom = Math.round(padBoxH - cardBottom + PAD) + 'px';
       ci.style.maxWidth = Math.round(Math.max(160, cardW - PAD * 2)) + 'px';
     }
+    scheduleBuyCtaLayout(item);
   }
   function markMediaReady(inner){
     if(!inner) return;
     inner.classList.remove('is-error');
     inner.classList.add('is-ready');
-    inner.closest('.feed-item')?.classList.add('media-ready');
+    const item = inner.closest('.feed-item');
+    item?.classList.add('media-ready');
+    scheduleBuyCtaLayout(item);
   }
   function markMediaError(inner){
     if(!inner) return;
     inner.classList.remove('is-ready');
     inner.classList.add('is-error');
     // still unlock the rail so the post isn't stuck inert
-    inner.closest('.feed-item')?.classList.add('media-ready');
+    const item = inner.closest('.feed-item');
+    item?.classList.add('media-ready');
+    scheduleBuyCtaLayout(item);
   }
   function attachImage(img, eager){
     const inner = img.closest('.media-inner');
