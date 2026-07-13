@@ -894,7 +894,7 @@ body.cfx-on #commentsDrawer{z-index:50;}
   }
   /* keep mute/more clear of the notch when chrome is tucked away */
   .main.topbar-autohide .media-topctl{top:calc(env(safe-area-inset-top) + 10px);}
-  .main.topbar-autohide .pull-spin{top:calc(env(safe-area-inset-top) + 10px);}
+  .main.topbar-autohide .pull-spin{top:calc(env(safe-area-inset-top) + 8px);}
   .main.topbar-autohide .speed-badge{top:calc(env(safe-area-inset-top) + 12px);}
   .brand-logo{display:block;}
   html.dark .brand-logo-light{display:none;}
@@ -965,7 +965,7 @@ body.cfx-on #commentsDrawer{z-index:50;}
 
   .chevron-nav{display:none;}
   .kbd-btn,.kbd-panel{display:none!important;}
-  .pull-spin{top:18px;}
+  .pull-spin{top:0;}
 
   /* bottom nav bar (replaces the left sidebar, thumb-reachable) */
   .mobile-nav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:34;align-items:center;justify-content:space-around;gap:2px;padding:8px 6px calc(env(safe-area-inset-bottom) + 8px);background:var(--card);border-top:1px solid var(--line);box-shadow:0 -6px 20px rgba(0,0,0,.06);}
@@ -987,16 +987,39 @@ body.cfx-on #commentsDrawer{z-index:50;}
 }
 
 /* ---- pull-to-refresh (mobile) + new-content pill (desktop) ---- */
-.pull-spin{position:absolute;top:0;left:50%;z-index:26;width:40px;height:40px;margin-top:-20px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;opacity:0;transform:translate(-50%,0) scale(.5);pointer-events:none;will-change:transform,opacity;}
-.pull-spin svg{width:26px;height:26px;display:block;}
-.pull-spin .pull-ring{fill:none;stroke:var(--orange);stroke-width:3.4;stroke-linecap:round;stroke-dasharray:88;stroke-dashoffset:calc(88 - 88 * var(--p,0));transform-origin:center;transform:rotate(calc(-90deg + var(--rot,0deg)));}
-.pull-spin.spinning svg{animation:pullspin .7s linear infinite;}
-.pull-spin.spinning .pull-ring{stroke-dashoffset:60;}
+/* Spinner sits in the rubber-band gap above the active card — never over peeks. */
+.pull-spin{
+  position:absolute;top:0;left:50%;z-index:26;
+  width:36px;height:36px;margin:0;
+  border-radius:50%;background:var(--card);box-shadow:var(--shadow);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translate(-50%,0) scale(.55);
+  pointer-events:none;will-change:transform,opacity;
+}
+.pull-spin svg{width:22px;height:22px;display:block;}
+.pull-spin .pull-ring{
+  fill:none;stroke:var(--orange);stroke-width:3.2;stroke-linecap:round;
+  stroke-dasharray:78;stroke-dashoffset:calc(78 - 78 * var(--p,0));
+  transform-origin:center;transform:rotate(calc(-90deg + var(--rot,0deg)));
+}
+.pull-spin.spinning svg{animation:pullspin .65s linear infinite;}
+.pull-spin.spinning .pull-ring{stroke-dashoffset:52;}
 @keyframes pullspin{to{transform:rotate(360deg);}}
 
-.feed-track.pull-animate{transition:transform .5s cubic-bezier(.22,1.32,.36,1);}
-.feed-scroller{transition:opacity .3s ease;}
-.feed-scroller.refresh-fade{opacity:.2;}
+/* Pull only shifts the active card; hide neighbors so nothing overlaps into the gap. */
+.feed-scroller.is-pulling .feed-item:not(.active),
+.feed-scroller.is-refreshing .feed-item:not(.active){
+  opacity:0!important;visibility:hidden;pointer-events:none;
+}
+.feed-scroller.is-pulling::after,
+.feed-scroller.is-refreshing::after{opacity:0;}
+.feed-scroller.is-pull-settle .feed-item.active{
+  transition:transform .42s cubic-bezier(.22,1,.36,1);
+}
+.feed-scroller.refresh-fade{opacity:.35;transition:opacity .28s ease;}
+.feed-scroller{transition:opacity .28s ease;}
+
+.feed-track.pull-animate{transition:none;} /* legacy class unused — keep inert */
 
 /* Always white surface + dark ink — must not follow theme --ink (light in dark mode). */
 .new-pill{position:absolute;top:16px;left:50%;transform:translate(-50%,-12px);z-index:26;display:inline-flex;align-items:center;gap:7px;padding:9px 16px 9px 12px;border-radius:999px;background:#fff;color:#2A241C;font-size:13px;font-weight:700;border:1px solid rgba(0,0,0,.06);cursor:pointer;box-shadow:0 8px 28px rgba(0,0,0,.1);opacity:0;pointer-events:none;transition:opacity .3s ease,transform .38s cubic-bezier(.22,1.5,.36,1),top .32s ease;}
@@ -1401,7 +1424,7 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
   }
   let dragStartY=0, dragStartPos=0, lastY=0, lastT=0, lastTickStep=0;
   let lastPointerX=0, lastPointerY=0;
-  let pulling=false, pullDist=0, pullEligible=false, dragPointerType='mouse', refreshing=false;
+  let pulling=false, pullDist=0, pullEligible=false, pullOffset=0, pullArmed=false, dragPointerType='mouse', refreshing=false;
   // tap / long-press gesture state (pointer capture routes all events to the scroller)
   let gStartX=0, gStartY=0, gStartT=0, gMoved=false, gHoldTimer=null, gHoldActive=false, gItem=null, gVideo=null;
   const GESTURE_MOVE_PX=8;
@@ -2308,7 +2331,8 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     const step = pageStep();
     itemEls().forEach((it,i)=>{
       const offset = wrappedOffset(i, pos);
-      it.style.transform = `translateY(${offset * step}px)`;
+      const pull = (offset === 0 && pullOffset > 0) ? pullOffset : 0;
+      it.style.transform = `translateY(${offset * step + pull}px)`;
       it.classList.toggle('is-peek-next', offset === 1);
       it.classList.toggle('is-peek-prev', offset === -1);
     });
@@ -2430,7 +2454,8 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
   document.getElementById('prevBtn').addEventListener('click', ()=>{ haptic('light'); goToIndex(-1); });
 
   /* ---------------- pull-to-refresh + new-content ---------------- */
-  const PULL_THRESHOLD = 74;
+  const PULL_THRESHOLD = 68;
+  const PULL_HOLD = 56;
   const pullSpin = document.getElementById('pullSpin');
   const newPill = document.getElementById('newPill');
   function positionNewPill(){
@@ -2445,35 +2470,76 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
   }
   let newContentReady = false, newTimer = null;
 
-  // asymptotic rubber-band resistance so the pull feels weighty near the end
-  function dampPull(dy){ const max=170, k=0.55; const raw=Math.max(0,dy)*k; return max*(1-Math.exp(-raw/max)); }
-  function setTrack(px, animate){
-    track.classList.toggle('pull-animate', !!animate);
-    track.style.transform = px ? `translateY(${px}px)` : '';
+  // Soft asymptotic rubber-band — smaller max so the gap stays tidy
+  function dampPull(dy){
+    const max = 112, k = 0.48;
+    const raw = Math.max(0, dy) * k;
+    return max * (1 - Math.exp(-raw / max));
+  }
+  function setPullChrome(on){
+    scroller.classList.toggle('is-pulling', !!on && !refreshing);
+    scroller.classList.toggle('is-refreshing', !!refreshing);
+  }
+  function setPullOffset(px, {settle=false}={}){
+    pullOffset = Math.max(0, px);
+    scroller.classList.toggle('is-pull-settle', !!settle);
+    setPullChrome(pullOffset > 0.5 || pulling || refreshing);
+    applyTransform();
   }
   function renderPull(px){
     const prog = px / PULL_THRESHOLD;
-    const y = Math.min(px*0.8, 96);
-    const scale = Math.min(1, 0.5 + Math.min(prog,1.2)*0.55);
-    pullSpin.style.transform = `translate(-50%, ${y}px) scale(${scale})`;
-    pullSpin.style.opacity = String(Math.min(1, prog*1.25));
+    // Center the spinner in the rubber-band gap above the active card
+    const y = Math.max(0, px * 0.5);
+    const scale = Math.min(1, 0.55 + Math.min(prog, 1.15) * 0.45);
+    pullSpin.style.transform = `translate(-50%, ${y}px) translateY(-50%) scale(${scale})`;
+    pullSpin.style.opacity = String(Math.min(1, prog * 1.35));
     pullSpin.style.setProperty('--p', String(Math.min(1, prog)));
-    pullSpin.style.setProperty('--rot', (Math.min(prog,1.4)*200)+'deg');
+    pullSpin.style.setProperty('--rot', (Math.min(prog, 1.25) * 180) + 'deg');
   }
-  function beginPull(){ pulling=true; pullSpin.style.transition=''; pullSpin.classList.remove('spinning'); setTopbarAutohide(false); }
-  function movePull(dy){ pullDist = dampPull(dy); setTrack(pullDist,false); renderPull(pullDist); }
+  function beginPull(){
+    pulling = true;
+    pullArmed = false;
+    pullSpin.style.transition = '';
+    pullSpin.classList.remove('spinning');
+    scroller.classList.remove('is-pull-settle');
+    setTopbarAutohide(false);
+    setPullChrome(true);
+  }
+  function movePull(dy){
+    pullDist = dampPull(dy);
+    if(!pullArmed && pullDist >= PULL_THRESHOLD){
+      pullArmed = true;
+      haptic('nudge');
+    } else if(pullArmed && pullDist < PULL_THRESHOLD * 0.85){
+      pullArmed = false;
+    }
+    setPullOffset(pullDist);
+    renderPull(pullDist);
+  }
+  function hidePullSpin(){
+    pullSpin.style.transition = 'transform .36s cubic-bezier(.22,1,.36,1), opacity .28s ease';
+    pullSpin.style.transform = 'translate(-50%,0) translateY(-50%) scale(.55)';
+    pullSpin.style.opacity = '0';
+    pullSpin.style.setProperty('--p', '0');
+    pullSpin.classList.remove('spinning');
+  }
   function cancelPull(){
-    setTrack(0,true);
-    pullSpin.style.transition='transform .42s cubic-bezier(.22,1.3,.36,1),opacity .3s';
-    pullSpin.style.transform='translate(-50%,0) scale(.5)';
-    pullSpin.style.opacity='0';
-    pullSpin.style.setProperty('--p','0');
-    setTimeout(()=>{ pullSpin.style.transition=''; track.classList.remove('pull-animate'); }, 460);
+    pulling = false;
+    pullArmed = false;
+    pullDist = 0;
+    setPullOffset(0, {settle:true});
+    hidePullSpin();
+    setTimeout(()=>{
+      pullSpin.style.transition = '';
+      scroller.classList.remove('is-pull-settle');
+      setPullChrome(false);
+    }, 420);
   }
   function finishPull(){
     const trigger = pullDist >= PULL_THRESHOLD;
-    pulling=false; pullDist=0;
-    if(trigger) doRefresh(true); else cancelPull();
+    pulling = false;
+    if(trigger) doRefresh(true);
+    else cancelPull();
   }
   function rotateInNewContent(){ const shift=2; for(let k=0;k<shift;k++) posts.unshift(posts.pop()); }
   function reloadTop(){
@@ -2484,40 +2550,59 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     applyTransform(); applyParallax();
   }
   function doRefresh(fromPull){
-    if(refreshing) return; refreshing=true;
-    state.feedLocked=true;
+    if(refreshing) return;
+    refreshing = true;
+    state.feedLocked = true;
+    pullArmed = false;
     newPill.classList.remove('show');
     haptic('open');
+    scroller.classList.remove('is-pulling');
+    scroller.classList.add('is-refreshing');
+
     if(fromPull){
-      // settle spinner into the loading dwell position, keep old content pushed down
-      pullSpin.style.transition='transform .32s cubic-bezier(.22,1.3,.36,1),opacity .2s';
-      pullSpin.style.transform='translate(-50%,52px) scale(1)';
-      pullSpin.style.opacity='1';
-      pullSpin.style.setProperty('--p','1');
+      setPullOffset(PULL_HOLD, {settle:true});
+      pullSpin.style.transition = 'transform .28s cubic-bezier(.22,1,.36,1), opacity .18s ease';
+      pullSpin.style.transform = `translate(-50%, ${PULL_HOLD * 0.5}px) translateY(-50%) scale(1)`;
+      pullSpin.style.opacity = '1';
+      pullSpin.style.setProperty('--p', '1');
       pullSpin.classList.add('spinning');
-      setTrack(56, true);
+
       setTimeout(()=>{
-        reloadTop();
-        setTrack(56, false);
-        requestAnimationFrame(()=>{
-          pullSpin.classList.remove('spinning');
-          pullSpin.style.transition='transform .45s cubic-bezier(.22,1.3,.36,1),opacity .35s';
-          pullSpin.style.transform='translate(-50%,0) scale(.5)';
-          pullSpin.style.opacity='0';
-          setTrack(0, true);
-          haptic('settle');
-        });
-        setTimeout(()=>{ pullSpin.style.transition=''; track.classList.remove('pull-animate'); refreshing=false; state.feedLocked=false; clearNewContent(); }, 540);
-      }, 900);
+        scroller.classList.add('refresh-fade');
+        setTimeout(()=>{
+          reloadTop();
+          setPullOffset(PULL_HOLD, {settle:false});
+          requestAnimationFrame(()=>{
+            scroller.classList.remove('refresh-fade');
+            hidePullSpin();
+            setPullOffset(0, {settle:true});
+            haptic('settle');
+          });
+          setTimeout(()=>{
+            pullSpin.style.transition = '';
+            scroller.classList.remove('is-pull-settle');
+            scroller.classList.remove('is-refreshing');
+            pullOffset = 0;
+            pullDist = 0;
+            refreshing = false;
+            state.feedLocked = false;
+            clearNewContent();
+          }, 440);
+        }, 160);
+      }, 620);
     } else {
-      // desktop: quick cross-fade swap
       scroller.classList.add('refresh-fade');
       setTimeout(()=>{
         reloadTop();
         requestAnimationFrame(()=>scroller.classList.remove('refresh-fade'));
         haptic('settle');
-        setTimeout(()=>{ refreshing=false; state.feedLocked=false; clearNewContent(); }, 380);
-      }, 380);
+        setTimeout(()=>{
+          scroller.classList.remove('is-refreshing');
+          refreshing = false;
+          state.feedLocked = false;
+          clearNewContent();
+        }, 320);
+      }, 280);
     }
   }
   const NEW_PILL_DELAY = 3 * 60 * 1000; // simmer ~3 min before offering new posts
@@ -2588,7 +2673,7 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     }
     if(pullEligible && !refreshing && (pulling || dy>0)){
       if(dy>2){ if(!pulling) beginPull(); movePull(dy); return; }
-      if(pulling){ pulling=false; setTrack(0,false); renderPull(0); dragStartY=e.clientY; dragStartPos=pos; }
+      if(pulling){ pulling=false; pullArmed=false; pullDist=0; setPullOffset(0); renderPull(0); dragStartY=e.clientY; dragStartPos=pos; }
     }
     const step = pageStep();
     pos = dragStartPos - dy/step;

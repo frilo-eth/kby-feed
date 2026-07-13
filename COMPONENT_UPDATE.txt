@@ -12,7 +12,7 @@ Feed
 - React rail — tip (immutable +$5 float); like↔dislike exclusive; comment; share; pulse + haptics
 - Meta — pinned | float-on-media | overlay-mode (narrow / drawer thresholds)
 - Hover cards (desktop) — user preview on uname/avatar; token chart preview on plus/ticker/mini/pill (no CTA)
-- Motion — spring doomscroll; peek; parallax; pull-refresh (mobile); new-pill (desktop ~3m); tap pause; 2× hold
+- Motion — spring doomscroll; peek; parallax; pull-refresh (active-card only, peeks hidden); new-pill (desktop ~3m); tap pause; 2× hold
 - Topbar — mobile auto-hide after settle (page-step locked mid-swipe)
 
 Comments

@@ -207,14 +207,17 @@ pos  += v * dt
 
 ### 8. Pull-to-refresh → spring settle (mobile)
 
+Only the **active** card rubber-bands down. Peek neighbors stay hidden so nothing overlaps into the gap (TikTok/IG style).
+
 | Step | Code | Detail |
 |------|------|--------|
-| Rubber-band | `dampPull(dy)` | `max=170`, `k=0.55`, asymptotic `max*(1−e^(−raw/max))` |
-| Threshold | `PULL_THRESHOLD = 74` | px of damped pull |
-| Spinner | `--p` progress + `@keyframes pullspin` | `.7s linear` when spinning |
-| Track release | `.pull-animate` | `.5s` `(.22,1.32,.36,1)` |
-| Content fade | `.refresh-fade` | opacity `.3s` → `.2` |
-| Reload | rotate posts, `pos=0`, spring settle | haptic `open` / `settle` |
+| Rubber-band | `dampPull(dy)` | `max=112`, `k=0.48`, asymptotic |
+| Offset | `pullOffset` via `setPullOffset` → `applyTransform` | active item only: `translateY(step*0 + pull)` |
+| Mask | `.is-pulling` / `.is-refreshing` | non-active items `visibility:hidden`; peek gradient off |
+| Threshold | `PULL_THRESHOLD = 68` | haptic `nudge` on arm |
+| Spinner | centered in gap (`y = pull*0.5`) | `--p` progress + `@keyframes pullspin` `.65s` |
+| Hold / settle | `PULL_HOLD = 56` · `.is-pull-settle` | `.42s` `(.22,1,.36,1)` — no bounce |
+| Content swap | `.refresh-fade` | brief opacity dip → rotate posts → release |
 | Desktop alternate | `#newPill` | opacity `.3s`, transform `.38s` pop |
 
 ---
