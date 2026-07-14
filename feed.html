@@ -195,9 +195,12 @@ html.dark .buy-cta{
   box-shadow:0 2px 10px rgba(0,0,0,.32);
 }
 .feed-item:not(.media-ready) .buy-cta{opacity:0!important;pointer-events:none!important;}
-/* Show on the active post once media is ready — no media-hover gate */
+/* Desktop: cycle show → hide → reappear on long engage */
 .feed-item.active.media-ready .buy-cta{
   opacity:1;pointer-events:auto;
+}
+.feed-item.active.media-ready .buy-cta.is-dormant{
+  opacity:0;pointer-events:none;
 }
 @media (hover:hover) and (pointer:fine) and (min-width:861px){
   .buy-cta:hover{background:#FFFFFF;color:var(--ink);box-shadow:0 4px 14px rgba(40,30,20,.12);}
@@ -275,7 +278,7 @@ html.dark .meta-overlay-mode .buy-cta{
 .center-flash.show .flash-btn{animation:flashPop .58s cubic-bezier(.22,1,.36,1) forwards;}
 @keyframes flashPop{0%{opacity:0;transform:scale(.55);}22%{opacity:1;transform:scale(1);}45%{opacity:1;transform:scale(1.02);}100%{opacity:0;transform:scale(1.5);}}
 
-/* 2× hold badge — chevron cascade + balanced pill padding */
+/* 2× hold badge — chevron cascade; charge ring → lock */
 .speed-badge{
   position:absolute;top:16px;left:50%;z-index:12;pointer-events:none;
   display:inline-flex;align-items:center;justify-content:center;gap:5px;
@@ -285,20 +288,29 @@ html.dark .meta-overlay-mode .buy-cta{
   backdrop-filter:blur(12px) saturate(160%);-webkit-backdrop-filter:blur(12px) saturate(160%);
   box-shadow:0 6px 22px rgba(0,0,0,.28);
   opacity:0;transform:translateX(-50%) translateY(-10px) scale(.86);
-  transition:opacity .2s ease, transform .4s cubic-bezier(.22,1.45,.36,1);
+  transition:opacity .2s ease, transform .4s cubic-bezier(.22,1.45,.36,1), background .2s ease;
   will-change:transform,opacity;
 }
 .speed-badge.show{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}
+.speed-badge.is-locked{
+  pointer-events:auto;cursor:pointer;
+  padding-left:12px;padding-right:14px;
+  background:rgba(20,16,12,.72);
+}
+.speed-badge.is-locked:hover{background:rgba(30,26,20,.82);}
+.speed-badge.is-locked:active{filter:brightness(.94);}
 .speed-chevs{display:inline-flex;align-items:center;margin-right:1px;}
 .speed-chev{
   display:block;width:11px;height:14px;margin-right:-5px;
   opacity:.22;transform:translateX(-3px);
   filter:drop-shadow(0 1px 2px rgba(0,0,0,.35));
 }
-.speed-badge.show .speed-chev{animation:speedChevron .85s ease-in-out infinite;}
-.speed-badge.show .speed-chev:nth-child(1){animation-delay:0s;}
-.speed-badge.show .speed-chev:nth-child(2){animation-delay:.14s;}
-.speed-badge.show .speed-chev:nth-child(3){animation-delay:.28s;}
+.speed-badge.show:not(.is-locked) .speed-chev{animation:speedChevron .85s ease-in-out infinite;}
+.speed-badge.show:not(.is-locked) .speed-chev:nth-child(1){animation-delay:0s;}
+.speed-badge.show:not(.is-locked) .speed-chev:nth-child(2){animation-delay:.14s;}
+.speed-badge.show:not(.is-locked) .speed-chev:nth-child(3){animation-delay:.28s;}
+.speed-badge.is-locked .speed-chevs{display:none;}
+.speed-badge.is-charging .speed-chevs{display:none;}
 @keyframes speedChevron{
   0%,100%{opacity:.2;transform:translateX(-2px);}
   40%{opacity:1;transform:translateX(1px);}
@@ -309,6 +321,35 @@ html.dark .meta-overlay-mode .buy-cta{
   padding:0 1px 0 2px;
   text-shadow:0 1px 3px rgba(0,0,0,.35);
 }
+.speed-lock-ring{
+  display:none;width:16px;height:16px;flex-shrink:0;
+  margin-right:1px;
+}
+.speed-badge.is-charging .speed-lock-ring{display:block;}
+.speed-badge.is-locked .speed-lock-ring{display:none;}
+.speed-lock-ring .speed-ring-track{
+  fill:none;stroke:rgba(255,255,255,.22);stroke-width:3;
+}
+.speed-lock-ring .speed-ring-prog{
+  fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;
+  stroke-dasharray:69.1;stroke-dashoffset:calc(69.1 - 69.1 * var(--lock-p, 0));
+  transform:rotate(-90deg);transform-origin:18px 18px;
+}
+.speed-lock-ico{
+  display:none;width:14px;height:14px;flex-shrink:0;
+  filter:drop-shadow(0 1px 2px rgba(0,0,0,.35));
+}
+.speed-badge.is-locked .speed-lock-ico{display:block;}
+.speed-lock-hint{
+  position:absolute;left:50%;top:calc(100% + 8px);
+  transform:translateX(-50%);
+  font-size:10px;font-weight:600;letter-spacing:.02em;
+  color:rgba(255,255,255,.72);text-shadow:0 1px 3px rgba(0,0,0,.45);
+  white-space:nowrap;opacity:0;pointer-events:none;
+  transition:opacity .25s ease;
+}
+.speed-badge.is-charging .speed-lock-hint{opacity:1;}
+.speed-badge.is-locked .speed-lock-hint{display:none;}
 
 /* ---- post info: pinned to a fixed spot near the left edge of the feed body so it never
    shifts horizontally as the media width changes between posts (no scroll fatigue) ---- */
@@ -1504,15 +1545,95 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
   let dragStartY=0, dragStartPos=0, lastY=0, lastT=0, lastTickStep=0;
   let lastPointerX=0, lastPointerY=0;
   let pulling=false, pullDist=0, pullEligible=false, pullOffset=0, pullArmed=false, dragPointerType='mouse', refreshing=false;
-  // tap / long-press gesture state (pointer capture routes all events to the scroller)
+  // tap / long-press / 2× lock gesture state (pointer capture routes all events to the scroller)
   let gStartX=0, gStartY=0, gStartT=0, gMoved=false, gHoldTimer=null, gHoldActive=false, gItem=null, gVideo=null;
+  let gSpeedLocked=false, gLockedItem=null, gLockedVideo=null, gLockRAF=0, gLockStart=0;
   const GESTURE_MOVE_PX=8;
+  const SPEED_HOLD_MS=240;
+  const SPEED_LOCK_MS=3000;
   function clearGestureHold(){ if(gHoldTimer){ clearTimeout(gHoldTimer); gHoldTimer=null; } }
+  function cancelSpeedLockCharge(){
+    if(gLockRAF){ cancelAnimationFrame(gLockRAF); gLockRAF=0; }
+    if(!gSpeedLocked){
+      const badge = gItem?.querySelector('.speed-badge');
+      badge?.classList.remove('is-charging');
+      badge?.style.removeProperty('--lock-p');
+    }
+  }
+  function clearSpeedBadge(badge){
+    if(!badge) return;
+    badge.classList.remove('show','is-charging','is-locked');
+    badge.style.removeProperty('--lock-p');
+    badge.setAttribute('aria-hidden','true');
+    badge.removeAttribute('role');
+    badge.removeAttribute('aria-label');
+  }
+  function unlockSpeed({hapticFeedback=true}={}){
+    cancelSpeedLockCharge();
+    if(gLockedVideo) gLockedVideo.playbackRate = 1;
+    clearSpeedBadge(gLockedItem?.querySelector('.speed-badge'));
+    // also clear any stray badges
+    document.querySelectorAll('.speed-badge.is-locked,.speed-badge.is-charging').forEach(clearSpeedBadge);
+    gSpeedLocked=false; gLockedItem=null; gLockedVideo=null;
+    gHoldActive=false;
+    if(hapticFeedback) haptic('toggle');
+  }
+  function lockSpeed(item, video){
+    if(!item || !video) return;
+    cancelSpeedLockCharge();
+    gSpeedLocked=true;
+    gHoldActive=false;
+    gLockedItem=item;
+    gLockedVideo=video;
+    video.playbackRate=2;
+    const badge = item.querySelector('.speed-badge');
+    if(badge){
+      badge.classList.remove('is-charging');
+      badge.classList.add('show','is-locked');
+      badge.style.setProperty('--lock-p','1');
+      badge.setAttribute('aria-hidden','false');
+      badge.setAttribute('role','button');
+      badge.setAttribute('aria-label','Unlock 2x speed');
+    }
+    haptic('toggle');
+  }
+  function startSpeedLockCharge(item, video){
+    cancelSpeedLockCharge();
+    const badge = item?.querySelector('.speed-badge');
+    if(!badge) return;
+    badge.classList.add('show','is-charging');
+    badge.style.setProperty('--lock-p','0');
+    gLockStart = performance.now();
+    const tick = (now)=>{
+      if(!gHoldActive || gSpeedLocked || gMoved || pulling) return;
+      const p = (now - gLockStart) / SPEED_LOCK_MS;
+      badge.style.setProperty('--lock-p', String(Math.min(1, Math.max(0, p))));
+      if(p >= 1){
+        gLockRAF=0;
+        lockSpeed(item, video);
+        return;
+      }
+      gLockRAF = requestAnimationFrame(tick);
+    };
+    gLockRAF = requestAnimationFrame(tick);
+  }
   function endSpeedHold(){
+    cancelSpeedLockCharge();
+    // Locked 2× survives finger up — only the badge click (or post change) clears it
+    if(gSpeedLocked){ gHoldActive=false; return; }
     if(!gHoldActive) return;
     gHoldActive=false;
     if(gVideo) gVideo.playbackRate=1;
-    gItem?.querySelector('.speed-badge')?.classList.remove('show');
+    clearSpeedBadge(gItem?.querySelector('.speed-badge'));
+  }
+  function resetAllSpeedLocks(){
+    cancelSpeedLockCharge();
+    clearGestureHold();
+    if(gLockedVideo) gLockedVideo.playbackRate=1;
+    if(gVideo && gVideo !== gLockedVideo) gVideo.playbackRate=1;
+    document.querySelectorAll('.speed-badge').forEach(clearSpeedBadge);
+    gSpeedLocked=false; gLockedItem=null; gLockedVideo=null;
+    gHoldActive=false;
   }
   function clearMediaHover(){ document.querySelectorAll('.media-card.media-hover').forEach(c=>c.classList.remove('media-hover')); }
   // CSS :hover breaks after a drag-scroll (pointer stays over the card but :hover never
@@ -2043,12 +2164,18 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
             <div class="more-menu"><button type="button" data-act="notinterested">Not interested</button><button type="button" data-act="report">Report</button></div>
             <div class="center-flash"></div>
             <div class="speed-badge" aria-hidden="true">
+              <svg class="speed-lock-ring" viewBox="0 0 36 36" aria-hidden="true">
+                <circle class="speed-ring-track" cx="18" cy="18" r="11"/>
+                <circle class="speed-ring-prog" cx="18" cy="18" r="11" pathLength="69.1"/>
+              </svg>
               <span class="speed-chevs">
                 <svg class="speed-chev" viewBox="0 0 11 14" fill="none" aria-hidden="true"><path d="M2.2 1.5L8.5 7L2.2 12.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <svg class="speed-chev" viewBox="0 0 11 14" fill="none" aria-hidden="true"><path d="M2.2 1.5L8.5 7L2.2 12.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <svg class="speed-chev" viewBox="0 0 11 14" fill="none" aria-hidden="true"><path d="M2.2 1.5L8.5 7L2.2 12.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </span>
+              <svg class="speed-lock-ico" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 11V8a5 5 0 0 1 10 0v3" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><rect x="5" y="11" width="14" height="10" rx="2.5" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="16" r="1.4" fill="currentColor"/></svg>
               <span class="speed-label">2x</span>
+              <span class="speed-lock-hint">Hold 3s to lock</span>
             </div>
             <div class="media-error" aria-hidden="true">
               ${svgIcon('broken')}
@@ -2095,6 +2222,7 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     itemEls().forEach((it,i)=>it.classList.toggle('active', i===0));
     lastActiveIdx = 0;
     applyTransform(); applyParallax();
+    armBuyCtaCycle(0);
     // Second pass after layout so scroller.clientHeight is real (avoids undersized skeleton)
     requestAnimationFrame(()=>{
       itemEls().forEach(it=>{
@@ -2187,8 +2315,20 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
       if(dist<=2){
         ensureVideoSrc(v, p);
         applyVideoSound(v, p.type);
-        if(i===idx) v.play().catch(()=>{}); else v.pause();
+        if(i===idx){
+          // Keep locked 2× on the same clip; everything else plays at 1×
+          if(!(gSpeedLocked && gLockedVideo === v)) v.playbackRate = 1;
+          v.play().catch(()=>{});
+        } else {
+          if(gSpeedLocked && gLockedVideo === v){
+            // Locked clip left the viewport — drop the lock
+            unlockSpeed({hapticFeedback:false});
+          }
+          v.playbackRate = 1;
+          v.pause();
+        }
       } else {
+        if(gSpeedLocked && gLockedVideo === v) unlockSpeed({hapticFeedback:false});
         releaseVideo(v);
       }
     });
@@ -2333,6 +2473,11 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
       });
       item.querySelector('.avatar-plus').addEventListener('click',(e)=>{ e.stopPropagation(); openDrawer(posts[item.dataset.index]); haptic('open'); });
       item.querySelector('.buy-cta')?.addEventListener('click',(e)=>{ e.stopPropagation(); openDrawer(posts[item.dataset.index]); haptic('open'); });
+      item.querySelector('.speed-badge')?.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        if(!e.currentTarget.classList.contains('is-locked')) return;
+        unlockSpeed();
+      });
       item.querySelector('.tag-ticker').addEventListener('click',(e)=>{ e.stopPropagation(); openDrawer(posts[item.dataset.index]); haptic('open'); });
       item.querySelector('.token-mini')?.addEventListener('click',(e)=>{ e.stopPropagation(); openDrawer(posts[item.dataset.index]); haptic('open'); });
       item.querySelector('.pill')?.addEventListener('click',(e)=>{ e.stopPropagation(); openDrawer(posts[item.dataset.index]); haptic('open'); });
@@ -2476,6 +2621,71 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     animRAF = requestAnimationFrame(frame);
   }
   let pendingTopbarAutohide = null;
+
+  /* ---- Buy CTA cycle (desktop): show → auto-hide → reappear on long engage ---- */
+  const BUY_CTA_SHOW_MS = 3800;
+  const BUY_CTA_ENGAGE_MS = 5500;
+  const BUY_CTA_MAX_SHOWS = 3;
+  let buyCtaTimer = 0;
+  let buyCtaEngageTimer = 0;
+  let buyCtaShows = 0;
+  let buyCtaIdx = -1;
+  function clearBuyCtaCycle(){
+    if(buyCtaTimer){ clearTimeout(buyCtaTimer); buyCtaTimer = 0; }
+    if(buyCtaEngageTimer){ clearTimeout(buyCtaEngageTimer); buyCtaEngageTimer = 0; }
+  }
+  function setBuyCtaDormant(item, dormant){
+    const btn = item?.querySelector('.buy-cta');
+    if(!btn) return;
+    btn.classList.toggle('is-dormant', !!dormant);
+  }
+  function armBuyCtaCycle(idx){
+    clearBuyCtaCycle();
+    buyCtaIdx = idx;
+    buyCtaShows = 0;
+    itemEls().forEach((it,i)=>{
+      const btn = it.querySelector('.buy-cta');
+      if(!btn) return;
+      btn.classList.toggle('is-dormant', i !== idx);
+    });
+    // Mobile hides via CSS; still safe to run timers (no-op visually)
+    const item = itemEls()[idx];
+    if(!item?.classList.contains('media-ready')){
+      buyCtaTimer = setTimeout(()=>armBuyCtaCycle(idx), 400);
+      return;
+    }
+    setBuyCtaDormant(item, false);
+    buyCtaShows = 1;
+    scheduleBuyCtaHide(idx);
+  }
+  function scheduleBuyCtaHide(idx){
+    clearBuyCtaCycle();
+    buyCtaTimer = setTimeout(()=>{
+      buyCtaTimer = 0;
+      if(lastActiveIdx !== idx || buyCtaIdx !== idx) return;
+      setBuyCtaDormant(itemEls()[idx], true);
+      if(buyCtaShows >= BUY_CTA_MAX_SHOWS) return;
+      scheduleBuyCtaReappear(idx);
+    }, BUY_CTA_SHOW_MS);
+  }
+  function scheduleBuyCtaReappear(idx){
+    if(buyCtaEngageTimer){ clearTimeout(buyCtaEngageTimer); buyCtaEngageTimer = 0; }
+    buyCtaEngageTimer = setTimeout(()=>{
+      buyCtaEngageTimer = 0;
+      if(lastActiveIdx !== idx || buyCtaIdx !== idx) return;
+      if(state.dragging || pulling || refreshing){
+        // Still engaged — try again shortly after the gesture settles
+        scheduleBuyCtaReappear(idx);
+        return;
+      }
+      const item = itemEls()[idx];
+      if(!item?.classList.contains('media-ready')) return;
+      buyCtaShows += 1;
+      setBuyCtaDormant(item, false);
+      scheduleBuyCtaHide(idx);
+    }, BUY_CTA_ENGAGE_MS);
+  }
+
   function onSettled(rawTarget){
     const wrapped = ((rawTarget % N)+N)%N;
     pos = wrapped; targetIndex = wrapped;
@@ -2502,6 +2712,9 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
       dismissFeedHint();
       // keep the open comments drawer in sync with the post now in view
       if(state.commentsOpen && !state.focusedComment) loadCommentsForPost(posts[idx], idx);
+      // New post — drop any prior 2× lock and restart Buy CTA cycle
+      if(gSpeedLocked) unlockSpeed({hapticFeedback:false});
+      armBuyCtaCycle(idx);
     }
     requestAnimationFrame(()=>syncMediaHover(lastPointerX, lastPointerY));
     positionNewPill();
@@ -2773,6 +2986,12 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     unlockAudio();
     if(e.target.closest('.col-actions') || e.target.closest('.col-info') || e.target.closest('.glass-btn') || e.target.closest('.more-menu') || e.target.closest('.react-btn') || e.target.closest('.buy-cta')) return;
     if(refreshing) return;
+    // Tap the locked 2× badge to unlock (don't start a drag/hold)
+    if(e.target.closest?.('.speed-badge.is-locked')){
+      e.preventDefault(); e.stopPropagation();
+      unlockSpeed();
+      return;
+    }
     clearMediaHover();
     state.dragging=true; scroller.classList.add('grabbing'); cancelAnim();
     lockPageStep();
@@ -2782,25 +3001,37 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     const atTop = (((Math.round(pos)%N)+N)%N)===0 && Math.abs(pos-Math.round(pos))<0.02;
     pullEligible = atTop && (dragPointerType==='touch' || window.innerWidth<=860);
     pulling=false; pullDist=0;
-    // gesture (tap / long-press) tracking for the media under the pointer
     gStartX=e.clientX; gStartY=e.clientY; gStartT=performance.now(); gMoved=false; gHoldActive=false;
     gItem=e.target.closest('.feed-item');
     gVideo=gItem?.querySelector('.media-inner video') || null;
     clearGestureHold();
-    if(gVideo){
+    // Don't start a fresh 2× hold while already locked on this clip
+    if(gVideo && !(gSpeedLocked && gLockedVideo === gVideo)){
       gHoldTimer=setTimeout(()=>{
-        if(gMoved || !state.dragging || pulling) return;
-        gHoldActive=true; gVideo.playbackRate=2;
-        gItem.querySelector('.speed-badge')?.classList.add('show'); haptic('nudge');
-      }, 240);
+        if(gMoved || !state.dragging || pulling || gSpeedLocked) return;
+        gHoldActive=true;
+        gVideo.playbackRate=2;
+        const badge = gItem.querySelector('.speed-badge');
+        badge?.classList.add('show');
+        haptic('nudge');
+        startSpeedLockCharge(gItem, gVideo);
+      }, SPEED_HOLD_MS);
     }
     scroller.setPointerCapture(e.pointerId);
   });
   scroller.addEventListener('pointermove',(e)=>{
     if(!state.dragging) return;
     const dy = e.clientY-dragStartY;
-    if(!gMoved && (Math.abs(dy)>GESTURE_MOVE_PX || Math.abs(e.clientX-gStartX)>GESTURE_MOVE_PX)){ gMoved=true; clearGestureHold(); }
-    if(gHoldActive) return; // holding for 2x speed -> don't scroll the feed
+    if(!gMoved && (Math.abs(dy)>GESTURE_MOVE_PX || Math.abs(e.clientX-gStartX)>GESTURE_MOVE_PX)){
+      gMoved=true; clearGestureHold(); cancelSpeedLockCharge();
+      // Moving cancels an unlocked hold (but never a committed lock)
+      if(gHoldActive && !gSpeedLocked){
+        gHoldActive=false;
+        if(gVideo) gVideo.playbackRate=1;
+        clearSpeedBadge(gItem?.querySelector('.speed-badge'));
+      }
+    }
+    if(gHoldActive) return; // actively holding temporary 2x → don't scroll
     // swipe-to-attach: hide comments and focus the drop stage while dragging toward the drawer
     if(state.commentsOpen && canOfferCommentMedia() && gMoved){
       const dx = e.clientX - gStartX;

@@ -41,10 +41,10 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Infinite wrap | Both directions; first-post down-swipe wraps to previous (TikTok trap) |
 | Pull-to-refresh | Mobile only; short deliberate pull at top; longer drag hands off to wrap scroll |
 | Mute morph | pathLength SVG draw (waves ↔ slash); session `kb_feed_sound` |
-| Buy `$ticker` | Desktop only — crystal glass pill CSS-anchored to rail token avatar (`.token-anchor`); text-only; visible on active ready post. Hidden on mobile (avatar+ / ticker / mini still open trade) |
+| Buy `$ticker` | Desktop only — show ~3.8s → hide → reappear after ~5.5s engage (max 3 / post); crystal glass on `.token-anchor`. Hidden on mobile |
 | Trade entry points | Avatar+, Buy CTA, ticker, token mini, category pill → trade drawer |
 | Hover cards | Desktop only — user / token preview portals (no Buy on the card) |
-| 2× hold | ≥240ms on video; badge + haptic |
+| 2× hold | ≥240ms on video; badge + haptic; hold 3s more → lock (padlock); tap badge to unlock |
 | New posts pill | Desktop; ~3 min delay (`NEW_PILL_DELAY`) |
 | First-visit hint | Hand Lottie; `kb_feed_hint_v8` |
 | Topbar auto-hide | Mobile; overlays feed (no layout resize); after settle on next; page-step locked mid-swipe |
@@ -101,7 +101,7 @@ Most motion reuses a small set of curves. Durations are wall-clock; springs are 
 | **Reaction rail** | outside: `#FAFAFA→#FFF` / dark `#130A07→#251D18`; on-media glass tint; active `brightness(1.06)` | `brightness(.94)` | bg/color `.22s` |
 | Reaction count | ink / white | — | color `.2s` |
 | **Mute / unmute** | pathLength draw morph — see below | — | `.2s` ease-in-out (+`.1s` outer) |
-| **Buy $ticker** | desktop only (≥861px); pill CSS-anchored to rail `.token-anchor` / `.avatar-plus`; crystal glass; text-only | brightness | opacity `.3s` on active ready |
+| **Buy $ticker** | desktop only (≥861px); pill on `.token-anchor`; show ~3.8s then hide; reappear after ~5.5s engage (≤3× / post) | brightness | opacity `.3s` |
 | **Hover cards** | user + token preview portals (no Buy CTA); desktop `pointer:fine` only | — | show `.18s`, delay 280ms |
 | New posts pill | brightness `.98` | `scale(.95)` | opacity `.3s`, transform `.38s` pop |
 | Tag / uname | color / underline | — | `.15s` |
@@ -172,7 +172,9 @@ WebHaptics-style pathLength draw — one SVG, no hard icon swap. Cone stays; wav
 | Play/pause flash | `@keyframes flashPop` | `.58s` `(.22,1,.36,1)` — scale `.55→1→1.5`, fade out |
 | 2× badge in | `.speed-badge.show` | `.4s` `(.22,1.45,.36,1)` spring-in |
 | 2× chevrons | `@keyframes speedChevron` | `.85s ease-in-out` infinite, staggered `.14s` |
-| Hold → 2× | `playbackRate = 2` after **240ms** hold | haptic `nudge` |
+| Hold → 2× | `playbackRate = 2` after **240ms** hold | haptic `nudge`; charge ring 3s → lock |
+| 2× lock | keep 2× after release; padlock on glass badge; tap unlocks | `SPEED_LOCK_MS = 3000` |
+| Buy CTA cycle | desktop show → dormant → reappear on engage | show 3.8s / engage 5.5s / max 3 |
 | Progress bar | `.video-progress-fill` | width `.08s linear` |
 
 ---

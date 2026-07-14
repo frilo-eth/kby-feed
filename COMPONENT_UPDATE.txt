@@ -12,10 +12,9 @@ Feed
 - Glass mute/more — 46px; pathLength mute↔sound morph; unmute/mute haptics+sounds; session persist
 - React rail — tip (immutable +$5 float); like↔dislike exclusive; comment; share; pulse + haptics
 - Meta — pinned | float-on-media | overlay-mode (`layoutMeta`); pinned flush with media bottom; float inset by PAD (18px)
-- Buy CTA — desktop only; crystal glass `Buy $ticker` pill CSS-anchored to `.token-anchor` (text-only); hidden ≤860; avatar+/ticker/mini still open trade
-- Trade entry — avatar+ / buy CTA / ticker / mini / pill → trade drawer (not hover card)
+- Buy CTA — desktop only; crystal glass `Buy $ticker` on `.token-anchor`; auto-hide ~3.8s, reappear after ~5.5s engage (max 3 / post); hidden ≤860
 - Hover cards (desktop) — user on uname/avatar; token chart on plus/buy/ticker/mini/pill (no CTA)
-- Motion — spring doomscroll; infinite wrap both ways; peek; mid-swipe hides meta/rail/topctl; no mid-swipe/mobile media scale; pull-refresh (short) vs wrap (longer)
+- Motion — spring doomscroll; infinite wrap; mid-swipe hides chrome; no mid-swipe/mobile scale; 2× hold → 3s charge/lock (tap badge unlocks); pull-refresh vs wrap
 - Topbar — mobile overlay auto-hide after settle (never resizes feed; page-step locked mid-swipe)
 - New-pill — desktop ~3m; first-visit hint Lottie `kb_feed_hint_v8`
 
