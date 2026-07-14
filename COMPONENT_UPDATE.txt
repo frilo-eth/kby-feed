@@ -12,7 +12,7 @@ Feed
 - Glass mute/more — 46px; pathLength mute↔sound morph; unmute/mute haptics+sounds; session persist
 - React rail — tip (immutable +$5 float); like↔dislike exclusive; comment; share; pulse + haptics
 - Meta — pinned | float-on-media | overlay-mode (`layoutMeta`); pinned flush with media bottom; float inset by PAD (18px)
-- Buy CTA — crystal glass `Buy $ticker` pill CSS-anchored to `.token-anchor` (text-only, no thumb); visible on active ready; opens trade
+- Buy CTA — desktop only; crystal glass `Buy $ticker` pill CSS-anchored to `.token-anchor` (text-only); hidden ≤860; avatar+/ticker/mini still open trade
 - Trade entry — avatar+ / buy CTA / ticker / mini / pill → trade drawer (not hover card)
 - Hover cards (desktop) — user on uname/avatar; token chart on plus/buy/ticker/mini/pill (no CTA)
 - Motion — spring doomscroll; infinite wrap both ways; peek; mid-swipe hides meta/rail/topctl; no mid-swipe/mobile media scale; pull-refresh (short) vs wrap (longer)

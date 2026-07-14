@@ -41,7 +41,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Infinite wrap | Both directions; first-post down-swipe wraps to previous (TikTok trap) |
 | Pull-to-refresh | Mobile only; short deliberate pull at top; longer drag hands off to wrap scroll |
 | Mute morph | pathLength SVG draw (waves ↔ slash); session `kb_feed_sound` |
-| Buy `$ticker` | Crystal glass pill CSS-anchored to rail token avatar (`.token-anchor`); text-only; visible on active ready post (no media hover) |
+| Buy `$ticker` | Desktop only — crystal glass pill CSS-anchored to rail token avatar (`.token-anchor`); text-only; visible on active ready post. Hidden on mobile (avatar+ / ticker / mini still open trade) |
 | Trade entry points | Avatar+, Buy CTA, ticker, token mini, category pill → trade drawer |
 | Hover cards | Desktop only — user / token preview portals (no Buy on the card) |
 | 2× hold | ≥240ms on video; badge + haptic |
@@ -101,7 +101,7 @@ Most motion reuses a small set of curves. Durations are wall-clock; springs are 
 | **Reaction rail** | outside: `#FAFAFA→#FFF` / dark `#130A07→#251D18`; on-media glass tint; active `brightness(1.06)` | `brightness(.94)` | bg/color `.22s` |
 | Reaction count | ink / white | — | color `.2s` |
 | **Mute / unmute** | pathLength draw morph — see below | — | `.2s` ease-in-out (+`.1s` outer) |
-| **Buy $ticker** | pill CSS-anchored to rail `.token-anchor` / `.avatar-plus` (`right: calc(100% + 12px)`, `top:50%`); crystal glass (`--glass-light` / overlay `--glass-dark`); text-only | brightness | opacity `.3s` on active ready |
+| **Buy $ticker** | desktop only (≥861px); pill CSS-anchored to rail `.token-anchor` / `.avatar-plus`; crystal glass; text-only | brightness | opacity `.3s` on active ready |
 | **Hover cards** | user + token preview portals (no Buy CTA); desktop `pointer:fine` only | — | show `.18s`, delay 280ms |
 | New posts pill | brightness `.98` | `scale(.95)` | opacity `.3s`, transform `.38s` pop |
 | Tag / uname | color / underline | — | `.15s` |
