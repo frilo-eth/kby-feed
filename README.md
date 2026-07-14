@@ -273,7 +273,7 @@ Infinite wrap both ways (TikTok trap). At the first post, a **short** down-pull 
 | Step | Code | Detail |
 |------|------|--------|
 | Infinite wrap | `wrappedOffset` / `springTo` | swipe down on first → previous (`N-1`); never hard-stops |
-| Pull vs scroll | `PULL_SCROLL_BREAK = 0.24` page | below → rubber-band refresh; at/above → `abortPullForScroll` → wrap |
+| Pull vs scroll | `PULL_SCROLL_BREAK` + `pullFingerFor(THRESHOLD)` | handoff always past refresh-arm distance so wrap can't steal the gesture |
 | Rubber-band | `dampPull(dy)` | `max=112`, `k=0.48`, asymptotic |
 | Offset | `pullOffset` via `setPullOffset` → `applyTransform` | active item only |
 | Mask | `.is-pulling` / `.is-refreshing` | non-active hidden; peek gradient off |
