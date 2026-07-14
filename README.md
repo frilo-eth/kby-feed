@@ -173,7 +173,7 @@ WebHaptics-style pathLength draw — one SVG, no hard icon swap. Cone stays; wav
 | 2× badge in | `.speed-badge.show` | `.4s` `(.22,1.45,.36,1)` spring-in |
 | 2× chevrons | `@keyframes speedChevron` | `.85s ease-in-out` infinite, staggered `.14s` |
 | Hold → 2× | `playbackRate = 2` after **240ms** hold | haptic `nudge`; charge ring 3s → lock |
-| 2× lock | keep 2× after release; padlock on glass badge; tap unlocks | `SPEED_LOCK_MS = 3000` |
+| 2× lock | keep 2× after release; padlock pathLength morph unlock + selection haptic | `SPEED_LOCK_MS = 3000` |
 | Buy CTA cycle | desktop show → dormant → reappear on engage | show 3.8s / engage 5.5s / max 3 |
 | Progress bar | `.video-progress-fill` | width `.08s linear` |
 
