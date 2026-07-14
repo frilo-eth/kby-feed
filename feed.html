@@ -1621,7 +1621,7 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     if(gLockedVideo) gLockedVideo.playbackRate = 1;
     gSpeedLocked=false; gLockedItem=null; gLockedVideo=null;
     gHoldActive=false;
-    if(hapticFeedback) haptic('selection'); // crisp unlock click
+    if(hapticFeedback) haptic('unlock'); // latch-open click + buzz
     if(animate && badge?.classList.contains('is-locked') && !badge.classList.contains('is-unlocking')){
       badge.classList.remove('is-settled');
       badge.classList.add('is-unlocking');
@@ -1675,7 +1675,7 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
         badge._lockSettleTimer = 0;
       }, 280);
     }
-    haptic('toggle');
+    haptic('lock');
   }
   function startSpeedLockCharge(item, video){
     cancelSpeedLockCharge();
@@ -1747,6 +1747,7 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     light:'light', selection:'selection', nudge:'nudge', settle:'success',
     dragtick:'soft', toggle:'rigid', unmute:'nudge', mute:'rigid', open:'medium', comment:'success',
     tip:'success', like:'medium', dislike:'warning', share:'soft', attach:'success',
+    lock:'rigid', unlock:'nudge',
   };
   const HAPTIC_PATTERNS = {
     light:     { vibrate: [7], taps: 1 },
@@ -1764,11 +1765,13 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     tip:       { vibrate: [9, 42, 11, 48, 16], taps: 3, tapGap: 52 },
     like:      { vibrate: [7, 28, 11], taps: 2, tapGap: 32 },
     dislike:   { vibrate: [26, 16, 22], taps: 1 },
+    lock:      { vibrate: [12, 22, 16], taps: 1 },
+    unlock:    { vibrate: [8, 20, 10, 28, 8], taps: 2, tapGap: 36 },
   };
   const PRESET_SOUND = {
     light:'light', selection:'light', nudge:'light', settle:'settle', attach:'settle', dragtick:'dragtick',
     toggle:'toggle', unmute:'unmute', mute:'mute', open:'open', comment:'comment', share:'share',
-    tip:'tip', like:'like', dislike:'dislike',
+    tip:'tip', like:'like', dislike:'dislike', lock:'lock', unlock:'unlock',
   };
   function ensureAudio(){
     if(!actx){
@@ -1933,6 +1936,41 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     setTimeout(()=>microClick(ctx, 420), 55);
   }
   function reactOpenSound(ctx){ microClick(ctx, 760); }
+  function reactLockSound(ctx){
+    // mechanical latch — low thud + bright click
+    const t0 = ctx.currentTime;
+    const body = ctx.createOscillator(); body.type = 'triangle';
+    body.frequency.setValueAtTime(240, t0);
+    body.frequency.exponentialRampToValueAtTime(95, t0 + 0.08);
+    const bg = ctx.createGain();
+    bg.gain.setValueAtTime(0.0001, t0);
+    bg.gain.exponentialRampToValueAtTime(0.14, t0 + 0.005);
+    bg.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.1);
+    body.connect(bg); bg.connect(masterGain);
+    body.start(t0); body.stop(t0 + 0.11);
+    const click = ctx.createOscillator(); click.type = 'square';
+    click.frequency.setValueAtTime(1450, t0 + 0.028);
+    const cg = ctx.createGain();
+    cg.gain.setValueAtTime(0.0001, t0 + 0.028);
+    cg.gain.exponentialRampToValueAtTime(0.07, t0 + 0.034);
+    cg.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.055);
+    click.connect(cg); cg.connect(masterGain);
+    click.start(t0 + 0.028); click.stop(t0 + 0.06);
+  }
+  function reactUnlockSound(ctx){
+    // springy open latch — rising bloom + tick (mute/unmute family)
+    const t0 = ctx.currentTime;
+    const osc = ctx.createOscillator(); osc.type = 'sine';
+    osc.frequency.setValueAtTime(360, t0);
+    osc.frequency.exponentialRampToValueAtTime(980, t0 + 0.09);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.12, t0 + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(t0); osc.stop(t0 + 0.13);
+    setTimeout(()=>microClick(ctx, 1320), 58);
+  }
   function playSound(kind, arg){
     unlockAudio();
     const ctx = actx; if(!ctx) return;
@@ -1951,6 +1989,8 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
     else if(kind==='toggle') reactToggleSound(ctx);
     else if(kind==='unmute') reactUnmuteSound(ctx);
     else if(kind==='mute') reactMuteSound(ctx);
+    else if(kind==='lock') reactLockSound(ctx);
+    else if(kind==='unlock') reactUnlockSound(ctx);
     else if(kind==='open') reactOpenSound(ctx);
     else if(kind==='light') microClick(ctx);
   }
