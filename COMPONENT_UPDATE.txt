@@ -16,8 +16,11 @@ Feed
 - Trade entry — avatar+ / buy CTA / ticker / mini / pill → trade drawer (not hover card)
 - Hover cards (desktop) — user on uname/avatar; token chart on plus/buy/ticker/mini/pill (no CTA)
 - Motion — spring doomscroll; infinite wrap; mid-swipe hides chrome; no mid-swipe/mobile scale; 2× hold → 3s charge/lock (tap badge unlocks); pull-refresh vs wrap
+- Activity bubbles — progressive disclosure; tip `tipped $N` / like `liked it` / dislike `disliked it` / comment short text + marquee only when overflowing
 - Topbar — mobile overlay auto-hide after settle (never resizes feed; page-step locked mid-swipe)
-- New-pill — desktop ~3m; first-visit hint Lottie `kb_feed_hint_v8`
+- New-pill / pull-spin — theme tokens (`--card`/`--ink`/`--line`); 20px topbar clearance
+- Meta float scrim — desktop short veil; tablet keeps chevron gutter; glass rail only on-media (≤860)
+- New-pill — desktop ~3m; first-visit hint Lottie `kb_feed_hint_v9` (idle display:none)
 
 Comments
 - Drawer — desktop 360 side panel; mobile 86vh sheet + scrim + drag dismiss
@@ -36,10 +39,10 @@ Overlays
   · auto-dismiss after Share on X or Copy url (copy flashes “Copied!” then closes)
   · scrim / ✕ / drag-dismiss also close
 - Sheet close btns — `var(--card)` bg; 40px / 44px mobile thumb targets
-- First-visit hint — Lottie hand (`/public/hand-helper/Hand.json`); key `kb_feed_hint_v8`
+- First-visit hint — Lottie hand (`/public/hand-helper/hand.json`); key `kb_feed_hint_v9`
 
 System
 - Tokens — `--bg` light `#F2EEEA` / dark `#070403`; rail outside `#FAFAFA→#FFF` / `#130A07→#251D18`
 - Haptics — light/selection/nudge/settle/attach/dragtick/toggle/unmute/mute/open/comment/share/tip/like/dislike
 - Sounds — WebAudio map per preset (no ambient)
-- Persist — kb_sidebar_collapsed; kb_feed_hint_v8; kb_feed_sound
+- Persist — kb_sidebar_collapsed; kb_feed_hint_v9; kb_feed_sound

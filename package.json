@@ -4,7 +4,10 @@
   "private": true,
   "description": "Kumbaya doomscroll feed prototype",
   "scripts": {
-    "dev": "npx --yes serve . -p 3000",
+    "dev": "python3 dev-server.py -p 3000",
     "start": "npm run dev"
+  },
+  "dependencies": {
+    "web-haptics": "^0.0.6"
   }
 }

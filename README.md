@@ -44,9 +44,12 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Buy `$ticker` | Desktop only — show ~3.8s → hide → reappear after ~5.5s engage (max 3 / post); crystal glass on `.token-anchor`. Hidden on mobile |
 | Trade entry points | Avatar+, Buy CTA, ticker, token mini, category pill → trade drawer |
 | Hover cards | Desktop only — user / token preview portals (no Buy on the card) |
-| 2× hold | ≥240ms on video; badge + haptic; hold 3s more → lock (padlock); tap badge to unlock |
-| New posts pill | Desktop; ~3 min delay (`NEW_PILL_DELAY`) |
-| First-visit hint | Hand Lottie; `kb_feed_hint_v8` |
+| 2× hold | ≥240ms on video; glass badge + chevrons; hold 3s → charge ring + lock; tap badge to unlock |
+| Activity bubbles | Desktop ambient reactions; progressive disclosure on the reaction chip |
+| New posts / pull pill | Themed `--card` / `--ink` / `--line`; 20px clearance under topbar |
+| Meta float scrim | Desktop short veil (`clamp(132px, 28%, 176px)`); mobile taller |
+| Tablet chrome | Keep chevron gutter (`--feed-chevron-gutter: 88px`); glass rail only when overlaid on media |
+| First-visit hint | Hand Lottie; `kb_feed_hint_v9`; idle = `display:none` (no backdrop veil) |
 | Topbar auto-hide | Mobile; overlays feed (no layout resize); after settle on next; page-step locked mid-swipe |
 
 ### Comments
@@ -161,6 +164,34 @@ WebHaptics-style pathLength draw — one SVG, no hard icon swap. Cone stays; wav
 
 ---
 
+### 2b. Activity bubbles (progressive disclosure)
+
+Floating IG-style avatars for ambient / live tip · comment · like · dislike. Host `#actBubbles` (`z-index:18`).
+
+| Piece | Detail |
+|-------|--------|
+| Enter / exit | `.act-bubble.is-in` / `.is-out` / `.is-fling` — opacity + scale, `.34–.55s` soft overshoot |
+| Idle drift | `@keyframes actBubbleDrift` — `5.2s ease-in-out` infinite (staggered delays) |
+| Chip closed | `.act-hit-rx` — 16×16 color badge with reaction icon |
+| Chip open | `.is-rx-open` — blooms to pill (`max-width:168px`, `.32s` `(.22,1,.36,1)`) |
+| Copy | tip `tipped $N` · like `liked it` · dislike `disliked it` · comment short text |
+| Comment marquee | `@keyframes actRxMarquee` — **only** `data-kind="comment"` when label overflows (`syncActRxMarquee`) |
+| API | `spawnActivityBubble` · `signalActivity` · `setActDisclosure` · `layoutActivityBubbles` |
+
+```css
+.act-rx-label.is-marquee .act-rx-label-text{
+  animation: actRxMarquee 3.8s linear infinite;
+}
+@keyframes actRxMarquee{
+  0%,14%{ transform: translateX(0); }
+  86%,100%{ transform: translateX(var(--marquee-x, 0px)); }
+}
+```
+
+Short snips (`wow`, `love this`) and like/dislike/tip labels never marquee.
+
+---
+
 ### 3. Media load & playback
 
 | Motion | Code | Timing |
@@ -170,12 +201,14 @@ WebHaptics-style pathLength draw — one SVG, no hard icon swap. Cone stays; wav
 | Rail unlock | `.feed-item.media-ready` | opacity/filter `.28s ease` |
 | Top controls show | `.media-topctl` | opacity `.2s`, `translateY(−6→0)` |
 | Play/pause flash | `@keyframes flashPop` | `.58s` `(.22,1,.36,1)` — scale `.55→1→1.5`, fade out |
-| 2× badge in | `.speed-badge.show` | `.4s` `(.22,1.45,.36,1)` spring-in |
+| 2× badge | `.speed-badge` — same glass as mute/more (`var(--glass-dark)`) | `.4s` pop spring-in |
 | 2× chevrons | `@keyframes speedChevron` | `.85s ease-in-out` infinite, staggered `.14s` |
 | Hold → 2× | `playbackRate = 2` after **240ms** hold | haptic `nudge`; charge ring 3s → lock |
-| 2× lock | keep 2× after release; padlock pathLength morph unlock + selection haptic | `SPEED_LOCK_MS = 3000` |
+| Lock hint | `.speed-lock-hint` — “Hold 3s to lock”, `13px` / weight 700 | opacity `.25s` while `.is-charging` |
+| 2× lock | keep 2× after release; padlock pathLength morph unlock + latch click | `SPEED_LOCK_MS = 3000` |
 | Buy CTA cycle | desktop show → dormant → reappear on engage | show 3.8s / engage 5.5s / max 3 |
 | Progress bar | `.video-progress-fill` | width `.08s linear` |
+| Meta float scrim | `.media-meta-scrim` desktop `clamp(132px,28%,176px)` soft gradient | mobile `48–52%` |
 
 ---
 
@@ -184,9 +217,19 @@ WebHaptics-style pathLength draw — one SVG, no hard icon swap. Cone stays; wav
 | Motion | Code | Timing |
 |--------|------|--------|
 | Overlay in | `.feed-hint.show` | opacity/bg/blur `.45s ease` |
-| Hand Lottie | local `lottie.min.js` + `/public/hand-helper/Hand.json` (MP4 fallback) | 700×700, 30fps, 110f (~3.7s), loop |
+| Idle | **`display:none`** when not showing — never leave an `opacity:0` + `backdrop-filter` layer over `#actBubbles` | — |
+| Hand Lottie | local `lottie.min.js` + `/public/hand-helper/hand.json` | 1080×1080, 30fps, 110f (~3.7s), loop · size `min(168px,44vw)` |
 | Lottie enter | `.hint-lottie` | `.55s` `(.22,1.4,.36,1)` scale `.94→1` |
-| Auto-dismiss | `kb_feed_hint_v8` | show after ready; ~10s or navigate (900ms grace) |
+| Auto-dismiss | `kb_feed_hint_v9` | show after ready; ~10s or navigate (900ms grace) |
+
+```css
+.feed-hint{ display:none; /* … */ opacity:0; }
+.feed-hint.show{
+  display:flex; opacity:1;
+  background:rgba(10,8,6,.52);
+  backdrop-filter:blur(3px);
+}
+```
 
 ---
 
@@ -234,6 +277,9 @@ pos  += v * dt
 | Chrome reflow | `reflowDuringChrome()` rAF loop | **440ms** |
 | Search marquee | `@keyframes searchMarquee` | `--mq-dur` (~overflow/45), ease-in-out alternate |
 | Meta bottom | `layoutMeta` — pinned: flush with media bottom; float (`.meta-float`): inset by `PAD` (18px) | — |
+| Chevron gutter | `--feed-chevron-gutter: 88px` on `.feed-item` (incl. `meta-overlay-mode` ≥861px) | keeps rail clear of `.chevron-nav` |
+| Media chrome | `mediaChromePx()` reserves pad + rail + chevron column | tablet / expanded sidebar |
+| Reaction glass | glass rail styles **only ≤860** (on-media); tablet keeps light `#FAFAFA` rail beside card | — |
 
 ---
 
@@ -268,7 +314,7 @@ API surface: open via `.comment-thumb`; close `#cfxClose` / backdrop / Escape. K
 
 ---
 
-### 8. Pull-to-refresh → spring settle (mobile)
+### 8. Pull-to-refresh → spring settle
 
 Infinite wrap both ways (TikTok trap). At the first post, a **short** down-pull still refreshes; drag further and it hands off to previous-post scroll.
 
@@ -280,9 +326,18 @@ Infinite wrap both ways (TikTok trap). At the first post, a **short** down-pull 
 | Offset | `pullOffset` via `setPullOffset` → `applyTransform` | active item only |
 | Mask | `.is-pulling` / `.is-refreshing` | non-active hidden; peek gradient off |
 | Threshold | `PULL_THRESHOLD = 68` | haptic `nudge` on arm |
-| Spinner | centered in gap (`y = pull*0.5`) | `--p` + `pullspin` `.65s` |
-| Hold / settle | `PULL_HOLD = 56` · `.is-pull-settle` | `.42s` `(.22,1,.36,1)` |
-| Desktop alternate | `#newPill` | opacity `.3s`, transform `.38s` pop |
+| Spinner pill | `#pullSpin` — `background:var(--card)`; `color:var(--ink)`; `border:var(--line)` | grounded on media lip; `TOP_PAD = 20` under topbar |
+| Spin feel | rAF cruise + wobble + SVG blur while `.is-spinning` | ease-out ramp ~200ms → ~1.7 rps |
+| Hold / settle | `PULL_HOLD = 64` | keep gap while loading |
+| Desktop alternate | `#newPill` — same theme tokens; `positionNewPill` max(20px, media−pill−14) | opacity `.28s`, transform `.34s` pop |
+
+```css
+.pull-spin, .new-pill{
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+```
 
 ---
 
@@ -324,8 +379,8 @@ First tagged snapshot of the single-file prototype (`feed.html` + `public/`).
 
 | Area | Included |
 |------|----------|
-| Feed | Spring doomscroll, infinite wrap, pull-to-refresh (mobile), mute morph, Buy CTA, hover cards, 2× hold, new-pill, first-visit hint |
-| Meta | Pinned left (flush) or float-on-media (padded inset) via `layoutMeta` |
+| Feed | Spring doomscroll, infinite wrap, pull-to-refresh, mute morph, Buy CTA, hover cards, 2× hold/lock, activity bubbles, new-pill, first-visit hint |
+| Meta | Pinned left (flush) or float-on-media (padded inset + short desktop scrim) via `layoutMeta` |
 | Comments | Anon/public, attach + fly-in, CFX gallery (desktop stage / mobile pinch-rotate-pan) |
 | Sheets | Trade, share (auto-close on X/copy), more (auto-close incl. theme), sheet-colored close targets |
 | System | Light/dark tokens, web-haptics + WebAudio, session keys for hint / sound / sidebar |
