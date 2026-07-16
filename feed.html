@@ -343,11 +343,12 @@ html.dark .buy-cta-rim::before{
   clip-path:inset(0 0 0 100%);
   transform:translateY(-50%) translateX(36px) scale(.42);
   z-index:1;
-  /* Exit: same path, faster — transition only */
+  /* Exit = reverse of enter (same spring curves), ~0.55× duration */
   transition:
-    clip-path .28s cubic-bezier(.23,1,.32,1),
-    transform .3s cubic-bezier(.2,1,.32,1),
-    background .14s ease, color .14s ease, box-shadow .22s ease,
+    clip-path .28s cubic-bezier(.18,1.15,.32,1),
+    transform .3s cubic-bezier(.16,1.25,.28,1),
+    background .14s ease, color .14s ease,
+    box-shadow .3s cubic-bezier(.22,1,.36,1),
     filter .1s ease, z-index 0s linear 0s;
   transition-delay:0s;
 }
@@ -489,11 +490,12 @@ html.dark .buy-cta-rim::before{
   opacity:.22;transform:translateX(-3px);
   filter:drop-shadow(0 1px 2px rgba(0,0,0,.35));
 }
-.speed-badge.show:not(.is-locked) .speed-chev{animation:speedChevron .85s ease-in-out infinite;}
-.speed-badge.show:not(.is-locked) .speed-chev:nth-child(1){animation-delay:0s;}
-.speed-badge.show:not(.is-locked) .speed-chev:nth-child(2){animation-delay:.14s;}
-.speed-badge.show:not(.is-locked) .speed-chev:nth-child(3){animation-delay:.28s;}
-.speed-badge.is-locked .speed-chevs{display:none;}
+/* Chevrons only if a non-charging 2× show exists — hold-to-lock goes straight to .is-charging */
+.speed-badge.show:not(.is-locked):not(.is-charging) .speed-chev{animation:speedChevron .85s ease-in-out infinite;}
+.speed-badge.show:not(.is-locked):not(.is-charging) .speed-chev:nth-child(1){animation-delay:0s;}
+.speed-badge.show:not(.is-locked):not(.is-charging) .speed-chev:nth-child(2){animation-delay:.14s;}
+.speed-badge.show:not(.is-locked):not(.is-charging) .speed-chev:nth-child(3){animation-delay:.28s;}
+.speed-badge.is-locked .speed-chevs,
 .speed-badge.is-charging .speed-chevs{display:none;}
 @keyframes speedChevron{
   0%,100%{opacity:.2;transform:translateX(-2px);}
@@ -567,7 +569,7 @@ html.dark .buy-cta-rim::before{
   .speed-badge.is-unlocking .lock-open{animation:none!important;}
 }
 .speed-lock-hint{
-  position:absolute;left:50%;top:calc(100% + 8px);
+  position:absolute;left:50%;top:calc(100% + 14px);
   transform:translateX(-50%);
   font-size:13px;font-weight:700;letter-spacing:.01em;
   color:rgba(255,255,255,.88);text-shadow:0 1px 4px rgba(0,0,0,.5);
@@ -4749,6 +4751,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       [...liveBubbles].forEach(b=> dismissActivityBubble(b, {animate:false}));
       haptic('settle');
       dismissFeedHint();
+      noteNewPillSwipe();
       // keep the open comments drawer in sync with the post now in view
       if(state.commentsOpen && !state.focusedComment) loadCommentsForPost(posts[idx], idx);
       // New post — drop any prior 2× lock and restart Buy CTA cycle
@@ -5326,8 +5329,35 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
 
   const NEW_PILL_DELAY = 3 * 60 * 1000; // simmer ~3 min before offering new posts
-  function armNewContent(delay){ clearTimeout(newTimer); newTimer=setTimeout(()=>{ newContentReady=true; if(!refreshing && !pulling){ newPill.classList.add('show'); positionFeedOverlays(); } }, delay); }
-  function clearNewContent(){ newContentReady=false; newPill.classList.remove('show'); armNewContent(NEW_PILL_DELAY); }
+  const NEW_PILL_SWIPES = 2; // hide after a couple of settled navigations so it doesn't linger
+  let newPillSwipes = 0;
+  function armNewContent(delay){
+    clearTimeout(newTimer);
+    newTimer = setTimeout(()=>{
+      newContentReady = true;
+      newPillSwipes = 0;
+      if(!refreshing && !pulling){
+        newPill.classList.add('show');
+        positionFeedOverlays();
+      }
+    }, delay);
+  }
+  function clearNewContent(){
+    newContentReady = false;
+    newPillSwipes = 0;
+    newPill.classList.remove('show');
+    armNewContent(NEW_PILL_DELAY);
+  }
+  function noteNewPillSwipe(){
+    if(!newPill?.classList.contains('show')) return;
+    newPillSwipes += 1;
+    if(newPillSwipes < NEW_PILL_SWIPES) return;
+    // Soft dismiss — not a refresh; re-arm so it can return later
+    newContentReady = false;
+    newPillSwipes = 0;
+    newPill.classList.remove('show');
+    armNewContent(NEW_PILL_DELAY);
+  }
   newPill.addEventListener('click', ()=>{ if(refreshing || pulling) return; doRefresh(false); });
   pullSpin.addEventListener('click', (e)=>{
     if(!pullArmed || refreshing || pulling) return;
@@ -5450,9 +5480,8 @@ html.dark .qhc-id{color:#6BA3FF;}
         if(gMoved || !state.dragging || pulling || gSpeedLocked) return;
         gHoldActive=true;
         gVideo.playbackRate=2;
-        const badge = gItem.querySelector('.speed-badge');
-        badge?.classList.add('show');
         haptic('nudge');
+        // Straight into charge UI (ring + hint) — never flash .show chevrons first
         startSpeedLockCharge(gItem, gVideo);
       }, SPEED_HOLD_MS);
     }

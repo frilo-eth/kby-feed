@@ -12,21 +12,26 @@ Feed
 - Glass mute/more — 46px; pathLength mute↔sound morph; unmute/mute haptics+sounds; session persist
 - React rail — tip (immutable +$5 float); like↔dislike exclusive; comment; share; pulse + haptics
 - Meta — pinned | float-on-media | overlay-mode (`layoutMeta`); pinned flush with media bottom; float inset by PAD (18px)
-- Buy CTA — desktop only; crystal glass `Buy $ticker` on `.token-anchor`; auto-hide ~3.8s, reappear after ~5.5s engage (max 3 / post); hidden ≤860
+- Buy CTA — desktop only; crystal glass `Buy $ticker` on `.token-anchor`; show ~4.2s → tuck (enter reverse ~0.55×) → reappear after ~6.5s engage (max 3 / post); hidden ≤860
 - Trade entry — avatar+ / buy CTA / ticker / mini / pill → trade drawer (not hover card)
-- Hover cards (desktop) — user on uname/avatar; token chart on plus/buy/ticker/mini/pill (no CTA)
-- Motion — spring doomscroll; infinite wrap; mid-swipe hides chrome; no mid-swipe/mobile scale; 2× hold → 3s charge/lock (tap badge unlocks); pull-refresh vs wrap
+- Hover cards (desktop) — user on uname/avatar; token chart on plus/buy/ticker/mini/pill; `>>id` quote card on comment quotes (no CTA)
+- Motion — spring doomscroll; infinite wrap; mid-swipe hides chrome; no mid-swipe/mobile scale; pull-refresh vs wrap
+- 2× hold → lock — hold video ≥240ms → glass `2x` + charge ring + annotation “Hold 3s to lock” (13px/700, 14px under pill); no chevron pulse (`.show.is-charging` in one step); lock survives release; tap badge unlocks (padlock morph + `lock`/`unlock` haptics)
 - Activity bubbles — progressive disclosure; tip `tipped $N` / like `liked it` / dislike `disliked it` / comment short text; marquee only for long comments (never tip/like/dislike)
 - Topbar — mobile overlay auto-hide after settle (never resizes feed; page-step locked mid-swipe)
 - New-pill / pull-spin — theme tokens (`--card`/`--ink`/`--line`); 20px topbar clearance
 - Meta float scrim — desktop short veil; tablet keeps chevron gutter; glass rail only on-media (≤860)
-- New-pill — desktop ~3m; first-visit hint Lottie `kb_feed_hint_v9` (idle display:none)
+- New-pill — desktop ~3m; soft-dismiss after 2 settled swipes then re-arm; first-visit hint Lottie `kb_feed_hint_v9` (idle display:none)
 
 Comments
 - Drawer — desktop 360 side panel; mobile 86vh sheet + scrim + drag dismiss
-- List — skeleton; empty; staggered enter; anon (no reacts/media) vs public (+ X-proof tip)
+- List — skeleton; empty; staggered `.comment-enter` (roots `--enter-d` ×42ms); fresh send uses `.comment-enter-fresh`
+- Threads — one indent level (`.comment-replies` pad 46/40); reply avatars 28px; collapsed by default
+- View / hide — `View N replies` → reveal 5 (`REPLY_PAGE`); `View N more`; `Hide` collapses all indented replies
+- `>>id` quotes — Reply prefixes compose; send nests under quoted root; blue `.comment-quote` in list + compose mirror
+- Quote hover — desktop `#quoteHoverCard` on `>>id` (list + mirror); missing id shows “not found”
 - Ctx menu — … → not interested / copy / report
-- Compose — identity chevron; anon pop+switch; pill input rest→focus→ready; send.show when ready
+- Compose — identity chevron; anon pop+switch; pill input rest→focus→ready; send.show when ready; mirror paints `>>` tags
 - Attach — file pop-in; feed fly-in; drop stage hides list; ✕ dismiss; anon auto-exits for media
 - CFX (comment media focus) — tap comment thumb → gallery
   · desktop: stage beside comments drawer
@@ -43,6 +48,6 @@ Overlays
 
 System
 - Tokens — `--bg` light `#F2EEEA` / dark `#070403`; rail outside `#FAFAFA→#FFF` / `#130A07→#251D18`
-- Haptics — light/selection/nudge/settle/attach/dragtick/toggle/unmute/mute/open/comment/share/tip/like/dislike
+- Haptics — light/selection/nudge/settle/attach/dragtick/toggle/unmute/mute/open/comment/share/tip/like/dislike/lock/unlock
 - Sounds — WebAudio map per preset (no ambient)
 - Persist — kb_sidebar_collapsed; kb_feed_hint_v9; kb_feed_sound

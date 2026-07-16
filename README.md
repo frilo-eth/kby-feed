@@ -26,7 +26,7 @@ Open [http://localhost:3000](http://localhost:3000) (`/` → feed).
 | `C` | Comment |
 | `S` | Share |
 
-Swipe / wheel on desktop. Hold video ≥240ms for 2×. Pull down on mobile for refresh (short pull) or wrap to previous (longer drag — infinite loop).
+Swipe / wheel on desktop. Hold video ≥240ms for 2× — badge opens straight into the charge ring + **“Hold 3s to lock”** annotation → locked 2× (tap badge to unlock). Pull down on mobile for refresh (short pull) or wrap to previous (longer drag — infinite loop).
 
 ---
 
@@ -41,12 +41,12 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Infinite wrap | Both directions; first-post down-swipe wraps to previous (TikTok trap) |
 | Pull-to-refresh | Mobile only; short deliberate pull at top; longer drag hands off to wrap scroll |
 | Mute morph | pathLength SVG draw (waves ↔ slash); session `kb_feed_sound` |
-| Buy `$ticker` | Desktop only — show ~3.8s → hide → reappear after ~5.5s engage (max 3 / post); crystal glass on `.token-anchor`. Hidden on mobile |
+| Buy `$ticker` | Desktop only — show ~4.2s → tuck → reappear after ~6.5s engage (max 3 / post); crystal glass on `.token-anchor`. Exit = reverse of enter (~0.55×). Hidden on mobile |
 | Trade entry points | Avatar+, Buy CTA, ticker, token mini, category pill → trade drawer |
-| Hover cards | Desktop only — user / token preview portals (no Buy on the card) |
-| 2× hold | ≥240ms on video; glass badge + chevrons; hold 3s → charge ring + lock; tap badge to unlock |
+| Hover cards | Desktop only — user / token / **`>>` quote** preview portals (no Buy on the card) |
+| 2× hold → lock | ≥240ms → glass `2x` badge with **charge ring** + **“Hold 3s to lock”** (`SPEED_LOCK_MS=3000`); no chevron pulse on this path; release early = back to 1×; lock survives finger-up; tap badge to unlock |
 | Activity bubbles | Desktop ambient reactions; progressive disclosure on the reaction chip |
-| New posts / pull pill | Themed `--card` / `--ink` / `--line`; 20px clearance under topbar |
+| New posts / pull pill | Themed `--card` / `--ink` / `--line`; 20px clearance under topbar; soft-dismiss after **2** settled swipes (`NEW_PILL_SWIPES`), then re-arm ~3 min |
 | Meta float scrim | Desktop short veil (`clamp(132px, 28%, 176px)`); mobile taller |
 | Tablet chrome | Keep chevron gutter (`--feed-chevron-gutter: 88px`); glass rail only when overlaid on media |
 | First-visit hint | Hand Lottie; `kb_feed_hint_v9`; idle = `display:none` (no backdrop veil) |
@@ -58,6 +58,10 @@ Use this as the checklist when reimplementing — these are the UX details that 
 |---------|----------|
 | Drawer / sheet | Desktop 360 side panel; mobile 86vh bottom sheet + scrim + drag dismiss |
 | Anon vs public | Anon: no reacts/media; public: X-proof tip + reacts |
+| **Threaded replies** | One indent level under a root (`.comment-replies` pad-left 46px / 40px mobile); smaller reply avatars (28px) |
+| **View / hide replies** | Collapsed by default. `View N replies` → reveal **5** at a time (`REPLY_PAGE`); then `View N more`; **Hide** collapses the whole indent |
+| **`>>id` quotes** | 4chan-style. Reply prefixes compose with `>>35355 `; send nests under that comment’s **root**; blue `.comment-quote` links in list + compose mirror |
+| Quote hover card | Desktop — hover `>>id` → `#quoteHoverCard` mini preview (180ms); works in list + compose mirror |
 | Attach | File pop-in or drag media from feed; drop stage; anon auto-exits for media |
 | **Comment media focus (CFX)** | Tap a comment thumb → gallery focus overlay |
 | CFX desktop | Stage beside the open comments drawer |
@@ -104,9 +108,9 @@ Most motion reuses a small set of curves. Durations are wall-clock; springs are 
 | **Reaction rail** | outside: `#FAFAFA→#FFF` / dark `#130A07→#251D18`; on-media glass tint; active `brightness(1.06)` | `brightness(.94)` | bg/color `.22s` |
 | Reaction count | ink / white | — | color `.2s` |
 | **Mute / unmute** | pathLength draw morph — see below | — | `.2s` ease-in-out (+`.1s` outer) |
-| **Buy $ticker** | desktop only (≥861px); pill on `.token-anchor`; show ~3.8s then hide; reappear after ~5.5s engage (≤3× / post) | brightness | opacity `.3s` |
-| **Hover cards** | user + token preview portals (no Buy CTA); desktop `pointer:fine` only | — | show `.18s`, delay 280ms |
-| New posts pill | brightness `.98` | `scale(.95)` | opacity `.3s`, transform `.38s` pop |
+| **Buy $ticker** | desktop only (≥861px); pill on `.token-anchor`; show ~4.2s then tuck; reappear after ~6.5s engage (≤3× / post); exit = enter reverse ~0.55× | brightness | clip/transform spring |
+| **Hover cards** | user + token + **`>>` quote** portals (no Buy CTA); desktop `pointer:fine` only | — | show `.18s`, delay 180–280ms |
+| New posts pill | brightness `.98`; soft-dismiss after 2 settled swipes | `scale(.95)` | opacity `.28s`, transform `.34s` pop |
 | Tag / uname | color / underline | — | `.15s` |
 | **Token mini** *(size allowed)* | `scale(1.14)` + orange ring | `scale(.96)` | `.28s` `(.22,1.4,.36,1)` |
 | **Trade plus** *(embellished)* | see below | settle | pop curve |
@@ -201,14 +205,63 @@ Floating IG-style avatars for ambient / live tip · comment · like · dislike. 
 | Rail unlock | `.feed-item.media-ready` | opacity/filter `.28s ease` |
 | Top controls show | `.media-topctl` | opacity `.2s`, `translateY(−6→0)` |
 | Play/pause flash | `@keyframes flashPop` | `.58s` `(.22,1,.36,1)` — scale `.55→1→1.5`, fade out |
-| 2× badge | `.speed-badge` — same glass as mute/more (`var(--glass-dark)`) | `.4s` pop spring-in |
-| 2× chevrons | `@keyframes speedChevron` | `.85s ease-in-out` infinite, staggered `.14s` |
-| Hold → 2× | `playbackRate = 2` after **240ms** hold | haptic `nudge`; charge ring 3s → lock |
-| Lock hint | `.speed-lock-hint` — “Hold 3s to lock”, `13px` / weight 700 | opacity `.25s` while `.is-charging` |
-| 2× lock | keep 2× after release; padlock pathLength morph unlock + latch click | `SPEED_LOCK_MS = 3000` |
-| Buy CTA cycle | desktop show → dormant → reappear on engage | show 3.8s / engage 5.5s / max 3 |
+| 2× hold / lock | see **Hold → lock gesture** below | `SPEED_HOLD_MS=240` · `SPEED_LOCK_MS=3000` |
+| Buy CTA cycle | desktop show → dormant → reappear on engage | show 4.2s / engage 6.5s / max 3 |
+| Buy CTA enter | clip `none` + `scale(1)` | `.52–.56s` `(.18,1.15,.32,1)` / `(.16,1.25,.28,1)` |
+| Buy CTA exit | same path reverse (`.is-dormant`) | `.28–.30s` **same springs** (~0.55×) |
 | Progress bar | `.video-progress-fill` | width `.08s linear` |
 | Meta float scrim | `.media-meta-scrim` desktop `clamp(132px,28%,176px)` soft gradient | mobile `48–52%` |
+
+```css
+/* Exit mirrors enter curves, faster */
+.feed-item.active.media-ready .buy-cta.is-dormant{
+  clip-path: inset(0 0 0 100%);
+  transform: translateY(-50%) translateX(36px) scale(.42);
+  transition:
+    clip-path .28s cubic-bezier(.18,1.15,.32,1),
+    transform .3s cubic-bezier(.16,1.25,.28,1);
+}
+```
+
+#### Hold → lock gesture (2× + annotation)
+
+Press-and-hold on video media (not chrome / rail). Move >8px cancels an unlocked hold; a committed lock is never cancelled by drag.
+
+| Phase | When | UI | API / haptic |
+|-------|------|----|--------------|
+| Armed | pointerdown on video | — | `SPEED_HOLD_MS = 240` timer |
+| Charging 2× | hold ≥240ms | `.speed-badge.show.is-charging` — **ring** + `2x` + **“Hold 3s to lock”** (no chevron pulse) | `playbackRate=2` · haptic `nudge` · `startSpeedLockCharge` · `--lock-p` 0→1 over `SPEED_LOCK_MS = 3000` |
+| Locked | charge completes | `.is-locked` — padlock pathLength draw (`data-lock="1"`); hint hidden; badge clickable | haptic `lock` · rate stays 2 after finger-up |
+| Early release | up before 3s | badge clears; rate → 1 | `endSpeedHold` |
+| Unlock | tap locked badge | `.is-unlocking` — open shackle swing + fade | haptic `unlock` · ~420ms then clear |
+
+**No chevron flash:** hold used to add `.show` one frame before `.is-charging`, which briefly ran `@keyframes speedChevron`. Charge now starts in one step (`startSpeedLockCharge` adds both classes). Chevrons stay in the DOM but only animate under `.show:not(.is-locked):not(.is-charging)` — unused on the lock path.
+
+**Gesture annotation** — label under the badge while charging only (not while locked / unlocking):
+
+| Piece | Detail |
+|-------|--------|
+| Copy | `Hold 3s to lock` |
+| Node | `.speed-lock-hint` inside `.speed-badge` |
+| Type | `13px` / weight `700` / `letter-spacing:.01em` / `rgba(255,255,255,.88)` + text-shadow |
+| Position | `top: calc(100% + 14px)` centered under badge |
+| Show | opacity `0→1` `.25s ease` when `.speed-badge.is-charging` |
+| Hide | `display:none` on `.is-locked` / `.is-unlocking` |
+
+```css
+.speed-lock-hint{
+  position: absolute; left: 50%; top: calc(100% + 14px);
+  transform: translateX(-50%);
+  font-size: 13px; font-weight: 700; letter-spacing: .01em;
+  color: rgba(255,255,255,.88);
+  opacity: 0; transition: opacity .25s ease;
+}
+.speed-badge.is-charging .speed-lock-hint{ opacity: 1; }
+.speed-badge.is-locked .speed-lock-hint,
+.speed-badge.is-unlocking .speed-lock-hint{ display: none; }
+```
+
+Ring progress: `.speed-lock-ring .speed-ring-prog` uses `stroke-dashoffset` from `--lock-p` (0→1). Padlock morph reuses the mute pathLength draw (`lockDraw` / `lockShackleSwing`).
 
 ---
 
@@ -289,7 +342,11 @@ pos  += v * dt
 |--------|-------|----------|
 | List swap out | ease | `.22s` |
 | List ready in | `(.22,1,.36,1)` / `(.22,1.2,.36,1)` | `.34–.42s` |
-| Row enter (stagger) | `(.22,1.4,.36,1)` | `.36–.42s` |
+| Root row enter (stagger) | `.comment-enter` → `.is-in`; `--enter-d` = `min(i,8)×42ms` | opacity `.4s` `(.22,1,.36,1)`, transform `.48s` `(.18,1.15,.32,1)` |
+| Reply page-in | same `.comment-enter`; `--enter-d` = `min(i,4)×36ms` (or page delta ×36ms) | same |
+| Fresh send enter | `.comment-enter-fresh` (springier than list) | opacity `.42s`, transform `.52s` `(.18,1.25,.32,1)` |
+| Thumb lag | `.comment-thumb-wrap` after row | +`.072–.088s` delay |
+| Thread bar hover | `.comment-thread-more` / `.hide` → `var(--line)` pill | bg/color `.15s`; press `scale(.98)` |
 | Drop stage in | `(.22,1.4,.36,1)` | `.42s` |
 | Attach expand | `(.22,1,.36,1)` + pop | `.42s` |
 | Attach thumb pop | `@keyframes attachPopIn` `(.22,1.45,.36,1)` | `.58s` |
@@ -297,6 +354,40 @@ pos  += v * dt
 | Anon exit | `anonExit*` keyframes `(.22,1.4–1.5,.36,1)` | `.42–.45s` |
 | Send btn show | `(.22,1.5,.36,1)` | `.18s` |
 | Compose lift on drop | `(.22,1.3,.36,1)` | `.36s` |
+
+#### Threaded replies + `>>id` quotes
+
+One indent level only (not infinite nesting). Roots stay flush; replies live in `.comment-replies`.
+
+| Piece | Detail |
+|-------|--------|
+| Indent | `.comment-replies` `padding-left:46px` (40px ≤860); `.is-reply` avatars 28px |
+| Collapse | `thread._shown = 0` by default — bar shows `View N replies` |
+| Page size | `REPLY_PAGE = 5` via `revealMoreReplies` → `View N more` until exhausted |
+| Hide | `hideThreadReplies` clears the box; Hide button only while `.has-open` |
+| Bar API | `syncThreadBar` · `renderCommentThread` · `renderThreadReplies({animate})` |
+| `>>` render | `renderCommentText` → `<span class="comment-quote" data-qid>` (escaped HTML) |
+| Reply action | `startReplyTo(c)` prefixes compose `>>{id} ` (replaces any existing leading tag) |
+| Send nest | `sendComment` — leading `>>id` → push onto `hit.root.replies` (never deeper than 1) |
+| Compose mirror | `#commentInputMirror` paints quotes; pointer-events on `.comment-quote` for hover |
+| Quote card | `#quoteHoverCard` via `scheduleShowHover('quote', …)` · `renderQuoteHoverCard` |
+
+```css
+.comment-replies{ padding: 12px 0 0 46px; }
+.comment-item.comment-enter{ opacity:0; transform:translateY(10px); }
+.comment-item.comment-enter.is-in{
+  opacity:1; transform:translateY(0);
+  transition:
+    opacity .4s cubic-bezier(.22,1,.36,1),
+    transform .48s cubic-bezier(.18,1.15,.32,1);
+  transition-delay: var(--enter-d, 0ms);
+}
+.comment-item.comment-enter-fresh.is-in{
+  transition:
+    opacity .42s cubic-bezier(.22,1,.36,1),
+    transform .52s cubic-bezier(.18,1.25,.32,1);
+}
+```
 
 #### Comment media gallery focus (`#cfx`)
 
@@ -330,6 +421,7 @@ Infinite wrap both ways (TikTok trap). At the first post, a **short** down-pull 
 | Spin feel | rAF cruise + wobble + SVG blur while `.is-spinning` | ease-out ramp ~200ms → ~1.7 rps |
 | Hold / settle | `PULL_HOLD = 64` | keep gap while loading |
 | Desktop alternate | `#newPill` — same theme tokens; `positionNewPill` max(20px, media−pill−14) | opacity `.28s`, transform `.34s` pop |
+| Soft dismiss | `noteNewPillSwipe` after settled nav while `.show` | hide after `NEW_PILL_SWIPES = 2`, re-arm `NEW_PILL_DELAY` (~3 min) |
 
 ```css
 .pull-spin, .new-pill{
@@ -345,7 +437,7 @@ Infinite wrap both ways (TikTok trap). At the first post, a **short** down-pull 
 
 Presets via [web-haptics](https://haptics.lochie.me/) + `navigator.vibrate` fallback:
 
-`light` · `selection` · `nudge` · `settle` · `dragtick` · `toggle` · `unmute` · `mute` · `open` · `comment` · `share` · `tip` · `like` · `dislike` · `attach`
+`light` · `selection` · `nudge` · `settle` · `dragtick` · `toggle` · `unmute` · `mute` · `open` · `comment` · `share` · `tip` · `like` · `dislike` · `attach` · `lock` · `unlock`
 
 Each can fire a matching WebAudio one-shot (no ambient loop).
 
@@ -355,13 +447,13 @@ Each can fire a matching WebAudio one-shot (no ambient loop).
 
 Preview-only popovers. **No CTA on the card** — click the underlying zone still opens the trade drawer / existing actions.
 
-| | User card (`#userHoverCard`) | Token card (`#tokenHoverCard`) |
-|--|--|--|
-| **Triggers** | `.uname`, `.avatar-sm` | `.avatar-plus`, `.buy-cta`, `.token-mini`, `.tag-ticker`, `.pill` (280ms) |
-| **Content** | blockie, name, Mirror+X icons, Launches, Global PnL | avatar, ticker+cat, name, MCAP, seeded SVG chart + markers, buyers / comments / tips / heat |
-| **Gate** | `width > 860` and `(hover:hover) and (pointer:fine)` — hidden on mobile | same |
-| **API** | `bindHoverCard(el, 'user'\|'token', post, delayMs)` · `hideHoverCards(immediate?)` · `mockUserStats` / `mockTokenStats` / `buildTokenChartSvg` | |
-| **Hide** | leave trigger (160ms bridge onto card), Escape, scroll, resize, open drawer/comments/share | |
+| | User (`#userHoverCard`) | Token (`#tokenHoverCard`) | Quote (`#quoteHoverCard`) |
+|--|--|--|--|
+| **Triggers** | `.uname`, `.avatar-sm`, comment avatar/name | `.avatar-plus`, `.buy-cta`, `.token-mini`, `.tag-ticker`, `.pill` (280ms) | `.comment-quote[data-qid]` in list + compose mirror (180ms) |
+| **Content** | blockie, name, Mirror+X, Launches, Global PnL | avatar, ticker+cat, MCAP, seeded chart, buyers / comments / tips / heat | avatar, `>>id`, time, 3-line text clamp, optional thumb |
+| **Gate** | `width > 860` and `(hover:hover) and (pointer:fine)` | same | same |
+| **API** | `bindHoverCard` · `hideHoverCards` · `mockUserStats` / `mockTokenStats` / `buildTokenChartSvg` · `renderQuoteHoverCard` · `findCommentById` | | |
+| **Hide** | leave trigger (160ms bridge onto card), Escape, scroll, resize, open drawer/share | | |
 
 Portal: `#kbHoverPortal`. Stats/chart are deterministic from `hashSeed(user|ticker)` — swap those helpers for live API data later.
 
@@ -379,9 +471,9 @@ First tagged snapshot of the single-file prototype (`feed.html` + `public/`).
 
 | Area | Included |
 |------|----------|
-| Feed | Spring doomscroll, infinite wrap, pull-to-refresh, mute morph, Buy CTA, hover cards, 2× hold/lock, activity bubbles, new-pill, first-visit hint |
+| Feed | Spring doomscroll, infinite wrap, pull-to-refresh, mute morph, Buy CTA (enter/exit spring), hover cards, 2× hold→lock + “Hold 3s to lock” annotation, activity bubbles, new-pill soft-dismiss, first-visit hint |
 | Meta | Pinned left (flush) or float-on-media (padded inset + short desktop scrim) via `layoutMeta` |
-| Comments | Anon/public, attach + fly-in, CFX gallery (desktop stage / mobile pinch-rotate-pan) |
+| Comments | Anon/public, **threaded replies** (indent + View 5 / Hide), **`>>id` quotes** + hover card, attach + fly-in, CFX gallery |
 | Sheets | Trade, share (auto-close on X/copy), more (auto-close incl. theme), sheet-colored close targets |
 | System | Light/dark tokens, web-haptics + WebAudio, session keys for hint / sound / sidebar |
 
