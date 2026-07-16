@@ -3533,7 +3533,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(!label || !text) return;
     label.classList.remove('is-marquee');
     label.style.removeProperty('--marquee-x');
-    // Marquee only for long comment copy — never likes/dislikes/tips or short snips
+    // Marquee only for long comment copy — never tip / like / dislike (or short snips that fit)
     if(!el.classList.contains('is-rx-open') || el.dataset.kind !== 'comment') return;
     requestAnimationFrame(()=>{
       if(!el.classList.contains('is-rx-open') || el._gone || el.dataset.kind !== 'comment') return;

@@ -175,10 +175,12 @@ Floating IG-style avatars for ambient / live tip · comment · like · dislike. 
 | Chip closed | `.act-hit-rx` — 16×16 color badge with reaction icon |
 | Chip open | `.is-rx-open` — blooms to pill (`max-width:168px`, `.32s` `(.22,1,.36,1)`) |
 | Copy | tip `tipped $N` · like `liked it` · dislike `disliked it` · comment short text |
-| Comment marquee | `@keyframes actRxMarquee` — **only** `data-kind="comment"` when label overflows (`syncActRxMarquee`) |
+| Marquee | `@keyframes actRxMarquee` — **comments only**, and only when the label overflows (`syncActRxMarquee`) |
+| Never marquee | tip (`tipped $N`), like (`liked it`), dislike (`disliked it`), short comment snips (`wow`, `love this`) |
 | API | `spawnActivityBubble` · `signalActivity` · `setActDisclosure` · `layoutActivityBubbles` |
 
 ```css
+/* gated in JS: el.dataset.kind === 'comment' && overflow > 4 */
 .act-rx-label.is-marquee .act-rx-label-text{
   animation: actRxMarquee 3.8s linear infinite;
 }
@@ -187,8 +189,6 @@ Floating IG-style avatars for ambient / live tip · comment · like · dislike. 
   86%,100%{ transform: translateX(var(--marquee-x, 0px)); }
 }
 ```
-
-Short snips (`wow`, `love this`) and like/dislike/tip labels never marquee.
 
 ---
 

@@ -16,7 +16,7 @@ Feed
 - Trade entry — avatar+ / buy CTA / ticker / mini / pill → trade drawer (not hover card)
 - Hover cards (desktop) — user on uname/avatar; token chart on plus/buy/ticker/mini/pill (no CTA)
 - Motion — spring doomscroll; infinite wrap; mid-swipe hides chrome; no mid-swipe/mobile scale; 2× hold → 3s charge/lock (tap badge unlocks); pull-refresh vs wrap
-- Activity bubbles — progressive disclosure; tip `tipped $N` / like `liked it` / dislike `disliked it` / comment short text + marquee only when overflowing
+- Activity bubbles — progressive disclosure; tip `tipped $N` / like `liked it` / dislike `disliked it` / comment short text; marquee only for long comments (never tip/like/dislike)
 - Topbar — mobile overlay auto-hide after settle (never resizes feed; page-step locked mid-swipe)
 - New-pill / pull-spin — theme tokens (`--card`/`--ink`/`--line`); 20px topbar clearance
 - Meta float scrim — desktop short veil; tablet keeps chevron gutter; glass rail only on-media (≤860)
