@@ -291,30 +291,35 @@ Ring progress: `.speed-lock-ring .speed-ring-prog` uses `stroke-dashoffset` from
 
 ---
 
-### 5. Feed doomscroll (JS spring)
+### 5. Feed doomscroll (JS spring) — `swipe-silk`
 
-Core engine in `springTo()`:
+Core engine in `springTo()` — **wall-clock dt** (same feel on 60/120Hz), Apple-style damping ratio + response:
 
 ```js
-stiffness = 280
-damping   = 30
-mass      = 0.8
-dt        = 1/60
+// Critically damped by default; hard flicks get ζ≈0.90 + slightly shorter response
+response = flick ? 0.40 : 0.50   // seconds
+zeta     = flick ? 0.90 : 1.0
+omega    = 2π / response
+stiffness = omega² · mass
+damping   = 2 · zeta · omega · mass
 
+// real frame dt (capped), 1–2 substeps
 force = -stiffness * (pos - target)
 damp  = -damping * v
-v    += (force + damp) / mass * dt
-pos  += v * dt
+v    += (force + damp) / mass * h
+pos  += v * h
 
-// settle when |pos-target| < 0.0025 && |v| < 0.01
+// settle when |pos-target| < 0.0016 && |v| < 0.01
 ```
 
 | Piece | Behavior |
 |-------|----------|
 | Step size | `pageStep = scroller.clientHeight − --feed-peek` |
+| Drag | 1:1 with finger; mid-spring grab inherits `springVel` (no brick wall) |
+| Release velocity | Sample window **~90ms** (`sampleReleaseVelocity`) — not last-frame noise |
+| Snap | Momentum projection `pos + v·0.26`, then `silkSnapTarget` (hard / soft flick thresholds) |
 | Parallax | active/next `scale(1)`; prev `scale(.97) opacity .55`; else fade `1 − ad*0.5`, scale `≥.92` |
-| Wheel | deltaY → `goToIndex(±1)`, lock **520ms** |
-| Drag fling | `|velocity| > 0.7` → ceil/floor target |
+| Wheel | accumulate delta (≥28); page step; lock **360ms** (was 520) for chained trackpad flicks |
 | Settle haptic | `haptic('settle')` when index changes |
 | Drag tick | `haptic('dragtick')` each crossed index |
 

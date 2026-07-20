@@ -2812,11 +2812,23 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   let dragStartY=0, dragStartPos=0, lastY=0, lastT=0, lastTickStep=0;
   let lastPointerX=0, lastPointerY=0;
+  let springVel = 0; // live spring velocity (pages/s) — handed off on grab / release
+  let velSamples = []; // short pointer history for silk release velocity
   let pulling=false, pullDist=0, pullEligible=false, pullOffset=0, pullArmed=false, dragPointerType='mouse', refreshing=false;
   // tap / long-press / 2× lock gesture state (pointer capture routes all events to the scroller)
   let gStartX=0, gStartY=0, gStartT=0, gMoved=false, gHoldTimer=null, gHoldActive=false, gItem=null, gVideo=null;
   let gSpeedLocked=false, gLockedItem=null, gLockedVideo=null, gLockRAF=0, gLockStart=0;
   const GESTURE_MOVE_PX=8;
+  /* Silk swipe: longer critically-damped settle; momentum projection; sample-based release vel.
+     Tuned so a finger flick feels like butter on silk — no brick-wall grab, no square settle. */
+  const SILK_RESPONSE = 0.50;       // seconds to settle (critically damped)
+  const SILK_FLICK_RESPONSE = 0.40; // slightly snappier when the gesture carried real speed
+  const SILK_FLICK_ZETA = 0.90;     // whisper of overshoot only on hard flicks
+  const SILK_PROJECT = 0.26;        // pages of glide projected from release velocity
+  const SILK_FLICK_V = 0.42;        // |v| (pages/s) that commits direction
+  const SILK_SOFT_FLICK_V = 0.18;   // gentle commit when already leaning that way
+  const SILK_VEL_WINDOW_MS = 90;    // sample window for release velocity
+  const SILK_V_MAX = 3.2;           // clamp handed-off velocity (pages/s)
   const SPEED_HOLD_MS=240;
   const SPEED_LOCK_MS=3000;
   function clearGestureHold(){ if(gHoldTimer){ clearTimeout(gHoldTimer); gHoldTimer=null; } }
@@ -4607,18 +4619,78 @@ html.dark .qhc-id{color:#6BA3FF;}
     });
   }
   function cancelAnim(){ if(animRAF){ cancelAnimationFrame(animRAF); animRAF=null; } }
+  function clampSilkVel(v){
+    if(!Number.isFinite(v)) return 0;
+    return Math.max(-SILK_V_MAX, Math.min(SILK_V_MAX, v));
+  }
+  function pushVelSample(clientY, t=performance.now()){
+    velSamples.push({ t, y: clientY });
+    while(velSamples.length > 1 && t - velSamples[0].t > SILK_VEL_WINDOW_MS) velSamples.shift();
+  }
+  /** Release velocity in pages/s from the recent sample window (smoother than last-frame). */
+  function sampleReleaseVelocity(step){
+    if(!step || velSamples.length < 2) return clampSilkVel(velocity);
+    const a = velSamples[0], b = velSamples[velSamples.length - 1];
+    const dt = (b.t - a.t) / 1000;
+    if(dt < 0.012) return clampSilkVel(velocity);
+    let v = (a.y - b.y) / step / dt; // finger up → next post (positive)
+    // If the finger paused before lift, bleed velocity so it doesn't false-flick
+    const idle = performance.now() - b.t;
+    if(idle > 64) v *= Math.max(0, 1 - (idle - 64) / 140);
+    return clampSilkVel(v);
+  }
+  /** Snap target from position + projected momentum (Apple-style — not nearest-only). */
+  function silkSnapTarget(p, v){
+    const projected = p + v * SILK_PROJECT;
+    let target = Math.round(projected);
+    const frac = p - Math.floor(p);
+    if(Math.abs(v) >= SILK_FLICK_V){
+      // Hard flick: commit in velocity direction regardless of nearest page
+      target = v > 0 ? Math.ceil(p - 0.001) : Math.floor(p + 0.001);
+    } else if(Math.abs(v) >= SILK_SOFT_FLICK_V){
+      // Soft flick: only if already leaning that way
+      if(v > 0 && frac > 0.14) target = Math.ceil(p - 0.001);
+      else if(v < 0 && frac < 0.86) target = Math.floor(p + 0.001);
+      else target = Math.round(projected);
+    }
+    return target;
+  }
   function springTo(target, initialVel){
     cancelAnim();
     lockPageStep();
     targetIndex = target;
-    let v = initialVel||0;
-    const stiffness=280, damping=30, mass=0.8, dt=1/60;
-    function frame(){
-      const force=-stiffness*(pos-target), damp=-damping*v;
-      v += (force+damp)/mass*dt; pos += v*dt;
+    let v = clampSilkVel(initialVel || 0);
+    springVel = v;
+    const flick = Math.abs(v) >= SILK_FLICK_V;
+    // Apple damping-ratio + response → mass/stiffness/damping (critically damped by default)
+    const response = flick ? SILK_FLICK_RESPONSE : SILK_RESPONSE;
+    const zeta = flick ? SILK_FLICK_ZETA : 1.0;
+    const mass = 1;
+    const omega = (2 * Math.PI) / Math.max(0.18, response);
+    const stiffness = omega * omega * mass;
+    const damping = 2 * zeta * omega * mass;
+    let last = performance.now();
+    function frame(now){
+      // Wall-clock dt — keeps the same silk feel on 60Hz and 120Hz (fixed 1/60 was frame-tied)
+      let dt = Math.min(0.034, Math.max(0.001, (now - last) / 1000));
+      last = now;
+      const steps = dt > 0.017 ? 2 : 1;
+      const h = dt / steps;
+      for(let i = 0; i < steps; i++){
+        const force = -stiffness * (pos - target);
+        const damp = -damping * v;
+        v += (force + damp) / mass * h;
+        pos += v * h;
+      }
+      springVel = v;
       applyTransform(); applyParallax();
       warmAround(pos);
-      if(Math.abs(pos-target)<0.0025 && Math.abs(v)<0.01){ pos=target; applyTransform(); applyParallax(); onSettled(target); return; }
+      if(Math.abs(pos - target) < 0.0016 && Math.abs(v) < 0.01){
+        pos = target; springVel = 0;
+        applyTransform(); applyParallax();
+        onSettled(target);
+        return;
+      }
       animRAF = requestAnimationFrame(frame);
     }
     animRAF = requestAnimationFrame(frame);
@@ -4986,7 +5058,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     unlockAudio();
     noteFeedNav(Math.sign(delta));
     warmAround(targetIndex + delta);
-    springTo(targetIndex + delta, velocity);
+    // Soft directional energy (not leftover drag velocity) — keeps wheel/keys silky
+    springTo(targetIndex + delta, Math.sign(delta) * 0.95);
   }
   document.getElementById('nextBtn').addEventListener('pointerdown', unlockAudio);
   document.getElementById('prevBtn').addEventListener('pointerdown', unlockAudio);
@@ -5641,7 +5714,12 @@ html.dark .qhc-id{color:#6BA3FF;}
     clearMediaHover();
     state.dragging=true; scroller.classList.add('grabbing'); cancelAnim();
     lockPageStep();
-    dragStartY=e.clientY; dragStartPos=pos; lastY=e.clientY; lastT=performance.now(); velocity=0;
+    dragStartY=e.clientY; dragStartPos=pos; lastY=e.clientY; lastT=performance.now();
+    // Inherit in-flight spring velocity so a mid-glide grab isn't a brick wall
+    velocity = clampSilkVel(springVel);
+    springVel = 0;
+    velSamples = [];
+    pushVelSample(e.clientY, lastT);
     lastTickStep = Math.floor(pos);
     dragPointerType = e.pointerType || 'mouse';
     const atTop = (((Math.round(pos)%N)+N)%N)===0 && Math.abs(pos-Math.round(pos))<0.02;
@@ -5698,15 +5776,19 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(homeDragClamp) pos = Math.max(0, pos);
     const tick = Math.floor(pos);
     if(tick!==lastTickStep){ haptic('dragtick', null, tick); lastTickStep=tick; }
-    const now=performance.now(); const elapsed=(now-lastT)/1000||0.016;
-    velocity=(lastY-e.clientY)/step/elapsed; lastY=e.clientY; lastT=now;
+    const now=performance.now();
+    pushVelSample(e.clientY, now);
+    const elapsed=(now-lastT)/1000||0.016;
+    // Keep a live estimate for home-clamp; release uses the sample window
+    velocity=clampSilkVel((lastY-e.clientY)/step/elapsed);
+    lastY=e.clientY; lastT=now;
     if(homeDragClamp && velocity < 0) velocity = 0;
     applyTransform(); applyParallax();
     warmAround(pos);
   });
   function endDrag(e){
     if(!state.dragging) return;
-    if(e){ lastPointerX=e.clientX; lastPointerY=e.clientY; }
+    if(e){ lastPointerX=e.clientX; lastPointerY=e.clientY; pushVelSample(e.clientY); }
     clearGestureHold();
     if(pulling){ state.dragging=false; scroller.classList.remove('grabbing','is-swiping'); unlockPageStep(); endSpeedHold(); gItem=gVideo=null; finishPull(); return; }
     if(state.feedLocked){ state.dragging=false; scroller.classList.remove('grabbing','is-swiping'); unlockPageStep(); endSpeedHold(); gItem=gVideo=null; return; }
@@ -5718,7 +5800,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     // onSettled -> activateVideo -> v.play(), which would instantly re-play the video we just
     // paused. Correcting pos in place keeps the pause (or play) the user asked for.
     if(!gMoved && gVideo && (performance.now()-gStartT)<400 && !e?.target?.closest?.('.col-info')){
-      pos = Math.round(pos); targetIndex = pos;
+      pos = Math.round(pos); targetIndex = pos; springVel = 0;
       unlockPageStep();
       scroller.classList.remove('is-swiping');
       applyTransform(); applyParallax();
@@ -5744,25 +5826,39 @@ html.dark .qhc-id{color:#6BA3FF;}
       clearCommentDropActive();
     }
     gItem=gVideo=null;
-    let target = Math.round(pos);
-    if(Math.abs(velocity)>0.7) target = velocity>0 ? Math.ceil(pos-0.001) : Math.floor(pos+0.001);
+    const step = pageStep();
+    let releaseVel = sampleReleaseVelocity(step);
+    if(homeDragClamp && releaseVel < 0) releaseVel = 0;
+    let target = silkSnapTarget(pos, releaseVel);
     // Home soft-edge: never settle onto wrap-around previous
     if(homeDragClamp) target = Math.max(0, target);
     const didScroll = gMoved;
     if(didScroll) noteFeedNav(wrapNavDir(lastActiveIdx, target));
-    springTo(target, velocity);
+    velocity = releaseVel;
+    springTo(target, releaseVel);
     if(didScroll) requestAnimationFrame(()=>syncMediaHover(lastPointerX, lastPointerY));
   }
   scroller.addEventListener('pointerup', endDrag);
   scroller.addEventListener('pointercancel', endDrag);
 
   let wheelLock=false;
+  let wheelAcc=0;
+  let wheelUnlockT=0;
   scroller.addEventListener('wheel',(e)=>{
     e.preventDefault();
-    if(state.feedLocked || wheelLock || Math.abs(e.deltaY)<6) return;
+    if(state.feedLocked) return;
     unlockAudio();
-    wheelLock=true; goToIndex(e.deltaY>0?1:-1);
-    setTimeout(()=>wheelLock=false, 520);
+    // Trackpads fire many small deltas — accumulate so one silk flick = one page
+    wheelAcc += e.deltaY;
+    if(Math.abs(wheelAcc) < 28) return;
+    if(wheelLock){ wheelAcc = 0; return; }
+    const dir = wheelAcc > 0 ? 1 : -1;
+    wheelAcc = 0;
+    wheelLock = true;
+    goToIndex(dir);
+    clearTimeout(wheelUnlockT);
+    // Unlock a bit before the spring finishes so chained flicks stay continuous
+    wheelUnlockT = setTimeout(()=>{ wheelLock=false; }, 360);
   }, {passive:false});
 
   window.addEventListener('keydown',(e)=>{
