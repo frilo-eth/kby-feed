@@ -41,11 +41,12 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Infinite wrap | Both directions; first-post down-swipe wraps to previous (TikTok trap) |
 | Pull-to-refresh | Mobile only; short deliberate pull at top; longer drag hands off to wrap scroll |
 | Mute morph | pathLength SVG draw (waves ↔ slash); session `kb_feed_sound` |
-| Buy `$ticker` | Desktop only — show ~4.2s → tuck → reappear after ~6.5s engage (max 3 / post); crystal glass on `.token-anchor`. Exit = reverse of enter (~0.55×). Hidden on mobile |
+| Buy `$ticker` | Desktop only — show ~4.2s → tuck → reappear after ~6.5s engage (max 3 / post); crystal glass on `.token-anchor`. Enter/exit share the same spring; wipe uses `clip-path: inset(… round 999px)` so the pill never goes square mid-flight. Hidden on mobile |
+| Media frame | **Desktop always matches source aspect ratio** (`fitMediaBox` + `--ar`); one binding axis, the other `auto`. Mobile ≤860 stays full-bleed `object-fit:cover` |
 | Trade entry points | Avatar+, Buy CTA, ticker, token mini, category pill → trade drawer |
 | Hover cards | Desktop only — user / token / **`>>` quote** preview portals (no Buy on the card) |
 | 2× hold → lock | ≥240ms → glass `2x` badge with **charge ring** + **“Hold 3s to lock”** (`SPEED_LOCK_MS=3000`); no chevron pulse on this path; release early = back to 1×; lock survives finger-up; tap badge to unlock |
-| Activity bubbles | Desktop ambient reactions; progressive disclosure on the reaction chip |
+| Activity bubbles | Desktop ambient reactions; progressive disclosure on the reaction chip; discs clamped inside the feed wrap (never under sidebar/drawer) |
 | New posts / pull pill | Themed `--card` / `--ink` / `--line`; 20px clearance under topbar; soft-dismiss after **2** settled swipes (`NEW_PILL_SWIPES`), then re-arm ~3 min |
 | Meta float scrim | Desktop short veil (`clamp(132px, 28%, 176px)`); mobile taller |
 | Tablet chrome | Keep chevron gutter (`--feed-chevron-gutter: 88px`); glass rail only when overlaid on media |
@@ -57,6 +58,8 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Feature | Behavior |
 |---------|----------|
 | Drawer / sheet | Desktop 360 side panel; mobile 86vh bottom sheet + scrim + drag dismiss |
+| Compose dock | Comments tab: list scrolls in `.comments-body`; compose stays on the drawer floor (not sticky-inside-scroll). Keep scroll **16px** gutters — do not negative-margin the whole panel |
+| Compose chrome | Squircle input row (`border-radius:14px`) matching `.comment-send`; send haptic `sent` |
 | Anon vs public | Anon: no reacts/media; public: X-proof tip + reacts |
 | **Threaded replies** | One indent level under a root (`.comment-replies` pad-left 46px / 40px mobile); smaller reply avatars (28px) |
 | **View / hide replies** | Collapsed by default. `View N replies` → reveal **5** at a time (`REPLY_PAGE`); then `View N more`; **Hide** collapses the whole indent |
@@ -74,7 +77,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 |---------|------------------|
 | **More sheet** (mobile) | Closes after **any** row action — including **Toggle theme**. Do not leave it open after theme flip. |
 | **Share** | Desktop modal / mobile sheet. **Share on X** and **Copy url** auto-close after success (copy shows “Copied!” ~800ms then closes). Scrim / ✕ / drag-dismiss also close. |
-| Trade / comments | Scrim tap, ✕, Escape, drag handle (mobile) |
+| Trade / comments | Scrim tap, ✕, **Escape**, drag handle (mobile). Esc peels topmost layer first (CFX → hover card → kbd → more → share → drawer) |
 | Sheet close buttons | Sheet-colored bg (`var(--card)`), 40px desktop / 44px mobile thumb target |
 
 ---
@@ -108,7 +111,7 @@ Most motion reuses a small set of curves. Durations are wall-clock; springs are 
 | **Reaction rail** | outside: `#FAFAFA→#FFF` / dark `#130A07→#251D18`; on-media glass tint; active `brightness(1.06)` | `brightness(.94)` | bg/color `.22s` |
 | Reaction count | ink / white | — | color `.2s` |
 | **Mute / unmute** | pathLength draw morph — see below | — | `.2s` ease-in-out (+`.1s` outer) |
-| **Buy $ticker** | desktop only (≥861px); pill on `.token-anchor`; show ~4.2s then tuck; reappear after ~6.5s engage (≤3× / post); exit = enter reverse ~0.55× | brightness | clip/transform spring |
+| **Buy $ticker** | desktop only (≥861px); pill on `.token-anchor`; show ~4.2s then tuck; reappear after ~6.5s engage (≤3× / post); shared enter/exit spring; `inset(… round 999px)` wipe | brightness | clip/transform spring |
 | **Hover cards** | user + token + **`>>` quote** portals (no Buy CTA); desktop `pointer:fine` only | — | show `.18s`, delay 180–280ms |
 | New posts pill | brightness `.98`; soft-dismiss after 2 settled swipes | `scale(.95)` | opacity `.28s`, transform `.34s` pop |
 | Tag / uname | color / underline | — | `.15s` |
@@ -202,24 +205,26 @@ Floating IG-style avatars for ambient / live tip · comment · like · dislike. 
 |--------|------|--------|
 | Skeleton shimmer | `@keyframes mediaShimmer` | `1.15s ease` infinite, gradient sweep |
 | Media fade-in | `.media-inner.is-ready` / `.vid-live` | opacity `.18–.22s ease` |
+| Desktop fit | `fitMediaBox` — landscape binds width, portrait binds height; `--ar` + `height/width:auto`; inline max ceilings | sync on load / resize / drawer |
+| Desktop paint | `object-fit:contain` inside the AR frame (no crop); mobile full-bleed `cover` | — |
 | Rail unlock | `.feed-item.media-ready` | opacity/filter `.28s ease` |
 | Top controls show | `.media-topctl` | opacity `.2s`, `translateY(−6→0)` |
 | Play/pause flash | `@keyframes flashPop` | `.58s` `(.22,1,.36,1)` — scale `.55→1→1.5`, fade out |
 | 2× hold / lock | see **Hold → lock gesture** below | `SPEED_HOLD_MS=240` · `SPEED_LOCK_MS=3000` |
 | Buy CTA cycle | desktop show → dormant → reappear on engage | show 4.2s / engage 6.5s / max 3 |
-| Buy CTA enter | clip `none` + `scale(1)` | `.52–.56s` `(.18,1.15,.32,1)` / `(.16,1.25,.28,1)` |
-| Buy CTA exit | same path reverse (`.is-dormant`) | `.28–.30s` **same springs** (~0.55×) |
+| Buy CTA enter / exit | shared transition; `clip-path: inset(… round 999px)` + scale/translate (never bare `inset` / `none` mismatch) | `.46s` / `.5s` `(.18,1.12,.32,1)` / `(.16,1.2,.28,1)` |
 | Progress bar | `.video-progress-fill` | width `.08s linear` |
 | Meta float scrim | `.media-meta-scrim` desktop `clamp(132px,28%,176px)` soft gradient | mobile `48–52%` |
 
 ```css
-/* Exit mirrors enter curves, faster */
+/* Open + dormant stay on inset+round so wake/tuck can interpolate without a square wipe */
+.feed-item.active.media-ready .buy-cta:not(.is-dormant){
+  clip-path: inset(0 0 0 0 round 999px);
+  transform: translateY(-50%) translateX(0) scale(1);
+}
 .feed-item.active.media-ready .buy-cta.is-dormant{
-  clip-path: inset(0 0 0 100%);
+  clip-path: inset(0 0 0 100% round 999px);
   transform: translateY(-50%) translateX(36px) scale(.42);
-  transition:
-    clip-path .28s cubic-bezier(.18,1.15,.32,1),
-    transform .3s cubic-bezier(.16,1.25,.28,1);
 }
 ```
 
@@ -354,6 +359,9 @@ pos  += v * dt
 | Anon exit | `anonExit*` keyframes `(.22,1.4–1.5,.36,1)` | `.42–.45s` |
 | Send btn show | `(.22,1.5,.36,1)` | `.18s` |
 | Compose lift on drop | `(.22,1.3,.36,1)` | `.36s` |
+| Compose dock | `.comments-body` scrolls; `#commentCompose` relative on drawer floor | gutters from `.token-drawer-scroll` padding |
+| Input shape | `.comment-input-row` `border-radius:14px` (squircle, matches send) | — |
+| Send feedback | `haptic('sent')` on Enter / send | vibration + ascending cue |
 
 #### Threaded replies + `>>id` quotes
 
@@ -437,7 +445,7 @@ Infinite wrap both ways (TikTok trap). At the first post, a **short** down-pull 
 
 Presets via [web-haptics](https://haptics.lochie.me/) + `navigator.vibrate` fallback:
 
-`light` · `selection` · `nudge` · `settle` · `dragtick` · `toggle` · `unmute` · `mute` · `open` · `comment` · `share` · `tip` · `like` · `dislike` · `attach` · `lock` · `unlock`
+`light` · `selection` · `nudge` · `settle` · `dragtick` · `toggle` · `unmute` · `mute` · `open` · `comment` · `sent` · `share` · `tip` · `like` · `dislike` · `attach` · `lock` · `unlock`
 
 Each can fire a matching WebAudio one-shot (no ambient loop).
 
@@ -456,6 +464,14 @@ Preview-only popovers. **No CTA on the card** — click the underlying zone stil
 | **Hide** | leave trigger (160ms bridge onto card), Escape, scroll, resize, open drawer/share | | |
 
 Portal: `#kbHoverPortal`. Stats/chart are deterministic from `hashSeed(user|ticker)` — swap those helpers for live API data later.
+
+---
+
+## Dev tooling
+
+| Tool | Notes |
+|------|-------|
+| **Agentation** | `devDependency` — localhost-only annotation overlay for agent feedback (CDN mount at end of `feed.html`). Not shipped as a production UX surface. |
 
 ---
 

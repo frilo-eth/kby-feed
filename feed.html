@@ -105,7 +105,8 @@ html.dark .side-brand .mark-dark{display:block;}
 .btn-wallet{background:var(--ink);color:var(--bg);border:none;border-radius:10px;padding:9px 14px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;}
 
 /* ================= FEED ================= */
-.feed-wrap{flex:1;position:relative;overflow:hidden;display:flex;user-select:none;-webkit-user-select:none;}
+/* overflow visible so #actBubbles can paint past the chrome lip; the scroller still clips the track */
+.feed-wrap{flex:1;position:relative;overflow:visible;display:flex;user-select:none;-webkit-user-select:none;}
 .feed-scroller{flex:1;position:relative;overflow:hidden;touch-action:none;cursor:grab;}
 .feed-scroller::after{content:'';position:absolute;left:0;right:0;bottom:0;height:var(--feed-peek);pointer-events:none;background:linear-gradient(to bottom,transparent,rgba(242,238,234,.55));z-index:3;}
 html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent,rgba(7,4,3,.55));}
@@ -128,7 +129,8 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
   transition:opacity .1s ease;
 }
 .feed-scroller.is-swiping .buy-cta{
-  clip-path:inset(0 0 0 100%)!important;
+  /* round keeps the wipe pill-shaped (bare inset = hard rectangle mid-flight) */
+  clip-path:inset(0 0 0 100% round 999px)!important;
   transform:translateY(-50%) translateX(28px) scale(.42)!important;
   pointer-events:none!important;
   transition:none!important;
@@ -138,32 +140,35 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
   opacity:0!important;pointer-events:none!important;
 }
 .feed-item:not(.active) .buy-cta{
-  clip-path:inset(0 0 0 100%)!important;
+  clip-path:inset(0 0 0 100% round 999px)!important;
   transform:translateY(-50%) translateX(28px) scale(.42)!important;
   pointer-events:none!important;
 }
 .stage{display:flex;align-items:center;justify-content:center;gap:16px;flex-shrink:0;max-height:100%;}
 .col-actions{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:16px;flex-shrink:0;z-index:5;align-self:flex-end;padding-bottom:6px;overflow:visible;margin-right:2px;}
 
-.media-card{position:relative;display:inline-flex;flex-direction:column;width:fit-content;max-height:min(90vh,calc(100% - var(--feed-peek) - 16px));max-width:min(90vh,calc(100vw - 200px));border-radius:16px;overflow:visible;background:transparent;box-shadow:none;will-change:transform,opacity;align-self:center;}
-/* Skeleton first: sized by JS (post w/h) so the rail never hugs a micro black box.
-   CSS fallback uses height + aspect-ratio (not width*% which resolves against the wrong axis). */
+.media-card{position:relative;display:inline-flex;flex-direction:column;width:fit-content;max-width:100%;max-height:100%;border-radius:16px;overflow:visible;background:transparent;box-shadow:none;will-change:transform,opacity;align-self:center;}
+/* Desktop media frame must always match source --ar.
+   Never pair a JS-set width+height with a CSS max-* that can clamp only one axis
+   (old max-width:min(90vh,…) did that to landscape → object-fit:cover cropped).
+   JS owns the fitted size; CSS only supplies aspect-ratio + skeleton fallback. */
 .media-inner{
   position:relative;display:block;
-  max-height:min(90vh,calc(100% - var(--feed-peek) - 16px));
-  max-width:min(90vh,calc(100vw - 200px));
+  max-width:100%;
+  max-height:100%;
   border-radius:16px;overflow:hidden;border:none;line-height:0;vertical-align:top;
   box-shadow:0 12px 40px rgba(0,0,0,.14);
   background:var(--skel);
   color:var(--skel);
+  aspect-ratio:var(--ar,9/16);
 }
 .media-inner:not(.is-ready):not(.is-error){
-  aspect-ratio:var(--ar,9/16);
+  /* Portrait-first skeleton; width follows --ar until JS fits the real box */
   height:min(70vh,640px);
   width:auto;
   min-width:200px;
 }
-.media-inner.is-ready,.media-inner.is-error{aspect-ratio:auto;}
+.media-inner.is-error{aspect-ratio:auto;height:auto;width:auto;}
 .media-inner::after{
   content:'';position:absolute;inset:0;pointer-events:none;z-index:1;
   background:linear-gradient(105deg,transparent 38%,var(--skel-shine) 50%,transparent 62%);
@@ -173,13 +178,18 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
 }
 .media-inner.is-ready::after,.media-inner.is-error::after{opacity:0;animation:none;}
 @keyframes mediaShimmer{0%{background-position:120% 0;}100%{background-position:-120% 0;}}
-.media-inner img,.media-inner video{display:block;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;background:transparent;-webkit-user-drag:none;user-select:none;pointer-events:none;}
-/* main content fades in: images with is-ready, videos only once they hold a real frame (vid-live) */
-.media-inner > img:not(.media-poster),.media-inner > video{opacity:0;transition:opacity .22s ease;position:relative;z-index:2;}
+/* Desktop: contain so a frame mismatch letterboxes instead of cropping source.
+   Absolute fill keeps replaced media sized when the frame uses height/width:auto + --ar.
+   Mobile full-bleed overrides to cover below. */
+.media-inner > img:not(.media-poster),.media-inner > video{
+  display:block;position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;
+  object-fit:contain;background:transparent;-webkit-user-drag:none;user-select:none;pointer-events:none;
+  opacity:0;transition:opacity .22s ease;z-index:2;
+}
 .media-inner.is-ready > img:not(.media-poster){opacity:1;}
 .media-inner.vid-live > video{opacity:1;}
 /* persistent poster/thumbnail layer sits under the video so you always see the clip's own frame, never black or stale media */
-.media-poster{position:absolute!important;inset:0;width:100%!important;height:100%!important;object-fit:cover;z-index:1;opacity:0;transition:opacity .18s ease;}
+.media-poster{position:absolute!important;inset:0;width:100%!important;height:100%!important;object-fit:contain;z-index:1;opacity:0;transition:opacity .18s ease;}
 .media-inner.is-ready .media-poster{opacity:1;}
 .media-inner.is-error{min-width:200px;background:#14110d;color:inherit;}
 .media-inner.is-error img,.media-inner.is-error video{display:none;}
@@ -263,14 +273,16 @@ html.dark .feed-scroller::after{background:linear-gradient(to bottom,transparent
     0 1px 2px rgba(40,30,20,.04),
     0 6px 18px rgba(40,30,20,.05);
   opacity:1;
-  clip-path:inset(0 0 0 100%);
+  /* Always use inset+round (never `none`) so wake/tuck can interpolate.
+     Bare inset() without round reads as a growing square mid-animation. */
+  clip-path:inset(0 0 0 100% round 999px);
   transform:translateY(-50%) translateX(36px) scale(.42);
   transform-origin:100% 50%;
   overflow:visible;
-  /* One system: CSS transitions only (interruptible). Exit overrides faster below. */
+  /* Stable transition on the element — enter/exit must share it or browsers skip the reverse */
   transition:
-    clip-path .5s cubic-bezier(.18,1.12,.32,1),
-    transform .54s cubic-bezier(.16,1.2,.28,1),
+    clip-path .46s cubic-bezier(.18,1.12,.32,1),
+    transform .5s cubic-bezier(.16,1.2,.28,1),
     background .2s ease, color .2s ease, box-shadow .35s ease,
     filter .12s ease, z-index 0s linear .15s;
   transition-delay:0s;
@@ -326,49 +338,41 @@ html.dark .buy-cta-rim::before{
   );
 }
 .feed-item:not(.media-ready) .buy-cta{
-  clip-path:inset(0 0 0 100%)!important;
+  clip-path:inset(0 0 0 100% round 999px)!important;
   transform:translateY(-50%) translateX(36px) scale(.42)!important;
   pointer-events:none!important;
   transition:none!important;
 }
 .feed-item.active.media-ready .buy-cta:not(.is-dormant){
   pointer-events:auto;
-  clip-path:none;
+  clip-path:inset(0 0 0 0 round 999px);
   transform:translateY(-50%) translateX(0) scale(1);
   z-index:2;
   transition-delay:0s;
 }
 .feed-item.active.media-ready .buy-cta.is-dormant{
   pointer-events:none;
-  clip-path:inset(0 0 0 100%);
+  clip-path:inset(0 0 0 100% round 999px);
   transform:translateY(-50%) translateX(36px) scale(.42);
   z-index:1;
-  /* Exit = reverse of enter (same spring curves), ~0.55× duration */
+  /* Same spring as enter — hover wake must reverse into the hotzone, not snap */
   transition:
-    clip-path .28s cubic-bezier(.18,1.15,.32,1),
-    transform .3s cubic-bezier(.16,1.25,.28,1),
-    background .14s ease, color .14s ease,
-    box-shadow .3s cubic-bezier(.22,1,.36,1),
-    filter .1s ease, z-index 0s linear 0s;
+    clip-path .46s cubic-bezier(.18,1.12,.32,1),
+    transform .5s cubic-bezier(.16,1.2,.28,1),
+    background .2s ease, color .2s ease,
+    box-shadow .35s cubic-bezier(.22,1,.36,1),
+    filter .12s ease, z-index 0s linear 0s;
   transition-delay:0s;
 }
 .feed-item.active.media-ready .buy-cta.is-dormant.is-hover-wake{
   pointer-events:auto;
-  clip-path:none;
+  clip-path:inset(0 0 0 0 round 999px);
   transform:translateY(-50%) translateX(0) scale(1);
   z-index:2;
-  transition:
-    clip-path .42s cubic-bezier(.18,1.12,.32,1),
-    transform .46s cubic-bezier(.16,1.2,.28,1),
-    background .2s ease, color .2s ease, box-shadow .3s ease,
-    filter .12s ease, z-index 0s linear 0s;
+  /* Do NOT redefine `transition` here — changing it on dismiss cancels the reverse */
   transition-delay:0s;
 }
 .feed-item.active.media-ready .buy-cta.is-landmark:not(.is-dormant){
-  transition:
-    clip-path .46s cubic-bezier(.18,1.15,.32,1),
-    transform .52s cubic-bezier(.16,1.22,.28,1),
-    background .15s ease, color .15s ease, box-shadow .15s ease, filter .12s ease;
   transition-delay:0s;
 }
 @media (hover:hover) and (pointer:fine) and (min-width:861px){
@@ -745,12 +749,13 @@ html.dark .buy-cta-rim::before{
     0 2px 10px rgba(40,30,20,.06),
     0 10px 36px rgba(255,102,34,.12),
     0 20px 56px rgba(255,102,34,.08);
+  /* Shadow only — keep clip/transform transition inherited so exit can reverse */
   transition:
-    clip-path .52s cubic-bezier(.18,1.15,.32,1),
-    transform .56s cubic-bezier(.16,1.25,.28,1),
+    clip-path .46s cubic-bezier(.18,1.12,.32,1),
+    transform .5s cubic-bezier(.16,1.2,.28,1),
     background .22s ease, color .22s ease,
     box-shadow .55s cubic-bezier(.22,1,.36,1),
-    filter .12s ease;
+    filter .12s ease, z-index 0s linear .15s;
   transition-delay:0s;
 }
 html.dark .token-anchor.is-cta-live:not(.is-hover-wake) .buy-cta:not(.is-dormant),
@@ -1083,6 +1088,10 @@ html.dark .act-bubble.is-rx-open .act-hit-rx{
 .act-bubble.is-rx-open .act-hit-rx .act-rx-label{
   max-width:118px;opacity:1;
 }
+/* Default pill is right-anchored and grows left; flip when the left side is tight (gutter / edge) */
+.act-bubble.is-flip .act-hit-rx{
+  right:auto;left:-4px;
+}
 /* Match rail reaction colours */
 .act-bubble[data-kind="tip"]{--act:var(--orange);}
 .act-bubble[data-kind="like"]{--act:var(--green);}
@@ -1290,7 +1299,17 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
   padding:14px 16px 18px;-webkit-overflow-scrolling:touch;
   overscroll-behavior:contain;touch-action:pan-y;
 }
+/* Comments tab: fill the scrollport and dock compose to the drawer floor.
+   Keep the scroll's 16px gutters — do NOT negative-margin the whole panel
+   (that fought .comments-inner{padding:0} and flushed avatars to the edge). */
+.token-drawer-scroll:has(#tokenPanelComments:not([hidden])){
+  display:flex;flex-direction:column;padding-bottom:0;overflow:hidden;
+}
 .token-panel{min-height:calc(100% + 148px);}
+.token-panel-comments.token-panel{
+  min-height:0;flex:1;display:flex;flex-direction:column;
+  margin:0;padding:0;width:auto;
+}
 .token-panel[hidden]{display:none !important;}
 .token-chart[hidden]{display:none !important;}
 
@@ -1372,8 +1391,8 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
 .trade-total svg{width:12px;height:12px;opacity:.6;}
 
 /* comments panel inside token drawer */
-.token-panel-comments.comments-inner{padding:0;display:flex;flex-direction:column;position:relative;min-height:280px;}
-.comments-body{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;}
+.token-panel-comments.comments-inner{padding:0;display:flex;flex-direction:column;position:relative;min-height:0;flex:1;}
+.comments-body{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
 .comments-list{flex:1;overflow:visible;padding:0 0 12px;display:flex;flex-direction:column;gap:20px;transform-origin:center 30%;transition:opacity .34s cubic-bezier(.22,1,.36,1),transform .42s cubic-bezier(.22,1.25,.36,1),filter .34s ease;}
 .comments-list.is-loading{gap:18px;}
 .comments-list.is-swapping{opacity:0;transform:translateY(6px);transition:opacity .22s ease,transform .22s ease;}
@@ -1510,7 +1529,14 @@ html.dark .comment-quote:hover{color:#9BC2FF;background:rgba(107,163,255,.14);}
 .c-pill.tip.active{color:var(--orange);background:var(--orange-dim);}
 .c-pill.like.active{color:var(--green);background:rgba(31,164,99,.12);}
 .c-pill.dislike.active{color:var(--red);background:rgba(229,69,63,.1);}
-.comment-compose{position:sticky;bottom:0;flex-shrink:0;padding:12px 14px;border-top:1px solid var(--line);isolation:isolate;background:var(--card);z-index:6;transition:transform .36s cubic-bezier(.22,1.3,.36,1),box-shadow .3s ease;}
+/* Always docked to the drawer floor — comments scroll above it.
+   Full-bleed the top rule only (compose sits inside the scroll's 16px gutters). */
+.comment-compose{
+  position:relative;bottom:auto;flex-shrink:0;margin:0 -16px;
+  padding:12px 30px calc(12px + env(safe-area-inset-bottom,0px));
+  border-top:1px solid var(--line);isolation:isolate;background:var(--card);z-index:6;
+  transition:transform .36s cubic-bezier(.22,1.3,.36,1),box-shadow .3s ease;
+}
 .comment-compose.is-anon .comment-attach,
 .comment-compose.is-anon .comment-attach-btn{display:none!important;}
 .comments-inner.is-drop .comment-compose{transform:translateY(-4px);box-shadow:0 -10px 28px rgba(255,102,34,.08);}
@@ -1531,13 +1557,14 @@ html.dark .comment-quote:hover{color:#9BC2FF;background:rgba(107,163,255,.14);}
 }
 .comment-fly{position:fixed;z-index:420;border-radius:16px;overflow:hidden;pointer-events:none;box-shadow:0 18px 40px rgba(0,0,0,.28);will-change:transform,opacity,border-radius;transform-origin:top left;}
 .comment-fly img,.comment-fly video{width:100%;height:100%;object-fit:cover;display:block;}
-.comment-input-row{display:flex;align-items:center;gap:8px;padding:6px 8px 6px 6px;flex-shrink:0;background:var(--card);border:1px solid #D1CDC7;border-radius:999px;min-height:48px;transition:border-color .18s ease,box-shadow .18s ease,background .18s ease;}
+/* Squircle to match .comment-send (12px) — not a full pill */
+.comment-input-row{display:flex;align-items:center;gap:8px;padding:6px 8px 6px 6px;flex-shrink:0;background:var(--card);border:1px solid #D1CDC7;border-radius:14px;min-height:48px;transition:border-color .18s ease,box-shadow .18s ease,background .18s ease;}
 .comment-input-row:focus-within{border-color:var(--ink);box-shadow:0 0 0 3px rgba(42,36,28,.06);}
 html.dark .comment-input-row{border-color:rgba(255,255,255,.14);}
 html.dark .comment-input-row:focus-within{border-color:rgba(255,255,255,.4);box-shadow:0 0 0 3px rgba(255,255,255,.06);}
 .comments-inner.is-drop .comment-input-row{border-color:var(--orange);box-shadow:0 0 0 3px rgba(255,102,34,.12);}
 .comment-identity{position:relative;flex-shrink:0;}
-.comment-identity-btn{display:inline-flex;align-items:center;gap:4px;padding:3px 6px 3px 3px;border:none;border-radius:999px;background:transparent;cursor:pointer;color:var(--ink-soft);transition:background .15s,color .15s;}
+.comment-identity-btn{display:inline-flex;align-items:center;gap:4px;padding:3px 6px 3px 3px;border:none;border-radius:12px;background:transparent;cursor:pointer;color:var(--ink-soft);transition:background .15s,color .15s;}
 .comment-identity-btn:hover,.comment-identity-btn:focus-visible,.comment-identity-btn[aria-expanded="true"]{background:var(--line);color:var(--ink);}
 .comment-identity-btn img{width:28px;height:28px;border-radius:50%;object-fit:cover;display:block;}
 .comment-identity-btn .chev{width:12px;height:12px;display:block;opacity:.7;transition:transform .2s ease;}
@@ -1876,7 +1903,9 @@ body.cfx-on #drawer{z-index:50;}
   }
   .token-drawer-chrome{padding:22px 16px 0;}
   .token-drawer-scroll{-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;padding-bottom:calc(env(safe-area-inset-bottom) + 14px);}
-  .comment-compose{padding-bottom:calc(env(safe-area-inset-bottom) + 12px);position:sticky;bottom:0;background:var(--card);z-index:3;}
+  .token-drawer-scroll:has(#tokenPanelComments:not([hidden])){padding-bottom:0;overflow:hidden;}
+  .comment-compose{padding:12px 30px calc(env(safe-area-inset-bottom) + 12px);margin:0 -16px;position:relative;bottom:auto;background:var(--card);z-index:3;}
+  .comments-body{-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;}
   /* bigger, thumb-friendly comment reactions on mobile */
   .comment-foot{gap:14px;margin-top:12px;}
   .c-pill{font-size:13px;gap:7px;padding:9px 12px;border-radius:20px;min-height:38px;}
@@ -1953,7 +1982,7 @@ body.cfx-on #drawer{z-index:50;}
   }
   .media-inner{
     width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;
-    border-radius:0!important;box-shadow:none;min-width:0!important;
+    border-radius:0!important;box-shadow:none;min-width:0!important;aspect-ratio:auto;
   }
   .media-inner:not(.is-ready):not(.is-error){
     aspect-ratio:auto;
@@ -2943,7 +2972,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   const WEB_HAPTIC_PRESETS = {
     light:'light', selection:'selection', nudge:'nudge', settle:'success',
     dragtick:'soft', toggle:'rigid', unmute:'nudge', mute:'rigid', open:'medium', comment:'success',
-    tip:'success', like:'medium', dislike:'warning', share:'soft', attach:'success',
+    sent:'success', tip:'success', like:'medium', dislike:'warning', share:'soft', attach:'success',
     lock:'rigid', unlock:'nudge',
     // Pull-to-refresh — custom patterns via web-haptics (https://haptics.lochie.me)
     pulltick:  [{ duration: 8, intensity: 0.22 }],
@@ -2966,6 +2995,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     mute:      { vibrate: [14, 22, 8], taps: 1 },
     open:      { vibrate: [8, 28, 9], taps: 1 },
     comment:   { vibrate: [9, 30, 9], taps: 2, tapGap: 38 },
+    sent:      { vibrate: [8, 26, 12, 34, 10], taps: 2, tapGap: 40 },
     share:     { vibrate: [7, 32, 7], taps: 2, tapGap: 36 },
     tip:       { vibrate: [9, 42, 11, 48, 16], taps: 3, tapGap: 52 },
     like:      { vibrate: [7, 28, 11], taps: 2, tapGap: 32 },
@@ -2982,7 +3012,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   };
   const PRESET_SOUND = {
     light:'light', selection:'light', nudge:'light', settle:'settle', attach:'settle', dragtick:'dragtick',
-    toggle:'toggle', unmute:'unmute', mute:'mute', open:'open', comment:'comment', share:'share',
+    toggle:'toggle', unmute:'unmute', mute:'mute', open:'open', comment:'comment', sent:'sent', share:'share',
     tip:'tip', like:'like', dislike:'dislike', lock:'lock', unlock:'unlock',
     pulltick:false, pullmorph:'light', pullarm:'light', pulldisarm:false,
     pullfire:'open', pullcancel:false, pullsettle:'settle',
@@ -3105,6 +3135,21 @@ html.dark .qhc-id{color:#6BA3FF;}
       osc.start(t0 + i * 0.04); osc.stop(t0 + i * 0.04 + 0.06);
     });
   }
+  // Soft ascending “posted” tick — present enough to reinforce send, quieter than tip/like
+  function reactSentSound(ctx){
+    const t0 = ctx.currentTime;
+    [660, 880, 1170].forEach((f, i)=>{
+      const t = t0 + i * 0.034;
+      const osc = ctx.createOscillator(); osc.type = 'sine'; osc.frequency.value = f;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.07 - i * 0.014, t + 0.006);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
+      osc.connect(g); g.connect(masterGain);
+      osc.start(t); osc.stop(t + 0.1);
+    });
+    setTimeout(()=>microClick(ctx, 1240), 72);
+  }
   function reactShareSound(ctx){
     const t0 = ctx.currentTime;
     const osc = ctx.createOscillator(); osc.type='sine';
@@ -3199,6 +3244,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     else if(kind==='like') reactLikeSound(ctx);
     else if(kind==='dislike') reactDislikeSound(ctx);
     else if(kind==='comment') reactCommentSound(ctx);
+    else if(kind==='sent') reactSentSound(ctx);
     else if(kind==='share') reactShareSound(ctx);
     else if(kind==='toggle') reactToggleSound(ctx);
     else if(kind==='unmute') reactUnmuteSound(ctx);
@@ -3252,6 +3298,9 @@ html.dark .qhc-id{color:#6BA3FF;}
   const feedWrap = document.querySelector('.feed-wrap');
   if(feedWrap) feedWrap.addEventListener('pointerdown', unlockAudio, { capture: true, passive: true });
   document.querySelector('.main')?.addEventListener('keydown', unlockAudio, { capture: true });
+  // Drawer sits outside .main — unlock audio so Enter-to-send can play the sent cue
+  document.getElementById('drawer')?.addEventListener('pointerdown', unlockAudio, { capture: true, passive: true });
+  document.getElementById('drawer')?.addEventListener('keydown', unlockAudio, { capture: true });
 
   function fmt(n){ if(n>=1000000) return (n/1000000).toFixed(1)+'M'; if(n>=1000) return (n/1000).toFixed(1)+'K'; return n; }
 
@@ -3331,8 +3380,8 @@ html.dark .qhc-id{color:#6BA3FF;}
   /* Desktop: size frame to source aspect ratio. Mobile: full-bleed cover. */
   function fitMediaBox(inner, p){
     if(!inner) return;
-    const w = (p && p.w) || 9;
-    const h = (p && p.h) || 16;
+    const w = Math.max(1, (p && p.w) || 9);
+    const h = Math.max(1, (p && p.h) || 16);
     inner.style.setProperty('--ar', `${w}/${h}`);
     inner.style.setProperty('--ar-dec', (w / h).toFixed(4));
     const ar = w / h;
@@ -3341,6 +3390,8 @@ html.dark .qhc-id{color:#6BA3FF;}
       // Full-bleed: fill the feed viewport; object-fit:cover crops to ratio
       const maxW = Math.max(200, window.innerWidth);
       const maxH = Math.max(240, (scroller && scroller.clientHeight) || (window.innerHeight - 64));
+      inner.style.maxWidth = '';
+      inner.style.maxHeight = '';
       inner.style.width = Math.round(maxW) + 'px';
       inner.style.height = Math.round(maxH) + 'px';
       return;
@@ -3348,26 +3399,59 @@ html.dark .qhc-id{color:#6BA3FF;}
     const peek = typeof peekPx === 'function' ? peekPx() : 58;
     const { sidebarW, drawerW, rail } = mediaChromePx();
     const scrollerH = (scroller && scroller.clientHeight) || Math.max(320, window.innerHeight - 64);
+    // Single source of truth for available space — also written as inline max-*
+    // so stylesheet ceilings can never clamp one axis alone and skew --ar.
     const maxH = Math.min(window.innerHeight * 0.9, Math.max(280, scrollerH - peek - 16));
     const maxW = Math.max(220, window.innerWidth - sidebarW - drawerW - rail);
-    let th = maxH, tw = th * ar;
-    if(tw > maxW){ tw = maxW; th = tw / ar; }
-    inner.style.width = Math.round(tw) + 'px';
-    inner.style.height = Math.round(th) + 'px';
+    let tw, th;
+    if(ar >= 1){
+      // Landscape / square: bind width, height follows --ar
+      tw = Math.min(maxW, maxH * ar);
+      tw = Math.max(1, Math.round(tw));
+      th = Math.max(1, Math.round(tw / ar));
+      if(th > maxH){
+        th = Math.round(maxH);
+        tw = Math.max(1, Math.round(th * ar));
+      }
+      inner.style.maxWidth = Math.round(maxW) + 'px';
+      inner.style.maxHeight = Math.round(maxH) + 'px';
+      inner.style.width = tw + 'px';
+      inner.style.height = 'auto'; // aspect-ratio + width → height; never a second definite axis
+    } else {
+      // Portrait: bind height, width follows --ar
+      th = Math.min(maxH, maxW / ar);
+      th = Math.max(1, Math.round(th));
+      tw = Math.max(1, Math.round(th * ar));
+      if(tw > maxW){
+        tw = Math.round(maxW);
+        th = Math.max(1, Math.round(tw / ar));
+      }
+      inner.style.maxWidth = Math.round(maxW) + 'px';
+      inner.style.maxHeight = Math.round(maxH) + 'px';
+      inner.style.height = th + 'px';
+      inner.style.width = 'auto';
+    }
   }
   function syncMediaAspect(el){
     const inner = el.closest('.media-inner');
-    if(!inner) return;
+    if(!inner || !el) return;
     const item = inner.closest('.feed-item');
     const p = item ? posts[+item.dataset.index] : null;
+    const isPoster = el.classList?.contains('media-poster');
     // Prefer the decoded media's intrinsic size so the container always matches
     // the real file — post w/h is only a skeleton placeholder until then.
     const nw = el.videoWidth || el.naturalWidth;
     const nh = el.videoHeight || el.naturalHeight;
     let dims = p;
     if(nw && nh){
-      if(p){ p.w = nw; p.h = nh; }
-      dims = { w: nw, h: nh };
+      // Posters often disagree with the clip (landscape thumb on portrait video).
+      // Never bake poster pixels into the post record or the desktop frame.
+      if(isPoster && p && (p.type === 'video' || p.type === 'gif') && p.w && p.h){
+        dims = p;
+      } else {
+        if(p){ p.w = nw; p.h = nh; }
+        dims = { w: nw, h: nh };
+      }
     } else if(!dims || !dims.w || !dims.h){
       return;
     }
@@ -3454,7 +3538,15 @@ html.dark .qhc-id{color:#6BA3FF;}
     const inner = v.closest('.media-inner');
     const poster = inner?.querySelector('.media-poster');
     // show the poster/thumbnail as soon as it's available (this is what the user sees while the video decodes)
-    const showPoster = ()=>{ if(inner && !inner.classList.contains('is-error')){ syncMediaAspect(poster); markMediaReady(inner); } };
+    const showPoster = ()=>{
+      if(!inner || inner.classList.contains('is-error')) return;
+      // Size from post / eventual video AR — not the poster file (can differ)
+      const item = inner.closest('.feed-item');
+      const p = item ? posts[+item.dataset.index] : null;
+      if(p?.w && p?.h) fitMediaBox(inner, p);
+      else syncMediaAspect(poster);
+      markMediaReady(inner);
+    };
     if(poster){
       if(!poster.getAttribute('src') && poster.dataset.poster) poster.src = poster.dataset.poster;
       if(poster.complete && poster.naturalWidth) showPoster();
@@ -3721,13 +3813,41 @@ html.dark .qhc-id{color:#6BA3FF;}
       if(!moved) break;
     }
 
+    // Expanded reaction pill (~168px) must stay inside the feed wrap. Sidebar (z:40)
+    // and drawer (z:35) sit above #actBubbles (z:18) and visually "clip" anything that
+    // bleeds under them — clamp discs and flip toward the roomier side.
+    const PILL_W = 168;
+    const EDGE = 12;
+    const wrapW = wr.width;
+    const wrapH = wr.height;
+
     liveBubbles.forEach((el, i)=>{
       if(el._dragging || el._gone) return;
       const p = placed[i % placed.length];
+      p.cx = Math.max(HALF + EDGE, Math.min(p.cx, wrapW - HALF - EDGE));
+      p.cy = Math.max(HALF + EDGE, Math.min(p.cy, wrapH - HALF - EDGE));
+
+      let roomLeft = p.cx - HALF;
+      let roomRight = wrapW - (p.cx + HALF);
+      // Bloom into open air — never under sidebar (left) or drawer (right)
+      const flip = roomLeft < PILL_W || roomLeft <= roomRight;
+      if(flip){
+        // Pill grows right from left:-4 — need PILL_W of room to the right of disc left
+        const needRight = PILL_W - 4;
+        if(wrapW - (p.cx - HALF) < needRight){
+          p.cx = Math.max(HALF + EDGE, wrapW - needRight + HALF);
+        }
+      } else {
+        // Pill grows left from right:-4 — need PILL_W of room to the left of disc right
+        const needLeft = PILL_W - 4;
+        if((p.cx + HALF) < needLeft){
+          p.cx = Math.min(wrapW - HALF - EDGE, needLeft - HALF);
+        }
+      }
+
       el.style.left = Math.round(p.cx - HALF) + 'px';
       el.style.top = Math.round(p.cy - HALF) + 'px';
-      // On-media: flip minicard if the right side is tight. Gutter: keep blooming right.
-      el.classList.toggle('is-flip', !metaOutside && (mediaRight - (p.cx + HALF)) < 220);
+      el.classList.toggle('is-flip', flip);
       if(!el.classList.contains('is-dragging') && !el.classList.contains('is-fling')){
         el.style.setProperty('--rot', '0deg');
       }
@@ -3955,17 +4075,25 @@ html.dark .qhc-id{color:#6BA3FF;}
     rootRow?.classList.add('comment-enter','comment-enter-fresh');
     list.appendChild(thread);
     requestAnimationFrame(()=> requestAnimationFrame(()=> rootRow?.classList.add('is-in')));
-    if(tokenDrawerScroll){
-      tokenDrawerScroll.scrollTo({ top: tokenDrawerScroll.scrollHeight, behavior: 'smooth' });
+    const scroller = commentsScrollEl();
+    if(scroller){
+      scroller.scrollTo({ top: scroller.scrollHeight, behavior: 'smooth' });
     }
     return true;
   }
+  function commentsScrollEl(){
+    if(tokenDrawerTab === 'comments'){
+      return document.querySelector('#tokenPanelComments .comments-body') || tokenDrawerScroll;
+    }
+    return tokenDrawerScroll;
+  }
   function rowScrollIntoView(el){
-    if(!el || !tokenDrawerScroll) return;
-    const listTop = tokenDrawerScroll.getBoundingClientRect().top;
+    const scroller = commentsScrollEl();
+    if(!el || !scroller) return;
+    const listTop = scroller.getBoundingClientRect().top;
     const elTop = el.getBoundingClientRect().top;
-    tokenDrawerScroll.scrollTo({
-      top: tokenDrawerScroll.scrollTop + (elTop - listTop) - 48,
+    scroller.scrollTo({
+      top: scroller.scrollTop + (elTop - listTop) - 48,
       behavior: 'smooth'
     });
   }
@@ -4541,6 +4669,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         clearTimeout(anchor._ctaLiveT);
         clearTimeout(anchor._ctaEnterT);
         clearTimeout(anchor._hoverWakeT);
+        clearTimeout(anchor._hoverSleepT);
         anchor.classList.remove('is-cta-live','is-cta-enter','is-landmark','is-hover-wake');
         resetPlusCueAnim(anchor);
         if(!mobile) anchor.classList.add('is-cta-dormant');
@@ -4578,6 +4707,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     clearTimeout(anchor._ctaLiveT);
     clearTimeout(anchor._ctaEnterT);
     clearTimeout(anchor._hoverWakeT);
+    clearTimeout(anchor._hoverSleepT);
     anchor.classList.remove('is-cta-live','is-cta-enter','is-landmark','is-hover-wake');
     resetPlusCueAnim(anchor);
     const btn = anchor.querySelector('.buy-cta');
@@ -4625,8 +4755,34 @@ html.dark .qhc-id{color:#6BA3FF;}
         const idx = item ? +item.dataset.index : -1;
         if(btn._pendingDormant){
           btn._pendingDormant = false;
-          if(item) setBuyCtaDormant(item, true);
-          if(idx === buyCtaIdx && buyCtaShows < BUY_CTA_MAX_SHOWS) scheduleBuyCtaReappear(idx);
+          btn.dataset.ctaHover = '';
+          // Cadence asked to tuck while hovered — reverse out of the hotzone now.
+          // Keep wake styles for one layout pass, then drop them so the shared
+          // dormant transition can interpolate clip/transform back under the avatar.
+          btn.classList.add('is-dormant');
+          void btn.offsetWidth;
+          btn.classList.remove('is-landmark','is-hover-wake');
+          clearTimeout(anchor._ctaLiveT);
+          clearTimeout(anchor._ctaEnterT);
+          clearTimeout(anchor._hoverSleepT);
+          anchor.classList.remove('is-cta-live','is-cta-enter','is-hover-wake');
+          resetPlusCueAnim(anchor);
+          const finishPending = ()=>{
+            if(window.innerWidth > 860) anchor.classList.add('is-cta-dormant');
+            if(idx === buyCtaIdx && buyCtaShows < BUY_CTA_MAX_SHOWS) scheduleBuyCtaReappear(idx);
+          };
+          const onTuckEnd = (ev)=>{
+            if(ev.target !== btn) return;
+            if(ev.propertyName !== 'transform' && ev.propertyName !== 'clip-path') return;
+            btn.removeEventListener('transitionend', onTuckEnd);
+            clearTimeout(anchor._hoverSleepT);
+            finishPending();
+          };
+          btn.addEventListener('transitionend', onTuckEnd);
+          anchor._hoverSleepT = setTimeout(()=>{
+            btn.removeEventListener('transitionend', onTuckEnd);
+            finishPending();
+          }, 520);
           return;
         }
         if(!btn.classList.contains('is-dormant')){
@@ -4634,15 +4790,37 @@ html.dark .qhc-id{color:#6BA3FF;}
           if(idx === buyCtaIdx) scheduleBuyCtaHide(idx);
           return;
         }
+        if(!btn.classList.contains('is-hover-wake')){
+          if(!anchor.classList.contains('is-cta-live')) anchor.classList.add('is-cta-dormant');
+          if(idx === buyCtaIdx && buyCtaShows < BUY_CTA_MAX_SHOWS && !buyCtaTimer && !buyCtaEngageTimer){
+            scheduleBuyCtaReappear(idx);
+          }
+          return;
+        }
+        // Reverse the wake: pill + zone glow tuck back under the avatar
+        void btn.offsetWidth;
         btn.classList.remove('is-hover-wake');
         anchor.classList.remove('is-hover-wake','is-cta-enter');
-        // Leave cadence is-cta-live alone — hover never owned it
-        if(!anchor.classList.contains('is-cta-live')){
-          anchor.classList.add('is-cta-dormant');
-        }
-        if(idx === buyCtaIdx && buyCtaShows < BUY_CTA_MAX_SHOWS && !buyCtaTimer && !buyCtaEngageTimer){
-          scheduleBuyCtaReappear(idx);
-        }
+        const finishSleep = ()=>{
+          if(btn.classList.contains('is-hover-wake')) return;
+          if(!anchor.classList.contains('is-cta-live')) anchor.classList.add('is-cta-dormant');
+          if(idx === buyCtaIdx && buyCtaShows < BUY_CTA_MAX_SHOWS && !buyCtaTimer && !buyCtaEngageTimer){
+            scheduleBuyCtaReappear(idx);
+          }
+        };
+        const onTuckEnd = (ev)=>{
+          if(ev.target !== btn) return;
+          if(ev.propertyName !== 'transform' && ev.propertyName !== 'clip-path') return;
+          btn.removeEventListener('transitionend', onTuckEnd);
+          clearTimeout(anchor._hoverSleepT);
+          finishSleep();
+        };
+        btn.addEventListener('transitionend', onTuckEnd);
+        clearTimeout(anchor._hoverSleepT);
+        anchor._hoverSleepT = setTimeout(()=>{
+          btn.removeEventListener('transitionend', onTuckEnd);
+          finishSleep();
+        }, 520);
       }, 160);
     };
 
@@ -6813,9 +6991,9 @@ html.dark .qhc-id{color:#6BA3FF;}
     card.addEventListener('pointerenter', ()=>{ clearTimeout(hoverHideTimer); hoverHideTimer = 0; });
     card.addEventListener('pointerleave', ()=> hideHoverCards(false));
   });
-  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') hideHoverCards(true); });
   scroller.addEventListener('scroll', ()=> hideHoverCards(true), {passive:true});
   document.getElementById('commentsList')?.addEventListener('scroll', ()=> hideHoverCards(true), {passive:true});
+  document.querySelector('#tokenPanelComments .comments-body')?.addEventListener('scroll', ()=> hideHoverCards(true), {passive:true});
   document.getElementById('tokenDrawerScroll')?.addEventListener('scroll', ()=> hideHoverCards(true), {passive:true});
   window.addEventListener('resize', ()=> hideHoverCards(true));
 
@@ -7624,7 +7802,6 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   cfxClose.addEventListener('click', closeCommentMedia);
   cfx.addEventListener('click', (e)=>{ if(e.target === cfx) closeCommentMedia(); });
-  window.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && state.focusedComment) closeCommentMedia(); });
 
   let commentsLoadToken = 0;
 
@@ -7858,7 +8035,8 @@ html.dark .qhc-id{color:#6BA3FF;}
           renderThreadReplies(thread, {animate:true});
         }
       }
-      if(tokenDrawerScroll) tokenDrawerScroll.scrollTop = tokenDrawerScroll.scrollHeight;
+      const scroller = commentsScrollEl();
+      if(scroller) scroller.scrollTop = scroller.scrollHeight;
     }
     const countEl = item?.querySelector('.comment-count');
     if(countEl) countEl.textContent = fmt(post.comments);
@@ -7867,7 +8045,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     clearCommentPendingMedia({ keepBlob:true, animate:false });
     syncCommentSendReady();
     closeCommentAnonPop();
-    haptic('comment');
+    haptic('sent');
     signalActivity('comment', { item, avatar: isAnon ? ANON_AVATAR : MY_AVATAR, text });
   }
 
@@ -8042,10 +8220,18 @@ html.dark .qhc-id{color:#6BA3FF;}
   document.addEventListener('click', (e)=>{
     if(!e.target.closest?.('#navMoreWrap')) closeNavMorePop();
   });
+  // Escape peels the topmost overlay (inner → outer). Works from comment input too.
   window.addEventListener('keydown', (e)=>{
-    if(e.key === 'Escape'){
-      closeNavMorePop();
-      if(moreSheet?.classList.contains('show')) closeMoreSheet();
+    if(e.key !== 'Escape') return;
+    if(state.focusedComment){ closeCommentMedia(); return; }
+    const hoverOpen = document.querySelector('#userHoverCard.show, #tokenHoverCard.show, #quoteHoverCard.show');
+    if(hoverOpen){ hideHoverCards(true); return; }
+    if(kbdPanel?.classList.contains('show')){ setKbdOpen(false); return; }
+    if(moreSheet?.classList.contains('show')){ closeMoreSheet(); return; }
+    if(navMorePop?.classList.contains('show')){ closeNavMorePop(); return; }
+    if(shareOverlay?.classList.contains('show')){ closeShare(); return; }
+    if(state.tradeOpen || state.commentsOpen || drawer?.classList.contains('open')){
+      closeTokenDrawer();
     }
   });
 
@@ -8126,6 +8312,24 @@ html.dark .qhc-id{color:#6BA3FF;}
 
   render();
 })();
+</script>
+<!-- Agentation: visual feedback for agents (localhost only). https://www.agentation.com/ -->
+<script type="module">
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    try {
+      const [{ default: React }, { createRoot }, { Agentation }] = await Promise.all([
+        import('https://esm.sh/react@18.3.1'),
+        import('https://esm.sh/react-dom@18.3.1/client'),
+        import('https://esm.sh/agentation@3?deps=react@18.3.1,react-dom@18.3.1'),
+      ]);
+      const mount = document.createElement('div');
+      mount.id = 'agentation-mount';
+      document.body.appendChild(mount);
+      createRoot(mount).render(React.createElement(Agentation));
+    } catch (e) {
+      console.warn('Agentation load failed:', e);
+    }
+  }
 </script>
 </body>
 </html>

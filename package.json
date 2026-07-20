@@ -9,5 +9,8 @@
   },
   "dependencies": {
     "web-haptics": "^0.0.6"
+  },
+  "devDependencies": {
+    "agentation": "^3.0.2"
   }
 }

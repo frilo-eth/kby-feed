@@ -2,19 +2,27 @@
 
 ## Unreleased
 
+### Media
+- Desktop frames always match source aspect ratio (`fitMediaBox` + `--ar`); landscape/portrait bind one axis
+- Dropped `max-width: min(90vh, …)` — it clamped landscape width alone and made `object-fit:cover` crop
+- Desktop paint uses `object-fit:contain` inside the AR box; mobile ≤860 stays full-bleed cover
+
+### Buy CTA
+- Enter/exit share one spring; wipe stays `clip-path: inset(… round 999px)` so the pill never goes square mid-flight
+- Hover dismiss waits for `transitionend` before finishing dormant (no snap)
+
 ### Comments
-- Threaded replies: one indent level, `View N replies` / `View N more` (5 at a time), Hide
-- 4chan-style `>>id` quotes in list + compose; Reply prefixes input; send nests under root
-- Desktop `#quoteHoverCard` preview on `>>` links (list + compose mirror)
-- Staggered list enter + springier `.comment-enter-fresh` for live sends / reply page-ins
+- Compose docked to drawer floor; `.comments-body` owns scroll
+- Squircle compose input (`14px`) matching send button
+- Restored 16px gutters (negative-margin panel + `padding:0` conflict had flushed avatars to the edge)
+- Send uses haptic preset `sent`
 
 ### Feed polish
-- Buy CTA exit mirrors enter spring curves at ~0.55× duration
-- New-posts pill soft-dismisses after 2 settled swipes, then re-arms (~3 min)
-- Activity bubbles progressive disclosure; comment-only marquee
-- Themed pull-spin / new-pill; shorter desktop meta float scrim; chevron gutter on tablet
-- 2× hold→lock: charge ring + “Hold 3s to lock” annotation (13px, 14px under pill) while `.is-charging`; tap badge to unlock
-- Fix: no speed-badge chevron flash — hold enters `.is-charging` in one step
+- Activity bubbles clamped inside the feed wrap (no sidebar/drawer clip); reaction pills flip toward open space
+- Escape peels overlays topmost-first (CFX → hover card → kbd → more → share → drawer)
+
+### Dev
+- Agentation `^3.0.2` as a localhost-only annotation helper
 
 ---
 
