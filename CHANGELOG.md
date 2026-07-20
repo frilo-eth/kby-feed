@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+### Feed — swipe-silk
+- Wall-clock spring `dt` (same feel on 60/120Hz); critically damped ~0.5s settle; hard flicks ζ≈0.90
+- ~90ms release-velocity sample window; momentum projection snap (`silkSnapTarget`)
+- Mid-glide grab inherits `springVel`; wheel lock shortened to 360ms
+
+### Activity bubbles
+- Avatar seeded from display name (matches hover card — no near-black “wrong” blockie)
+- Hairline ring only on an opaque disc; dropped colored `--act` outer ring / brown wash shadow
+- Layout band (~96px) above the post avatar; lowest free slot on respawn; no upward collision bias
+- Softer exit rise + smaller idle drift so the flock doesn’t climb the feed over idle time
+
+### Comments
+- Compose docked to drawer floor; `.comments-body` owns scroll
+- Squircle compose input (`14px`) matching send button
+- Restored 16px gutters (negative-margin panel + `padding:0` conflict had flushed avatars to the edge)
+- **Hide** hover pill no longer uses a right negative margin (was clipped by `overflow-x:hidden`)
+- Send uses haptic preset `sent`
+
 ### Media
 - Desktop frames always match source aspect ratio (`fitMediaBox` + `--ar`); landscape/portrait bind one axis
 - Dropped `max-width: min(90vh, …)` — it clamped landscape width alone and made `object-fit:cover` crop
@@ -10,12 +28,6 @@
 ### Buy CTA
 - Enter/exit share one spring; wipe stays `clip-path: inset(… round 999px)` so the pill never goes square mid-flight
 - Hover dismiss waits for `transitionend` before finishing dormant (no snap)
-
-### Comments
-- Compose docked to drawer floor; `.comments-body` owns scroll
-- Squircle compose input (`14px`) matching send button
-- Restored 16px gutters (negative-margin panel + `padding:0` conflict had flushed avatars to the edge)
-- Send uses haptic preset `sent`
 
 ### Feed polish
 - Activity bubbles clamped inside the feed wrap (no sidebar/drawer clip); reaction pills flip toward open space

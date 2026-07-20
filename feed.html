@@ -955,7 +955,7 @@ html.dark .react-btn{
     opacity .34s cubic-bezier(.23,1,.32,1),
     transform .5s cubic-bezier(.18,1.15,.32,1),
     filter .15s ease;
-  will-change:transform,opacity;
+  will-change:transform;
   -webkit-tap-highlight-color:transparent;
   touch-action:none;
   z-index:1;
@@ -998,30 +998,35 @@ html.dark .react-btn{
 .act-bubble:nth-child(3n+3) .act-bubble-inner{animation-delay:-3.4s;}
 @keyframes actBubbleDrift{
   0%,100%{transform:translate3d(0,0,0) rotate(0deg);}
-  20%{transform:translate3d(1.2px,-2.5px,0) rotate(.6deg);}
-  45%{transform:translate3d(-.8px,-4.5px,0) rotate(-.5deg);}
-  70%{transform:translate3d(.6px,-2px,0) rotate(.35deg);}
-  85%{transform:translate3d(-.4px,-1px,0) rotate(-.2deg);}
+  20%{transform:translate3d(1px,-1.5px,0) rotate(.4deg);}
+  45%{transform:translate3d(-.6px,-2.5px,0) rotate(-.35deg);}
+  70%{transform:translate3d(.5px,-1.2px,0) rotate(.25deg);}
+  85%{transform:translate3d(-.3px,-.6px,0) rotate(-.15deg);}
 }
 .act-hit-av{
   display:block;width:34px;height:34px;padding:0;margin:0;border:none;
-  background:transparent;cursor:pointer;border-radius:50%;
+  /* Opaque disc behind the img — kills GPU dark-edge fringe on rounded avatars
+     inside opacity/transform layers (reads as black/brown washy halo at rest) */
+  background:#fff;
+  cursor:pointer;border-radius:50%;
+  box-shadow:0 0 0 1.5px rgba(255,255,255,.96);
   -webkit-tap-highlight-color:transparent;
+  overflow:hidden;
+}
+html.dark .act-hit-av{
+  background:#1a1612;
+  box-shadow:0 0 0 1.5px rgba(255,255,255,.28);
 }
 .act-bubble-av{
   width:34px;height:34px;border-radius:50%;object-fit:cover;display:block;
-  box-shadow:
-    0 0 0 1.5px rgba(255,255,255,.92),
-    0 0 0 2.5px color-mix(in srgb, var(--act) 40%, transparent),
-    0 4px 12px rgba(40,30,20,.18);
-  transition:box-shadow .2s ease, transform .22s cubic-bezier(.22,1,.36,1);
+  box-shadow:none;
+  /* Keep img on same opaque layer as the hit disc */
+  -webkit-backface-visibility:hidden;
+  backface-visibility:hidden;
+  transform:translateZ(0);
+  transition:transform .22s cubic-bezier(.22,1,.36,1);
 }
-html.dark .act-bubble-av{
-  box-shadow:
-    0 0 0 1.5px rgba(42,36,30,.88),
-    0 0 0 2.5px color-mix(in srgb, var(--act) 50%, transparent),
-    0 6px 14px rgba(0,0,0,.45);
-}
+html.dark .act-bubble-av{box-shadow:none;}
 /* Reaction mini-bubble → blooms into expression pill */
 .act-hit-rx{
   position:absolute;right:-4px;bottom:-4px;z-index:2;
@@ -1029,7 +1034,7 @@ html.dark .act-bubble-av{
   height:16px;min-width:16px;max-width:16px;padding:0;
   border-radius:999px;border:1.5px solid rgba(255,255,255,.95);
   background:var(--act);color:#fff;
-  box-shadow:0 1px 4px rgba(40,30,20,.22);
+  box-shadow:0 1px 3px rgba(0,0,0,.16);
   cursor:pointer;overflow:hidden;white-space:nowrap;
   transition:
     max-width .32s cubic-bezier(.22,1,.36,1),
@@ -1073,7 +1078,7 @@ html.dark .act-hit-rx{border-color:rgba(20,16,12,.9);}
   background:color-mix(in srgb, var(--act) 16%, #fff);
   color:color-mix(in srgb, var(--act) 82%, #2A241C);
   border-color:color-mix(in srgb, var(--act) 28%, transparent);
-  box-shadow:0 4px 14px rgba(40,30,20,.14);
+  box-shadow:0 4px 14px rgba(0,0,0,.1);
 }
 html.dark .act-bubble.is-rx-open .act-hit-rx{
   background:color-mix(in srgb, var(--act) 22%, #1a1612);
@@ -1098,7 +1103,7 @@ html.dark .act-bubble.is-rx-open .act-hit-rx{
 .act-bubble[data-kind="dislike"]{--act:var(--red);}
 .act-bubble[data-kind="comment"]{--act:var(--ix-comment);}
 @media (hover:hover) and (pointer:fine){
-  .act-hit-av:hover .act-bubble-av{transform:scale(1.04);}
+  .act-hit-av:hover .act-bubble-av{transform:translateZ(0) scale(1.04);}
   .act-bubble:not(.is-dragging) .act-hit-rx:hover{
     filter:brightness(1.06);
   }
@@ -1475,9 +1480,11 @@ html.dark .comment-skel-line::after{background:linear-gradient(105deg,transparen
   display:inline-flex;align-items:center;gap:6px;
   border:none;background:transparent;cursor:pointer;
   font-size:12px;font-weight:700;color:var(--ink-faint);
-  padding:6px 10px;border-radius:999px;margin:0 -10px;
+  padding:6px 10px;border-radius:999px;margin:0;
   transition:background .15s ease,color .15s ease;
 }
+/* Expand More hover into the reply gutter — never pull Hide past the right clip edge */
+.comment-thread-more{margin-left:-10px;}
 .comment-thread-more:hover,.comment-thread-hide:hover{
   background:var(--line);color:var(--ink-soft);
 }
@@ -3721,7 +3728,8 @@ html.dark .qhc-id{color:#6BA3FF;}
       el.style.setProperty('--pop', '0.62');
     } else {
       el.classList.add('is-out');
-      el.style.setProperty('--dy', ((parseFloat(el.style.getPropertyValue('--dy')) || 0) - 18) + 'px');
+      // Soft settle — avoid a big upward exit that makes the cluster feel like it's migrating
+      el.style.setProperty('--dy', ((parseFloat(el.style.getPropertyValue('--dy')) || 0) - 6) + 'px');
       el.style.setProperty('--pop', '0.82');
     }
     setTimeout(()=> el.remove(), 560);
@@ -3744,6 +3752,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     const HALF = BUBBLE / 2;
     const PAD = 28;       // inset when clustering on-media
     const AV_GAP = 52;    // clear space above the meta avatar (center limit)
+    const CLUSTER_H = 96; // keep the flock in a band just above the avatar — never climb the feed
     const MIN_SEP = 54;   // center-to-center — discs + rings don't kiss
     const MEDIA_GAP = 12; // air between gutter cluster and media lip
 
@@ -3761,32 +3770,38 @@ html.dark .qhc-id{color:#6BA3FF;}
     // cluster, but confine it to the gutter so it doesn't hang over the media.
     const metaOutside = !item.classList.contains('meta-float') && avCX < mediaLeft - 4;
 
-    // Same bloom language as overlay mode — scale X down if the gutter is tight
+    // Same bloom language as overlay mode — scale X down if the gutter is tight.
+    // Slots stay near the avatar (small |y|) so respawns never climb the column.
     const baseSlots = [
       { x: 6,  y: -52 },
-      { x: 44, y: -90 },
-      { x: 86, y: -70 },
+      { x: 44, y: -78 },
+      { x: 78, y: -58 },
     ];
 
     let minCX, maxCX, minCY, maxCY;
+    const floorCY = avTop - AV_GAP; // bottom of band (just above avatar)
+    const ceilingFloor = metaOutside ? (HALF + 10) : (mediaTop + PAD + HALF);
     if(metaOutside){
       minCX = HALF + 10;
       maxCX = mediaLeft - MEDIA_GAP - HALF;
-      minCY = HALF + 10;
-      maxCY = avTop - AV_GAP;
     } else {
       minCX = mediaLeft + PAD + HALF;
       maxCX = mediaRight - PAD - HALF;
-      minCY = mediaTop + PAD + HALF;
-      maxCY = avTop - AV_GAP;
+    }
+    maxCY = floorCY;
+    minCY = Math.max(ceilingFloor, maxCY - CLUSTER_H);
+    // Degenerate band (avatar near top) — pin to a short stack above the avatar
+    if(minCY > maxCY){
+      maxCY = Math.max(ceilingFloor + 8, floorCY);
+      minCY = Math.max(ceilingFloor, maxCY - 48);
     }
 
     const roomRight = Math.max(8, maxCX - avCX);
     const scaleX = metaOutside ? Math.min(1, roomRight / 92) : 1;
     const slots = baseSlots.map(s => ({
       x: s.x * scaleX,
-      // When the gutter is tight, bloom more upward so the cluster still reads
-      y: s.y - (metaOutside ? (1 - scaleX) * 36 : 0)
+      // Tight gutter: shift slightly toward media, not up the feed
+      y: s.y
     }));
 
     let padNudgeX = 0, padNudgeY = 0;
@@ -3797,9 +3812,12 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(seedY < minCY) padNudgeY = minCY - seedY;
     if(seedY > maxCY) padNudgeY = maxCY - seedY;
 
+    const clampCX = (v)=> Math.max(minCX, Math.min(v, maxCX));
+    const clampCY = (v)=> Math.max(minCY, Math.min(v, maxCY));
+
     const placed = slots.map(s => ({
-      cx: Math.max(minCX, Math.min(avCX + s.x + padNudgeX, maxCX)),
-      cy: Math.max(minCY, Math.min(avTop + s.y + padNudgeY, maxCY))
+      cx: clampCX(avCX + s.x + padNudgeX),
+      cy: clampCY(avTop + s.y + padNudgeY)
     }));
 
     for(let pass = 0; pass < 5; pass++){
@@ -3811,14 +3829,20 @@ html.dark .qhc-id{color:#6BA3FF;}
           const dy = b.cy - a.cy;
           const d = Math.hypot(dx, dy) || 0.01;
           if(d >= MIN_SEP) continue;
-          const need = MIN_SEP - d;
-          // Prefer bloom along available axis — up when gutter X is tight
-          const pushX = metaOutside && scaleX < 0.55
-            ? need * 0.2
-            : Math.max(need * 0.85, need * (dx >= 0 ? 0.5 : 1));
-          const pushY = dy > 0 ? -need * 0.35 : -need * (metaOutside ? 0.75 : 0.55);
-          b.cx = Math.max(minCX, Math.min(b.cx + pushX, maxCX));
-          b.cy = Math.max(minCY, Math.min(b.cy + pushY, maxCY));
+          const need = (MIN_SEP - d) / 2;
+          // Separate along the join vector — no systematic upward bias
+          let nx = dx / d, ny = dy / d;
+          if(metaOutside && scaleX < 0.55){
+            // Narrow gutter: prefer vertical split but keep it inside the avatar band
+            nx *= 0.35;
+            ny = ny === 0 ? (a.cy <= b.cy ? -1 : 1) : Math.sign(ny) || -1;
+            const len = Math.hypot(nx, ny) || 1;
+            nx /= len; ny /= len;
+          }
+          a.cx = clampCX(a.cx - nx * need);
+          a.cy = clampCY(a.cy - ny * need);
+          b.cx = clampCX(b.cx + nx * need);
+          b.cy = clampCY(b.cy + ny * need);
           moved = true;
         }
       }
@@ -3833,11 +3857,13 @@ html.dark .qhc-id{color:#6BA3FF;}
     const wrapW = wr.width;
     const wrapH = wr.height;
 
-    liveBubbles.forEach((el, i)=>{
+    liveBubbles.forEach((el)=>{
       if(el._dragging || el._gone) return;
-      const p = placed[i % placed.length];
+      const slot = ((el._slot ?? 0) % placed.length + placed.length) % placed.length;
+      const p = { cx: placed[slot].cx, cy: placed[slot].cy };
       p.cx = Math.max(HALF + EDGE, Math.min(p.cx, wrapW - HALF - EDGE));
-      p.cy = Math.max(HALF + EDGE, Math.min(p.cy, wrapH - HALF - EDGE));
+      // Never climb above the avatar band — wrap top is not a valid parking spot
+      p.cy = Math.max(minCY, Math.min(p.cy, Math.min(maxCY, wrapH - HALF - EDGE)));
 
       let roomLeft = p.cx - HALF;
       let roomRight = wrapW - (p.cx + HALF);
@@ -3869,6 +3895,14 @@ html.dark .qhc-id{color:#6BA3FF;}
         el.style.setProperty('--dy', '0px');
       }
     });
+  }
+
+  function nextActBubbleSlot(){
+    const used = new Set(liveBubbles.map(b => b._slot));
+    for(let i = 0; i < ACT_BUBBLE_MAX; i++){
+      if(!used.has(i)) return i;
+    }
+    return 0;
   }
 
   function bindActivityBubbleInteractions(root){
@@ -4009,8 +4043,11 @@ html.dark .qhc-id{color:#6BA3FF;}
       dismissActivityBubble(liveBubbles[0]);
     }
     const seedKey = seed || ('who' + Math.random().toString(36).slice(2,8));
-    const av = avatar || userAvatar(seedKey);
+    // Avatar must seed from the display name — hover card uses userAvatar(name).
+    // Seeding from seedKey made the bubble a different (often near-black) blockie
+    // than the preview card, which read as a dark/washy overlay on the disc.
     const name = actBubbleName(seedKey);
+    const av = avatar || userAvatar(name);
     const expr = actBubbleExpr(k, { amount, text });
     const root = document.createElement('div');
     root.className = 'act-bubble';
@@ -4018,7 +4055,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     root.setAttribute('role', 'group');
     root.setAttribute('aria-label', `${name} · ${expr}`);
     root._pop = 0.98 + Math.random() * 0.04;
-    root._slot = liveBubbles.length;
+    root._slot = nextActBubbleSlot();
     root._name = name;
     root._expr = expr;
     root.innerHTML = `

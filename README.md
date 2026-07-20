@@ -46,7 +46,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Trade entry points | Avatar+, Buy CTA, ticker, token mini, category pill → trade drawer |
 | Hover cards | Desktop only — user / token / **`>>` quote** preview portals (no Buy on the card) |
 | 2× hold → lock | ≥240ms → glass `2x` badge with **charge ring** + **“Hold 3s to lock”** (`SPEED_LOCK_MS=3000`); no chevron pulse on this path; release early = back to 1×; lock survives finger-up; tap badge to unlock |
-| Activity bubbles | Desktop ambient reactions; progressive disclosure on the reaction chip; discs clamped inside the feed wrap (never under sidebar/drawer) |
+| Activity bubbles | Desktop ambient reactions; progressive disclosure on the reaction chip; discs clamped to a band above the post avatar (never climb the feed); avatar seeded from display name (matches hover card); hairline ring only (no colored/brown halo) |
 | New posts / pull pill | Themed `--card` / `--ink` / `--line`; 20px clearance under topbar; soft-dismiss after **2** settled swipes (`NEW_PILL_SWIPES`), then re-arm ~3 min |
 | Meta float scrim | Desktop short veil (`clamp(132px, 28%, 176px)`); mobile taller |
 | Tablet chrome | Keep chevron gutter (`--feed-chevron-gutter: 88px`); glass rail only when overlaid on media |
@@ -62,7 +62,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Compose chrome | Squircle input row (`border-radius:14px`) matching `.comment-send`; send haptic `sent` |
 | Anon vs public | Anon: no reacts/media; public: X-proof tip + reacts |
 | **Threaded replies** | One indent level under a root (`.comment-replies` pad-left 46px / 40px mobile); smaller reply avatars (28px) |
-| **View / hide replies** | Collapsed by default. `View N replies` → reveal **5** at a time (`REPLY_PAGE`); then `View N more`; **Hide** collapses the whole indent |
+| **View / hide replies** | Collapsed by default. `View N replies` → reveal **5** at a time (`REPLY_PAGE`); then `View N more`; **Hide** collapses the whole indent. Hide hover pill stays inside the scroll gutter (no right-edge clip) |
 | **`>>id` quotes** | 4chan-style. Reply prefixes compose with `>>35355 `; send nests under that comment’s **root**; blue `.comment-quote` links in list + compose mirror |
 | Quote hover card | Desktop — hover `>>id` → `#quoteHoverCard` mini preview (180ms); works in list + compose mirror |
 | Attach | File pop-in or drag media from feed; drop stage; anon auto-exits for media |
@@ -84,7 +84,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 
 ## Animation system
 
-Most motion reuses a small set of curves. Durations are wall-clock; springs are physics-stepped at `dt = 1/60`.
+Most motion reuses a small set of curves. Durations are wall-clock; doomscroll springs use **real frame dt** (see `swipe-silk` below).
 
 ### Shared easing tokens
 
@@ -177,14 +177,17 @@ Floating IG-style avatars for ambient / live tip · comment · like · dislike. 
 
 | Piece | Detail |
 |-------|--------|
-| Enter / exit | `.act-bubble.is-in` / `.is-out` / `.is-fling` — opacity + scale, `.34–.55s` soft overshoot |
-| Idle drift | `@keyframes actBubbleDrift` — `5.2s ease-in-out` infinite (staggered delays) |
+| Enter / exit | `.act-bubble.is-in` / `.is-out` / `.is-fling` — opacity + scale, soft settle (exit rise ~6px, not a climb) |
+| Idle drift | `@keyframes actBubbleDrift` — gentle `5.2s` loop (small amplitude so the flock doesn’t feel like it’s migrating) |
+| Layout | `layoutActivityBubbles` — avatar-relative slots inside a **~96px band** above meta; lowest free `_slot` on respawn; separate overlaps along the join vector (no upward bias) |
+| Avatar | `userAvatar(displayName)` — same seed as the user hover card (never the ambient `cmN` / `tipperN` key) |
+| Ring | Opaque disc + white hairline on `.act-hit-av`; no colored `--act` outer ring / brown drop shadow |
 | Chip closed | `.act-hit-rx` — 16×16 color badge with reaction icon |
 | Chip open | `.is-rx-open` — blooms to pill (`max-width:168px`, `.32s` `(.22,1,.36,1)`) |
 | Copy | tip `tipped $N` · like `liked it` · dislike `disliked it` · comment short text |
 | Marquee | `@keyframes actRxMarquee` — **comments only**, and only when the label overflows (`syncActRxMarquee`) |
 | Never marquee | tip (`tipped $N`), like (`liked it`), dislike (`disliked it`), short comment snips (`wow`, `love this`) |
-| API | `spawnActivityBubble` · `signalActivity` · `setActDisclosure` · `layoutActivityBubbles` |
+| API | `spawnActivityBubble` · `signalActivity` · `setActDisclosure` · `layoutActivityBubbles` · `nextActBubbleSlot` |
 
 ```css
 /* gated in JS: el.dataset.kind === 'comment' && overflow > 4 */
@@ -377,7 +380,7 @@ One indent level only (not infinite nesting). Roots stay flush; replies live in 
 | Indent | `.comment-replies` `padding-left:46px` (40px ≤860); `.is-reply` avatars 28px |
 | Collapse | `thread._shown = 0` by default — bar shows `View N replies` |
 | Page size | `REPLY_PAGE = 5` via `revealMoreReplies` → `View N more` until exhausted |
-| Hide | `hideThreadReplies` clears the box; Hide button only while `.has-open` |
+| Hide | `hideThreadReplies` clears the box; Hide button only while `.has-open`; hover pill flush to the right (no `-10px` clip) |
 | Bar API | `syncThreadBar` · `renderCommentThread` · `renderThreadReplies({animate})` |
 | `>>` render | `renderCommentText` → `<span class="comment-quote" data-qid>` (escaped HTML) |
 | Reply action | `startReplyTo(c)` prefixes compose `>>{id} ` (replaces any existing leading tag) |
