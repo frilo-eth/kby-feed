@@ -41,7 +41,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Infinite wrap | Both directions; first-post down-swipe wraps to previous (TikTok trap) |
 | Pull-to-refresh | Mobile only; short deliberate pull at top; longer drag hands off to wrap scroll |
 | Mute morph | pathLength SVG draw (waves ↔ slash); session `kb_feed_sound` |
-| Buy `$ticker` | Floating crystal pill on `.token-anchor` (desktop + mobile). Cadence: show ~4.2s → tuck → reappear after engage (proximity / idle / tab); max 3 / post. Enter/exit share the same spring; wipe uses `clip-path: inset(… round 999px)`. **Separate:** hover the avatar/`+` expands a full-width orange Buy bar with marquee (never auto-wakes with the pill) |
+| Buy `$ticker` | Floating crystal pill on `.token-anchor` (desktop + mobile). Cadence: show ~4.2s → tuck → reappear after engage (proximity / idle / tab); max 3 / post. Enter/exit share the same spring; wipe uses `clip-path: inset(… round 999px)`. **Buy bar:** desktop = hover avatar/`+`; mobile = auto-expand with pill show, **2** marquee cycles, then minimize to `+` |
 | Media frame | **Desktop always matches source aspect ratio** (`fitMediaBox` + `--ar`); one binding axis, the other `auto`. Mobile ≤860 stays full-bleed `object-fit:cover` |
 | Trade entry points | Avatar+, Buy CTA, ticker, token mini, category pill → trade drawer |
 | Hover cards | Desktop only — user / token / **`>>` quote** preview portals (no Buy on the card) |
@@ -116,7 +116,7 @@ Most motion reuses a small set of curves. Durations are wall-clock; doomscroll s
 | New posts pill | brightness `.98`; soft-dismiss after 2 settled swipes | `scale(.95)` | opacity `.28s`, transform `.34s` pop |
 | Tag / uname | color / underline | — | `.15s` |
 | **Token mini** *(size allowed)* | `scale(1.14)` + orange ring | `scale(.96)` | `.28s` `(.22,1.4,.36,1)` |
-| **Trade plus → Buy bar** *(key)* | hover avatar/`+` only — see below | `scale(.97)` press | width + marquee |
+| **Trade plus → Buy bar** *(key)* | desktop hover / mobile auto (2 cycles → `+`) — see below | `scale(.97)` press | width + marquee |
 
 Desktop reaction hover gated: `@media (hover:hover) and (pointer:fine)`.
 
@@ -155,8 +155,8 @@ Two independent Buy surfaces on `.token-anchor`. Do **not** couple them.
 
 | Surface | When it wakes | What moves |
 |---------|---------------|------------|
-| **Floating Buy pill** (`.buy-cta`) | Cadence (`is-cta-live`) + hotzone / idle / tab re-engage (`is-hover-wake`) | Crystal pill wipe only. Soft glow on avatar/`+` allowed. **Never** expands the orange bar. |
-| **Orange Buy bar** (`.plus-badge`) | **Hover** `.avatar-plus` only (desktop `pointer:fine`) | Bar grows full token width; label `Buy $TICKER` marquees. Cadence must not trigger this. |
+| **Floating Buy pill** (`.buy-cta`) | Cadence (`is-cta-live`) + hotzone / idle / tab re-engage (`is-hover-wake`) | Crystal pill wipe only. Soft glow on avatar/`+` allowed. **Never** expands the orange bar by itself. |
+| **Orange Buy bar** (`.plus-badge`) | **Desktop:** hover `.avatar-plus`. **Mobile:** `.is-plus-buy` when the pill show arms — marquee a few cycles, then collapse to `+` | Bar grows full token width; label `Buy $TICKER` marquees. |
 
 **Geometry (no jump)**
 
@@ -174,17 +174,20 @@ Two independent Buy surfaces on `.token-anchor`. Do **not** couple them.
 |-------|--------|
 | Markup | `.plus-buy-label` → `.plus-buy-track` → two `.plus-buy-seg` (`Buy ${ticker}`, second `aria-hidden`) |
 | Copy | `Buy $TICKER` (ticker already includes `$`) — **Buy** is the word eyes must catch first |
-| Motion | `@keyframes plusBuyMarquee` `translateX(0→−50%)` · `3.2s linear` · `.18s` start delay · `infinite` |
+| Motion | `@keyframes plusBuyMarquee` `translateX(0→−50%)` · `3.2s linear` · `.18s` start delay · `infinite` while expanded |
 | Gap | `padding-right:8px` on each seg (included in the `-50%` travel) |
-| Gate | Animation only under `.token-anchor .avatar-plus:hover` — not `is-cta-live` |
+| Gate (desktop) | `.token-anchor .avatar-plus:hover` |
+| Gate (mobile) | `.token-anchor.is-plus-buy` via `armPlusBuyBar` — **2** cycles (`PLUS_BUY_BAR_CYCLES`), then `clearPlusBuyBar` → `+` only. Re-arms with each pill show. Independent of pill tuck timing. |
+| Reduced motion | brief expand without loop, then collapse |
 
 ```css
-/* Hover-only — cadence uses is-cta-live for the floating pill alone */
-.token-anchor .avatar-plus:hover .plus-badge{
+/* Desktop hover + mobile .is-plus-buy share the same expand */
+.token-anchor .avatar-plus:hover .plus-badge,
+.token-anchor.is-plus-buy .plus-badge{
   width:calc(100% + 3px);
-  /* right/bottom/height stay put */
 }
-.token-anchor .avatar-plus:hover .plus-badge .plus-buy-track{
+.token-anchor .avatar-plus:hover .plus-badge .plus-buy-track,
+.token-anchor.is-plus-buy .plus-badge .plus-buy-track{
   animation:plusBuyMarquee 3.2s linear .18s infinite;
 }
 @keyframes plusBuyMarquee{
@@ -254,7 +257,7 @@ Floating IG-style avatars for ambient / live tip · comment · like · dislike. 
 | 2× hold / lock | see **Hold → lock gesture** below | `SPEED_HOLD_MS=240` · `SPEED_LOCK_MS=3000` |
 | Buy CTA cycle | floating pill show → dormant → reappear (desktop + mobile); hotzone/idle/tab wake | show ~4.2s / engage / max 3 — pill only, not Buy bar |
 | Buy CTA enter / exit | shared transition; `clip-path: inset(… round 999px)` + scale/translate (never bare `inset` / `none` mismatch) | `.46s` / `.5s` `(.18,1.12,.32,1)` / `(.16,1.2,.28,1)` |
-| Buy bar marquee | hover `+` only — see **Trade plus → Buy bar** | `3.2s linear` continuous, `.18s` delay |
+| Buy bar marquee | desktop hover `+` · mobile `.is-plus-buy` (2 cycles → `+`) — see **Trade plus → Buy bar** | `3.2s linear` continuous, `.18s` delay |
 | Progress bar | `.video-progress-fill` | width `.08s linear` |
 | Meta float scrim | `.media-meta-scrim` desktop `clamp(132px,28%,176px)` soft gradient | mobile `48–52%` |
 
@@ -362,8 +365,8 @@ pos  += v * h
 | Snap | Momentum projection `pos + v·0.26`, then `silkSnapTarget` (hard / soft flick thresholds) |
 | Parallax | active/next `scale(1)`; prev `scale(.97) opacity .55`; else fade `1 − ad*0.5`, scale `≥.92` |
 | Wheel | accumulate delta (≥28); page step; lock **360ms** (was 520) for chained trackpad flicks |
-| Settle haptic | `haptic('settle')` when index changes |
-| Drag tick | `haptic('dragtick')` each crossed index |
+| Settle haptic | `haptic('settle')` when index changes — **haptic only** (no swipe audio) |
+| Drag tick | `haptic('dragtick')` each crossed index — **haptic only** |
 
 ---
 

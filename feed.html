@@ -747,10 +747,13 @@ html.dark .buy-cta-rim::before{
   transition-duration:.1s;
 }
 /*
-  Full-width Buy bar — hover only on the + / avatar.
-  Cadence (is-cta-live) wakes the floating pill only — never this morph.
+  Full-width Buy bar —
+  desktop: hover on + / avatar
+  mobile:  .is-plus-buy (JS) — a few marquee cycles, then collapse to +
+  Cadence (is-cta-live) wakes the floating pill only — never this morph alone.
 */
-.token-anchor .avatar-plus:hover .plus-badge{
+.token-anchor .avatar-plus:hover .plus-badge,
+.token-anchor.is-plus-buy .plus-badge{
   /* right/bottom/height stay put — no Y jump, no left jump of the + */
   width:calc(100% + 3px);
   padding:0;
@@ -762,7 +765,8 @@ html.dark .buy-cta-rim::before{
     0 0 0 2px rgba(255,102,34,.16),
     0 4px 12px rgba(255,102,34,.36);
 }
-.token-anchor .avatar-plus:hover .plus-badge .plus-buy-label{
+.token-anchor .avatar-plus:hover .plus-badge .plus-buy-label,
+.token-anchor.is-plus-buy .plus-badge .plus-buy-label{
   /* Fill the bar left of + so it doesn't read as a ghost icon slot */
   flex:1 1 0;
   max-width:100%;
@@ -772,14 +776,16 @@ html.dark .buy-cta-rim::before{
   padding-left:6px; /* keep "B" clear of the squirclish edge */
   transform:none;
 }
-.token-anchor .avatar-plus:hover .plus-badge .plus-buy-track{
+.token-anchor .avatar-plus:hover .plus-badge .plus-buy-track,
+.token-anchor.is-plus-buy .plus-badge .plus-buy-track{
   /* Short settle, then a brisk continuous loop */
   animation:plusBuyMarquee 3.2s linear .18s infinite;
 }
-.token-anchor .avatar-plus:hover .plus-badge::before{
+.token-anchor .avatar-plus:hover .plus-badge::before,
+.token-anchor.is-plus-buy .plus-badge::before{
   opacity:.65;transform:scale(1.02);
 }
-/* Hover: no pop-scale. Press: listen with 0.97 (origin stays on the +) */
+/* Hover/press: no pop-scale on token. Press: listen with 0.97 (origin stays on the +) */
 .token-anchor .avatar-plus:active .plus-badge{
   transform:scale(.97);
   transition-duration:.1s;
@@ -3168,7 +3174,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     pullsettle:{ vibrate: [14, 36, 20], taps: 2, tapGap: 46 },
   };
   const PRESET_SOUND = {
-    light:'light', selection:'light', nudge:'light', settle:'settle', attach:'settle', dragtick:'dragtick',
+    // Swipe ticks are haptic-only — audio is reserved for intentional cues (react, mute, lock, …)
+    light:'light', selection:'light', nudge:'light', settle:false, attach:'settle', dragtick:false,
     toggle:'toggle', unmute:'unmute', mute:'mute', open:'open', comment:'comment', sent:'sent', share:'share',
     tip:'tip', like:'like', dislike:'dislike', lock:'lock', unlock:'unlock',
     pulltick:false, pullmorph:'light', pullarm:'light', pulldisarm:false,
@@ -4897,6 +4904,10 @@ html.dark .qhc-id{color:#6BA3FF;}
   const BUY_CTA_MAX_SHOWS = 3;
   const BUY_CTA_TAB_AWAY_MS = 12000; // hidden this long → landmark on return
   const BUY_CTA_IDLE_MS = 9000;     // no pointer/touch → soft reappear nudge
+  /* Mobile Buy bar: expand, marquee N loops, collapse to + (no hover) */
+  const PLUS_BUY_BAR_CYCLES = 2;
+  const PLUS_BUY_BAR_CYCLE_MS = 3200;
+  const PLUS_BUY_BAR_DELAY_MS = 180;
   let buyCtaTimer = 0;
   let buyCtaEngageTimer = 0;
   let buyCtaIdleTimer = 0;
@@ -4976,6 +4987,59 @@ html.dark .qhc-id{color:#6BA3FF;}
       el.style.transform = '';
     });
   }
+  function clearPlusBuyBar(anchor){
+    if(!anchor) return;
+    clearTimeout(anchor._plusBuyT);
+    anchor._plusBuyT = 0;
+    const track = anchor.querySelector('.plus-buy-track');
+    if(track && anchor._plusBuyIter){
+      track.removeEventListener('animationiteration', anchor._plusBuyIter);
+      anchor._plusBuyIter = null;
+    }
+    if(track){
+      track.style.animation = 'none';
+      void track.offsetWidth;
+      track.style.animation = '';
+    }
+    anchor.classList.remove('is-plus-buy');
+  }
+  /**
+   * Mobile only: expand Buy bar, run PLUS_BUY_BAR_CYCLES marquees, then minimize to +.
+   * Desktop keeps hover — do not call this for fine pointers.
+   */
+  function armPlusBuyBar(anchor){
+    if(!anchor || !isTouchBuyFeed()) return;
+    if(matchMedia('(prefers-reduced-motion:reduce)').matches){
+      // Still flash the label once without looping
+      clearPlusBuyBar(anchor);
+      anchor.classList.add('is-plus-buy');
+      clearTimeout(anchor._plusBuyT);
+      anchor._plusBuyT = setTimeout(()=> clearPlusBuyBar(anchor), 1600);
+      return;
+    }
+    clearPlusBuyBar(anchor);
+    const track = anchor.querySelector('.plus-buy-track');
+    anchor.classList.add('is-plus-buy');
+    // Restart marquee from "Buy …"
+    if(track){
+      track.style.animation = 'none';
+      void track.offsetWidth;
+      track.style.animation = '';
+    }
+    let cycles = 0;
+    const onIter = ()=>{
+      cycles += 1;
+      if(cycles < PLUS_BUY_BAR_CYCLES) return;
+      clearPlusBuyBar(anchor);
+    };
+    anchor._plusBuyIter = onIter;
+    track?.addEventListener('animationiteration', onIter);
+    // Fallback if iteration events are missed
+    clearTimeout(anchor._plusBuyT);
+    anchor._plusBuyT = setTimeout(()=>{
+      clearPlusBuyBar(anchor);
+    }, PLUS_BUY_BAR_DELAY_MS + PLUS_BUY_BAR_CYCLES * PLUS_BUY_BAR_CYCLE_MS + 320);
+  }
   function setBuyCtaDormant(item, dormant){
     const btn = item?.querySelector('.buy-cta');
     const anchor = item?.querySelector('.token-anchor');
@@ -4998,6 +5062,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         clearTimeout(anchor._hoverWakeT);
         clearTimeout(anchor._hoverSleepT);
         clearTimeout(anchor._proxHoldT);
+        // Leave .is-plus-buy alone — mobile bar finishes its own marquee cycles
         anchor.classList.remove('is-cta-live','is-cta-enter','is-landmark','is-hover-wake');
         resetPlusCueAnim(anchor);
         anchor.classList.add('is-cta-dormant');
@@ -5012,6 +5077,8 @@ html.dark .qhc-id{color:#6BA3FF;}
       const delay = mobile ? 60 : 240;
       clearTimeout(anchor._ctaLiveT);
       clearTimeout(anchor._ctaEnterT);
+      // Mobile: Buy bar expands with the pill show — a few marquees, then + only
+      if(mobile) armPlusBuyBar(anchor);
       anchor._ctaLiveT = setTimeout(()=>{
         if(buyCtaIdx !== idx) return;
         if(btn?.classList.contains('is-dormant')) return;
@@ -5037,6 +5104,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     clearTimeout(anchor._hoverWakeT);
     clearTimeout(anchor._hoverSleepT);
     clearTimeout(anchor._proxHoldT);
+    clearPlusBuyBar(anchor);
     anchor.classList.remove('is-cta-live','is-cta-enter','is-landmark','is-hover-wake');
     resetPlusCueAnim(anchor);
     const btn = anchor.querySelector('.buy-cta');
@@ -5075,6 +5143,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       anchor.classList.add('is-hover-wake');
       anchor.classList.remove('is-cta-dormant');
       if(mobile){
+        armPlusBuyBar(anchor);
         // No hover hold — brief reveal then auto-tuck
         clearTimeout(anchor._proxHoldT);
         anchor._proxHoldT = setTimeout(()=>{
