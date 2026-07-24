@@ -41,7 +41,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Infinite wrap | Both directions; first-post down-swipe wraps to previous (TikTok trap) |
 | Pull-to-refresh | Mobile only; short deliberate pull at top; longer drag hands off to wrap scroll |
 | Mute morph | pathLength SVG draw (waves ↔ slash); session `kb_feed_sound` |
-| Buy `$ticker` | Desktop only — show ~4.2s → tuck → reappear after ~6.5s engage (max 3 / post); crystal glass on `.token-anchor`. Enter/exit share the same spring; wipe uses `clip-path: inset(… round 999px)` so the pill never goes square mid-flight. Hidden on mobile |
+| Buy `$ticker` | Floating crystal pill on `.token-anchor` (desktop + mobile). Cadence: show ~4.2s → tuck → reappear after engage (proximity / idle / tab); max 3 / post. Enter/exit share the same spring; wipe uses `clip-path: inset(… round 999px)`. **Separate:** hover the avatar/`+` expands a full-width orange Buy bar with marquee (never auto-wakes with the pill) |
 | Media frame | **Desktop always matches source aspect ratio** (`fitMediaBox` + `--ar`); one binding axis, the other `auto`. Mobile ≤860 stays full-bleed `object-fit:cover` |
 | Trade entry points | Avatar+, Buy CTA, ticker, token mini, category pill → trade drawer |
 | Hover cards | Desktop only — user / token / **`>>` quote** preview portals (no Buy on the card) |
@@ -111,12 +111,12 @@ Most motion reuses a small set of curves. Durations are wall-clock; doomscroll s
 | **Reaction rail** | outside: `#FAFAFA→#FFF` / dark `#130A07→#251D18`; on-media glass tint; active `brightness(1.06)` | `brightness(.94)` | bg/color `.22s` |
 | Reaction count | ink / white | — | color `.2s` |
 | **Mute / unmute** | pathLength draw morph — see below | — | `.2s` ease-in-out (+`.1s` outer) |
-| **Buy $ticker** | desktop only (≥861px); pill on `.token-anchor`; show ~4.2s then tuck; reappear after ~6.5s engage (≤3× / post); shared enter/exit spring; `inset(… round 999px)` wipe | brightness | clip/transform spring |
+| **Buy $ticker** (floating pill) | desktop + mobile; cadence show → tuck → re-engage (≤3× / post); shared enter/exit spring; `inset(… round 999px)` wipe; hotzone wake = pill only (`is-hover-wake`) | brightness | clip/transform spring |
 | **Hover cards** | user + token + **`>>` quote** portals (no Buy CTA); desktop `pointer:fine` only | — | show `.18s`, delay 180–280ms |
 | New posts pill | brightness `.98`; soft-dismiss after 2 settled swipes | `scale(.95)` | opacity `.28s`, transform `.34s` pop |
 | Tag / uname | color / underline | — | `.15s` |
 | **Token mini** *(size allowed)* | `scale(1.14)` + orange ring | `scale(.96)` | `.28s` `(.22,1.4,.36,1)` |
-| **Trade plus** *(embellished)* | see below | settle | pop curve |
+| **Trade plus → Buy bar** *(key)* | hover avatar/`+` only — see below | `scale(.97)` press | width + marquee |
 
 Desktop reaction hover gated: `@media (hover:hover) and (pointer:fine)`.
 
@@ -149,13 +149,51 @@ WebHaptics-style pathLength draw — one SVG, no hard icon swap. Cone stays; wav
 </svg>
 ```
 
-#### Trade plus embellishment
+#### Trade plus → Buy bar (key)
 
-| Piece | Hover |
+Two independent Buy surfaces on `.token-anchor`. Do **not** couple them.
+
+| Surface | When it wakes | What moves |
+|---------|---------------|------------|
+| **Floating Buy pill** (`.buy-cta`) | Cadence (`is-cta-live`) + hotzone / idle / tab re-engage (`is-hover-wake`) | Crystal pill wipe only. Soft glow on avatar/`+` allowed. **Never** expands the orange bar. |
+| **Orange Buy bar** (`.plus-badge`) | **Hover** `.avatar-plus` only (desktop `pointer:fine`) | Bar grows full token width; label `Buy $TICKER` marquees. Cadence must not trigger this. |
+
+**Geometry (no jump)**
+
+| Piece | Detail |
 |-------|--------|
-| Avatar | orange `2px` ring + slight brightness |
-| Plus badge | SVG `+` (grid-centered); `scale(1.1) rotate(90deg)`, `.28s` `(.22,1.2,.36,1)` |
-| Plus `::before` ring | opacity `0→1`, `scale(.85→1.2)` — same curve |
+| Anchor | `right:-3px; bottom:-5px; height:20px` — only **width** grows left (`calc(100% + 3px)`); `border-radius:7px` |
+| `+` icon | `justify-content:flex-end` + fixed `margin-right` — icon never travels |
+| Label | `.plus-buy-label` fills space left of `+`; `padding-left:6px`; mask fades **right edge only** (left soft-mask crops “Buy”) |
+| Press | `scale(0.97)`, `transform-origin:100% 50%` |
+| Reduced motion | `@media (prefers-reduced-motion:reduce)` kills `.plus-buy-track` animation |
+
+**Marquee** — continuous loop (no hold between cycles). Duplicated segments so `-50%` is seamless.
+
+| Piece | Detail |
+|-------|--------|
+| Markup | `.plus-buy-label` → `.plus-buy-track` → two `.plus-buy-seg` (`Buy ${ticker}`, second `aria-hidden`) |
+| Copy | `Buy $TICKER` (ticker already includes `$`) — **Buy** is the word eyes must catch first |
+| Motion | `@keyframes plusBuyMarquee` `translateX(0→−50%)` · `3.2s linear` · `.18s` start delay · `infinite` |
+| Gap | `padding-right:8px` on each seg (included in the `-50%` travel) |
+| Gate | Animation only under `.token-anchor .avatar-plus:hover` — not `is-cta-live` |
+
+```css
+/* Hover-only — cadence uses is-cta-live for the floating pill alone */
+.token-anchor .avatar-plus:hover .plus-badge{
+  width:calc(100% + 3px);
+  /* right/bottom/height stay put */
+}
+.token-anchor .avatar-plus:hover .plus-badge .plus-buy-track{
+  animation:plusBuyMarquee 3.2s linear .18s infinite;
+}
+@keyframes plusBuyMarquee{
+  from{transform:translateX(0);}
+  to{transform:translateX(-50%);}
+}
+```
+
+Non-token `.avatar-plus:hover .plus-badge` still uses the soft pop (`scale(1.12)` + ring) — token hover overrides to `transform:none` so width grow doesn’t fight scale.
 
 ---
 
@@ -214,8 +252,9 @@ Floating IG-style avatars for ambient / live tip · comment · like · dislike. 
 | Top controls show | `.media-topctl` | opacity `.2s`, `translateY(−6→0)` |
 | Play/pause flash | `@keyframes flashPop` | `.58s` `(.22,1,.36,1)` — scale `.55→1→1.5`, fade out |
 | 2× hold / lock | see **Hold → lock gesture** below | `SPEED_HOLD_MS=240` · `SPEED_LOCK_MS=3000` |
-| Buy CTA cycle | desktop show → dormant → reappear on engage | show 4.2s / engage 6.5s / max 3 |
+| Buy CTA cycle | floating pill show → dormant → reappear (desktop + mobile); hotzone/idle/tab wake | show ~4.2s / engage / max 3 — pill only, not Buy bar |
 | Buy CTA enter / exit | shared transition; `clip-path: inset(… round 999px)` + scale/translate (never bare `inset` / `none` mismatch) | `.46s` / `.5s` `(.18,1.12,.32,1)` / `(.16,1.2,.28,1)` |
+| Buy bar marquee | hover `+` only — see **Trade plus → Buy bar** | `3.2s linear` continuous, `.18s` delay |
 | Progress bar | `.video-progress-fill` | width `.08s linear` |
 | Meta float scrim | `.media-meta-scrim` desktop `clamp(132px,28%,176px)` soft gradient | mobile `48–52%` |
 
@@ -495,7 +534,7 @@ First tagged snapshot of the single-file prototype (`feed.html` + `public/`).
 
 | Area | Included |
 |------|----------|
-| Feed | Spring doomscroll, infinite wrap, pull-to-refresh, mute morph, Buy CTA (enter/exit spring), hover cards, 2× hold→lock + “Hold 3s to lock” annotation, activity bubbles, new-pill soft-dismiss, first-visit hint |
+| Feed | Spring doomscroll, infinite wrap, pull-to-refresh, mute morph, Buy CTA pill (enter/exit spring, mobile too) + hover Buy-bar marquee on `+`, hover cards, 2× hold→lock + “Hold 3s to lock” annotation, activity bubbles, new-pill soft-dismiss, first-visit hint |
 | Meta | Pinned left (flush) or float-on-media (padded inset + short desktop scrim) via `layoutMeta` |
 | Comments | Anon/public, **threaded replies** (indent + View 5 / Hide), **`>>id` quotes** + hover card, attach + fly-in, CFX gallery |
 | Sheets | Trade, share (auto-close on X/copy), more (auto-close incl. theme), sheet-colored close targets |

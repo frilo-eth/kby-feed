@@ -28,6 +28,9 @@
 ### Buy CTA
 - Enter/exit share one spring; wipe stays `clip-path: inset(… round 999px)` so the pill never goes square mid-flight
 - Hover dismiss waits for `transitionend` before finishing dormant (no snap)
+- Floating pill now wakes on **mobile** too (proximity / idle / tab) — cadence only, not the `+` morph
+- **Hover Buy bar** on avatar/`+`: full-token orange bar, `+` fixed bottom-right, label `Buy $TICKER` continuous marquee (`plusBuyMarquee` 3.2s linear, no hold between loops). Cadence/`is-hover-wake` must **not** expand this bar
+- Documented under README **Trade plus → Buy bar (key)**
 
 ### Feed polish
 - Activity bubbles clamped inside the feed wrap (no sidebar/drawer clip); reaction pills flip toward open space
