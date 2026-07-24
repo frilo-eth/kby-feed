@@ -41,7 +41,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Infinite wrap | Both directions; first-post down-swipe wraps to previous (TikTok trap) |
 | Pull-to-refresh | Mobile only; short deliberate pull at top; longer drag hands off to wrap scroll |
 | Mute morph | pathLength SVG draw (waves ↔ slash); session `kb_feed_sound` |
-| Buy `$ticker` | Floating crystal pill on `.token-anchor` (desktop + mobile). Cadence: show ~4.2s → tuck → reappear after engage (proximity / idle / tab); max 3 / post. Enter/exit share the same spring; wipe uses `clip-path: inset(… round 999px)`. **Buy bar:** desktop = hover avatar/`+`; mobile = auto-expand with pill show, **2** marquee cycles, then minimize to `+` |
+| Buy `$ticker` | Floating crystal pill on `.token-anchor` (desktop + mobile). **Mobile stagger:** `+` Buy bar marquees 2× first, then pill (no overlap). Hotzone/tab = pill only. Desktop: pill cadence + hover Buy bar. Wipe: `clip-path: inset(… round 999px)` |
 | Media frame | **Desktop always matches source aspect ratio** (`fitMediaBox` + `--ar`); one binding axis, the other `auto`. Mobile ≤860 stays full-bleed `object-fit:cover` |
 | Trade entry points | Avatar+, Buy CTA, ticker, token mini, category pill → trade drawer |
 | Hover cards | Desktop only — user / token / **`>>` quote** preview portals (no Buy on the card) |
@@ -155,8 +155,8 @@ Two independent Buy surfaces on `.token-anchor`. Do **not** couple them.
 
 | Surface | When it wakes | What moves |
 |---------|---------------|------------|
-| **Floating Buy pill** (`.buy-cta`) | Cadence (`is-cta-live`) + hotzone / idle / tab re-engage (`is-hover-wake`) | Crystal pill wipe only. Soft glow on avatar/`+` allowed. **Never** expands the orange bar by itself. |
-| **Orange Buy bar** (`.plus-badge`) | **Desktop:** hover `.avatar-plus`. **Mobile:** `.is-plus-buy` when the pill show arms — marquee a few cycles, then collapse to `+` | Bar grows full token width; label `Buy $TICKER` marquees. |
+| **Floating Buy pill** (`.buy-cta`) | Cadence + hotzone / idle / tab. **Mobile:** delayed until `+` marquee finishes (cadence); hotzone/tab = pill only | Crystal pill wipe. Soft glow on avatar/`+` allowed. |
+| **Orange Buy bar** (`.plus-badge`) | **Desktop:** hover `.avatar-plus`. **Mobile:** leads cadence — 2 marquees, then collapse to `+`, then pill | Full-token `Buy $TICKER` marquee |
 
 **Geometry (no jump)**
 
@@ -177,7 +177,7 @@ Two independent Buy surfaces on `.token-anchor`. Do **not** couple them.
 | Motion | `@keyframes plusBuyMarquee` `translateX(0→−50%)` · `3.2s linear` · `.18s` start delay · `infinite` while expanded |
 | Gap | `padding-right:8px` on each seg (included in the `-50%` travel) |
 | Gate (desktop) | `.token-anchor .avatar-plus:hover` |
-| Gate (mobile) | `.token-anchor.is-plus-buy` via `armPlusBuyBar` — **2** cycles (`PLUS_BUY_BAR_CYCLES`), then `clearPlusBuyBar` → `+` only. Re-arms with each pill show. Independent of pill tuck timing. |
+| Gate (mobile) | `.is-plus-buy` via `armPlusBuyBar` — **2** cycles, then collapse; floating pill reveals after (`pillOnly`). Hotzone/tab skip the bar |
 | Reduced motion | brief expand without loop, then collapse |
 
 ```css
@@ -480,6 +480,7 @@ Infinite wrap both ways (TikTok trap). At the first post, a **short** down-pull 
 | Hold / settle | `PULL_HOLD = 64` | keep gap while loading |
 | Desktop alternate | `#newPill` — same theme tokens; `positionNewPill` max(20px, media−pill−14) | opacity `.28s`, transform `.34s` pop |
 | Soft dismiss | `noteNewPillSwipe` after settled nav while `.show` | hide after `NEW_PILL_SWIPES = 2`, re-arm `NEW_PILL_DELAY` (~3 min) |
+| Done cue | `haptic('pullsettle')` → sound `refresh` | soft A5→E6 sine ping — not swipe land |
 
 ```css
 .pull-spin, .new-pill{
@@ -495,9 +496,9 @@ Infinite wrap both ways (TikTok trap). At the first post, a **short** down-pull 
 
 Presets via [web-haptics](https://haptics.lochie.me/) + `navigator.vibrate` fallback:
 
-`light` · `selection` · `nudge` · `settle` · `dragtick` · `toggle` · `unmute` · `mute` · `open` · `comment` · `sent` · `share` · `tip` · `like` · `dislike` · `attach` · `lock` · `unlock`
+`light` · `selection` · `nudge` · `settle` · `dragtick` · `toggle` · `unmute` · `mute` · `open` · `comment` · `sent` · `share` · `tip` · `like` · `dislike` · `attach` · `lock` · `unlock` · `pullsettle`→`refresh`
 
-Each can fire a matching WebAudio one-shot (no ambient loop).
+Swipe settle/dragtick = haptic only. Pull-refresh done plays a dedicated `refresh` notification ping.
 
 ---
 

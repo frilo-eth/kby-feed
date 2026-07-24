@@ -27,9 +27,10 @@
 
 ### Buy CTA
 - Enter/exit share one spring; wipe stays `clip-path: inset(… round 999px)`
-- **Mobile:** floating pill wakes (proximity / idle / tab). Orange `+` auto-expands `Buy $TICKER`, marquees **2×**, then minimizes to `+` only
-- **Desktop:** pill cadence + hover Buy-bar marquee on `+` (unchanged)
+- **Mobile:** on each swipe-in, `+` marquee (2×) first → then floating pill. Reappear / idle / hotzone / tab = pill only
+- **Desktop:** pill cadence + hover Buy-bar marquee on `+`
 - Swipe settle/dragtick = haptic only (no reel audio)
+- Pull-to-refresh done uses a dedicated `refresh` ping (not swipe land)
 - See README **Trade plus → Buy bar (key)**
 
 ### Feed polish

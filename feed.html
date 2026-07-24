@@ -3179,7 +3179,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     toggle:'toggle', unmute:'unmute', mute:'mute', open:'open', comment:'comment', sent:'sent', share:'share',
     tip:'tip', like:'like', dislike:'dislike', lock:'lock', unlock:'unlock',
     pulltick:false, pullmorph:'light', pullarm:'light', pulldisarm:false,
-    pullfire:'open', pullcancel:false, pullsettle:'settle',
+    pullfire:'open', pullcancel:false, pullsettle:'refresh',
   };
   function ensureAudio(){
     if(!actx){
@@ -3243,6 +3243,21 @@ html.dark .qhc-id{color:#6BA3FF;}
     sg.gain.exponentialRampToValueAtTime(0.0001, ts + 0.17);
     spark.connect(sg); sg.connect(masterGain);
     spark.start(ts); spark.stop(ts + 0.19);
+  }
+  /** Soft “new content” ping — distinct from swipe land / drawer open */
+  function reactRefreshSound(ctx){
+    const t0 = ctx.currentTime;
+    // Two sine bells (A5 → E6), short decay — reads as a notification, not a reel settle
+    [[880, 0, 0.085], [1318.51, 0.1, 0.06]].forEach(([f, off, peak])=>{
+      const t = t0 + off;
+      const osc = ctx.createOscillator(); osc.type='sine'; osc.frequency.value = f;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(peak, t + 0.014);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
+      osc.connect(g); g.connect(masterGain);
+      osc.start(t); osc.stop(t + 0.34);
+    });
   }
   function microClick(ctx, freq){
     const t0 = ctx.currentTime;
@@ -3404,6 +3419,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       slotReelTick(ctx, arg || 0, 0);
     }
     else if(kind==='settle') slotLand(ctx);
+    else if(kind==='refresh') reactRefreshSound(ctx);
     else if(kind==='tip') reactTipSound(ctx);
     else if(kind==='like') reactLikeSound(ctx);
     else if(kind==='dislike') reactDislikeSound(ctx);
@@ -4941,7 +4957,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       // Idle wins over the timed reappear cadence
       if(buyCtaEngageTimer){ clearTimeout(buyCtaEngageTimer); buyCtaEngageTimer = 0; }
       buyCtaShows += 1;
-      setBuyCtaDormant(item, false);
+      setBuyCtaDormant(item, false, {pillOnly: isTouchBuyFeed()});
       scheduleBuyCtaHide(idx);
     }, BUY_CTA_IDLE_MS);
   }
@@ -4971,7 +4987,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(buyCtaEngageTimer){ clearTimeout(buyCtaEngageTimer); buyCtaEngageTimer = 0; }
     if(buyCtaTimer){ clearTimeout(buyCtaTimer); buyCtaTimer = 0; }
     buyCtaShows += 1;
-    setBuyCtaDormant(item, false);
+    setBuyCtaDormant(item, false, {pillOnly:true});
     scheduleBuyCtaHide(idx);
     // Avoid thrashing if the finger stays in the pad
     anchor._proxCoolUntil = Date.now() + 4200;
@@ -4991,6 +5007,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(!anchor) return;
     clearTimeout(anchor._plusBuyT);
     anchor._plusBuyT = 0;
+    anchor._plusBuyDone = null;
     const track = anchor.querySelector('.plus-buy-track');
     if(track && anchor._plusBuyIter){
       track.removeEventListener('animationiteration', anchor._plusBuyIter);
@@ -5005,19 +5022,26 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   /**
    * Mobile only: expand Buy bar, run PLUS_BUY_BAR_CYCLES marquees, then minimize to +.
-   * Desktop keeps hover — do not call this for fine pointers.
+   * onDone fires after collapse (used to delay the floating pill so they don't compete).
    */
-  function armPlusBuyBar(anchor){
-    if(!anchor || !isTouchBuyFeed()) return;
-    if(matchMedia('(prefers-reduced-motion:reduce)').matches){
-      // Still flash the label once without looping
+  function armPlusBuyBar(anchor, {onDone}={}){
+    if(!anchor || !isTouchBuyFeed()){ onDone?.(); return; }
+    const finish = ()=>{
+      const done = anchor._plusBuyDone;
+      anchor._plusBuyDone = null;
       clearPlusBuyBar(anchor);
+      done?.();
+    };
+    if(matchMedia('(prefers-reduced-motion:reduce)').matches){
+      clearPlusBuyBar(anchor);
+      anchor._plusBuyDone = onDone || null;
       anchor.classList.add('is-plus-buy');
       clearTimeout(anchor._plusBuyT);
-      anchor._plusBuyT = setTimeout(()=> clearPlusBuyBar(anchor), 1600);
+      anchor._plusBuyT = setTimeout(finish, 1600);
       return;
     }
     clearPlusBuyBar(anchor);
+    anchor._plusBuyDone = onDone || null;
     const track = anchor.querySelector('.plus-buy-track');
     anchor.classList.add('is-plus-buy');
     // Restart marquee from "Buy …"
@@ -5030,17 +5054,15 @@ html.dark .qhc-id{color:#6BA3FF;}
     const onIter = ()=>{
       cycles += 1;
       if(cycles < PLUS_BUY_BAR_CYCLES) return;
-      clearPlusBuyBar(anchor);
+      finish();
     };
     anchor._plusBuyIter = onIter;
     track?.addEventListener('animationiteration', onIter);
     // Fallback if iteration events are missed
     clearTimeout(anchor._plusBuyT);
-    anchor._plusBuyT = setTimeout(()=>{
-      clearPlusBuyBar(anchor);
-    }, PLUS_BUY_BAR_DELAY_MS + PLUS_BUY_BAR_CYCLES * PLUS_BUY_BAR_CYCLE_MS + 320);
+    anchor._plusBuyT = setTimeout(finish, PLUS_BUY_BAR_DELAY_MS + PLUS_BUY_BAR_CYCLES * PLUS_BUY_BAR_CYCLE_MS + 320);
   }
-  function setBuyCtaDormant(item, dormant){
+  function setBuyCtaDormant(item, dormant, opts={}){
     const btn = item?.querySelector('.buy-cta');
     const anchor = item?.querySelector('.token-anchor');
     const mobile = isTouchBuyFeed();
@@ -5069,6 +5091,29 @@ html.dark .qhc-id{color:#6BA3FF;}
       }
       return;
     }
+    /* Mobile cadence: + marquee first, floating pill after it collapses (no overlap). */
+    if(mobile && !opts.pillOnly){
+      if(btn){
+        btn._pendingDormant = false;
+        btn.classList.add('is-dormant');
+        btn.classList.remove('is-hover-wake');
+      }
+      if(anchor){
+        clearTimeout(anchor._ctaLiveT);
+        clearTimeout(anchor._ctaEnterT);
+        anchor.classList.remove('is-cta-live','is-cta-enter','is-hover-wake');
+        anchor.classList.add('is-cta-dormant');
+        armPlusBuyBar(anchor, {
+          onDone: ()=>{
+            if(buyCtaIdx !== idx || lastActiveIdx !== idx) return;
+            if(!item?.classList.contains('active') || !item.classList.contains('media-ready')) return;
+            setBuyCtaDormant(item, false, {pillOnly:true});
+            scheduleBuyCtaHide(idx);
+          }
+        });
+      }
+      return;
+    }
     if(btn){
       btn.classList.remove('is-dormant','is-hover-wake');
       anchor?.classList.remove('is-cta-dormant','is-hover-wake');
@@ -5077,8 +5122,6 @@ html.dark .qhc-id{color:#6BA3FF;}
       const delay = mobile ? 60 : 240;
       clearTimeout(anchor._ctaLiveT);
       clearTimeout(anchor._ctaEnterT);
-      // Mobile: Buy bar expands with the pill show — a few marquees, then + only
-      if(mobile) armPlusBuyBar(anchor);
       anchor._ctaLiveT = setTimeout(()=>{
         if(buyCtaIdx !== idx) return;
         if(btn?.classList.contains('is-dormant')) return;
@@ -5143,8 +5186,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       anchor.classList.add('is-hover-wake');
       anchor.classList.remove('is-cta-dormant');
       if(mobile){
-        armPlusBuyBar(anchor);
-        // No hover hold — brief reveal then auto-tuck
+        // Pill-only wake — bar already teaches on cadence; don't stack both
         clearTimeout(anchor._proxHoldT);
         anchor._proxHoldT = setTimeout(()=>{
           btn.dataset.ctaHover = '';
@@ -5255,7 +5297,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     setBuyCtaDormant(item, false);
     buyCtaShows = 1;
-    scheduleBuyCtaHide(idx);
+    // Mobile: hide is scheduled after + marquee ends (see setBuyCtaDormant stagger)
+    if(!isTouchBuyFeed()) scheduleBuyCtaHide(idx);
     noteBuyCtaActivity();
   }
   /** Soft place-memory after coming back — Buy pill + glowing + on all viewports. */
@@ -5274,7 +5317,8 @@ html.dark .qhc-id{color:#6BA3FF;}
       }
       if(i !== idx) clearTokenCtaCue(it);
     });
-    setBuyCtaDormant(item, false);
+    // Landmark = pill (skip + marquee so tab-return isn't a double teach)
+    setBuyCtaDormant(item, false, {pillOnly:true});
     if(btn) btn.classList.add('is-landmark');
     if(anchor) anchor.classList.add('is-landmark');
     buyCtaTimer = setTimeout(()=>{
@@ -5309,7 +5353,8 @@ html.dark .qhc-id{color:#6BA3FF;}
       if(!item?.classList.contains('media-ready')) return;
       buyCtaShows += 1;
       item.querySelector('.buy-cta')?.classList.remove('is-landmark');
-      setBuyCtaDormant(item, false);
+      // Reappear = pill only on mobile (bar already taught on the swipe-in)
+      setBuyCtaDormant(item, false, {pillOnly: isTouchBuyFeed()});
       scheduleBuyCtaHide(idx);
     }, BUY_CTA_ENGAGE_MS);
   }
