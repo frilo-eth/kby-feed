@@ -26,7 +26,7 @@ Open [http://localhost:3000](http://localhost:3000) (`/` → feed).
 | `C` | Comment |
 | `S` | Share |
 
-Swipe / wheel on desktop. Hold video ≥240ms for 2× — badge opens straight into the charge ring + **“Hold 3s to lock”** annotation → locked 2× (tap badge to unlock). Details: [2× hold → lock](#hold-lock-2x). Pull down on mobile for refresh (short pull) or wrap to previous (longer drag — infinite loop).
+Swipe / wheel on desktop. Hold video ≥240ms for 2× — badge opens straight into the charge ring + **“Hold 3s to lock”** annotation → locked 2× (tap badge to unlock). Details: [2× hold → lock](#hold-lock-2x). At the first post, pull down to [refresh](#pull-refresh) (desktop + mobile). Infinite wrap both ways when swiping the feed.
 
 ---
 
@@ -39,7 +39,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Feature | Behavior |
 |---------|----------|
 | Infinite wrap | Both directions; first-post down-swipe wraps to previous (TikTok trap) |
-| Pull-to-refresh | Mobile only; short deliberate pull at top; longer drag hands off to wrap scroll |
+| [Pull-to-refresh](#pull-refresh) | At first post: short deliberate pull refreshes; longer drag can wrap to previous (infinite loop). Desktop + mobile. `#pullSpin` dial → spin · [Q&A](#pull-refresh) |
 | Mute morph | pathLength SVG draw (waves ↔ slash); session `kb_feed_sound` |
 | [Video progress bar](#video-progress) | Bottom 3px track on `type=video` only (not gif-loops); `--orange` fill from `timeupdate`; non-interactive; loops with the clip |
 | Buy `$ticker` | Floating crystal pill on `.token-anchor` (desktop + mobile). **Mobile stagger:** `+` Buy bar marquees 2× first, then pill (no overlap). Hotzone/tab = pill only. Desktop: pill cadence + hover Buy bar. Wipe: `clip-path: inset(… round 999px)` |
@@ -756,32 +756,75 @@ API surface: open via `.comment-thumb`; close `#cfxClose` / backdrop / Escape. K
 
 ---
 
-### 8. Pull-to-refresh → spring settle
+<a id="pull-refresh"></a>
 
-Infinite wrap both ways (TikTok trap). At the first post, a **short** down-pull still refreshes; drag further and it hands off to previous-post scroll.
+### 8. Pull-to-refresh — handoff
 
-| Step | Code | Detail |
-|------|------|--------|
-| Infinite wrap | `wrappedOffset` / `springTo` | swipe down on first → previous (`N-1`); never hard-stops |
-| Pull vs scroll | `PULL_SCROLL_BREAK` + `pullFingerFor(THRESHOLD)` | handoff always past refresh-arm distance so wrap can't steal the gesture |
-| Rubber-band | `dampPull(dy)` | `max=112`, `k=0.48`, asymptotic |
-| Offset | `pullOffset` via `setPullOffset` → `applyTransform` | active item only |
-| Mask | `.is-pulling` / `.is-refreshing` | non-active hidden; peek gradient off |
-| Threshold | `PULL_THRESHOLD = 68` | haptic `nudge` on arm |
-| Spinner pill | `#pullSpin` — `background:var(--card)`; `color:var(--ink)`; `border:var(--line)` | grounded on media lip; `TOP_PAD = 20` under topbar |
-| Spin feel | rAF cruise + wobble + SVG blur while `.is-spinning` | ease-out ramp ~200ms → ~1.7 rps |
-| Hold / settle | `PULL_HOLD = 64` | keep gap while loading |
-| Desktop alternate | `#newPill` — same theme tokens; `positionNewPill` max(20px, media−pill−14) | opacity `.28s`, transform `.34s` pop |
-| Soft dismiss | `noteNewPillSwipe` after settled nav while `.show` | hide after `NEW_PILL_SWIPES = 2`, re-arm `NEW_PILL_DELAY` (~3 min) |
-| Done cue | `haptic('pullsettle')` → sound `refresh` | soft A5→E6 sine ping — not swipe land |
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#pull-refresh](https://github.com/frilo-eth/kby-feed/blob/main/README.md#pull-refresh)
 
-```css
-.pull-spin, .new-pill{
-  background: var(--card);
-  color: var(--ink);
-  border: 1px solid var(--line);
-}
+At the **settled first post**, drag down → rubber-band + `#pullSpin` dial. Cross threshold → arm → release fires refresh. Desktop **and** mobile (`pullEligible = atTop`). While pulling from home, `homeDragClamp` blocks wrap-to-previous so refresh owns the gesture. Demo: `?refresh` / `#refresh`.
+
+| Constant | Value | Role |
+|----------|-------|------|
+| `PULL_THRESHOLD` | **84** | Arm / fire distance (damped px) |
+| `PULL_HOLD` | 64 | Gap held while loading |
+| `PULL_DAMP_MAX` / `K` | 160 / 0.42 | Asymptotic rubber-band (`dampPull`) |
+| `PULL_LOAD_MS` | 520 | Fake load before settle home |
+| `PULL_DIAL_TURNS` | 1.15 | Arrow winds with finger distance |
+| `PULL_TICK_PX` | 11 | Stretch haptic notches |
+| `PULL_REVEAL_PX` | 36 | Chip scales in once gap can hold it |
+
+##### Phases
+
+| Phase | When | UI | Haptic |
+|-------|------|----|--------|
+| Begin | down-drag on home (`dy>2`) | `.is-pulling` · chip `.is-live` | `pulltick` |
+| Stretch | finger moves | dial `--rot` from distance · morph → “Refreshing” | `pulltick` notches · `pullmorph` mid-morph |
+| Armed | `pullDist ≥ 84` | `.is-armed` | `pullarm` |
+| Disarm | back below ~82% threshold | lose armed | `pulldisarm` |
+| Cancel | release early | spring to 0 · dismiss chip | `pullcancel` |
+| Fire | release while armed | `.is-refreshing` · hold at `PULL_HOLD` · `.is-spinning` | `pullfire` |
+| Done | after `PULL_LOAD_MS` + spring home | shuffle posts · chip clear | `pullsettle` → sound **`refresh`** (A5→E6 ping) |
+
+Desktop alternate when not pulling: `#newPill` (“New posts”) — soft-dismiss after **2** settled swipes, re-arm ~3 min. Same theme tokens as the spin chip.
+
+##### Chip (minimum)
+
+```html
+<button type="button" class="pull-spin" id="pullSpin" aria-hidden="true" aria-label="Refreshing" tabindex="-1">
+  <svg class="pull-reload-svg" viewBox="-2 -2 28 28" aria-hidden="true">
+    <path class="pull-reload" d="M20 12a8 8 0 1 1-2.34-5.66"/>
+    <path class="pull-reload" d="M20 4v5h-5"/>
+  </svg>
+  <span class="pull-label">Refreshing</span>
+</button>
 ```
+
+Grounded on the media lip (`layoutPullSpin`, `PULL_GROUND=22`, `TOP_PAD=20`). Vars: `--pull-morph`, `--pull-scale`, `--pull-lift`, `--rot`. Theme: `background:var(--card)` · `color:var(--ink)` · `border:var(--line)`.
+
+##### Port checklist
+
+1. Only arm pull when **settled on index 0** — don’t fight mid-swipe.
+2. Clamp home so wrap-to-previous can’t steal the down-drag (`homeDragClamp`).
+3. One rotation owner (`pullSpinAngle`) — finger dial **or** load spin, never both fighting `--rot`.
+4. Hold the band at `PULL_HOLD` while loading; settle haptic/sound only when the band returns home.
+5. Done sound is **`refresh`**, not swipe `settle` — different cue family.
+
+##### Q&A
+
+**Q: Mobile-only?**  
+A: No — `pullEligible = atTop` on desktop and mobile. Desktop also gets `#newPill` as a non-gesture alternate.
+
+**Q: Why doesn’t a long pull wrap to the previous post?**  
+A: On home, `homeDragClamp` keeps `pos ≥ 0` so refresh owns down-drag. Infinite wrap still works when navigating the feed normally.
+
+**Q: What does “arm” mean?**  
+A: Past `PULL_THRESHOLD` (84px damped). Release while armed → refresh; release early → cancel spring.
+
+**Q: Why dial the arrow with distance?**  
+A: Continuity — the same glyph that winds under the finger becomes the load spinner (Family Values: float, don’t teleport).
+
+Source: CSS ~2228–2363 · JS ~5492–6080 · markup `#pullSpin` ~2541 · pointer home path ~6148–6195.
 
 ---
 
