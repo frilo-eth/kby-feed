@@ -606,6 +606,22 @@ html.dark .buy-cta-rim::before{
 .avatar-sm{width:34px;height:34px;object-fit:cover;flex-shrink:0;background:var(--line);}
 .uname{font-weight:700;font-size:14px;cursor:pointer;transition:opacity .15s;color:var(--ink);}
 .uname:hover{opacity:.8;}
+/* User blockies — shared hover on every instance (meta, comments, CFX, bubbles, cards, wallet) */
+img.blockie{
+  cursor:pointer;
+  transition:opacity .15s ease, filter .15s ease;
+}
+@media (hover:hover) and (pointer:fine){
+  img.blockie:hover,
+  .act-hit-av:hover img.blockie,
+  .uhc-avatar:hover img.blockie,
+  .thc-marker-av:hover img.blockie,
+  .thc-buyer-stack:hover img.blockie,
+  .btn-wallet:hover img.blockie{
+    opacity:.88;
+    filter:brightness(1.06);
+  }
+}
 .desc{font-size:13.5px;line-height:1.4;color:var(--ink-soft);max-width:100%;margin-bottom:9px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .meta-tags{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .token-tag{
@@ -1208,7 +1224,6 @@ html.dark .act-bubble.is-rx-open .act-hit-rx{
 .act-bubble[data-kind="dislike"]{--act:var(--red);}
 .act-bubble[data-kind="comment"]{--act:var(--ix-comment);}
 @media (hover:hover) and (pointer:fine){
-  .act-hit-av:hover .act-bubble-av{transform:translateZ(0) scale(1.04);}
   .act-bubble:not(.is-dragging) .act-hit-rx:hover{
     filter:brightness(1.06);
   }
@@ -2516,7 +2531,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       <div class="topbar-spacer"></div>
       <button class="icon-btn" id="themeBtn" title="Toggle theme"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
       <button class="btn-launch" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13.5 4.5c2.4-1.5 5-1.2 6-1c.2 1 .5 3.6-1 6L14 14l-4-4l3.5-5.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 14l-1.5 1.5M6.5 12.5C5 13.5 4.5 16.5 4.5 19.5c3 0 6-.5 7-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15" cy="9" r="1.3" fill="currentColor"/></svg><span>Launch Token</span></button>
-      <button class="btn-wallet" type="button" id="walletBtn" title="Wallet" aria-label="Open wallet"><span class="btn-wallet-label">0x635e...9739</span><img class="btn-wallet-avatar circle" id="walletAvatar" src="" alt=""></button>
+      <button class="btn-wallet" type="button" id="walletBtn" title="Wallet" aria-label="Open wallet"><span class="btn-wallet-label">0x635e...9739</span><img class="btn-wallet-avatar circle blockie" id="walletAvatar" src="" alt=""></button>
     </div>
 
     <div class="feed-wrap" id="feedWrap">
@@ -2698,7 +2713,7 @@ html.dark .qhc-id{color:#6BA3FF;}
             <div class="comment-input-row" id="commentInputRow">
               <div class="comment-identity" id="commentIdentity">
                 <button type="button" class="comment-identity-btn" id="commentIdentityBtn" aria-expanded="false" aria-haspopup="true" title="Posting identity">
-                  <img class="circle" id="commentInputAvatar" src="" alt="">
+                  <img class="circle blockie" id="commentInputAvatar" src="" alt="">
                   <svg class="chev" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
                 <div class="comment-anon-pop" id="commentAnonPop" role="dialog" aria-label="Anonymous posting">
@@ -4209,6 +4224,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     // than the preview card, which read as a dark/washy overlay on the disc.
     const name = actBubbleName(seedKey);
     const av = avatar || userAvatar(name);
+    const isBlockie = typeof av === 'string' && av.startsWith('data:');
     const expr = actBubbleExpr(k, { amount, text });
     const root = document.createElement('div');
     root.className = 'act-bubble';
@@ -4222,7 +4238,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     root.innerHTML = `
       <span class="act-bubble-inner">
         <button type="button" class="act-hit-av" aria-label="Preview ${name}">
-          <img class="act-bubble-av circle" src="${av}" alt="">
+          <img class="act-bubble-av circle${isBlockie ? ' blockie' : ''}" src="${av}" alt="">
         </button>
         <button type="button" class="act-hit-rx" aria-expanded="false" aria-label="${actEscapeLabel(expr)}">
           <span class="act-rx-ico" aria-hidden="true">${svgIcon(k)}</span>
@@ -4422,7 +4438,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         </div>
         <div class="col-info">
           <div class="meta-block">
-            <div class="row1"><img class="avatar-sm circle" src="${userAvatar(p.user)}"><div class="uname">@${p.user}</div></div>
+            <div class="row1"><img class="avatar-sm circle blockie" src="${userAvatar(p.user)}"><div class="uname">@${p.user}</div></div>
             <div class="desc">${p.desc}</div>
             <div class="meta-tags"><span class="token-tag"><img class="token-mini squircle" src="${p.avatar}" alt=""><span class="tag-ticker">${p.ticker}</span></span><div class="pill ${p.cat.toLowerCase()}">${p.cat}</div></div>
           </div>
@@ -7263,7 +7279,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     const stats = mockUserStats(post.user);
     const av = userAvatar(post.user);
     userHoverCard.innerHTML = `
-      <div class="uhc-avatar squircle"><img src="${av}" alt=""></div>
+      <div class="uhc-avatar squircle"><img class="blockie" src="${av}" alt=""></div>
       <div class="uhc-body">
         <div class="uhc-name">${post.user}</div>
         <div class="uhc-socials">
@@ -7333,20 +7349,20 @@ html.dark .qhc-id{color:#6BA3FF;}
       const left = (p.x / 412) * 100;
       const top = (p.y / 168) * 100;
       if(kind === 'av'){
-        return `<div class="thc-marker" style="left:${left}%;top:${top}%"><div class="thc-marker-av"><img src="${userAvatar(post.user + i)}" alt=""></div></div>`;
+        return `<div class="thc-marker" style="left:${left}%;top:${top}%"><div class="thc-marker-av"><img class="blockie" src="${userAvatar(post.user + i)}" alt=""></div></div>`;
       }
       if(kind === 'rocket'){
         return `<div class="thc-marker" style="left:${left}%;top:${top}%"><div class="thc-marker-av" style="background:var(--orange);display:grid;place-items:center"><svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M13.5 4.5c2.4-1.5 5-1.2 6-1c.2 1 .5 3.6-1 6L14 14l-4-4l3.5-5.5Z" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg></div></div>`;
       }
       if(kind === 'comment'){
-        return `<div class="thc-marker" style="left:${left}%;top:${top}%"><div class="thc-marker-chip comment">cool! that'…</div><div class="thc-marker-av"><img src="${userAvatar('commenter')}" alt=""></div></div>`;
+        return `<div class="thc-marker" style="left:${left}%;top:${top}%"><div class="thc-marker-chip comment">cool! that'…</div><div class="thc-marker-av"><img class="blockie" src="${userAvatar('commenter')}" alt=""></div></div>`;
       }
       if(kind === 'tip'){
         return `<div class="thc-marker" style="left:${left}%;top:${top}%"><div class="thc-marker-chip tip"><svg viewBox="0 0 24 24" fill="none"><path d="M12 6.4C18.5-.3 29.7 12.1 12 22C-5.7 12.1 5.5-.3 12 6.4Z" stroke="currentColor" stroke-width="2"/></svg>$${tipVal}</div><div class="thc-marker-av"><img src="${post.avatar}" alt=""></div></div>`;
       }
-      return `<div class="thc-marker" style="left:${left}%;top:${top}%"><div class="thc-marker-chip pnl">+$${pnlVal}</div><div class="thc-marker-av"><img src="${userAvatar('pnl'+post.ticker)}" alt=""></div></div>`;
+      return `<div class="thc-marker" style="left:${left}%;top:${top}%"><div class="thc-marker-chip pnl">+$${pnlVal}</div><div class="thc-marker-av"><img class="blockie" src="${userAvatar('pnl'+post.ticker)}" alt=""></div></div>`;
     }).join('');
-    const buyerImgs = [0,1,2].map(i=>`<img src="${userAvatar(post.ticker + '-b' + i)}" alt="">`).join('');
+    const buyerImgs = [0,1,2].map(i=>`<img class="blockie" src="${userAvatar(post.ticker + '-b' + i)}" alt="">`).join('');
     tokenHoverCard.innerHTML = `
       <div class="thc-head">
         <div class="thc-token-av squircle"><img src="${post.avatar}" alt=""></div>
@@ -7423,7 +7439,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       ? `<div class="qhc-thumb">${commentMediaTag(comment.media, true)}</div>`
       : '';
     quoteHoverCard.innerHTML = `
-      <img class="qhc-av" src="${userAvatar(comment.user)}" alt="">
+      <img class="qhc-av blockie" src="${userAvatar(comment.user)}" alt="">
       <div class="qhc-body">
         <div class="qhc-head">
           <span class="qhc-user">${escapeCommentHtml(comment.user)}</span>
@@ -7869,7 +7885,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     row.dataset.commentId = String(c.id);
     row._comment = c;
     row.innerHTML = `
-      <img class="comment-avatar circle" src="${userAvatar(c.user)}" alt="">
+      <img class="comment-avatar circle blockie" src="${userAvatar(c.user)}" alt="">
       <div class="comment-body">
         <div class="comment-head">
           <span class="comment-user">${c.user}</span>
@@ -8273,7 +8289,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(isVideo){ const v = cfxMedia.querySelector('video'); if(v) v.play().catch(()=>{}); }
 
     cfxCaption.innerHTML = `
-      <img class="cfx-user-av" src="${userAvatar(c.user)}" alt="">
+      <img class="cfx-user-av blockie" src="${userAvatar(c.user)}" alt="">
       <div class="info">
         <div class="name cfx-user-name">@${c.user}</div>
         <div class="cap">${renderCommentText(c.text)}</div>
@@ -8478,6 +8494,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(!commentInputAvatar) return;
     const anon = commentAnonToggle?.classList.contains('active');
     commentInputAvatar.src = anon ? ANON_AVATAR : MY_AVATAR;
+    commentInputAvatar.classList.toggle('blockie', !anon);
   }
   function syncCommentSendReady(){
     const ready = state.commentsOpen && !!(commentInput.value.trim() || (!commentAnonToggle?.classList.contains('active') && commentPendingMedia));

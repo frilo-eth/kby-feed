@@ -46,7 +46,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Media frame | **Desktop always matches source aspect ratio** (`fitMediaBox` + `--ar`); one binding axis, the other `auto`. Mobile ≤860 stays full-bleed `object-fit:cover` |
 | Trade entry points | Avatar+, Buy CTA, ticker, token mini, category pill → trade drawer |
 | Hover cards | Desktop only — user / token / **`>>` quote** preview portals (no Buy on the card) — meta triggers in [Meta affordances](#meta-affordances) |
-| [Meta affordances](#meta-affordances) | `@uname` opacity hover · token mini scale+ring · ticker coffee→hover · pill; click token/pill → trade drawer; desktop hover cards |
+| [Meta affordances](#meta-affordances) | `@uname` opacity hover · **`.blockie`** lighten on all user avatars · token mini scale+ring · ticker coffee→hover · pill; click token/pill → trade drawer; desktop hover cards · [Q&A](#meta-affordances) |
 | [2× hold → lock](#hold-lock-2x) | ≥240ms → glass `2x` badge with **charge ring** + **“Hold 3s to lock”** (`SPEED_LOCK_MS=3000`); no chevron pulse on this path; release early = back to 1×; lock survives finger-up; tap badge to unlock — [full technical overview](#hold-lock-2x) |
 | Activity bubbles | Desktop ambient reactions; progressive disclosure on the reaction chip; discs clamped to a band above the post avatar (never climb the feed); avatar seeded from display name (matches hover card); hairline ring only (no colored/brown halo) |
 | New posts / pull pill | Themed `--card` / `--ink` / `--line`; 20px clearance under topbar; soft-dismiss after **2** settled swipes (`NEW_PILL_SWIPES`), then re-arm ~3 min |
@@ -805,8 +805,9 @@ Bottom-left post chrome (`.col-info` → `.meta-block`). **Rule:** hover is most
 
 | Target | Hover affordance | Press | Click | Desktop hover card | Haptic |
 |--------|------------------|-------|-------|--------------------|--------|
-| `.avatar-sm` | — (cursor default on img) | — | — | **user** · 280ms | — |
+| `.avatar-sm.blockie` | opacity `.88` + brightness `1.06` · `.15s` | — | — | **user** · 280ms | — |
 | `.uname` (`@user`) | `opacity:.8` · `.15s` (no underline) | — | — *(no profile route yet)* | **user** · 280ms | — |
+| **`img.blockie`** (all instances) | same lighten — meta, comments, CFX, act-bubbles, hover cards, buyers, wallet | — | — | user card where bound | — |
 | `.token-tag` (wraps mini + ticker) | mini scale + ring; ticker color | mini `scale(.96)` | **trade drawer** | **token** · 280ms | `open` |
 | `.token-mini` | `scale(1.14)` + orange ring `0 0 0 2px rgba(255,102,34,.35)` + brightness | `scale(.96)` · `.1s` | *(via `.token-tag`)* | *(via `.token-tag`)* | — |
 | `.tag-ticker` | `color: var(--coffee) → var(--coffee-hover)` · `.15s` | — | *(via `.token-tag`)* | *(via `.token-tag`)* | — |
@@ -820,7 +821,7 @@ Bottom-left post chrome (`.col-info` → `.meta-block`). **Rule:** hover is most
 <div class="col-info">
   <div class="meta-block">
     <div class="row1">
-      <img class="avatar-sm circle" src="…">
+      <img class="avatar-sm circle blockie" src="…">
       <div class="uname">@${user}</div>
     </div>
     <div class="desc">…</div>
@@ -838,6 +839,23 @@ Bottom-left post chrome (`.col-info` → `.meta-block`). **Rule:** hover is most
 ##### CSS (affordance minimum)
 
 ```css
+/* Shared user-blockie hover — tag every userAvatar() <img> with .blockie */
+img.blockie{
+  cursor: pointer;
+  transition: opacity .15s ease, filter .15s ease;
+}
+@media (hover:hover) and (pointer:fine){
+  img.blockie:hover,
+  .act-hit-av:hover img.blockie,
+  .uhc-avatar:hover img.blockie,
+  .thc-marker-av:hover img.blockie,
+  .thc-buyer-stack:hover img.blockie,
+  .btn-wallet:hover img.blockie{
+    opacity: .88;
+    filter: brightness(1.06);
+  }
+}
+
 .uname{
   font-weight:700; font-size:14px; cursor:pointer;
   transition: opacity .15s; color: var(--ink);
@@ -923,12 +941,36 @@ Gate: `width > 860` and `(hover:hover) and (pointer:fine)` · mouse `pointerente
 1. Keep **username** and **token** as separate targets — user → profile preview; token → trade.
 2. Hit target for ticker+mini is the **`.token-tag` wrapper** (negative margin padding), not two separate buttons.
 3. Only the mini may scale on hover — ticker stays type-only (color). Do not scale the whole chip.
-4. Hover card delay **280ms**; leave trigger has a short bridge onto the card (don’t kill preview on the 1px gap).
-5. `stopPropagation` on clicks so the scroller doesn’t treat them as feed gestures.
-6. On float/mobile, switch to light-on-scrim tokens — coffee brown disappears on dark frames.
-7. Category `.pill` is also a trade entry (same drawer + token hover card).
+4. Tag every `userAvatar()` `<img>` with **`.blockie`** so hover lighten is shared (meta, comments, CFX, bubbles, cards, wallet). Skip anon PNG / token photos.
+5. Hover card delay **280ms**; leave trigger has a short bridge onto the card (don’t kill preview on the 1px gap).
+6. `stopPropagation` on clicks so the scroller doesn’t treat them as feed gestures.
+7. On float/mobile, switch to light-on-scrim tokens — coffee brown disappears on dark frames.
+8. Category `.pill` is also a trade entry (same drawer + token hover card).
 
-Source: CSS ~602–644, mobile ~2181–2188 · markup ~4423–4428 · binds ~4711–4719 · `layoutMeta` ~3655–3691.
+##### Q&A
+
+**Q: Why doesn’t `@uname` underline anymore?**  
+A: Underline competed with ticker/link cues. Hover is opacity-only (`.8`) — lighter, still clickable-looking with `cursor:pointer`.
+
+**Q: Why can the token mini scale but the username avatar doesn’t?**  
+A: Mini is a trade affordance (exception to the “no scale on hover” rule). User blockies use a shared **lighten** (opacity + brightness) so they don’t fight layout in dense lists.
+
+**Q: What’s a “blockie” vs the token image?**  
+A: Blockies = deterministic `userAvatar(seed)` identicons for **people**. Token art = `post.avatar` / `.token-mini` / rail `.avatar-plus` — those keep orange-ring / Buy behaviors, not `.blockie`.
+
+**Q: Where does `.blockie` hover apply?**  
+A: Every tagged instance: meta `.avatar-sm`, comment avatars, CFX caption av, act-bubble discs (data-URL only), user/quote hover cards, chart buyer stack + markers, wallet chip. Compose input drops `.blockie` while anon.
+
+**Q: Click username/avatar — where do I go?**  
+A: Prototype has **no profile route**. Desktop opens the user hover card; mobile has no hover card. Token tag + category pill open the **trade drawer** (`haptic('open')`).
+
+**Q: Why bind hover cards on `.token-tag` instead of mini and ticker separately?**  
+A: One hit target, one delay timer, no flicker when the pointer crosses from mini → `$TICKER`.
+
+**Q: Pinned vs float — do affordances change?**  
+A: Motion/CSS hooks stay the same; **paint** swaps to light-on-scrim when `.meta-float` or mobile so coffee/ink don’t vanish on dark frames.
+
+Source: CSS ~606–625 (blockie + uname), ~627–660 (token-tag) · markup meta ~4440 · binds ~4725–4735 · `layoutMeta` ~3655–3691 · `userAvatar` / `makeBlockie` ~2787+.
 
 ---
 
