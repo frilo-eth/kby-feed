@@ -1011,7 +1011,7 @@ Gate: `width > 860` and `(hover:hover) and (pointer:fine)` · mouse `pointerente
 
 | Piece | Detail |
 |-------|--------|
-| Width | `max-width` collapsed `3.85em` → open `10.5em` |
+| Width | collapsed `calc(pads+icon+1.85em)` → open `calc(…+9.6em+10px)`; open pad-right `10px` |
 | Curve | `.52s` `cubic-bezier(.22,.82,.28,1)` — soft both ways (collapse must not snap) |
 | Labels | Stacked in `.role-badge-text` (`display:inline-grid`); **opacity crossfade** — never `display:none` |
 | Expand | short → 0 immediately; full → 1 after `.06s` |
