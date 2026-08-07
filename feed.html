@@ -2007,20 +2007,114 @@ body.cfx-on #drawer{z-index:50;}
   }
 }
 .share-body{padding:18px;}
-.share-card{position:relative;display:flex;align-items:stretch;justify-content:space-between;gap:16px;padding:22px;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#d7ebfd 0%,#bcdcfb 55%,#addafb 100%);}
-.share-card::before{content:'';position:absolute;inset:0;background-image:url("/public/logo-light.png");background-size:48px;background-repeat:repeat;opacity:.18;pointer-events:none;}
+/* Share minicard — type tint + holo foil (simeydotme-inspired, lighter)
+   Dare = blue texture · Meme = orange texture */
+.share-card{
+  --share-ink:#0e2c56;
+  --share-ink-soft:#2f6fd0;
+  --share-media-shadow:rgba(14,44,86,.22);
+  --share-grad:linear-gradient(135deg,#d7ebfd 0%,#bcdcfb 55%,#addafb 100%);
+  --mx:52%;
+  --my:40%;
+  position:relative;display:flex;align-items:stretch;justify-content:space-between;gap:16px;
+  padding:22px;border-radius:16px;overflow:hidden;
+  background:var(--share-grad);
+  isolation:isolate;
+  transform:translateZ(0);
+}
+.share-card.is-dare{
+  --share-ink:#0e2c56;
+  --share-ink-soft:#2f6fd0;
+  --share-media-shadow:rgba(14,44,86,.22);
+  --share-grad:linear-gradient(135deg,#d7ebfd 0%,#bcdcfb 55%,#addafb 100%);
+}
+.share-card.is-meme{
+  --share-ink:#6B2A0A;
+  --share-ink-soft:#c45a1a;
+  --share-media-shadow:rgba(107,42,10,.22);
+  --share-grad:linear-gradient(135deg,#fde4cf 0%,#f5c49a 55%,#efb07a 100%);
+}
+.share-card::before{
+  content:'';position:absolute;inset:0;z-index:0;
+  background-image:url("/public/logo-light.png");
+  background-size:48px;background-repeat:repeat;opacity:.18;pointer-events:none;
+}
+/* Holo foil — rainbow bars + glare beam; stays under content */
+.share-card-holo{
+  position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;
+  opacity:.72;
+  background-image:
+    repeating-linear-gradient(
+      110deg,
+      hsl(0,85%,65%) 0%,
+      hsl(40,90%,60%) 4%,
+      hsl(80,75%,55%) 8%,
+      hsl(160,70%,55%) 12%,
+      hsl(200,80%,60%) 16%,
+      hsl(260,75%,65%) 20%,
+      hsl(300,80%,60%) 24%,
+      hsl(0,85%,65%) 28%
+    ),
+    radial-gradient(
+      farthest-corner circle at var(--mx) var(--my),
+      hsla(0,0%,100%,.85) 0%,
+      hsla(0,0%,100%,.25) 18%,
+      hsla(0,0%,100%,0) 42%
+    ),
+    linear-gradient(
+      115deg,
+      transparent 20%,
+      hsla(180,90%,70%,.35) 40%,
+      hsla(40,100%,70%,.4) 48%,
+      hsla(300,90%,70%,.35) 56%,
+      transparent 72%
+    );
+  background-size:220% 220%, 160% 160%, 240% 240%;
+  background-position:
+    calc(var(--mx) * .55) calc(var(--my) * .55),
+    var(--mx) var(--my),
+    calc(100% - var(--mx)) calc(100% - var(--my));
+  mix-blend-mode:color-dodge;
+  filter:brightness(1.05) contrast(1.2) saturate(1.15);
+  animation:shareHoloIdle 7s ease-in-out infinite alternate;
+  transition:opacity .25s ease, filter .25s ease;
+}
+.share-card.is-meme .share-card-holo{mix-blend-mode:soft-light;opacity:.85;filter:brightness(1.12) contrast(1.15) saturate(1.25);}
+.share-card.is-holo-track .share-card-holo{animation:none;}
+@keyframes shareHoloIdle{
+  0%{
+    background-position:18% 22%, 30% 35%, 72% 58%;
+    filter:brightness(1.02) contrast(1.15) saturate(1.05);
+  }
+  100%{
+    background-position:78% 70%, 72% 65%, 28% 40%;
+    filter:brightness(1.12) contrast(1.25) saturate(1.2);
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .share-card-holo{animation:none!important;opacity:.32;filter:brightness(1.05) contrast(1.05) saturate(1.05)!important;}
+}
 .share-card-info{position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-start;gap:12px;min-width:0;}
-.share-brand{display:flex;align-items:center;gap:8px;color:#0e2c56;font-weight:800;font-style:italic;font-size:19px;letter-spacing:-.01em;}
+.share-brand{display:flex;align-items:center;gap:8px;color:var(--share-ink);font-weight:800;font-style:italic;font-size:19px;letter-spacing:-.01em;}
 .share-brand .mark{width:28px;height:28px;object-fit:contain;flex-shrink:0;display:block;}
-.share-pill{background:rgba(255,255,255,.6);color:#0e2c56;font-size:12px;font-weight:700;padding:5px 14px;border-radius:16px;}
-.share-title{color:#0e2c56;font-weight:800;font-size:22px;line-height:1.15;word-break:break-word;}
-.share-ticker{color:#2f6fd0;font-weight:700;font-size:16px;}
-.share-card-media{position:relative;z-index:1;width:150px;height:150px;flex-shrink:0;align-self:center;border-radius:12px;overflow:hidden;background:#000;box-shadow:0 6px 18px rgba(14,44,86,.22);}
+.share-pill{background:rgba(255,255,255,.6);color:var(--share-ink);font-size:12px;font-weight:700;padding:5px 14px;border-radius:16px;}
+.share-title{color:var(--share-ink);font-weight:800;font-size:22px;line-height:1.15;word-break:break-word;}
+.share-ticker{color:var(--share-ink-soft);font-weight:700;font-size:16px;}
+.share-card-media{position:relative;z-index:1;width:150px;height:150px;flex-shrink:0;align-self:center;border-radius:12px;overflow:hidden;background:#000;box-shadow:0 6px 18px var(--share-media-shadow);}
 .share-card-media img,.share-card-media video{width:100%;height:100%;object-fit:cover;display:block;}
-.share-x-btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;margin-top:16px;padding:15px;border:none;border-radius:14px;background:#7cb2f0;color:#0e2c56;font-weight:800;font-size:16px;cursor:pointer;transition:background .15s,transform .1s;}
+.share-x-btn{
+  display:flex;align-items:center;justify-content:center;gap:9px;width:100%;margin-top:16px;padding:15px;
+  border:none;border-radius:14px;font-weight:800;font-size:16px;cursor:pointer;
+  background:#7cb2f0;color:#0e2c56;
+  transition:background .15s,transform .1s,color .15s;
+}
 .share-x-btn:hover{background:#69a6ee;}
 .share-x-btn:active{transform:scale(.98);}
-.share-x-btn .x-logo{width:17px;height:17px;fill:#0e2c56;}
+.share-x-btn .x-logo{width:17px;height:17px;fill:currentColor;}
+.share-modal.is-meme .share-x-btn{background:#f0a46e;color:#6B2A0A;}
+.share-modal.is-meme .share-x-btn:hover{background:#e89458;}
+.share-modal.is-dare .share-x-btn{background:#7cb2f0;color:#0e2c56;}
+.share-modal.is-dare .share-x-btn:hover{background:#69a6ee;}
 .copy-url{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;margin-top:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px;font-size:15px;color:var(--ink-soft);cursor:pointer;font-weight:700;transition:background .15s;}
 .copy-url:hover{background:var(--bg);}
 .copy-url svg{width:16px;height:16px;}
@@ -2897,7 +2991,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     <div class="sheet-handle"></div>
     <div class="share-head"><h4>Share</h4><button type="button" class="share-close" id="shareClose" aria-label="Close">✕</button></div>
     <div class="share-body">
-      <div class="share-card" id="shareCard">
+      <div class="share-card is-dare" id="shareCard">
+        <div class="share-card-holo" aria-hidden="true"></div>
         <div class="share-card-info">
           <div class="share-brand"><img class="mark" src="/public/logo-light.png" width="28" height="28" alt=""><span>Kumbaya</span></div>
           <div class="share-pill" id="sharePill">Dare</div>
@@ -8747,28 +8842,65 @@ html.dark .qhc-id{color:#6BA3FF;}
   });
 
   const shareOverlay = document.getElementById('shareOverlay');
+  const shareCard = document.getElementById('shareCard');
+  const shareModal = shareOverlay?.querySelector('.share-modal');
   function prettyToken(ticker){ const t=(ticker||'').replace(/^\$/,''); return t ? t.charAt(0).toUpperCase()+t.slice(1).toLowerCase() : 'Token'; }
-  function closeShare(){ shareOverlay.classList.remove('show'); }
+  function closeShare(){
+    shareOverlay.classList.remove('show');
+    shareCard?.classList.remove('is-holo-track');
+  }
+  function setShareType(cat){
+    const kind = String(cat || 'meme').toLowerCase() === 'dare' ? 'dare' : 'meme';
+    if(shareCard){
+      shareCard.classList.toggle('is-dare', kind === 'dare');
+      shareCard.classList.toggle('is-meme', kind === 'meme');
+    }
+    if(shareModal){
+      shareModal.classList.toggle('is-dare', kind === 'dare');
+      shareModal.classList.toggle('is-meme', kind === 'meme');
+    }
+  }
+  function onShareHoloMove(e){
+    if(!shareCard || matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+    if(e.pointerType && e.pointerType !== 'mouse') return;
+    const r = shareCard.getBoundingClientRect();
+    if(!r.width || !r.height) return;
+    const px = ((e.clientX - r.left) / r.width) * 100;
+    const py = ((e.clientY - r.top) / r.height) * 100;
+    shareCard.style.setProperty('--mx', Math.max(0, Math.min(100, px)).toFixed(1) + '%');
+    shareCard.style.setProperty('--my', Math.max(0, Math.min(100, py)).toFixed(1) + '%');
+    shareCard.classList.add('is-holo-track');
+  }
+  function onShareHoloLeave(){
+    if(!shareCard) return;
+    shareCard.classList.remove('is-holo-track');
+    shareCard.style.removeProperty('--mx');
+    shareCard.style.removeProperty('--my');
+  }
   function openShare(post){
     hideHoverCards(true);
     if(post){
       const title = post.name || prettyToken(post.ticker);
-      document.getElementById('sharePill').textContent = post.cat || 'Post';
+      const cat = post.cat || 'Post';
+      document.getElementById('sharePill').textContent = cat;
       document.getElementById('shareTitle').textContent = title;
       document.getElementById('shareTicker').textContent = post.ticker || '';
       const thumb = (post.type==='video'||post.type==='gif') ? (post.poster||post.src) : post.src;
       document.getElementById('shareMedia').innerHTML = `<img src="${thumb}" alt="">`;
       shareOverlay.dataset.title = title;
       shareOverlay.dataset.ticker = post.ticker || '';
+      setShareType(cat);
     }
     shareOverlay.classList.add('show');
   }
+  shareCard?.addEventListener('pointermove', onShareHoloMove);
+  shareCard?.addEventListener('pointerleave', onShareHoloLeave);
   shareOverlay.addEventListener('click',(e)=>{ if(e.target===shareOverlay) closeShare(); });
   document.getElementById('shareClose').addEventListener('click', closeShare);
   (function(){
-    const shareModal = shareOverlay.querySelector('.modal');
-    enableSheetDrag(shareModal, shareModal.querySelector('.sheet-handle'), closeShare, shareOverlay);
-    enableSheetDrag(shareModal, shareModal.querySelector('.share-head'), closeShare, shareOverlay);
+    const modal = shareOverlay.querySelector('.modal');
+    enableSheetDrag(modal, modal.querySelector('.sheet-handle'), closeShare, shareOverlay);
+    enableSheetDrag(modal, modal.querySelector('.share-head'), closeShare, shareOverlay);
   })();
   document.getElementById('shareXBtn').addEventListener('click', ()=>{
     const title = shareOverlay.dataset.title || 'this drop';
