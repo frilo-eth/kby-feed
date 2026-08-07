@@ -46,7 +46,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Media frame | **Desktop always matches source aspect ratio** (`fitMediaBox` + `--ar`); one binding axis, the other `auto`. Mobile ≤860 stays full-bleed `object-fit:cover` |
 | Trade entry points | Avatar+, Buy CTA, ticker, token mini, category pill → trade drawer |
 | Hover cards | Desktop only — user / token / **`>>` quote** preview portals (no Buy on the card) — meta triggers in [Meta affordances](#meta-affordances) |
-| [Meta affordances](#meta-affordances) | `@uname` opacity hover · **`.blockie`** lighten on all user avatars · token mini scale+ring · ticker coffee→hover · pill; click token/pill → trade drawer; desktop hover cards · [Q&A](#meta-affordances) |
+| [Meta affordances](#meta-affordances) | `@uname` opacity hover · **`.blockie`** lighten · **OP** [role badge](#dare-role-badge) (squarish; any cat; Entry = no badge) · token mini · ticker · pill · [Q&A](#meta-affordances) |
 | [2× hold → lock](#hold-lock-2x) | ≥240ms → glass `2x` badge with **charge ring** + **“Hold 3s to lock”** (`SPEED_LOCK_MS=3000`); no chevron pulse on this path; release early = back to 1×; lock survives finger-up; tap badge to unlock — [full technical overview](#hold-lock-2x) |
 | Activity bubbles | Desktop ambient reactions; progressive disclosure on the reaction chip; discs clamped to a band above the post avatar (never climb the feed); avatar seeded from display name (matches hover card); hairline ring only (no colored/brown halo) |
 | New posts / pull pill | Themed `--card` / `--ink` / `--line`; 20px clearance under topbar; soft-dismiss after **2** settled swipes (`NEW_PILL_SWIPES`), then re-arm ~3 min |
@@ -117,6 +117,7 @@ Most motion reuses a small set of curves. Durations are wall-clock; doomscroll s
 | **Hover cards** | user + token + **`>>` quote** portals (no Buy CTA); desktop `pointer:fine` only | — | show `.18s`, delay 180–280ms |
 | New posts pill | brightness `.98`; soft-dismiss after 2 settled swipes | `scale(.95)` | opacity `.28s`, transform `.34s` pop |
 | Tag / uname | [Meta affordances](#meta-affordances) — opacity `.8` (no underline) | — | `.15s` |
+| **OP badge** | [OP badge](#dare-role-badge) — Launch icon + `OP` → `Original Post` (width + opacity crossfade) | — | max-width `.52s` `(.22,.82,.28,1)` · label `.28s` (exit delayed) |
 | **Token mini** *(size allowed)* | [Meta affordances](#meta-affordances) — `scale(1.14)` + orange ring | `scale(.96)` | `.28s` `(.22,1.4,.36,1)` |
 | **Trade plus → Buy bar** *(key)* | desktop hover / mobile auto (2 cycles → `+`) — see below | `scale(.97)` press | width + marquee |
 
@@ -850,6 +851,7 @@ Bottom-left post chrome (`.col-info` → `.meta-block`). **Rule:** hover is most
 |--------|------------------|-------|-------|--------------------|--------|
 | `.avatar-sm.blockie` | opacity `.88` + brightness `1.06` · `.15s` | — | — | **user** · 280ms | — |
 | `.uname` (`@user`) | `opacity:.8` · `.15s` (no underline) | — | — *(no profile route yet)* | **user** · 280ms | — |
+| `.role-badge.role-op` | Launch icon + sheen; expands to “Original Post” (smooth width + crossfade). Entry: **no badge** | — | — | — | — |
 | **`img.blockie`** (all instances) | same lighten — meta, comments, CFX, act-bubbles, hover cards, buyers, wallet | — | — | user card where bound | — |
 | `.token-tag` (wraps mini + ticker) | mini scale + ring; ticker color | mini `scale(.96)` | **trade drawer** | **token** · 280ms | `open` |
 | `.token-mini` | `scale(1.14)` + orange ring `0 0 0 2px rgba(255,102,34,.35)` + brightness | `scale(.96)` · `.1s` | *(via `.token-tag`)* | *(via `.token-tag`)* | — |
@@ -866,6 +868,8 @@ Bottom-left post chrome (`.col-info` → `.meta-block`). **Rule:** hover is most
     <div class="row1">
       <img class="avatar-sm circle blockie" src="…">
       <div class="uname">@${user}</div>
+      <!-- role==="op" only — see #dare-role-badge -->
+      <span class="role-badge role-op">…</span>
     </div>
     <div class="desc">…</div>
     <div class="meta-tags">
@@ -979,16 +983,70 @@ Gate: `width > 860` and `(hover:hover) and (pointer:fine)` · mouse `pointerente
 .feed-item.meta-float .token-tag:hover .tag-ticker{ color:#fff; }
 ```
 
+<a id="dare-role-badge"></a>
+
+##### OP badge (temporary)
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#dare-role-badge](https://github.com/frilo-eth/kby-feed/blob/main/README.md#dare-role-badge)
+
+**Problem:** Viewers can’t tell an **original post (OP)** from a response **entry**. Entries stay unlabeled (a second badge was confusing).
+
+**Temp solution (feed meta only):** squarish chip next to `@uname` when `role === "op"`. **Category-agnostic** — Meme or Dare. **Entry / missing role → no badge.**
+
+| Field | Values | UI |
+|-------|--------|-----|
+| `post.role` | `"op"` | `.role-badge.role-op` — Launch icon + `OP` → **Original Post** on desktop row hover |
+| `post.role` | `"entry"` or omitted | no badge |
+
+**Shape / material**
+
+- Squarish: `border-radius: 7px` (not a round pill — distinct from category `.pill`)
+- Icon: shared Launch SVG (`viewBox 0 0 16 16`, `svgIcon('launch')`) — also on `.btn-launch` / `.mnav-launch`
+- Specular sheen (`roleBadgeSheen`); `pointer-events: none`
+- **Pinned** (meta outside media): inverted Buy CTA — light → dark chip; dark → light chip
+- **On-media** (`.meta-float` + mobile ≤860): glass (`--glass-dark`)
+
+**Motion (hover expand / collapse)**
+
+| Piece | Detail |
+|-------|--------|
+| Width | `max-width` collapsed `3.85em` → open `10.5em` |
+| Curve | `.52s` `cubic-bezier(.22,.82,.28,1)` — soft both ways (collapse must not snap) |
+| Labels | Stacked in `.role-badge-text` (`display:inline-grid`); **opacity crossfade** — never `display:none` |
+| Expand | short → 0 immediately; full → 1 after `.06s` |
+| Collapse (exit) | full → 0 first; short → 1 after `.14s` (waits for width) |
+| Touch | no expand (`hover:none`) |
+| Reduced motion | kill sheen + width/label transitions |
+
+```html
+<span class="role-badge role-op" title="Original Post" aria-label="Original Post">
+  <!-- svgIcon('launch') -->
+  <span class="role-badge-text">
+    <span class="role-badge-short">OP</span>
+    <span class="role-badge-full">Original Post</span>
+  </span>
+</span>
+```
+
+**Design handoff (@orlando) — formal treatment still needed:**
+
+1. Final OP labels / hover expand; confirm Entry stays badge-less  
+2. Pinned inverted-CTA vs on-media glass as the lasting system  
+3. Relationship to category `.pill` (Dare / Meme)  
+4. Should Entry eventually link/preview the parent OP without a permanent chip?  
+5. Propagate later to Dares / Tokens / Hall surfaces outside this prototype  
+
 ##### Port checklist
 
 1. Keep **username** and **token** as separate targets — user → profile preview; token → trade.
 2. Hit target for ticker+mini is the **`.token-tag` wrapper** (negative margin padding), not two separate buttons.
 3. Only the mini may scale on hover — ticker stays type-only (color). Do not scale the whole chip.
 4. Tag every `userAvatar()` `<img>` with **`.blockie`** so hover lighten is shared (meta, comments, CFX, bubbles, cards, wallet). Skip anon PNG / token photos.
-5. Hover card delay **280ms**; leave trigger has a short bridge onto the card (don’t kill preview on the 1px gap).
-6. `stopPropagation` on clicks so the scroller doesn’t treat them as feed gestures.
-7. On float/mobile, switch to light-on-scrim tokens — coffee brown disappears on dark frames.
-8. Category `.pill` is also a trade entry (same drawer + token hover card).
+5. OP posts set `role: "op"` (any `cat`); Entry posts omit the badge (no `role` or ignore `"entry"`).
+6. Hover card delay **280ms**; leave trigger has a short bridge onto the card (don’t kill preview on the 1px gap).
+7. `stopPropagation` on clicks so the scroller doesn’t treat them as feed gestures.
+8. On float/mobile, switch to light-on-scrim tokens — coffee brown disappears on dark frames.
+9. Category `.pill` is also a trade entry (same drawer + token hover card).
 
 ##### Q&A
 
@@ -1013,7 +1071,10 @@ A: One hit target, one delay timer, no flicker when the pointer crosses from min
 **Q: Pinned vs float — do affordances change?**  
 A: Motion/CSS hooks stay the same; **paint** swaps to light-on-scrim when `.meta-float` or mobile so coffee/ink don’t vanish on dark frames.
 
-Source: CSS ~606–625 (blockie + uname), ~627–660 (token-tag) · markup meta ~4440 · binds ~4725–4735 · `layoutMeta` ~3655–3691 · `userAvatar` / `makeBlockie` ~2787+.
+**Q: What’s the difference between the category pill and the OP badge?**  
+A: Bottom `.pill` = category (Dare / Meme). Username `.role-badge` = **OP only** (original post), on any category. Entries have no badge. Temporary — see [#dare-role-badge](#dare-role-badge).
+
+Source: CSS `.role-badge` ~609–710 · markup `render()` row1 · Launch SVG in `svgIcon('launch')` + `.btn-launch` · `layoutMeta` · blockie / token-tag nearby.
 
 ---
 

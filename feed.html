@@ -606,6 +606,107 @@ html.dark .buy-cta-rim::before{
 .avatar-sm{width:34px;height:34px;object-fit:cover;flex-shrink:0;background:var(--line);}
 .uname{font-weight:700;font-size:14px;cursor:pointer;transition:opacity .15s;color:var(--ink);}
 .uname:hover{opacity:.8;}
+/* Temp OP badge — next to username; category-agnostic (Meme or Dare). Entry = no badge.
+   Pinned (outside media): inverted Buy-CTA solid. Float/on-media: glass. Formal design TBD @orlando */
+.role-badge{
+  position:relative;display:inline-flex;align-items:center;justify-content:center;gap:4px;
+  flex-shrink:0;height:20px;padding:0 7px 0 6px;border-radius:7px;
+  font-size:10px;font-weight:700;letter-spacing:.04em;line-height:1;text-transform:uppercase;
+  pointer-events:none;user-select:none;overflow:hidden;
+  /* Collapsed ≈ icon + gap + "OP" */
+  max-width:3.85em;white-space:nowrap;
+  /* Soft ease both ways — longer collapse so exit doesn’t snap */
+  transition:
+    max-width .52s cubic-bezier(.22,.82,.28,1),
+    padding .4s cubic-bezier(.22,.82,.28,1),
+    background .2s ease, color .2s ease, box-shadow .25s ease, border-color .2s ease;
+}
+.role-badge .role-badge-ico{
+  width:12px;height:12px;flex-shrink:0;display:block;
+}
+.role-badge .role-badge-ico path{stroke:currentColor;}
+.role-badge-text{
+  position:relative;display:inline-grid;align-items:center;justify-items:start;
+  min-width:0;
+}
+.role-badge-short,
+.role-badge-full{
+  grid-area:1/1;
+  white-space:nowrap;
+  transition:opacity .28s cubic-bezier(.22,.82,.28,1);
+}
+.role-badge-short{opacity:1;transition-delay:.14s;} /* reappear after width settles */
+.role-badge-full{opacity:0;pointer-events:none;transition-delay:0s;}
+.role-badge::after{
+  content:"";position:absolute;inset:-40% -60%;
+  background:linear-gradient(105deg, transparent 35%, rgba(255,255,255,.4) 48%, transparent 62%);
+  transform:translateX(-60%);
+  animation:roleBadgeSheen 2.8s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes roleBadgeSheen{
+  0%,55%{transform:translateX(-60%);}
+  85%,100%{transform:translateX(60%);}
+}
+/* Pinned meta (gutter / outside media): inverted Buy CTA — dark on light, light on dark */
+.role-badge.role-op{
+  color:#F7F1E8;
+  background:#2A241C;
+  border:1px solid rgba(42,36,28,.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 1px 2px rgba(40,30,20,.06),
+    0 4px 12px rgba(40,30,20,.1);
+}
+html.dark .role-badge.role-op{
+  color:#2A241C;
+  background:rgba(255,252,248,.94);
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.55),
+    0 1px 2px rgba(0,0,0,.15),
+    0 4px 14px rgba(0,0,0,.28);
+}
+.meta-block .row1:hover .role-badge.role-op,
+.meta-block .row1:focus-within .role-badge.role-op{
+  max-width:10.5em;padding:0 8px 0 6px;
+}
+.meta-block .row1:hover .role-badge.role-op .role-badge-short{
+  opacity:0;transition-delay:0s; /* hide OP immediately on expand */
+}
+.meta-block .row1:hover .role-badge.role-op .role-badge-full{
+  opacity:1;transition-delay:.06s; /* label fades in as width opens */
+}
+/* On-media (meta-float): glass — matches chrome / Buy crystal feel on frames */
+.feed-item.meta-float .role-badge.role-op{
+  color:#fff;
+  background:var(--glass-dark);
+  border:1px solid rgba(255,255,255,.22);
+  backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.2),
+    0 2px 10px rgba(0,0,0,.28);
+}
+html.dark .feed-item.meta-float .role-badge.role-op{
+  color:#fff;
+  background:rgba(255,255,255,.16);
+  border-color:rgba(255,255,255,.22);
+}
+@media (hover:none){
+  .meta-block .row1:hover .role-badge.role-op,
+  .meta-block .row1:focus-within .role-badge.role-op{
+    max-width:3.85em;padding:0 7px 0 6px;
+  }
+  .meta-block .row1:hover .role-badge.role-op .role-badge-short,
+  .meta-block .row1:focus-within .role-badge.role-op .role-badge-short{opacity:1;transition-delay:0s;}
+  .meta-block .row1:hover .role-badge.role-op .role-badge-full,
+  .meta-block .row1:focus-within .role-badge.role-op .role-badge-full{opacity:0;}
+}
+@media (prefers-reduced-motion:reduce){
+  .role-badge{transition:none;}
+  .role-badge-short,.role-badge-full{transition:none!important;}
+  .role-badge::after{animation:none!important;opacity:0;}
+}
 /* User blockies — shared hover on every instance (meta, comments, CFX, bubbles, cards, wallet) */
 img.blockie{
   cursor:pointer;
@@ -2197,6 +2298,17 @@ body.cfx-on #drawer{z-index:50;}
   .col-info{position:absolute;left:16px;right:80px;bottom:16px;top:auto;width:auto;max-width:none;z-index:11;}
   .meta-block,.uname{color:#fff!important;text-shadow:0 1px 3px rgba(0,0,0,.5);}
   .desc{color:rgba(255,255,255,.92)!important;}
+  /* Mobile meta always sits on media → glass OP badge */
+  .role-badge.role-op{
+    color:#fff!important;
+    background:var(--glass-dark)!important;
+    border:1px solid rgba(255,255,255,.22)!important;
+    backdrop-filter:blur(10px) saturate(160%)!important;-webkit-backdrop-filter:blur(10px) saturate(160%)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 2px 10px rgba(0,0,0,.28)!important;
+  }
+  html.dark .role-badge.role-op{
+    background:rgba(255,255,255,.16)!important;
+  }
   .tag-ticker{color:#F0DDB8!important;text-shadow:0 1px 2px rgba(0,0,0,.5);}
   .token-tag:hover .tag-ticker{color:#fff!important;}
   .token-mini{box-shadow:0 1px 4px rgba(0,0,0,.35);}
@@ -2530,7 +2642,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       <div class="search" role="button" tabindex="0" aria-label="Search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="search-text"><span class="st">Search for a token, wallet or contract</span></span></div>
       <div class="topbar-spacer"></div>
       <button class="icon-btn" id="themeBtn" title="Toggle theme"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-      <button class="btn-launch" type="button"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M13.5 4.5c2.4-1.5 5-1.2 6-1c.2 1 .5 3.6-1 6L14 14l-4-4l3.5-5.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 14l-1.5 1.5M6.5 12.5C5 13.5 4.5 16.5 4.5 19.5c3 0 6-.5 7-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15" cy="9" r="1.3" fill="currentColor"/></svg><span>Launch Token</span></button>
+      <button class="btn-launch" type="button"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.67796 10.8918L1.86133 12.7084M4.88905 12.1029L3.67796 13.314M2.46687 7.86404C2.46687 7.86404 4.87571 8.69425 5.98113 9.79967C7.08652 10.9051 7.91678 13.314 7.91678 13.314L10.339 11.4973V9.68068C12.8948 8.40274 14.2875 6.28543 13.9681 1.81274C9.49538 1.49326 7.37803 2.886 6.10015 5.44182H4.28351L2.46687 7.86404ZM11.5501 5.44184C11.5501 6.1107 11.0078 6.65295 10.339 6.65295C9.67008 6.65295 9.12787 6.1107 9.12787 5.44184C9.12787 4.77297 9.67008 4.23075 10.339 4.23075C11.0078 4.23075 11.5501 4.77297 11.5501 5.44184Z" stroke="currentColor" stroke-linecap="square"/></svg><span>Launch Token</span></button>
       <button class="btn-wallet" type="button" id="walletBtn" title="Wallet" aria-label="Open wallet"><span class="btn-wallet-label">0x635e...9739</span><img class="btn-wallet-avatar circle blockie" id="walletAvatar" src="" alt=""></button>
     </div>
 
@@ -2748,7 +2860,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     <button type="button" class="mnav-item" data-nav="home" aria-label="Home"><svg viewBox="0 0 16 16" fill="none"><path d="M2.33203 5.8949L7.9987 1.33325L13.6654 5.8949V13.6666H2.33203V5.8949Z" stroke="currentColor" stroke-width="1.5"/></svg></button>
     <button type="button" class="mnav-item active" data-nav="feed" aria-label="Feed"><svg viewBox="0 0 16 16" fill="none"><path d="M2.33203 2.33325H13.6654V6.99992H2.33203V2.33325Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2.33203 8.99992H13.6654V13.6666H2.33203V8.99992Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
     <button type="button" class="mnav-item" data-nav="tokens" aria-label="Tokens"><svg viewBox="0 0 16 16" fill="none"><path d="M14.3332 8.00002C14.3332 11.4978 11.4976 14.3334 7.99984 14.3334C4.50203 14.3334 1.6665 11.4978 1.6665 8.00002C1.6665 4.50221 4.50203 1.66669 7.99984 1.66669C11.4976 1.66669 14.3332 4.50221 14.3332 8.00002Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/><path d="M5.33447 7.99986L8.00114 5.33319L10.6678 7.99986L8.00114 10.6665L5.33447 7.99986Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg></button>
-    <button type="button" class="mnav-item mnav-launch" data-nav="launch" aria-label="Launch Token"><svg viewBox="0 0 24 24" fill="none"><path d="M13.5 4.5c2.4-1.5 5-1.2 6-1c.2 1 .5 3.6-1 6L14 14l-4-4l3.5-5.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 14l-1.5 1.5M6.5 12.5C5 13.5 4.5 16.5 4.5 19.5c3 0 6-.5 7-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15" cy="9" r="1.3" fill="currentColor"/></svg></button>
+    <button type="button" class="mnav-item mnav-launch" data-nav="launch" aria-label="Launch Token"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.67796 10.8918L1.86133 12.7084M4.88905 12.1029L3.67796 13.314M2.46687 7.86404C2.46687 7.86404 4.87571 8.69425 5.98113 9.79967C7.08652 10.9051 7.91678 13.314 7.91678 13.314L10.339 11.4973V9.68068C12.8948 8.40274 14.2875 6.28543 13.9681 1.81274C9.49538 1.49326 7.37803 2.886 6.10015 5.44182H4.28351L2.46687 7.86404ZM11.5501 5.44184C11.5501 6.1107 11.0078 6.65295 10.339 6.65295C9.67008 6.65295 9.12787 6.1107 9.12787 5.44184C9.12787 4.77297 9.67008 4.23075 10.339 4.23075C11.0078 4.23075 11.5501 4.77297 11.5501 5.44184Z" stroke="currentColor" stroke-linecap="square"/></svg></button>
     <button type="button" class="mnav-item" data-nav="swap" aria-label="Swap"><svg viewBox="0 0 16 16" fill="none"><path d="M9.92317 4.82457C9.23077 3.35255 7.7343 2.33351 5.99984 2.33351C3.6066 2.33351 1.6665 4.27361 1.6665 6.66684C1.6665 8.99398 3.50086 10.8926 5.8025 10.9958M2.48999 12.2464L2.86852 13.2594C3.26051 14.3084 4.42864 14.8409 5.47762 14.449M4.50667 12.5842L2.48999 12.2464L2.11058 14.5113M13.5098 3.75362L13.1312 2.74065C12.7392 1.69167 11.5711 1.15908 10.5221 1.55107M11.4931 3.41579L13.5098 3.75362L13.8892 1.48869M14.3332 9.33351C14.3332 11.7268 12.3931 13.6668 9.99984 13.6668C7.60657 13.6668 5.6665 11.7268 5.6665 9.33351C5.6665 6.94024 7.60657 5.00018 9.99984 5.00018C12.3931 5.00018 14.3332 6.94024 14.3332 9.33351Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg></button>
     <button type="button" class="mnav-item" data-nav="pools" aria-label="Pools"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M5.5 2.5v8.5M10.5 2.5v8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M5.5 7h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2.5 11.25c1.1-.85 2.2-.85 3.3 0s2.2.85 3.3 0 2.2-.85 3.3 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.5 13.5c1.1-.85 2.2-.85 3.3 0s2.2.85 3.3 0 2.2-.85 3.3 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <button type="button" class="mnav-item" data-nav="more" aria-label="More" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 16 16" fill="none"><path d="M3.44838 8.00013H3.45975M7.99786 8.00013H8.00923M12.546 8.00013H12.5574" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
@@ -2857,7 +2969,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   const walletAvatar = document.getElementById('walletAvatar');
   if(walletAvatar) walletAvatar.src = MY_AVATAR;
   const posts = [
-    { user:"nath4an", avatar:`${M}/tabasco4.jpeg`, desc:"droppin' the mic here — one gallon of pure regret, straight from the fridge", ticker:"$THINCK", cat:"Meme", type:"image", w:9, h:16, src:`${M}/tabasco4.jpeg`, tips:512, comments:256, likes:128,
+    { user:"nath4an", avatar:`${M}/tabasco4.jpeg`, desc:"droppin' the mic here — one gallon of pure regret, straight from the fridge", ticker:"$THINCK", cat:"Meme", role:"op", type:"image", w:9, h:16, src:`${M}/tabasco4.jpeg`, tips:512, comments:256, likes:128,
       commentList:[
         {user:"p3dr0u", id:35355, avatar:`${M}/tabasco.png`, xHandle:"p3dr0u", time:"2 h", text:"dunno, maybe going up? 👀", tips:512, likes:512,
           media:{type:"image", w:1, h:1, src:`${M}/tabasco.png`, tips:41, comments:8, likes:512},
@@ -2876,7 +2988,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         {user:"nightowl", id:35372, avatar:`${M}/tabasco3.png`, xHandle:"nightowl", time:"9 m", text:"holding through the sauce", tips:640, likes:301}
       ]
     },
-    { user:"asuncion.eth", avatar:`${M}/tabasco2.png`, desc:"testing 2x hold speed on this clip, hold anywhere to see it", ticker:"$MADMAN", cat:"Dare", type:"video", w:269, h:480, src:`${M}/tabasco2.mp4`, poster:`${M}/tabasco2.png`, tips:88, comments:41, likes:970,
+    { user:"asuncion.eth", avatar:`${M}/tabasco2.png`, desc:"testing 2x hold speed on this clip, hold anywhere to see it", ticker:"$MADMAN", cat:"Dare", role:"op", type:"video", w:269, h:480, src:`${M}/tabasco2.mp4`, poster:`${M}/tabasco2.png`, tips:88, comments:41, likes:970,
       commentList:[
         {user:"framewatcher", avatar:`${M}/tabasco2.png`, xHandle:"framewatcher", time:"3 h", text:"2x hold is actually so satisfying", tips:22, likes:44,
           media:{type:"video", w:269, h:480, src:`${M}/tabasco2.mp4`, tips:5, comments:2, likes:18}},
@@ -2895,10 +3007,10 @@ html.dark .qhc-id{color:#6BA3FF;}
       ]
     },
     { user:"loopgirl", avatar:`${M}/tabasco3.png`, desc:"gif-style looping clip, muted autoplay, no sound controls needed", ticker:"$LOOP", cat:"Meme", type:"gif", w:269, h:480, src:`${M}/tabasco3.mp4`, poster:`${M}/tabasco3.png`, tips:301, comments:0, likes:640, commentList:[] },
-    { user:"quilicura.sol", avatar:`${M}/tabasco.png`, desc:"square native footage, full 1:1 ratio", ticker:"$QUILI", cat:"Dare", type:"video", w:1, h:1, src:`${M}/tabasco5.mp4`, poster:`${M}/tabasco.png`, tips:19, comments:3, likes:57,
+    { user:"quilicura.sol", avatar:`${M}/tabasco.png`, desc:"square native footage, full 1:1 ratio", ticker:"$QUILI", cat:"Dare", role:"op", type:"video", w:1, h:1, src:`${M}/tabasco5.mp4`, poster:`${M}/tabasco.png`, tips:19, comments:3, likes:57,
       commentList:[{user:"vertfan", avatar:`${M}/tabasco4.jpeg`, time:"9 h", text:"native ratio gang", tips:3, likes:11}]
     },
-    { user:"frilostudio", avatar:`${M}/tabasco3.png`, desc:"square 1:1 image post, classic grid crop", ticker:"$FRILO", cat:"Meme", type:"image", w:1, h:1, src:`${M}/tabasco3.png`, tips:77, comments:8, likes:302,
+    { user:"frilostudio", avatar:`${M}/tabasco3.png`, desc:"square 1:1 image post, classic grid crop", ticker:"$FRILO", cat:"Meme", role:"op", type:"image", w:1, h:1, src:`${M}/tabasco3.png`, tips:77, comments:8, likes:302,
       commentList:[{user:"gridkid", avatar:`${M}/tabasco.png`, time:"12 h", text:"the crop is doing a lot of work here", tips:6, likes:29}]
     },
 
@@ -2907,7 +3019,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       commentList:[{user:"grainfan", time:"2 h", text:"that grain is doing unpaid labor", tips:4, likes:27}] },
     { user:"neonroom", avatar:`${M}/extra-media2.jpg`, desc:"another 4:5 still — same ratio family, different mood", ticker:"$NEON", cat:"Dare", type:"image", w:1080, h:1350, src:`${M}/extra-media2.jpg`, tips:31, comments:5, likes:190,
       commentList:[{user:"moodboard", time:"4 h", text:"dare category for a still? bold", tips:2, likes:14}] },
-    { user:"cliprunner", avatar:`${M}/extra-media3-poster.jpg`, desc:"vertical motion study — hold for 2× if you're impatient", ticker:"$CLIP", cat:"Dare", type:"video", w:720, h:900, src:`${M}/extra-media3.mp4`, poster:`${M}/extra-media3-poster.jpg`, tips:112, comments:17, likes:801,
+    { user:"cliprunner", avatar:`${M}/extra-media3-poster.jpg`, desc:"vertical motion study — hold for 2× if you're impatient", ticker:"$CLIP", cat:"Dare", role:"op", type:"video", w:720, h:900, src:`${M}/extra-media3.mp4`, poster:`${M}/extra-media3-poster.jpg`, tips:112, comments:17, likes:801,
       commentList:[
         {user:"speedrun", time:"1 h", text:"2× on this hits different", tips:9, likes:41},
         {user:"framefan", time:"38 m", text:"poster already sold me", tips:3, likes:12}
@@ -2916,28 +3028,28 @@ html.dark .qhc-id{color:#6BA3FF;}
       commentList:[{user:"dpi", time:"6 h", text:"someone paid for megapixels", tips:5, likes:22}] },
     { user:"wideshot", avatar:`${M}/extra-media5.webp`, desc:"widescreen webp — desktop gets to breathe for once", ticker:"$WIDE", cat:"Dare", type:"image", w:2800, h:1575, src:`${M}/extra-media5.webp`, tips:91, comments:14, likes:522,
       commentList:[{user:"ultrawide", time:"3 h", text:"finally a real landscape", tips:11, likes:58}] },
-    { user:"gridlord", avatar:`${M}/extra-media6.jpg`, desc:"perfect square. no crop drama. just vibes.", ticker:"$GRID", cat:"Meme", type:"image", w:1536, h:1536, src:`${M}/extra-media6.jpg`, tips:155, comments:22, likes:940,
+    { user:"gridlord", avatar:`${M}/extra-media6.jpg`, desc:"perfect square. no crop drama. just vibes.", ticker:"$GRID", cat:"Meme", role:"op", type:"image", w:1536, h:1536, src:`${M}/extra-media6.jpg`, tips:155, comments:22, likes:940,
       commentList:[{user:"sq", time:"5 h", text:"1:1 forever", tips:8, likes:63}] },
     { user:"talltale", avatar:`${M}/extra-media7.jpg`, desc:"taller portrait (2:3) — phone-native storytelling", ticker:"$TALL", cat:"Meme", type:"image", w:800, h:1200, src:`${M}/extra-media7.jpg`, tips:27, comments:4, likes:143,
       commentList:[{user:"stories", time:"8 h", text:"this wants to be a story, not a post", tips:1, likes:9}] },
-    { user:"warmtone", avatar:`${M}/extra-media8.jpg`, desc:"warm 4:5 still — orange spill without the CTA yelling", ticker:"$WARM", cat:"Dare", type:"image", w:1440, h:1800, src:`${M}/extra-media8.jpg`, tips:73, comments:9, likes:351,
+    { user:"warmtone", avatar:`${M}/extra-media8.jpg`, desc:"warm 4:5 still — orange spill without the CTA yelling", ticker:"$WARM", cat:"Dare", role:"op", type:"image", w:1440, h:1800, src:`${M}/extra-media8.jpg`, tips:73, comments:9, likes:351,
       commentList:[{user:"palette", time:"2 h", text:"brand-adjacent orange, chefs kiss", tips:6, likes:31}] },
     { user:"pngpunk", avatar:`${M}/extra-media9.png`, desc:"png with edges — transparency lore if you squint", ticker:"$PNG", cat:"Meme", type:"image", w:1000, h:1499, src:`${M}/extra-media9.png`, tips:39, comments:6, likes:208,
       commentList:[{user:"alpha", time:"7 h", text:"png supremacy", tips:4, likes:19}] },
     { user:"latemotion", avatar:`${M}/extra-media10-poster.jpg`, desc:"landscape clip — short, wide, slightly chaotic", ticker:"$LATE", cat:"Dare", type:"video", w:736, h:414, src:`${M}/extra-media10.mp4`, poster:`${M}/extra-media10-poster.jpg`, tips:58, comments:8, likes:277,
       commentList:[{user:"cine", time:"1 h", text:"letterbox energy in a vertical app, respect", tips:7, likes:29}] },
-    { user:"stillframe", avatar:`${M}/extra-media11.jpg`, desc:"wide still from the same universe as the clip above", ticker:"$STILL", cat:"Meme", type:"image", w:736, h:460, src:`${M}/extra-media11.jpg`, tips:21, comments:3, likes:98,
+    { user:"stillframe", avatar:`${M}/extra-media11.jpg`, desc:"wide still from the same universe as the clip above", ticker:"$STILL", cat:"Meme", role:"op", type:"image", w:736, h:460, src:`${M}/extra-media11.jpg`, tips:21, comments:3, likes:98,
       commentList:[{user:"seq", time:"4 h", text:"sequel to the motion post?", tips:2, likes:11}] },
     { user:"portraitkid", avatar:`${M}/extra-media12.jpg`, desc:"classic 3:4 — neither story nor landscape, just correct", ticker:"$PORT", cat:"Meme", type:"image", w:1199, h:1592, src:`${M}/extra-media12.jpg`, tips:86, comments:13, likes:447,
       commentList:[{user:"ratio", time:"9 h", text:"3:4 is underrated", tips:5, likes:24}] },
-    { user:"horizon.sol", avatar:`${M}/extra-media13.jpg`, desc:"almost-cinematic wide — tip if the sky does something", ticker:"$HZN", cat:"Dare", type:"image", w:1179, h:661, src:`${M}/extra-media13.jpg`, tips:44, comments:5, likes:189,
+    { user:"horizon.sol", avatar:`${M}/extra-media13.jpg`, desc:"almost-cinematic wide — tip if the sky does something", ticker:"$HZN", cat:"Dare", role:"op", type:"image", w:1179, h:661, src:`${M}/extra-media13.jpg`, tips:44, comments:5, likes:189,
       commentList:[{user:"skywatcher", time:"3 h", text:"sky did something", tips:12, likes:40}] },
     { user:"loopvert", avatar:`${M}/extra-media14-poster.jpg`, desc:"muted vertical loop — gif energy, video bones", ticker:"$VERT", cat:"Meme", type:"gif", w:720, h:900, src:`${M}/extra-media14.mp4`, poster:`${M}/extra-media14-poster.jpg`, tips:203, comments:0, likes:712, commentList:[] },
     { user:"bannerboi", avatar:`${M}/extra-media15.jpg`, desc:"ultra-wide still — feed meta has to negotiate for space", ticker:"$BNR", cat:"Dare", type:"image", w:2047, h:1151, src:`${M}/extra-media15.jpg`, tips:67, comments:10, likes:305,
       commentList:[{user:"layout", time:"2 h", text:"meta-float mode loading…", tips:3, likes:17}] },
-    { user:"tinypic", avatar:`${M}/extra-media16.jpg`, desc:"tiny 4:3 source — upscaled vibes, original soul", ticker:"$TINY", cat:"Meme", type:"image", w:400, h:300, src:`${M}/extra-media16.jpg`, tips:15, comments:2, likes:71,
+    { user:"tinypic", avatar:`${M}/extra-media16.jpg`, desc:"tiny 4:3 source — upscaled vibes, original soul", ticker:"$TINY", cat:"Meme", role:"op", type:"image", w:400, h:300, src:`${M}/extra-media16.jpg`, tips:15, comments:2, likes:71,
       commentList:[{user:"pixel", time:"11 h", text:"400px of pure character", tips:1, likes:8}] },
-    { user:"motionlab", avatar:`${M}/extra-media17-poster.jpg`, desc:"chunky 4:3 clip — less phone, more desk cam", ticker:"$LAB", cat:"Dare", type:"video", w:720, h:552, src:`${M}/extra-media17.mp4`, poster:`${M}/extra-media17-poster.jpg`, tips:96, comments:15, likes:533,
+    { user:"motionlab", avatar:`${M}/extra-media17-poster.jpg`, desc:"chunky 4:3 clip — less phone, more desk cam", ticker:"$LAB", cat:"Dare", role:"op", type:"video", w:720, h:552, src:`${M}/extra-media17.mp4`, poster:`${M}/extra-media17-poster.jpg`, tips:96, comments:15, likes:533,
       commentList:[{user:"desk", time:"1 h", text:"desk cam supremacy", tips:8, likes:36}] },
     { user:"megapixel", avatar:`${M}/extra-media18.jpg`, desc:"huge 4:5 still — scroll slow, it's heavy for a reason", ticker:"$MEGA", cat:"Meme", type:"image", w:3571, h:4462, src:`${M}/extra-media18.jpg`, tips:128, comments:19, likes:681,
       commentList:[
@@ -2948,15 +3060,15 @@ html.dark .qhc-id{color:#6BA3FF;}
       commentList:[{user:"bpm", time:"2 h", text:"this is a metronome with plot", tips:10, likes:49}] },
     { user:"afterglow", avatar:`${M}/extra-media20-poster.jpg`, desc:"second vertical beat — same ratio, new attitude", ticker:"$GLOW", cat:"Meme", type:"video", w:720, h:900, src:`${M}/extra-media20.mp4`, poster:`${M}/extra-media20-poster.jpg`, tips:82, comments:11, likes:404,
       commentList:[{user:"sequel", time:"6 h", text:"PULSE's cooler cousin", tips:4, likes:21}] },
-    { user:"cinemode", avatar:`${M}/extra-media21-poster.jpg`, desc:"4K-ish 4:3 motion — desktop feed flex", ticker:"$CINE", cat:"Dare", type:"video", w:2880, h:2160, src:`${M}/extra-media21.mp4`, poster:`${M}/extra-media21-poster.jpg`, tips:241, comments:31, likes:1204,
+    { user:"cinemode", avatar:`${M}/extra-media21-poster.jpg`, desc:"4K-ish 4:3 motion — desktop feed flex", ticker:"$CINE", cat:"Dare", role:"op", type:"video", w:2880, h:2160, src:`${M}/extra-media21.mp4`, poster:`${M}/extra-media21-poster.jpg`, tips:241, comments:31, likes:1204,
       commentList:[
         {user:"hdr", time:"3 h", text:"why does this look expensive", tips:18, likes:91},
         {user:"anon", time:"55 m", text:"because it is", tips:2, likes:15, isAnon:true}
       ] },
     { user:"secondunit", avatar:`${M}/extra-media22-poster.jpg`, desc:"matching wide motion from the same shoot", ticker:"$UNIT", cat:"Dare", type:"video", w:2880, h:2160, src:`${M}/extra-media22.mp4`, poster:`${M}/extra-media22-poster.jpg`, tips:119, comments:16, likes:610,
       commentList:[{user:"broll", time:"4 h", text:"b-roll that out-acts the a-roll", tips:9, likes:44}] },
-    { user:"squarewave", avatar:`${M}/extra-media23-poster.jpg`, desc:"native 1:1 loop — tap to pause the wave", ticker:"$WAVE", cat:"Meme", type:"gif", w:720, h:720, src:`${M}/extra-media23.mp4`, poster:`${M}/extra-media23-poster.jpg`, tips:310, comments:0, likes:988, commentList:[] },
-    { user:"ultra1x1", avatar:`${M}/extra-media24-poster.jpg`, desc:"absurdly sharp square — 1:1 at max effort", ticker:"$ULTRA", cat:"Dare", type:"video", w:3840, h:3840, src:`${M}/extra-media24.mp4`, poster:`${M}/extra-media24-poster.jpg`, tips:188, comments:27, likes:1102,
+    { user:"squarewave", avatar:`${M}/extra-media23-poster.jpg`, desc:"native 1:1 loop — tap to pause the wave", ticker:"$WAVE", cat:"Meme", role:"op", type:"gif", w:720, h:720, src:`${M}/extra-media23.mp4`, poster:`${M}/extra-media23-poster.jpg`, tips:310, comments:0, likes:988, commentList:[] },
+    { user:"ultra1x1", avatar:`${M}/extra-media24-poster.jpg`, desc:"absurdly sharp square — 1:1 at max effort", ticker:"$ULTRA", cat:"Dare", role:"op", type:"video", w:3840, h:3840, src:`${M}/extra-media24.mp4`, poster:`${M}/extra-media24-poster.jpg`, tips:188, comments:27, likes:1102,
       commentList:[{user:"retina", time:"1 h", text:"my screen just filed a complaint", tips:11, likes:52}] },
     { user:"closeloop", avatar:`${M}/extra-media25-poster.jpg`, desc:"clean 1080 square closer — end of the variety pack", ticker:"$CLOSE", cat:"Meme", type:"video", w:1080, h:1080, src:`${M}/extra-media25.mp4`, poster:`${M}/extra-media25-poster.jpg`, tips:97, comments:12, likes:455,
       commentList:[{user:"finale", time:"20 m", text:"variety pack complete 🫡", tips:7, likes:33}] }
@@ -3553,7 +3665,8 @@ html.dark .qhc-id{color:#6BA3FF;}
       like:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 22V10M2 12v8a2 2 0 002 2h13.5a2 2 0 002-1.6l1.4-7A2 2 0 0018.9 9H14l1-5-.5-1a2 2 0 00-3.4-.3L7 8H2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
       dislike:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 2V14M22 12V4a2 2 0 00-2-2H6.5a2 2 0 00-2 1.6l-1.4 7A2 2 0 005.1 15H10l-1 5 .5 1a2 2 0 003.4.3L17 16H22z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
       share:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="18" cy="5" r="3" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="12" r="3" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="19" r="3" stroke="currentColor" stroke-width="2"/><path d="M8.6 10.6l6.8-4.2M8.6 13.4l6.8 4.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
-      speech:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02943 16.9706 3 12 3C7.02943 3 3 7.02943 3 12C3 13.4877 3.36093 14.891 4 16.1272L3 21L8 20.0645C9.20496 20.6633 10.5631 21 12 21Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>'
+      speech:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M12 21C16.9706 21 21 16.9706 21 12C21 7.02943 16.9706 3 12 3C7.02943 3 3 7.02943 3 12C3 13.4877 3.36093 14.891 4 16.1272L3 21L8 20.0645C9.20496 20.6633 10.5631 21 12 21Z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+      launch:'<svg class="role-badge-ico" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.67796 10.8918L1.86133 12.7084M4.88905 12.1029L3.67796 13.314M2.46687 7.86404C2.46687 7.86404 4.87571 8.69425 5.98113 9.79967C7.08652 10.9051 7.91678 13.314 7.91678 13.314L10.339 11.4973V9.68068C12.8948 8.40274 14.2875 6.28543 13.9681 1.81274C9.49538 1.49326 7.37803 2.886 6.10015 5.44182H4.28351L2.46687 7.86404ZM11.5501 5.44184C11.5501 6.1107 11.0078 6.65295 10.339 6.65295C9.67008 6.65295 9.12787 6.1107 9.12787 5.44184C9.12787 4.77297 9.67008 4.23075 10.339 4.23075C11.0078 4.23075 11.5501 4.77297 11.5501 5.44184Z" stroke="currentColor" stroke-linecap="square"/></svg>'
     };
     return icons[name]||'';
   }
@@ -4438,7 +4551,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         </div>
         <div class="col-info">
           <div class="meta-block">
-            <div class="row1"><img class="avatar-sm circle blockie" src="${userAvatar(p.user)}"><div class="uname">@${p.user}</div></div>
+            <div class="row1"><img class="avatar-sm circle blockie" src="${userAvatar(p.user)}"><div class="uname">@${p.user}</div>${p.role==='op' ? `<span class="role-badge role-op" title="Original Post" aria-label="Original Post">${svgIcon('launch')}<span class="role-badge-text"><span class="role-badge-short">OP</span><span class="role-badge-full">Original Post</span></span></span>` : ''}</div>
             <div class="desc">${p.desc}</div>
             <div class="meta-tags"><span class="token-tag"><img class="token-mini squircle" src="${p.avatar}" alt=""><span class="tag-ticker">${p.ticker}</span></span><div class="pill ${p.cat.toLowerCase()}">${p.cat}</div></div>
           </div>

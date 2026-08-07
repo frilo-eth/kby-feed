@@ -12,6 +12,7 @@ Feed
 - Glass mute/more — 46px; pathLength mute↔sound morph; unmute/mute haptics+sounds; session persist
 - React rail — tip (immutable +$5 float); like↔dislike exclusive; comment; share; pulse + haptics
 - Meta — pinned | float-on-media | overlay-mode (`layoutMeta`); pinned flush with media bottom; float inset by PAD (18px)
+- OP badge — temp `.role-badge` next to `@uname` when `role:"op"` (any cat); Launch icon + OP→Original Post hover; Entry = no badge; pinned = inverted Buy CTA, on-media = glass; see README `#dare-role-badge`
 - Buy CTA — desktop only; crystal glass `Buy $ticker` on `.token-anchor`; show ~4.2s → tuck (enter reverse ~0.55×) → reappear after ~6.5s engage (max 3 / post); hidden ≤860
 - Trade entry — avatar+ / buy CTA / ticker / mini / pill → trade drawer (not hover card)
 - Hover cards (desktop) — user on uname/avatar; token chart on plus/buy/ticker/mini/pill; `>>id` quote card on comment quotes (no CTA)
