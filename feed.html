@@ -610,11 +610,12 @@ html.dark .buy-cta-rim::before{
    Pinned (outside media): inverted Buy-CTA solid. Float/on-media: glass. Formal design TBD @orlando */
 .role-badge{
   position:relative;display:inline-flex;align-items:center;justify-content:center;gap:4px;
-  flex-shrink:0;height:20px;padding:0 7px 0 6px;border-radius:7px;
-  font-size:10px;font-weight:700;letter-spacing:.04em;line-height:1;text-transform:uppercase;
+  /* min-height + vertical pad — fixed 20px + overflow clipped bold caps */
+  flex-shrink:0;min-height:22px;padding:3px 7px 3px 6px;border-radius:6px;
+  font-size:10px;font-weight:700;letter-spacing:.04em;line-height:12px;text-transform:uppercase;
   pointer-events:none;user-select:none;overflow:hidden;
   /* Collapsed ≈ icon + gap + "OP" */
-  max-width:3.85em;white-space:nowrap;
+  max-width:3.95em;white-space:nowrap;
   /* Soft ease both ways — longer collapse so exit doesn’t snap */
   transition:
     max-width .52s cubic-bezier(.22,.82,.28,1),
@@ -622,16 +623,17 @@ html.dark .buy-cta-rim::before{
     background .2s ease, color .2s ease, box-shadow .25s ease, border-color .2s ease;
 }
 .role-badge .role-badge-ico{
-  width:12px;height:12px;flex-shrink:0;display:block;
+  width:11px;height:11px;flex-shrink:0;display:block;
 }
 .role-badge .role-badge-ico path{stroke:currentColor;}
 .role-badge-text{
   position:relative;display:inline-grid;align-items:center;justify-items:start;
-  min-width:0;
+  min-width:0;line-height:12px;height:12px;
 }
 .role-badge-short,
 .role-badge-full{
   grid-area:1/1;
+  display:block;line-height:12px;height:12px;
   white-space:nowrap;
   transition:opacity .28s cubic-bezier(.22,.82,.28,1);
 }
@@ -652,24 +654,22 @@ html.dark .buy-cta-rim::before{
 .role-badge.role-op{
   color:#F7F1E8;
   background:#2A241C;
-  border:1px solid rgba(42,36,28,.08);
+  border:1px solid rgba(42,36,28,.12);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.12),
     0 1px 2px rgba(40,30,20,.06),
-    0 4px 12px rgba(40,30,20,.1);
+    0 3px 10px rgba(40,30,20,.08);
 }
 html.dark .role-badge.role-op{
   color:#2A241C;
   background:rgba(255,252,248,.94);
-  border:1px solid rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.14);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.55),
-    0 1px 2px rgba(0,0,0,.15),
-    0 4px 14px rgba(0,0,0,.28);
+    0 1px 2px rgba(0,0,0,.12),
+    0 3px 12px rgba(0,0,0,.22);
 }
 .meta-block .row1:hover .role-badge.role-op,
 .meta-block .row1:focus-within .role-badge.role-op{
-  max-width:10.5em;padding:0 8px 0 6px;
+  max-width:10.5em;padding:3px 8px 3px 6px;
 }
 .meta-block .row1:hover .role-badge.role-op .role-badge-short{
   opacity:0;transition-delay:0s; /* hide OP immediately on expand */
@@ -683,9 +683,7 @@ html.dark .role-badge.role-op{
   background:var(--glass-dark);
   border:1px solid rgba(255,255,255,.22);
   backdrop-filter:blur(10px) saturate(160%);-webkit-backdrop-filter:blur(10px) saturate(160%);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.2),
-    0 2px 10px rgba(0,0,0,.28);
+  box-shadow:0 2px 10px rgba(0,0,0,.28);
 }
 html.dark .feed-item.meta-float .role-badge.role-op{
   color:#fff;
@@ -695,7 +693,7 @@ html.dark .feed-item.meta-float .role-badge.role-op{
 @media (hover:none){
   .meta-block .row1:hover .role-badge.role-op,
   .meta-block .row1:focus-within .role-badge.role-op{
-    max-width:3.85em;padding:0 7px 0 6px;
+    max-width:3.95em;padding:3px 7px 3px 6px;
   }
   .meta-block .row1:hover .role-badge.role-op .role-badge-short,
   .meta-block .row1:focus-within .role-badge.role-op .role-badge-short{opacity:1;transition-delay:0s;}
@@ -2304,7 +2302,7 @@ body.cfx-on #drawer{z-index:50;}
     background:var(--glass-dark)!important;
     border:1px solid rgba(255,255,255,.22)!important;
     backdrop-filter:blur(10px) saturate(160%)!important;-webkit-backdrop-filter:blur(10px) saturate(160%)!important;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.2), 0 2px 10px rgba(0,0,0,.28)!important;
+    box-shadow:0 2px 10px rgba(0,0,0,.28)!important;
   }
   html.dark .role-badge.role-op{
     background:rgba(255,255,255,.16)!important;
