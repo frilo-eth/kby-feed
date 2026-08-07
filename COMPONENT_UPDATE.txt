@@ -42,6 +42,7 @@ Comments
 Overlays
 - Trade drawer — buy/sell token sheet (same chrome as comments)
 - Share — desktop modal; mobile sheet; X intent + copy url
+  · minicard tint by cat: Dare = blue, Meme = orange; holo foil (idle + pointer)
   · auto-dismiss after Share on X or Copy url (copy flashes “Copied!” then closes)
   · scrim / ✕ / drag-dismiss also close
 - Sheet close btns — `var(--card)` bg; 40px / 44px mobile thumb targets
