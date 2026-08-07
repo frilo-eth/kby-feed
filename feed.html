@@ -2007,13 +2007,14 @@ body.cfx-on #drawer{z-index:50;}
   }
 }
 .share-body{padding:18px;}
-/* Share minicard — type tint + holo foil (simeydotme-inspired, lighter)
-   Dare = blue texture · Meme = orange texture */
+/* Share minicard — type tint + subdued holo foil
+   Dare = blue field + blue logo pattern · Meme = orange field + orange pattern */
 .share-card{
   --share-ink:#0e2c56;
   --share-ink-soft:#2f6fd0;
   --share-media-shadow:rgba(14,44,86,.22);
-  --share-grad:linear-gradient(135deg,#d7ebfd 0%,#bcdcfb 55%,#addafb 100%);
+  --share-grad:linear-gradient(145deg,#d9ecfd 0%,#c2dffb 52%,#b4d8fa 100%);
+  --share-pattern:#3a6eb8;
   --mx:52%;
   --my:40%;
   position:relative;display:flex;align-items:stretch;justify-content:space-between;gap:16px;
@@ -2026,78 +2027,100 @@ body.cfx-on #drawer{z-index:50;}
   --share-ink:#0e2c56;
   --share-ink-soft:#2f6fd0;
   --share-media-shadow:rgba(14,44,86,.22);
-  --share-grad:linear-gradient(135deg,#d7ebfd 0%,#bcdcfb 55%,#addafb 100%);
+  --share-grad:linear-gradient(145deg,#d9ecfd 0%,#c2dffb 52%,#b4d8fa 100%);
+  --share-pattern:#3a6eb8;
 }
 .share-card.is-meme{
   --share-ink:#6B2A0A;
-  --share-ink-soft:#c45a1a;
-  --share-media-shadow:rgba(107,42,10,.22);
-  --share-grad:linear-gradient(135deg,#fde4cf 0%,#f5c49a 55%,#efb07a 100%);
+  --share-ink-soft:#b85a22;
+  --share-media-shadow:rgba(107,42,10,.2);
+  /* Tight warm band — not peach→burnt */
+  --share-grad:linear-gradient(145deg,#f6d2b4 0%,#f0c29a 50%,#ebb288 100%);
+  --share-pattern:#c4783a;
 }
+/* Logo watermark — tinted via mask, small + spaced tile, slight slant */
 .share-card::before{
-  content:'';position:absolute;inset:0;z-index:0;
-  background-image:url("/public/logo-light.png");
-  background-size:48px;background-repeat:repeat;opacity:.18;pointer-events:none;
+  content:'';position:absolute;inset:-42%;z-index:0;
+  width:184%;height:184%;
+  background-color:var(--share-pattern);
+  -webkit-mask-image:url("/public/logo-share-tile.png");
+  mask-image:url("/public/logo-share-tile.png");
+  -webkit-mask-size:44px 44px;mask-size:44px 44px;
+  -webkit-mask-repeat:repeat;mask-repeat:repeat;
+  opacity:.13;pointer-events:none;
+  transform:rotate(-16deg);
 }
-/* Holo foil — rainbow bars + glare beam; stays under content */
+/* Holo foil — narrow type hues, soft presence (under content) */
 .share-card-holo{
   position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;
-  opacity:.72;
+  opacity:.38;
+  --holo-a:hsla(210,70%,68%,.55);
+  --holo-b:hsla(195,65%,72%,.45);
+  --holo-c:hsla(230,55%,70%,.5);
+  --holo-beam:hsla(205,80%,78%,.28);
   background-image:
     repeating-linear-gradient(
-      110deg,
-      hsl(0,85%,65%) 0%,
-      hsl(40,90%,60%) 4%,
-      hsl(80,75%,55%) 8%,
-      hsl(160,70%,55%) 12%,
-      hsl(200,80%,60%) 16%,
-      hsl(260,75%,65%) 20%,
-      hsl(300,80%,60%) 24%,
-      hsl(0,85%,65%) 28%
+      118deg,
+      var(--holo-a) 0%,
+      var(--holo-b) 6%,
+      var(--holo-c) 12%,
+      var(--holo-a) 18%
     ),
     radial-gradient(
       farthest-corner circle at var(--mx) var(--my),
-      hsla(0,0%,100%,.85) 0%,
-      hsla(0,0%,100%,.25) 18%,
-      hsla(0,0%,100%,0) 42%
+      hsla(0,0%,100%,.55) 0%,
+      hsla(0,0%,100%,.12) 22%,
+      hsla(0,0%,100%,0) 48%
     ),
     linear-gradient(
       115deg,
-      transparent 20%,
-      hsla(180,90%,70%,.35) 40%,
-      hsla(40,100%,70%,.4) 48%,
-      hsla(300,90%,70%,.35) 56%,
-      transparent 72%
+      transparent 28%,
+      var(--holo-beam) 46%,
+      transparent 64%
     );
-  background-size:220% 220%, 160% 160%, 240% 240%;
+  background-size:200% 200%, 140% 140%, 220% 220%;
   background-position:
-    calc(var(--mx) * .55) calc(var(--my) * .55),
+    calc(var(--mx) * .5) calc(var(--my) * .5),
     var(--mx) var(--my),
     calc(100% - var(--mx)) calc(100% - var(--my));
-  mix-blend-mode:color-dodge;
-  filter:brightness(1.05) contrast(1.2) saturate(1.15);
-  animation:shareHoloIdle 7s ease-in-out infinite alternate;
+  mix-blend-mode:soft-light;
+  filter:brightness(1.04) contrast(1.08) saturate(1.05);
+  animation:shareHoloIdle 8s ease-in-out infinite alternate;
   transition:opacity .25s ease, filter .25s ease;
 }
-.share-card.is-meme .share-card-holo{mix-blend-mode:soft-light;opacity:.85;filter:brightness(1.12) contrast(1.15) saturate(1.25);}
-.share-card.is-holo-track .share-card-holo{animation:none;}
+.share-card.is-dare .share-card-holo{
+  --holo-a:hsla(210,72%,68%,.55);
+  --holo-b:hsla(198,68%,74%,.42);
+  --holo-c:hsla(225,58%,70%,.5);
+  --holo-beam:hsla(205,80%,80%,.26);
+  opacity:.42;
+}
+.share-card.is-meme .share-card-holo{
+  /* Warm amber band only — no green/purple sweep */
+  --holo-a:hsla(28,78%,62%,.5);
+  --holo-b:hsla(36,72%,68%,.4);
+  --holo-c:hsla(18,70%,58%,.48);
+  --holo-beam:hsla(32,85%,72%,.24);
+  opacity:.4;
+}
+.share-card.is-holo-track .share-card-holo{animation:none;opacity:.52;}
 @keyframes shareHoloIdle{
   0%{
     background-position:18% 22%, 30% 35%, 72% 58%;
-    filter:brightness(1.02) contrast(1.15) saturate(1.05);
+    filter:brightness(1.02) contrast(1.05) saturate(1.02);
   }
   100%{
     background-position:78% 70%, 72% 65%, 28% 40%;
-    filter:brightness(1.12) contrast(1.25) saturate(1.2);
+    filter:brightness(1.08) contrast(1.1) saturate(1.08);
   }
 }
 @media (prefers-reduced-motion:reduce){
-  .share-card-holo{animation:none!important;opacity:.32;filter:brightness(1.05) contrast(1.05) saturate(1.05)!important;}
+  .share-card-holo{animation:none!important;opacity:.22;filter:brightness(1.03) contrast(1.03) saturate(1.02)!important;}
 }
 .share-card-info{position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-start;gap:12px;min-width:0;}
 .share-brand{display:flex;align-items:center;gap:8px;color:var(--share-ink);font-weight:800;font-style:italic;font-size:19px;letter-spacing:-.01em;}
 .share-brand .mark{width:28px;height:28px;object-fit:contain;flex-shrink:0;display:block;}
-.share-pill{background:rgba(255,255,255,.6);color:var(--share-ink);font-size:12px;font-weight:700;padding:5px 14px;border-radius:16px;}
+.share-pill{background:rgba(255,255,255,.55);color:var(--share-ink);font-size:12px;font-weight:700;padding:5px 14px;border-radius:16px;}
 .share-title{color:var(--share-ink);font-weight:800;font-size:22px;line-height:1.15;word-break:break-word;}
 .share-ticker{color:var(--share-ink-soft);font-weight:700;font-size:16px;}
 .share-card-media{position:relative;z-index:1;width:150px;height:150px;flex-shrink:0;align-self:center;border-radius:12px;overflow:hidden;background:#000;box-shadow:0 6px 18px var(--share-media-shadow);}
@@ -2111,8 +2134,8 @@ body.cfx-on #drawer{z-index:50;}
 .share-x-btn:hover{background:#69a6ee;}
 .share-x-btn:active{transform:scale(.98);}
 .share-x-btn .x-logo{width:17px;height:17px;fill:currentColor;}
-.share-modal.is-meme .share-x-btn{background:#f0a46e;color:#6B2A0A;}
-.share-modal.is-meme .share-x-btn:hover{background:#e89458;}
+.share-modal.is-meme .share-x-btn{background:#e8a66a;color:#6B2A0A;}
+.share-modal.is-meme .share-x-btn:hover{background:#de9656;}
 .share-modal.is-dare .share-x-btn{background:#7cb2f0;color:#0e2c56;}
 .share-modal.is-dare .share-x-btn:hover{background:#69a6ee;}
 .copy-url{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;margin-top:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px;font-size:15px;color:var(--ink-soft);cursor:pointer;font-weight:700;transition:background .15s;}
@@ -8850,14 +8873,14 @@ html.dark .qhc-id{color:#6BA3FF;}
     shareCard?.classList.remove('is-holo-track');
   }
   function setShareType(cat){
-    const kind = String(cat || 'meme').toLowerCase() === 'dare' ? 'dare' : 'meme';
+    const kind = /\bdare\b/i.test(String(cat || '')) ? 'dare' : 'meme';
     if(shareCard){
-      shareCard.classList.toggle('is-dare', kind === 'dare');
-      shareCard.classList.toggle('is-meme', kind === 'meme');
+      shareCard.classList.remove('is-dare', 'is-meme');
+      shareCard.classList.add(kind === 'dare' ? 'is-dare' : 'is-meme');
     }
     if(shareModal){
-      shareModal.classList.toggle('is-dare', kind === 'dare');
-      shareModal.classList.toggle('is-meme', kind === 'meme');
+      shareModal.classList.remove('is-dare', 'is-meme');
+      shareModal.classList.add(kind === 'dare' ? 'is-dare' : 'is-meme');
     }
   }
   function onShareHoloMove(e){
