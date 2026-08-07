@@ -611,35 +611,37 @@ html.dark .buy-cta-rim::before{
    Pinned: inverted Buy-CTA. Float/on-media/mobile: glass. Tap/click → explain tip. */
 .role-badge{
   position:relative;display:inline-flex;align-items:center;justify-content:flex-start;gap:4px;
-  flex:0 1 auto;flex-shrink:1;min-width:0;
+  flex:0 0 auto;flex-shrink:0;
   min-height:22px;padding:3px 8px 3px 6px;border-radius:6px;
-  /* Hard cap — never grow into the reaction strip */
-  width:4.85rem;max-width:min(4.85rem,28vw);
+  /* Rest = hug icon+OP; open/hover grows to capped marquee width */
+  width:auto;max-width:none;
   font-size:10px;font-weight:700;letter-spacing:.04em;line-height:12px;text-transform:uppercase;
   pointer-events:auto;cursor:pointer;user-select:none;overflow:hidden;
-  transition:background .2s ease, color .2s ease, box-shadow .25s ease, border-color .2s ease;
+  transition:
+    max-width .36s cubic-bezier(.22,.82,.28,1),
+    width .36s cubic-bezier(.22,.82,.28,1),
+    background .2s ease, color .2s ease, box-shadow .25s ease, border-color .2s ease;
 }
 .role-badge .role-badge-ico{
   width:11px;height:11px;flex-shrink:0;display:block;position:relative;z-index:2;
 }
 .role-badge .role-badge-ico path{stroke:currentColor;}
 .role-badge-clip{
-  position:relative;flex:1 1 auto;min-width:0;height:12px;overflow:hidden;
-  -webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 7px),transparent);
-  mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 7px),transparent);
+  position:relative;flex:0 1 auto;min-width:0;height:12px;overflow:hidden;
 }
 .role-badge-idle{
   display:block;line-height:12px;height:12px;white-space:nowrap;
-  transition:opacity .18s ease;
+  transition:opacity .16s ease;
 }
 .role-badge-marquee{
   position:absolute;left:0;top:0;right:0;bottom:0;overflow:hidden;
   opacity:0;pointer-events:none;
-  transition:opacity .18s ease;
+  transition:opacity .16s ease;
 }
 .role-badge-track{
   display:inline-flex;align-items:center;width:max-content;
   transform:translateX(0);will-change:transform;
+  animation:none;
 }
 .role-badge-seg{
   flex:0 0 auto;padding-right:10px;white-space:nowrap;line-height:12px;height:12px;
@@ -648,7 +650,17 @@ html.dark .buy-cta-rim::before{
   from{transform:translateX(0);}
   to{transform:translateX(-50%);}
 }
-/* Hover / focus / tap-open → marquee within the capped width */
+/* Open / focus — widen to marquee cap (never into the reaction rail) */
+.role-badge.role-op.is-open,
+.role-badge.role-op:focus-visible{
+  width:4.85rem;max-width:min(4.85rem,28vw);
+}
+.role-badge.role-op.is-open .role-badge-clip,
+.role-badge.role-op:focus-visible .role-badge-clip{
+  flex:1 1 auto;
+  -webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 7px),transparent);
+  mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 7px),transparent);
+}
 .role-badge.role-op.is-open .role-badge-idle,
 .role-badge.role-op:focus-visible .role-badge-idle{opacity:0;}
 .role-badge.role-op.is-open .role-badge-marquee,
@@ -658,6 +670,14 @@ html.dark .buy-cta-rim::before{
   animation:roleOpMarquee 3.2s linear .12s infinite;
 }
 @media (hover:hover) and (pointer:fine){
+  .role-badge.role-op:hover{
+    width:4.85rem;max-width:min(4.85rem,28vw);
+  }
+  .role-badge.role-op:hover .role-badge-clip{
+    flex:1 1 auto;
+    -webkit-mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 7px),transparent);
+    mask-image:linear-gradient(90deg,#000 0,#000 calc(100% - 7px),transparent);
+  }
   .role-badge.role-op:hover .role-badge-idle{opacity:0;}
   .role-badge.role-op:hover .role-badge-marquee{opacity:1;}
   .role-badge.role-op:hover .role-badge-track{
@@ -706,14 +726,9 @@ html.dark .feed-item.meta-float .role-badge.role-op{
   border-color:rgba(255,255,255,.22);
 }
 @media (prefers-reduced-motion:reduce){
-  .role-badge-track{animation:none!important;}
+  .role-badge{transition:none;}
+  .role-badge-track{animation:none!important;transform:none!important;}
   .role-badge::after{animation:none!important;opacity:0;}
-  .role-badge.role-op.is-open .role-badge-idle,
-  .role-badge.role-op:hover .role-badge-idle,
-  .role-badge.role-op:focus-visible .role-badge-idle{opacity:0;}
-  .role-badge.role-op.is-open .role-badge-marquee,
-  .role-badge.role-op:hover .role-badge-marquee,
-  .role-badge.role-op:focus-visible .role-badge-marquee{opacity:1;}
 }
 
 /* User blockies — shared hover on every instance (meta, comments, CFX, bubbles, cards, wallet) */
@@ -7781,6 +7796,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       if(!fineHover()) return;
       clearTimeout(hoverShowTimer); hoverShowTimer = 0;
       setOpBadgeOpen(el, false);
+      el.blur(); /* drop :focus-visible so width collapses on release */
       hideHoverCards(false);
     });
     el.addEventListener('click', (e)=>{
