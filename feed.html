@@ -613,7 +613,7 @@ html.dark .buy-cta-rim::before{
   /* min-height + vertical pad — avoid fixed height clipping bold caps */
   flex-shrink:0;min-height:22px;padding:3px 8px 3px 6px;border-radius:6px;
   font-size:10px;font-weight:700;letter-spacing:.04em;line-height:12px;text-transform:uppercase;
-  pointer-events:none;user-select:none;overflow:hidden;
+  pointer-events:auto;cursor:help;user-select:none;overflow:hidden;
   /* Collapsed must fit icon + gap + "OP" + right pad (3.95em was clipping the P) */
   max-width:calc(6px + 11px + 4px + 1.85em + 8px);
   white-space:nowrap;
@@ -2586,6 +2586,18 @@ html.dark .qhc-id{color:#6BA3FF;}
 .qhc-thumb img,.qhc-thumb video{width:100%;height:100%;object-fit:cover;display:block;}
 .qhc-missing{font-size:12px;font-weight:600;color:var(--ink-faint);padding:4px 0;}
 
+/* POX-style explain tip — title + body, no CTA (OP badge, etc.) */
+.kb-info-tip{
+  width:min(268px,calc(100vw - 24px));padding:16px 18px;
+  display:flex;flex-direction:column;gap:8px;border-radius:14px;
+}
+.kb-info-tip-title{
+  font-size:13px;font-weight:600;color:var(--ink-faint);line-height:1.3;letter-spacing:-.01em;
+}
+.kb-info-tip-body{
+  font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.45;letter-spacing:-.01em;
+}
+
 @media (max-width:860px){
   .kb-hover-portal{display:none!important;}
 }
@@ -2904,6 +2916,10 @@ html.dark .qhc-id{color:#6BA3FF;}
   <div class="kb-hover-card user-hover-card" id="userHoverCard" role="dialog" aria-label="User preview"></div>
   <div class="kb-hover-card token-hover-card" id="tokenHoverCard" role="dialog" aria-label="Token preview"></div>
   <div class="kb-hover-card quote-hover-card" id="quoteHoverCard" role="dialog" aria-label="Quoted comment"></div>
+  <div class="kb-hover-card kb-info-tip" id="infoHoverTip" role="tooltip" aria-label="Original Post">
+    <div class="kb-info-tip-title">Original Post</div>
+    <div class="kb-info-tip-body">Media posted by the token creator at launch.</div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
@@ -4551,7 +4567,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         </div>
         <div class="col-info">
           <div class="meta-block">
-            <div class="row1"><img class="avatar-sm circle blockie" src="${userAvatar(p.user)}"><div class="uname">@${p.user}</div>${p.role==='op' ? `<span class="role-badge role-op" title="Original Post" aria-label="Original Post">${svgIcon('launch')}<span class="role-badge-text"><span class="role-badge-short">OP</span><span class="role-badge-full">Original Post</span></span></span>` : ''}</div>
+            <div class="row1"><img class="avatar-sm circle blockie" src="${userAvatar(p.user)}"><div class="uname">@${p.user}</div>${p.role==='op' ? `<span class="role-badge role-op" aria-label="Original Post" tabindex="0">${svgIcon('launch')}<span class="role-badge-text"><span class="role-badge-short">OP</span><span class="role-badge-full">Original Post</span></span></span>` : ''}</div>
             <div class="desc">${p.desc}</div>
             <div class="meta-tags"><span class="token-tag"><img class="token-mini squircle" src="${p.avatar}" alt=""><span class="tag-ticker">${p.ticker}</span></span><div class="pill ${p.cat.toLowerCase()}">${p.cat}</div></div>
           </div>
@@ -4846,6 +4862,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       bindHoverCard(item.querySelector('.pill'), 'token', postRef, 280);
       bindHoverCard(item.querySelector('.uname'), 'user', postRef, 280);
       bindHoverCard(item.querySelector('.avatar-sm'), 'user', postRef, 280);
+      bindHoverCard(item.querySelector('.role-badge.role-op'), 'info', postRef, 220);
       item.querySelector('.react-btn.comment').addEventListener('click',(e)=>{
         e.stopPropagation(); if(state.feedLocked) return;
         const btn = e.currentTarget;
@@ -7504,17 +7521,19 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
 
   const quoteHoverCard = document.getElementById('quoteHoverCard');
+  const infoHoverTip = document.getElementById('infoHoverTip');
   let hoverShowTimer = 0, hoverHideTimer = 0, hoverActive = null, hoverAnchor = null, hoverPost = null;
   function hoverCardsEnabled(){
     return window.innerWidth > 860 && matchMedia('(hover:hover) and (pointer:fine)').matches;
+  }
+  function hoverCardEls(){
+    return [userHoverCard, tokenHoverCard, quoteHoverCard, infoHoverTip].filter(Boolean);
   }
   function hideHoverCards(immediate){
     clearTimeout(hoverShowTimer); clearTimeout(hoverHideTimer);
     hoverShowTimer = hoverHideTimer = 0;
     const doHide = ()=>{
-      userHoverCard.classList.remove('show');
-      tokenHoverCard.classList.remove('show');
-      quoteHoverCard?.classList.remove('show');
+      hoverCardEls().forEach(c=> c.classList.remove('show'));
       hoverActive = null; hoverAnchor = null; hoverPost = null;
     };
     if(immediate) doHide();
@@ -7529,8 +7548,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     let top = ar.top < window.innerHeight * 0.55
       ? ar.top - 8
       : ar.bottom - h;
-    if(card.classList.contains('quote-hover-card')){
-      // Prefer above the quote link so it doesn't cover the thread
+    if(card.classList.contains('quote-hover-card') || card.classList.contains('kb-info-tip')){
+      // Prefer above the anchor so the tip doesn’t cover the thread / meta
       left = Math.min(ar.left, window.innerWidth - w - pad);
       top = ar.top - h - 8;
       if(top < pad) top = ar.bottom + 8;
@@ -7567,22 +7586,27 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   function showHoverCard(type, post, anchor){
     if(!hoverCardsEnabled() || !anchor) return;
-    if(type !== 'quote' && !post) return;
+    if(type !== 'quote' && type !== 'info' && !post) return;
     clearTimeout(hoverHideTimer); hoverHideTimer = 0;
     const card = type === 'user' ? userHoverCard
       : type === 'token' ? tokenHoverCard
+      : type === 'info' ? infoHoverTip
       : quoteHoverCard;
     if(!card) return;
-    [userHoverCard, tokenHoverCard, quoteHoverCard].forEach(c=>{
+    hoverCardEls().forEach(c=>{
       if(c && c !== card) c.classList.remove('show');
     });
     if(type === 'user') renderUserHoverCard(post);
     else if(type === 'token') renderTokenHoverCard(post);
-    else renderQuoteHoverCard(post, anchor.dataset?.qid);
+    else if(type === 'quote') renderQuoteHoverCard(post, anchor.dataset?.qid);
+    // info tip is static markup — no render
     hoverActive = type; hoverAnchor = anchor; hoverPost = post;
     card.classList.add('show');
-    // measure after paint
-    requestAnimationFrame(()=> positionHoverCard(card, anchor));
+    // measure after paint (OP badge also expands on hover — re-pin after width settles)
+    requestAnimationFrame(()=>{
+      positionHoverCard(card, anchor);
+      if(type === 'info') setTimeout(()=> positionHoverCard(card, anchor), 280);
+    });
   }
   function scheduleShowHover(type, post, anchor, delay){
     if(!hoverCardsEnabled()) return;
@@ -7618,7 +7642,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       bindHoverCard(el, 'user', ref, 220);
     });
   }
-  [userHoverCard, tokenHoverCard, quoteHoverCard].forEach(card=>{
+  [userHoverCard, tokenHoverCard, quoteHoverCard, infoHoverTip].forEach(card=>{
     if(!card) return;
     card.addEventListener('pointerenter', ()=>{ clearTimeout(hoverHideTimer); hoverHideTimer = 0; });
     card.addEventListener('pointerleave', ()=> hideHoverCards(false));
