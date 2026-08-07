@@ -670,7 +670,8 @@ html.dark .role-badge.role-op{
 }
 .meta-block .row1:hover .role-badge.role-op,
 .meta-block .row1:focus-within .role-badge.role-op{
-  max-width:10.5em;padding:3px 9px 3px 6px;
+  /* Full label needs room past "Original Post" — 10.5em clipped the trailing T */
+  max-width:calc(6px + 11px + 4px + 9.6em + 10px);padding:3px 10px 3px 6px;
 }
 .meta-block .row1:hover .role-badge.role-op .role-badge-short{
   opacity:0;transition-delay:0s; /* hide OP immediately on expand */
