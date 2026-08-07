@@ -610,12 +610,13 @@ html.dark .buy-cta-rim::before{
    Pinned (outside media): inverted Buy-CTA solid. Float/on-media: glass. Formal design TBD @orlando */
 .role-badge{
   position:relative;display:inline-flex;align-items:center;justify-content:center;gap:4px;
-  /* min-height + vertical pad — fixed 20px + overflow clipped bold caps */
-  flex-shrink:0;min-height:22px;padding:3px 7px 3px 6px;border-radius:6px;
+  /* min-height + vertical pad — avoid fixed height clipping bold caps */
+  flex-shrink:0;min-height:22px;padding:3px 8px 3px 6px;border-radius:6px;
   font-size:10px;font-weight:700;letter-spacing:.04em;line-height:12px;text-transform:uppercase;
   pointer-events:none;user-select:none;overflow:hidden;
-  /* Collapsed ≈ icon + gap + "OP" */
-  max-width:3.95em;white-space:nowrap;
+  /* Collapsed must fit icon + gap + "OP" + right pad (3.95em was clipping the P) */
+  max-width:calc(6px + 11px + 4px + 1.85em + 8px);
+  white-space:nowrap;
   /* Soft ease both ways — longer collapse so exit doesn’t snap */
   transition:
     max-width .52s cubic-bezier(.22,.82,.28,1),
@@ -669,7 +670,7 @@ html.dark .role-badge.role-op{
 }
 .meta-block .row1:hover .role-badge.role-op,
 .meta-block .row1:focus-within .role-badge.role-op{
-  max-width:10.5em;padding:3px 8px 3px 6px;
+  max-width:10.5em;padding:3px 9px 3px 6px;
 }
 .meta-block .row1:hover .role-badge.role-op .role-badge-short{
   opacity:0;transition-delay:0s; /* hide OP immediately on expand */
@@ -693,7 +694,7 @@ html.dark .feed-item.meta-float .role-badge.role-op{
 @media (hover:none){
   .meta-block .row1:hover .role-badge.role-op,
   .meta-block .row1:focus-within .role-badge.role-op{
-    max-width:3.95em;padding:3px 7px 3px 6px;
+    max-width:calc(6px + 11px + 4px + 1.85em + 8px);padding:3px 8px 3px 6px;
   }
   .meta-block .row1:hover .role-badge.role-op .role-badge-short,
   .meta-block .row1:focus-within .role-badge.role-op .role-badge-short{opacity:1;transition-delay:0s;}

@@ -1001,6 +1001,7 @@ Gate: `width > 860` and `(hover:hover) and (pointer:fine)` · mouse `pointerente
 **Shape / material**
 
 - Squarish: `border-radius: 6px` (not a round pill — distinct from category `.pill`); `min-height: 22px` + vertical pad so bold caps aren’t clipped by `overflow:hidden`
+- Collapsed `max-width` is a `calc(pad + icon + gap + 1.85em + pad)` so **OP** + right padding aren’t clipped (a tight em-only clamp was eating the **P**)
 - Icon: shared Launch SVG (`viewBox 0 0 16 16`, `svgIcon('launch')`) — also on `.btn-launch` / `.mnav-launch`
 - Specular sheen (`roleBadgeSheen`); `pointer-events: none`
 - **Pinned** (meta outside media): inverted Buy CTA — light → dark chip; dark → light chip
