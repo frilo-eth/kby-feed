@@ -32,7 +32,7 @@ Comments
 - View / hide — `View N replies` → reveal 5 (`REPLY_PAGE`); `View N more`; `Hide` collapses all indented replies
 - `>>id` quotes — Reply prefixes compose; send nests under quoted root; blue `.comment-quote` in list + compose mirror
 - Quote hover — desktop `#quoteHoverCard` on `>>id` (list + mirror); missing id shows “not found”
-- Ctx menu — … → not interested / copy / report
+- Ctx menu — … → Reply · Copy link · Share on X · Report · Hide user
 - Compose — identity chevron; anon pop+switch; pill input rest→focus→ready; send.show when ready; mirror paints `>>` tags
 - Attach — file pop-in; feed fly-in; drop stage hides list; ✕ dismiss; anon auto-exits for media
 - CFX (comment media focus) — tap comment thumb → gallery
