@@ -10,7 +10,7 @@ Navigation
 Feed
 - Media card — shimmer→ready|error; hover topctl; drag-to-comment ghost; aspect --ar
 - Glass mute/more — 46px; pathLength mute↔sound morph; unmute/mute haptics+sounds; session persist
-- Media `…` menu — Reply · Trade · **View yap** (token page) · Token address · Copy link · Share on X · Hide post · Report
+- Media `…` menu — Reply · Trade · **View thread** (token page) · Token address · Copy link · Share on X · Hide post · Report
 - React rail — tip (immutable +$5 float); like↔dislike exclusive; comment; share; pulse + haptics
 - Meta — pinned | float-on-media | overlay-mode (`layoutMeta`); pinned flush with media bottom; float inset by PAD (18px)
 - OP badge — temp `.role-badge` next to `@uname` when `role:"op"` (any cat); capped width + OP→Original Post marquee; Entry = no badge; pinned = inverted Buy CTA, on-media = glass; tap/click explain tip (mobile too); see README `#dare-role-badge`
