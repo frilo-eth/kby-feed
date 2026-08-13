@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Local preview server — serves . as static files and maps /feed → feed.html."""
+"""Local preview server — serves . as static files and maps /feed and /token."""
 from __future__ import annotations
 
 import argparse
@@ -20,6 +20,8 @@ class Handler(SimpleHTTPRequestHandler):
         clean = parsed.path.rstrip("/") or "/"
         if clean in ("/feed", "/feed.html"):
             return str(ROOT / "feed.html")
+        if clean in ("/token", "/token.html"):
+            return str(ROOT / "token.html")
         return super().translate_path(path)
 
     def copyfile(self, source, outputfile):
@@ -45,6 +47,7 @@ def main() -> None:
     server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
     print(f"Serving {ROOT}")
     print(f"  Feed:     http://127.0.0.1:{args.port}/feed")
+    print(f"  Token:    http://127.0.0.1:{args.port}/token")
     print(f"  Refresh:  http://127.0.0.1:{args.port}/feed?refresh")
     try:
         server.serve_forever()

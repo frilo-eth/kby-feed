@@ -4,6 +4,8 @@
   "framework": null,
   "outputDirectory": ".",
   "rewrites": [
-    { "source": "/", "destination": "/feed.html" }
+    { "source": "/", "destination": "/feed.html" },
+    { "source": "/feed", "destination": "/feed.html" },
+    { "source": "/token", "destination": "/token.html" }
   ]
 }

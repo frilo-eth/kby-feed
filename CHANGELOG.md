@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+### Auth, funds, trade
+- Option 4: social/email → embedded sponsored wallet; EOA wallet → signatures on gift/buy/sell. README [#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth)
+- One tray at a time; in-tray steps use `morphSheet` (~320ms Vaul). README [#sheet-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sheet-morph)
+- Deposit: **Deposit $25.00.** Crypto networks unfold Ethereum/Base/Solana without remounting QR. README [#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit)
+- Withdraw: amount → address → review. README [#withdraw](https://github.com/frilo-eth/kby-feed/blob/main/README.md#withdraw)
+- Trade: dollarized buy helpers; sell `%` of holdings; ⇅ USD↔token (`TOKEN_PER_USD`); Pay with chip (ETH/WETH/USDm). README [#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer) · [#pay-with](https://github.com/frilo-eth/kby-feed/blob/main/README.md#pay-with)
+
+### `$SAUCE` catalog
+- Default first card is the OP: `sauce.eth` / `public/SAUCE.webp`. `nath4an` / `tabasco4.jpeg` is the second card (Entry). README [#sauce-token](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sauce-token)
+- Real entries: `tabasco6.webp` (wrestling), `tabasco7.webp` (IQ curve), `tabasco8.webp` (Ed)
+
+### Morphing pill / token vs yap
+- Category `.pill` morphs in place (Dare/Meme → Original Post / Entry / Content). Username OP badge removed.
+- Motion: `--pill-morph` 0→1, `.28s` `--ease-out`; labels overlay; width interpolates measured rest→role (no dual `max-width` balloon). README [#dare-role-badge](https://github.com/frilo-eth/kby-feed/blob/main/README.md#dare-role-badge)
+- OP cannot be tipped; `…` is **View token** (route `/token`) vs **View in thread** (parent comments). README [#token-vs-yap](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-vs-yap)
+- Token mini / plus / drawer use `tokenArtOf()` (parent OP art), not the yap frame
+- Empty token page: `token.html` · `/token?t=SAUCE`. README [#token-page](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-page)
+- `$SAUCE` is a Dare (drink the Tabasco); OP `sauce.eth`. README [#sauce-token](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sauce-token)
+
 ### Feed — swipe-silk
 - Wall-clock spring `dt` (same feel on 60/120Hz); critically damped ~0.5s settle; hard flicks ζ≈0.90
 - ~90ms release-velocity sample window; momentum projection snap (`silkSnapTarget`)

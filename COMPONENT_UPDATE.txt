@@ -10,13 +10,15 @@ Navigation
 Feed
 - Media card — shimmer→ready|error; hover topctl; drag-to-comment ghost; aspect --ar
 - Glass mute/more — 46px; pathLength mute↔sound morph; unmute/mute haptics+sounds; session persist
-- Media `…` menu — Reply · Trade · **View thread** (token page) · Token address · Copy link · Share on X · Hide post · Report
-- React rail — tip (immutable +$5 float); like↔dislike exclusive; comment; share; pulse + haptics
+- Media `…` menu — Reply · Trade · **View token** (OP → `/token` page, not the drawer) / **View in thread** (entry/content) · Token address · Copy link · Share on X · Hide post · Report
+- React rail — tip on yaps only (immutable +$5 float); **no tip on original posts**; like↔dislike exclusive; comment; share; pulse + haptics
 - Meta — pinned | float-on-media | overlay-mode (`layoutMeta`); pinned flush with media bottom; float inset by PAD (18px)
-- OP badge — temp `.role-badge` next to `@uname` when `role:"op"` (any cat); capped width + OP→Original Post marquee; Entry = no badge; pinned = inverted Buy CTA, on-media = glass; tap/click explain tip (mobile too); see README `#dare-role-badge`
-- Buy CTA — desktop only; crystal glass `Buy $ticker` on `.token-anchor`; show ~4.2s → tuck (enter reverse ~0.55×) → reappear after ~6.5s engage (max 3 / post); hidden ≤860
-- Trade entry — avatar+ / buy CTA / ticker / mini / pill → trade drawer (not hover card)
-- Hover cards (desktop) — user on uname/avatar; token chart on plus/buy/ticker/mini/pill; `>>id` quote card on comment quotes (no CTA)
+- Morphing pill — category `.pill` rest = Dare/Meme; hover/cycle/tap morphs to Original Post (OP) · Entry (Dare) · Content (Meme); `--pill-morph` `.28s` `--ease-out`; overlay labels + measured width (no balloon); `#infoHoverTip`; README `#dare-role-badge`
+- Token vs yap — OP is the token (mini = media, no tip, View token → `/token`). Entry/Content are yaps: mini/plus/drawer use parent token art (`tokenArtOf`); media is the yap; tip + View in thread. README `#token-vs-yap`
+- `$SAUCE` — Dare token (drink the Tabasco). First card = OP `sauce.eth` / `SAUCE.webp`; second = nath4an Entry / `tabasco4.jpeg`; also `tabasco6–8.webp`. Token art = OP. README `#sauce-token`
+- Buy CTA — crystal glass `Buy $ticker` on `.token-anchor` (desktop + mobile). Mobile stagger: `+` marquees 2× first, then pill. Desktop: pill cadence + hover Buy bar. Wipe `clip-path: inset(… round 999px)`
+- Trade entry — avatar+ / buy CTA / ticker / mini → trade drawer (not hover card). Desktop pill click still trades; mobile pill tap explains role
+- Hover cards (desktop) — user on uname/avatar; token chart on plus/buy/ticker/mini; pill → info tip (not token card); `>>id` quote card on comment quotes (no CTA)
 - Motion — spring doomscroll; infinite wrap; mid-swipe hides chrome; no mid-swipe/mobile scale; pull-refresh vs wrap
 - 2× hold → lock — hold video ≥240ms → glass `2x` + charge ring + annotation “Hold 3s to lock” (13px/700, 14px under pill); no chevron pulse (`.show.is-charging` in one step); lock survives release; tap badge unlocks (padlock morph + `lock`/`unlock` haptics)
 - Activity bubbles — progressive disclosure; tip `tipped $N` / like `liked it` / dislike `disliked it` / comment short text; marquee only for long comments (never tip/like/dislike)
@@ -41,7 +43,9 @@ Comments
   · caption tip/like/dislike stay synced with the comment row
 
 Overlays
-- Trade drawer — buy/sell token sheet (same chrome as comments)
+- Trade drawer — buy/sell; dollarized amount; `$25/$100/$500` buy helpers; sell `25%/50%/All`; ⇅ USD↔token; Pay with ETH/WETH/USDm chip (not a modal). README `#trade-drawer` `#pay-with`
+- Auth (Option 4) — social → embedded sponsored; EOA → signatures. One tray at a time. README `#auth`
+- Deposit / Withdraw — `morphSheet` ~320ms Vaul; crypto nets unfold without remounting QR. Copy: Deposit / Withdraw. README `#deposit` `#withdraw` `#sheet-morph`
 - Share — desktop modal; mobile sheet; X intent + copy url
   · minicard tint by cat: Dare = blue, Meme = orange; holo foil (idle + pointer)
   · auto-dismiss after Share on X or Copy url (copy flashes “Copied!” then closes)

@@ -6,13 +6,33 @@
 **Repo:** [frilo-eth/kby-feed](https://github.com/frilo-eth/kby-feed)  
 **Tag:** [`v0.1.0`](https://github.com/frilo-eth/kby-feed/releases/tag/v0.1.0)
 
+### This drop — jump links (GitHub `#`)
+
+Porting / review: open the heading, not the whole README. Production: [https://kby-feed.vercel.app](https://kby-feed.vercel.app) · first card is the `$SAUCE` original post.
+
+| Topic | GitHub |
+|-------|--------|
+| [`$SAUCE` Dare](#sauce-token) — OP first, then entries | [README.md#sauce-token](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sauce-token) |
+| [Token vs yap](#token-vs-yap) (tip, menu, token art) | [README.md#token-vs-yap](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-vs-yap) |
+| [Morphing pill](#dare-role-badge) (Dare/Meme → OP / Entry / Content) | [README.md#dare-role-badge](https://github.com/frilo-eth/kby-feed/blob/main/README.md#dare-role-badge) · [#morphing-pill](https://github.com/frilo-eth/kby-feed/blob/main/README.md#morphing-pill) |
+| [Info tip](#info-hover-tip) (Image vs Video copy) | [README.md#info-hover-tip](https://github.com/frilo-eth/kby-feed/blob/main/README.md#info-hover-tip) |
+| [Token page](#token-page) (`/token`, empty stub) | [README.md#token-page](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-page) |
+| [Auth (Option 4)](#auth) — social vs EOA | [README.md#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth) |
+| [Sheet morph](#sheet-morph) (`morphSheet` ~320ms) | [README.md#sheet-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sheet-morph) |
+| [Deposit](#deposit) | [README.md#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit) |
+| [Withdraw](#withdraw) | [README.md#withdraw](https://github.com/frilo-eth/kby-feed/blob/main/README.md#withdraw) |
+| [Trade drawer](#trade-drawer) (dollarized buy) | [README.md#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer) |
+| [Pay with](#pay-with) (ETH / WETH / USDm chip) | [README.md#pay-with](https://github.com/frilo-eth/kby-feed/blob/main/README.md#pay-with) |
+| [Meta affordances](#meta-affordances) | [README.md#meta-affordances](https://github.com/frilo-eth/kby-feed/blob/main/README.md#meta-affordances) |
+| [Animation system](#animation-system) | [README.md#animation-system](https://github.com/frilo-eth/kby-feed/blob/main/README.md#animation-system) |
+
 ## Run locally
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) (`/` → feed).
+Open [http://localhost:3000/feed](http://localhost:3000/feed). Token stub: [http://localhost:3000/token?t=SAUCE](http://localhost:3000/token?t=SAUCE). `/` also serves the feed.
 
 ## Controls
 
@@ -22,7 +42,7 @@ Open [http://localhost:3000](http://localhost:3000) (`/` → feed).
 | `K` / `↑` | Previous post |
 | `L` | Like |
 | `D` | Dislike |
-| `T` | Tip |
+| `T` | Tip (no-ops on original posts) |
 | `C` | Comment |
 | `S` | Share |
 
@@ -44,9 +64,10 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | [Video progress bar](#video-progress) | Bottom 3px track on `type=video` only (not gif-loops); `--orange` fill from `timeupdate`; non-interactive; loops with the clip |
 | Buy `$ticker` | Floating crystal pill on `.token-anchor` (desktop + mobile). **Mobile stagger:** `+` Buy bar marquees 2× first, then pill (no overlap). Hotzone/tab = pill only. Desktop: pill cadence + hover Buy bar. Wipe: `clip-path: inset(… round 999px)` |
 | Media frame | **Desktop always matches source aspect ratio** (`fitMediaBox` + `--ar`); one binding axis, the other `auto`. Mobile ≤860 stays full-bleed `object-fit:cover` |
-| Trade entry points | Avatar+, Buy CTA, ticker, token mini, category pill → trade drawer |
+| Trade entry points | Avatar+, Buy CTA, ticker, token mini → trade drawer. Morphing [category pill](#dare-role-badge): hover/cycle explains OP vs Entry/Content; desktop click still trades |
+| [Token vs yap](#token-vs-yap) | OP = the token (no tip, View token → [`/token`](#token-page)). Entry/Content = yaps (tip + View in thread). Mini/plus/drawer = `tokenArtOf()`, never the yap frame |
 | Hover cards | Desktop only — user / token / **`>>` quote** preview portals (no Buy on the card) — meta triggers in [Meta affordances](#meta-affordances) |
-| [Meta affordances](#meta-affordances) | `@uname` opacity hover · **`.blockie`** lighten · **OP** [role badge](#dare-role-badge) (squarish; any cat; Entry = no badge) · token mini · ticker · pill · [Q&A](#meta-affordances) |
+| [Meta affordances](#meta-affordances) | `@uname` opacity hover · **`.blockie`** lighten · morphing [category pill](#dare-role-badge) (Dare/Meme → Original Post / Entry / Content) · token mini · ticker · [Q&A](#meta-affordances) |
 | [2× hold → lock](#hold-lock-2x) | ≥240ms → glass `2x` badge with **charge ring** + **“Hold 3s to lock”** (`SPEED_LOCK_MS=3000`); no chevron pulse on this path; release early = back to 1×; lock survives finger-up; tap badge to unlock — [full technical overview](#hold-lock-2x) |
 | Activity bubbles | Desktop ambient reactions; progressive disclosure on the reaction chip; discs clamped to a band above the post avatar (never climb the feed); avatar seeded from display name (matches hover card); hairline ring only (no colored/brown halo) |
 | New posts / pull pill | Themed `--card` / `--ink` / `--line`; 20px clearance under topbar; soft-dismiss after **2** settled swipes (`NEW_PILL_SWIPES`), then re-arm ~3 min |
@@ -54,6 +75,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Tablet chrome | Keep chevron gutter (`--feed-chevron-gutter: 88px`); glass rail only when overlaid on media |
 | First-visit hint | Hand Lottie; `kb_feed_hint_v9`; idle = `display:none` (no backdrop veil) |
 | Topbar auto-hide | Mobile; overlays feed (no layout resize); after settle on next; page-step locked mid-swipe |
+| [Token page](#token-page) | OP `…` → **View token** navigates to `/token?t=TICKER` (empty stub). Not the trade drawer. |
 
 ### Comments
 
@@ -81,10 +103,32 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | **Share** | Desktop modal / mobile sheet. **Share on X** and **Copy url** auto-close after success (copy shows “Copied!” ~800ms then closes). Scrim / ✕ / drag-dismiss also close. |
 | Trade / comments | Scrim tap, ✕, **Escape**, drag handle (mobile). Esc peels topmost layer first (CFX → hover card → kbd → more → share → drawer) |
 | Sheet close buttons | Sheet-colored bg (`var(--card)`), 40px desktop / 44px mobile thumb target |
+| Auth / wallet / funds | **One tray at a time** (`overlayOpen` closes the other three). In-tray steps use [`morphSheet`](#sheet-morph) — do not remount a new overlay per step |
+
+### Auth, wallet, funds
+
+| Feature | Behavior |
+|---------|----------|
+| [Option 4](#auth) | Social / email → embedded Kumbaya wallet, **sponsored** (no signature on gift/buy/sell). Crypto wallet (EOA) → that address is the account; gift/buy/sell/launch **sign** (`needsSig()`). No gates. Copy is **Deposit** / **Withdraw** |
+| Sign-in sheet | Google + Apple/X/Farcaster/email + detected wallet row. Same `.modal` chrome as share (`--card`, Inter, `--bg` `#F2EEEA`) |
+| [Deposit](#deposit) | Card or crypto. Crypto: collapsed **Ethereum ▾** unfolds Ethereum / Base / Solana with tray morph; **QR + address do not remount** on net toggle. Copy: **Deposit $25.00.** |
+| [Withdraw](#withdraw) | Amount → address → review. Empty balance routes to deposit first |
+
+### Trade drawer
+
+| Feature | Behavior |
+|---------|----------|
+| [Buy field](#trade-drawer) | **Buy $TICKER** + pill helpers `$25 / $100 / $500`. Amount row: `$` + input + token chip (chip aligns with the dollar, not the label). Spend always uses `tradeUsdAmt()` |
+| Sell helpers | `25% / 50% / All` of holdings (dollarized spend) |
+| Unit swap | `#tradeOut` **⇅** toggles `session.tradeUnit` `'usd'` \| `'token'`. Rate `TOKEN_PER_USD = 26120`. Token mode hides `$` via `#tradeBuyField.is-token` |
+| [Pay with](#pay-with) | Compact dropdown on the chip (ETH / WETH / USDm) — not a modal, not an in-drawer swap. Chip fill is `--bg`. Menu `position:fixed` under the chip |
+| CTA | Signed-out: **Sign in to buy/sell**. Short: **Deposit to buy**. EOA: note **Confirm in {wallet}**. Embedded: fires without a signature sheet |
+| Elevation | Sheet / drawer = `--card`. Controls at rest = `--card` + hairline. Hover = `color-mix` with white — never cream `--bg` wells (Pay-with chip is the exception; it matches the screenshot `--bg` fill) |
 
 ---
 
 ## Animation system
+<a id="animation-system"></a>
 
 Most motion reuses a small set of curves. Durations are wall-clock; doomscroll springs use **real frame dt** (see `swipe-silk` below).
 
@@ -92,11 +136,13 @@ Most motion reuses a small set of curves. Durations are wall-clock; doomscroll s
 
 | Token | Curve | Feel |
 |-------|-------|------|
+| **`--ease-out`** | `cubic-bezier(.23, 1, .32, 1)` | Morphing pill width + wash; UI that should start moving immediately |
+| **`--ease-in-out`** | `cubic-bezier(.77, 0, .175, 1)` | On-screen travel (not the pill — dual `max-width` + this curve ballooned) |
 | **Snap** | `cubic-bezier(.65, 0, .35, 1)` | Sidebar collapse, hint thumb travel |
 | **Standard out** | `cubic-bezier(.22, 1, .36, 1)` | Drawers, panels, list settle |
 | **Soft overshoot** | `cubic-bezier(.22, 1.2–1.4, .36, 1)` | Comment enter, drop stage, attach |
 | **Pop** | `cubic-bezier(.22, 1.45–1.5, .36, 1)` | Reaction pulse, new-pill, attach thumb |
-| **Vaul sheet** | `cubic-bezier(.32, .72, 0, 1)` | Mobile bottom sheets / topbar hide |
+| **Vaul sheet** | `cubic-bezier(.32, .72, 0, 1)` | Mobile bottom sheets / topbar hide / [`morphSheet`](#sheet-morph) height (~320ms) |
 | **Linear / ease** | `linear`, `ease`, `ease-out`, `ease-in-out` | Spinners, fades, marquee |
 
 ---
@@ -117,7 +163,7 @@ Most motion reuses a small set of curves. Durations are wall-clock; doomscroll s
 | **Hover cards** | user + token + **`>>` quote** portals (no Buy CTA); desktop `pointer:fine` only | — | show `.18s`, delay 180–280ms |
 | New posts pill | brightness `.98`; soft-dismiss after 2 settled swipes | `scale(.95)` | opacity `.28s`, transform `.34s` pop |
 | Tag / uname | [Meta affordances](#meta-affordances) — opacity `.8` (no underline) | — | `.15s` |
-| **OP badge** | [OP badge](#dare-role-badge) — Launch icon + `OP` → `Original Post` (width + opacity crossfade) | — | max-width `.52s` `(.22,.82,.28,1)` · label `.28s` (exit delayed) |
+| **Morphing pill** | [Morphing pill](#dare-role-badge) — Dare/Meme → Original Post / Entry / Content (`--pill-morph` 0→1) | `scale(.97)` | `.28s` `var(--ease-out)` · overlay labels · measured width · hover + active-item cycle |
 | **Token mini** *(size allowed)* | [Meta affordances](#meta-affordances) — `scale(1.14)` + orange ring | `scale(.96)` | `.28s` `(.22,1.4,.36,1)` |
 | **Trade plus → Buy bar** *(key)* | desktop hover / mobile auto (2 cycles → `+`) — see below | `scale(.97)` press | width + marquee |
 
@@ -851,12 +897,11 @@ Bottom-left post chrome (`.col-info` → `.meta-block`). **Rule:** hover is most
 |--------|------------------|-------|-------|--------------------|--------|
 | `.avatar-sm.blockie` | opacity `.88` + brightness `1.06` · `.15s` | — | — | **user** · 280ms | — |
 | `.uname` (`@user`) | `opacity:.8` · `.15s` (no underline) | — | — *(no profile route yet)* | **user** · 280ms | — |
-| `.role-badge.role-op` | Launch icon + sheen; expands to “Original Post” (smooth width + crossfade). Entry: **no badge** | — | — | — | — |
+| `.pill` (Dare / Meme) | Rest = category. Hover / cycle / tap morphs to **Original Post** (OP) · **Entry** (Dare) · **Content** (Meme) | `scale(.97)` | desktop click → **trade drawer**; mobile tap → explain tip | **info** · 180ms | `open` (desktop click) |
 | **`img.blockie`** (all instances) | same lighten — meta, comments, CFX, act-bubbles, hover cards, buyers, wallet | — | — | user card where bound | — |
 | `.token-tag` (wraps mini + ticker) | mini scale + ring; ticker color | mini `scale(.96)` | **trade drawer** | **token** · 280ms | `open` |
 | `.token-mini` | `scale(1.14)` + orange ring `0 0 0 2px rgba(255,102,34,.35)` + brightness | `scale(.96)` · `.1s` | *(via `.token-tag`)* | *(via `.token-tag`)* | — |
 | `.tag-ticker` | `color: var(--coffee) → var(--coffee-hover)` · `.15s` | — | *(via `.token-tag`)* | *(via `.token-tag`)* | — |
-| `.pill` (Dare / Meme) | — (category chip) | — | **trade drawer** | **token** · 280ms | `open` |
 
 **Not on the card:** Buy CTA — hover cards are preview-only; the underlying click still opens the drawer.
 
@@ -868,8 +913,6 @@ Bottom-left post chrome (`.col-info` → `.meta-block`). **Rule:** hover is most
     <div class="row1">
       <img class="avatar-sm circle blockie" src="…">
       <div class="uname">@${user}</div>
-      <!-- role==="op" only — see #dare-role-badge -->
-      <span class="role-badge role-op">…</span>
     </div>
     <div class="desc">…</div>
     <div class="meta-tags">
@@ -877,7 +920,8 @@ Bottom-left post chrome (`.col-info` → `.meta-block`). **Rule:** hover is most
         <img class="token-mini squircle" src="…" alt="">
         <span class="tag-ticker">${ticker}</span>  <!-- already includes $ -->
       </span>
-      <div class="pill ${cat.toLowerCase()}">${cat}</div>
+      <!-- morphing category pill — see #dare-role-badge -->
+      <div class="pill dare">…</div>
     </div>
   </div>
 </div>
@@ -936,34 +980,27 @@ img.blockie{
 .token-tag:hover .tag-ticker{ color: var(--coffee-hover); } /* #8A7452 */
 
 .pill{
-  font-size:11px; font-weight:700; text-transform:uppercase;
-  letter-spacing:.04em; padding:4px 10px; border-radius:20px;
-  border:none; cursor:pointer;
+  --pill-morph: 0;                 /* 0 rest · 1 Original Post / Entry / Content */
+  height: 22px; padding: 4px 10px; border-radius: 100px;
+  font-size: 11px; font-weight: 700;
 }
-.pill.dare{ color:var(--dare-fg); background:var(--dare-bg); }
-.pill.meme{ color:var(--meme-fg); background:var(--meme-bg); }
+.pill.dare{ color: var(--dare-fg); background: var(--dare-bg); }
+.pill.meme{ color: var(--meme-fg); background: var(--meme-bg); }
 ```
 
 ##### JS binding
 
 ```js
-// Click → trade drawer (token surfaces only)
 item.querySelector('.token-tag')?.addEventListener('click', (e) => {
   e.stopPropagation();
   openDrawer(posts[item.dataset.index]);
   haptic('open');
 });
-item.querySelector('.pill')?.addEventListener('click', (e) => {
-  e.stopPropagation();
-  openDrawer(posts[item.dataset.index]);
-  haptic('open');
-});
 
-// Desktop hover cards — bind the whole .token-tag (not mini/ticker alone)
 bindHoverCard(item.querySelector('.uname'), 'user', postRef, 280);
 bindHoverCard(item.querySelector('.avatar-sm'), 'user', postRef, 280);
 bindHoverCard(item.querySelector('.token-tag'), 'token', postRef, 280);
-bindHoverCard(item.querySelector('.pill'), 'token', postRef, 280);
+bindMorphPill(item.querySelector('.pill'), postRef);
 ```
 
 Gate: `width > 860` and `(hover:hover) and (pointer:fine)` · mouse `pointerenter` only · see [Hover info cards](#10-hover-info-cards-desktop).
@@ -984,59 +1021,97 @@ Gate: `width > 860` and `(hover:hover) and (pointer:fine)` · mouse `pointerente
 ```
 
 <a id="dare-role-badge"></a>
+<a id="morphing-pill"></a>
 
-##### OP badge (temporary)
+##### Morphing pill (OP / Entry / Content)
 
 **Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#dare-role-badge](https://github.com/frilo-eth/kby-feed/blob/main/README.md#dare-role-badge)
 
-**Problem:** Viewers can’t tell an **original post (OP)** from a response **entry**. Entries stay unlabeled (a second badge was confusing).
+**Problem:** Viewers can’t tell an **original post (OP)** from a Dare **entry** or Meme **content**.
 
-**Temp solution (feed meta only):** squarish chip next to `@uname` when `role === "op"`. **Category-agnostic** — Meme or Dare. **Entry / missing role → no badge.**
+**Solution:** don’t add a second chip. The existing category `.pill` **morphs** — rest stays Dare / Meme; hover, focus, tap, or the active-item cycle reveals the role. Figma: [dare](https://www.figma.com/design/DYukWIAVscGqu85nfGUhT5/Launchpad---Root?node-id=17247-443202) · [meme](https://www.figma.com/design/DYukWIAVscGqu85nfGUhT5/Launchpad---Root?node-id=17270-443404). Linear: [KUM-592](https://linear.app/kumbaya/issue/KUM-592/there-is-nothing-to-differentiate-between-an-entry-and-a-dare).
 
-| Field | Values | UI |
-|-------|--------|-----|
-| `post.role` | `"op"` | `.role-badge.role-op` — Launch icon + `OP` → **Original Post** on desktop row hover |
-| `post.role` | `"entry"` or omitted | no badge |
+| `post.role` | `post.cat` | Rest | Morph label | Icon | Tooltip |
+|-------------|------------|------|-------------|------|---------|
+| `"op"` | Dare or Meme | Dare / Meme | **Original Post** | diamond origin (`pillOp`, rotated 45°) | `{Image\|Video} posted by the token creator at launch.` |
+| `"entry"` or omitted | Dare | Dare | **Entry** | paper plane (`pillEntry`) | `{Image\|Video} participating on a Dare.` |
+| `"entry"` or omitted | Meme | Meme | **Content** | frame + plus (`pillContent`) | `{Image\|Video} posted on a Meme thread.` |
 
-**Shape / material**
+**Paint**
 
-- Squarish: `border-radius: 6px` (not a round pill — distinct from category `.pill`); `min-height: 22px` + vertical pad so bold caps aren’t clipped by `overflow:hidden`
-- Collapsed `max-width` is a `calc(pad + icon + gap + 1.85em + pad)` so **OP** + right padding aren’t clipped (a tight em-only clamp was eating the **P**)
-- Icon: shared Launch SVG (`viewBox 0 0 16 16`, `svgIcon('launch')`) — also on `.btn-launch` / `.mnav-launch`
-- Specular sheen (`roleBadgeSheen`); `pointer-events: auto` (info tip)
-- **Desktop tooltip** (POX-style, no CTA): hover badge → `#infoHoverTip` — title **Original Post** · body “Media posted by the token creator at launch.”
-- **Pinned** (meta outside media): inverted Buy CTA — light → dark chip; dark → light chip
-- **On-media** (`.meta-float` + mobile ≤860): glass (`--glass-dark`)
+- Rest: existing `--dare-bg/#fg` · `--meme-bg/#fg`
+- Morph Dare: gradient `#0067C9 → #0089E2`, fg `#CCECFF`
+- Morph Meme: gradient `#FF6622 → #FF7A3F`, fg `#FFE5DD`
+- Overlay `::before` opacity follows `--pill-morph` so the wash is interruptible
 
-**Motion (hover expand / collapse)**
+**Motion** (`--pill-morph` 0→1 via `@property`, `.28s` `--ease-out` `cubic-bezier(.23, 1, .32, 1)`)
 
 | Piece | Detail |
 |-------|--------|
-| Width | collapsed `calc(pads+icon+1.85em)` → open `calc(…+9.6em+10px)`; open pad-right `10px` |
-| Curve | `.52s` `cubic-bezier(.22,.82,.28,1)` — soft both ways (collapse must not snap) |
-| Labels | Stacked in `.role-badge-text` (`display:inline-grid`); **opacity crossfade** — never `display:none` |
-| Expand | short → 0 immediately; full → 1 after `.06s` |
-| Collapse (exit) | full → 0 first; short → 1 after `.14s` (waits for width) |
-| Touch | no expand (`hover:none`) |
-| Reduced motion | kill sheen + width/label transitions |
+| Driver | `--pill-morph` on `.pill`; hover / `:focus-visible` / `.is-morph` / `.is-cycled` → `1` |
+| Width | labels **overlay** in one grid cell; chip `width` interpolates measured `--pill-w-rest` → `--pill-w-role` (no dual `max-width` — that ballooned mid-morph) |
+| Crossfade | opacity only (same slot — no blur) |
+| Press | `scale(.97)` · `160ms` `--ease-out` |
+| Cycle | active item only: rest 3.8s ↔ morph 2.4s after a 1.4s settle; pauses on hover/tap and while dragging |
+| Touch | tap toggles morph + `#infoHoverTip` (token-tag still opens trade) |
+| Desktop click | still opens the trade drawer |
+| Reduced motion | no cycle; snap width; keep color/opacity |
 
 ```html
-<span class="role-badge role-op" title="Original Post" aria-label="Original Post">
-  <!-- svgIcon('launch') -->
-  <span class="role-badge-text">
-    <span class="role-badge-short">OP</span>
-    <span class="role-badge-full">Original Post</span>
+<div class="pill dare" role="button" tabindex="0" aria-label="Dare, Original Post"
+     data-role="op" data-tip-title="Original Post"
+     data-tip-body="Media posted by the token creator at launch.">
+  <span class="pill-rest">Dare</span>
+  <span class="pill-role" aria-hidden="true">
+    <!-- svgIcon('pillOp') -->
+    <span class="pill-role-label">Original Post</span>
   </span>
-</span>
+</div>
 ```
 
-**Design handoff (@orlando) — formal treatment still needed:**
+<a id="token-vs-yap"></a>
 
-1. Final OP labels / hover expand; confirm Entry stays badge-less  
-2. Pinned inverted-CTA vs on-media glass as the lasting system  
-3. Relationship to category `.pill` (Dare / Meme)  
-4. Should Entry eventually link/preview the parent OP without a permanent chip?  
-5. Propagate later to Dares / Tokens / Hall surfaces outside this prototype  
+##### Token vs yap
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-vs-yap](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-vs-yap)
+
+**OP is the token. Entries / Content are yaps (comments) on that token.** Chrome follows that split:
+
+| Surface | Original Post | Entry / Content |
+|---------|---------------|-----------------|
+| Rail tip | **hidden** — you cannot tip an OP | `$` tip + count (immutable +$5) |
+| `…` menu | **View token** (origin icon) → [token page](#token-page) | **View in thread** (list icon) → parent token comments |
+| Token mini + plus rail + drawer av | Token art = this media | Token art from the parent OP (`tokenArtOf`) — **not** the yap frame |
+| Media container | Token launch media | Yap media (can differ from the mini) |
+
+`tokenArtOf(post)` resolves `parentTokenPost` (same `ticker` + `role:"op"`), then `avatar` / `poster` / `src`. A token is **Dare or Meme, never both**.
+
+<a id="sauce-token"></a>
+
+##### `$SAUCE` (Dare)
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#sauce-token](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sauce-token)
+
+All Tabasco media belongs to **`$SAUCE`**, a Dare: drink the Tabasco.
+
+**Default feed order** (first card on load — `posts[0]`, `lastActiveIdx = 0`):
+
+| # | User | Role | Media | Notes |
+|---|------|------|-------|-------|
+| 1 | `sauce.eth` | **OP** | `/public/SAUCE.webp` (1080×1080) | Balcony gallon. Token art for the whole cluster |
+| 2 | `nath4an` | Entry | `/public/tabasco4.jpeg` (9:16) | Kitchen gallon — kept as an entry, not removed |
+| 3–7 | asuncion.eth → frilostudio | Entry | existing clips / stills | Prototype ratio pack |
+| 8–10 | ringside / bellcurve / edsnaps | Entry | `tabasco6.webp` · `tabasco7.webp` · `tabasco8.webp` | Live-product memes (wrestling / IQ curve / Ed) |
+
+Caption on the OP: *“the dare: drink the tabasco. one gallon, fridge-cold, no chaser.”* Token mini / plus / drawer on every `$SAUCE` yap resolve to `SAUCE.webp` via `tokenArtOf()`. Extra-media posts keep their own tickers. Pull-to-refresh may shuffle `posts[0]` — OP identity is `role:"op"` + ticker, not array index.
+
+<a id="token-page"></a>
+
+##### Token page
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-page](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-page)
+
+OP `…` → **View token** is a **route**, not the trade drawer: `token.html` at `/token?t=SAUCE` (empty stub + ticker + back to feed). `openTokenPage()` / `tokenPageUrl()`. Trade / Buy still open the drawer. Local: `http://localhost:3000/token?t=SAUCE`. Vercel rewrite: `/token` → `token.html`.
 
 ##### Port checklist
 
@@ -1044,11 +1119,12 @@ Gate: `width > 860` and `(hover:hover) and (pointer:fine)` · mouse `pointerente
 2. Hit target for ticker+mini is the **`.token-tag` wrapper** (negative margin padding), not two separate buttons.
 3. Only the mini may scale on hover — ticker stays type-only (color). Do not scale the whole chip.
 4. Tag every `userAvatar()` `<img>` with **`.blockie`** so hover lighten is shared (meta, comments, CFX, bubbles, cards, wallet). Skip anon PNG / token photos.
-5. OP posts set `role: "op"` (any `cat`); Entry posts omit the badge (no `role` or ignore `"entry"`).
-6. Hover card delay **280ms**; leave trigger has a short bridge onto the card (don’t kill preview on the 1px gap).
-7. `stopPropagation` on clicks so the scroller doesn’t treat them as feed gestures.
-8. On float/mobile, switch to light-on-scrim tokens — coffee brown disappears on dark frames.
-9. Category `.pill` is also a trade entry (same drawer + token hover card).
+5. OP posts set `role: "op"` (any `cat`); Dare entries `role: "entry"` (or omit); Meme non-OP morphs to **Content**.
+6. Do not render the rail tip on OP. Menu item is **View token** (OP) vs **View in thread** (yap). Token mini / plus / drawer use `tokenArtOf()`, never the yap `src` on entries.
+7. Hover card delay **280ms** on token/user; pill info tip **180ms**. Leave trigger has a short bridge onto the card.
+8. `stopPropagation` on clicks so the scroller doesn’t treat them as feed gestures.
+9. On float/mobile, switch to light-on-scrim tokens — coffee brown disappears on dark frames.
+10. Category `.pill` morphs in place — do not add a second username badge.
 
 ##### Q&A
 
@@ -1059,13 +1135,19 @@ A: Underline competed with ticker/link cues. Hover is opacity-only (`.8`) — li
 A: Mini is a trade affordance (exception to the “no scale on hover” rule). User blockies use a shared **lighten** (opacity + brightness) so they don’t fight layout in dense lists.
 
 **Q: What’s a “blockie” vs the token image?**  
-A: Blockies = deterministic `userAvatar(seed)` identicons for **people**. Token art = `post.avatar` / `.token-mini` / rail `.avatar-plus` — those keep orange-ring / Buy behaviors, not `.blockie`.
+A: Blockies = deterministic `userAvatar(seed)` identicons for **people**. Token art = `tokenArtOf(post)` on `.token-mini` / rail `.avatar-plus` / drawer — the **token**, not the yap frame. On an OP those match the media; on Entry/Content the mini stays the parent token while `.media-inner` shows the yap.
+
+**Q: Why no tip on original posts?**  
+A: The OP **is** the token. Tips go to yaps (Entry/Content). The `$` rail control is omitted on `role:"op"` (keyboard `T` no-ops).
+
+**Q: View token vs View in thread?**  
+A: OP → **token page** (`/token?t=SAUCE`, empty stub — not the trade drawer). Entry/Content → parent token’s comment thread (`openComments(parentTokenPost)`). Rail comment still opens **this** post’s comments. Trade still opens the drawer.
 
 **Q: Where does `.blockie` hover apply?**  
 A: Every tagged instance: meta `.avatar-sm`, comment avatars, CFX caption av, act-bubble discs (data-URL only), user/quote hover cards, chart buyer stack + markers, wallet chip. Compose input drops `.blockie` while anon.
 
 **Q: Click username/avatar — where do I go?**  
-A: Prototype has **no profile route**. Desktop opens the user hover card; mobile has no hover card. Token tag + category pill open the **trade drawer** (`haptic('open')`).
+A: Prototype has **no profile route**. Desktop opens the user hover card; mobile has no hover card. Token tag opens the **trade drawer** (`haptic('open')`). Desktop pill click also trades; mobile pill tap explains the role.
 
 **Q: Why bind hover cards on `.token-tag` instead of mini and ticker separately?**  
 A: One hit target, one delay timer, no flicker when the pointer crosses from mini → `$TICKER`.
@@ -1073,10 +1155,10 @@ A: One hit target, one delay timer, no flicker when the pointer crosses from min
 **Q: Pinned vs float — do affordances change?**  
 A: Motion/CSS hooks stay the same; **paint** swaps to light-on-scrim when `.meta-float` or mobile so coffee/ink don’t vanish on dark frames.
 
-**Q: What’s the difference between the category pill and the OP badge?**  
-A: Bottom `.pill` = category (Dare / Meme). Username `.role-badge` = **OP only** (original post), on any category. Entries have no badge. Temporary — see [#dare-role-badge](#dare-role-badge).
+**Q: Where did the username OP badge go?**  
+A: Replaced by the morphing category pill — same distinction, no extra chrome. See [#dare-role-badge](#dare-role-badge).
 
-Source: CSS `.role-badge` ~609–710 · markup `render()` row1 · Launch SVG in `svgIcon('launch')` + `.btn-launch` · `layoutMeta` · blockie / token-tag nearby.
+Source: CSS `.pill` morph · `morphPillHtml()` / `bindMorphPill()` / `armPillCycle()` · `#infoHoverTip` · `layoutMeta` · blockie / token-tag nearby.
 
 ---
 
@@ -1086,13 +1168,190 @@ Preview-only popovers. **No CTA on the card** — click the underlying zone stil
 
 | | User (`#userHoverCard`) | Token (`#tokenHoverCard`) | Quote (`#quoteHoverCard`) |
 |--|--|--|--|
-| **Triggers** | `.uname`, `.avatar-sm`, comment avatar/name | `.avatar-plus`, `.buy-cta`, **`.token-tag`** (mini+ticker), `.pill` (280ms) — [meta affordances](#meta-affordances) | `.comment-quote[data-qid]` in list + compose mirror (180ms) |
+| **Triggers** | `.uname`, `.avatar-sm`, comment avatar/name | `.avatar-plus`, `.buy-cta`, **`.token-tag`** (mini+ticker) (280ms) — [meta affordances](#meta-affordances) | `.comment-quote[data-qid]` in list + compose mirror (180ms) |
 | **Content** | blockie, name, Mirror+X, Launches, Global PnL | avatar, ticker+cat, MCAP, seeded chart, buyers / comments / tips / heat | avatar, `>>id`, time, 3-line text clamp, optional thumb |
 | **Gate** | `width > 860` and `(hover:hover) and (pointer:fine)` | same | same |
 | **API** | `bindHoverCard` · `hideHoverCards` · `mockUserStats` / `mockTokenStats` / `buildTokenChartSvg` · `renderQuoteHoverCard` · `findCommentById` | | |
 | **Hide** | leave trigger (160ms bridge onto card), Escape, scroll, resize, open drawer/share | | |
 
 Portal: `#kbHoverPortal`. Stats/chart are deterministic from `hashSeed(user|ticker)` — swap those helpers for live API data later.
+
+---
+
+<a id="info-hover-tip"></a>
+
+### 11. Info hover tip (Image vs Video)
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#info-hover-tip](https://github.com/frilo-eth/kby-feed/blob/main/README.md#info-hover-tip)
+
+`#infoHoverTip` is the pill explain surface (not the token hover card). Copy is built in `pillRoleOf()` via `postMediaNoun(post)`:
+
+| Media | Noun | How |
+|-------|------|-----|
+| `type:"video"` or `"gif"` | **Video** | gif counts as video |
+| `.mp4` / `.webm` / `.mov` src | **Video** | extension fallback |
+| everything else | **Image** | default, including `$SAUCE` OP / nath4an / memes |
+
+Bodies: `{noun} posted by the token creator at launch.` · `{noun} participating on a Dare.` · `{noun} posted on a Meme thread.`
+
+| Piece | Detail |
+|-------|--------|
+| Show | desktop hover 180ms; mobile tap on pill |
+| Hide | leave trigger, swipe, drawer open |
+| Motion | same as hover cards — opacity `.18s`, no scale |
+
+---
+
+<a id="sheet-morph"></a>
+
+### 12. Sheet morph (`morphSheet`)
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#sheet-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sheet-morph)
+
+Auth, wallet, signature, and funds share **one tray**. Switching steps **mutates the same modal** — do not remount, do not crossfade a second overlay on top.
+
+`morphSheet(modal, mutate)` (~320ms, Vaul `cubic-bezier(.32,.72,0,1)`):
+
+1. Measure `from` height
+2. Run `mutate()` (swap inner HTML / unhide a clip)
+3. Measure `to` height
+4. If `|to-from| < 2px`, skip
+5. Lock `height: from`, `overflow: hidden`, then animate to `to`
+6. On `transitionend` (or 400ms fallback) clear inline height so the sheet can grow again
+
+| Also | Detail |
+|------|--------|
+| Reduced motion | mutate only, no height tween |
+| One overlay | `overlayOpen` closes the other auth-family trays first |
+| Family Values | [benji.org/family-values](https://benji.org/family-values) — fluidity (persistent UI), progressive disclosure, no redundant animation |
+
+Mobile enter of `.modal` itself is still `transform: translateY(100%+24px) → 0` · `.44s` same Vaul curve (share / auth / wallet / funds).
+
+---
+
+<a id="auth"></a>
+
+### 13. Auth (Option 4)
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth)
+
+One login, one paying wallet. Prototype only — no real keys.
+
+| Path | `session.auth` | Wallet | Gift / buy / sell / launch |
+|------|----------------|--------|----------------------------|
+| Google, Apple, X, Farcaster, email | `'social'` | minted **embedded** (`kind:'embedded'`, name Kumbaya) | **sponsored** — no signature sheet |
+| MetaMask / Phantom / … | `'eoa'` | that catalog row (`kind:'eoa'`) | **`needsSig()`** → signature sheet, then proceed |
+
+No product gates. Topbar: **Sign in** → after auth, wallet chip with `usdLabel(totalBal())`. Copy everywhere is **Deposit** / **Withdraw** (never Add funds / Send / Top up in the UI).
+
+| Motion | Spec |
+|--------|------|
+| Open / close overlay | `.modal` Vaul slide · `.44s` `(.32,.72,0,1)` |
+| Panel switch (login ↔ wallets ↔ email ↔ funds) | [`morphSheet`](#sheet-morph) `.32s` |
+| Icon / row press | `scale(.97)` · `.12s` |
+| Hover on `--card` controls | `color-mix(in srgb, var(--card) 62%, white)` — not `--bg` |
+| Signed-in feedback | short “You’re signed in.” hold, then `afterAuth` (deposit if `totalBal() < need`) |
+
+API: `completeLogin` · `requireAuth` · `requireSpend` · `requestSignature` · `paintAuthChrome`.
+
+---
+
+<a id="deposit"></a>
+
+### 14. Deposit
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit)
+
+`openDeposit(need, then)` / `session.flow.kind === 'deposit'`. Hosts: auth tray (`setAuthPanel('funds')`), wallet tray, or `#fundsOverlay`.
+
+| Step | UI |
+|------|----|
+| `home` | Card vs crypto methods |
+| `crypto` | QR + address + network disclosure |
+| `cash` | card placeholder |
+| `confirm` | complete |
+
+**Need copy:** `Deposit $25.00.` — not “You need $25.00 to continue.”
+
+**Networks (progressive disclosure):** collapsed **Ethereum ▾**. Tap → `setFlowNetsOpen(true)` → [`morphSheet`](#sheet-morph) unhides `.flow-nets-clip`. Chevron rotates `.32s` Vaul. Rows stagger `flow-net-in` (0 / 50 / 100ms) from `translateY(-8px)`. **Do not call `paintFlowSheet()` on net toggle** — that remounts the QR. `depositAddr()` ignores network; QR seed is the active wallet id.
+
+Address row: clipboard SVG (same as Copy url), regular weight, one line + ellipsis (`.flow-addr span`).
+
+| Motion | Spec |
+|--------|------|
+| Method row hover | `--card` mix white · `.15s` |
+| Method press | `scale(.985)` · `.12s` |
+| Preset `$25/$50/$100` | on = ink fill; hover mix white |
+| Network unfold | sheet height morph + chevron 180° + stagger in |
+| Reduced motion | no chevron tween, no `flow-net-in` |
+
+---
+
+<a id="withdraw"></a>
+
+### 15. Withdraw
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#withdraw](https://github.com/frilo-eth/kby-feed/blob/main/README.md#withdraw)
+
+`openWithdraw()`. Empty balance → toast **Deposit first, then withdraw.** and opens deposit.
+
+| Step | UI |
+|------|----|
+| `amount` | dollar field + presets; cap = `totalBal()` |
+| `addr` | paste destination |
+| `review` | confirm |
+
+Steps morph in the **wallet** tray (`session.walletView = 'flow'`). Same elevation / press rules as deposit. Back peels `review → addr → amount`.
+
+---
+
+<a id="trade-drawer"></a>
+
+### 16. Trade drawer (dollarized)
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer)
+
+Same chrome as comments (desktop 360 / mobile sheet). Buy / Sell tabs. Amount is always a **USD spend** under the hood (`tradeUsdAmt()`); the field can display tokens.
+
+| Control | Buy | Sell |
+|---------|-----|------|
+| Helpers | `$25` / `$100` / `$500` | `25%` / `50%` / `All` of holdings |
+| Label | Buy `$TICKER` | Sell `$TICKER` |
+| `#tradePayWith` label | Pay with | Receive |
+| CTA | Buy · Sign in to buy · Deposit to buy | Sell · Sign in to sell |
+
+**Amount row:** `$` + `#tradePayInput` (32px / 800) + token chip `#tradeGetAsset` (aligned with the input, **not** the label row).
+
+**⇅ `#tradeOut`:** toggles `session.tradeUnit` `'usd'` ↔ `'token'`. Rate `TOKEN_PER_USD = 26120`. Token mode: `#tradeBuyField.is-token` hides `$`. Quote still converts through USD.
+
+| Motion | Spec |
+|--------|------|
+| Field focus | background mix white · border mix ink · `.15s` |
+| Helper pills | rest mix 8% ink on `--card`; hover 12%; on 16%; press `scale(.97)` · `.12s` |
+| CTA | green `#3DDC97` buy / `--red` sell / ink gated; hover brightness `1.03`; press `scale(.985)` |
+| Drawer open | existing comments/trade panel morph (not a new overlay) |
+
+Meta rows stay flat for now (Max slippage / You receive / You pay) — no accordion in this drop.
+
+---
+
+<a id="pay-with"></a>
+
+### 17. Pay with chip
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#pay-with](https://github.com/frilo-eth/kby-feed/blob/main/README.md#pay-with)
+
+Stay until a later PRD cut. **Not** a modal and **not** an in-drawer asset swap.
+
+| Piece | Detail |
+|-------|--------|
+| Assets | ETH (default), WETH, USDm · `session.payAsset` |
+| Chip `#tradePayChip` | `--bg` fill + down chevron (`has-chev`) — screenshot exception to the “no `--bg` wells” rule |
+| Menu `#tradePayMenu` | `position:fixed` under the chip (`placePayMenu`); `--card` + hairline + `--shadow`; radius 14px |
+| Close | outside click, Escape, drawer scroll, switching to Sell |
+| Balance row | **removed** — redundant when dollarized |
+
+Hover on menu rows / selected: `--bg`. Icons are inline SVG (`PAY_ETH_ICON` / `PAY_WETH_ICON` / `PAY_USDM_ICON`).
 
 ---
 
@@ -1117,9 +1376,11 @@ First tagged snapshot of the single-file prototype (`feed.html` + `public/`).
 | Area | Included |
 |------|----------|
 | Feed | Spring doomscroll, infinite wrap, pull-to-refresh, mute morph, Buy CTA pill (enter/exit spring, mobile too) + hover Buy-bar marquee on `+`, hover cards, 2× hold→lock + “Hold 3s to lock” annotation, activity bubbles, new-pill soft-dismiss, first-visit hint |
-| Meta | Pinned left (flush) or float-on-media (padded inset + short desktop scrim) via `layoutMeta`; [username / token / ticker affordances](#meta-affordances) |
+| Meta | Pinned left (flush) or float-on-media (padded inset + short desktop scrim) via `layoutMeta`; [username / token / ticker](#meta-affordances); [morphing pill](#dare-role-badge) |
+| Token vs yap | [OP vs Entry/Content](#token-vs-yap); [`$SAUCE` Dare](#sauce-token); [token page stub](#token-page) (`token.html`) |
 | Comments | Anon/public, **threaded replies** (indent + View 5 / Hide), **`>>id` quotes** + hover card, attach + fly-in, CFX gallery |
-| Sheets | Trade, share (auto-close on X/copy), more (auto-close incl. theme), sheet-colored close targets |
+| Sheets | Trade, share (auto-close on X/copy), more (auto-close incl. theme), sheet-colored close targets, [auth / deposit / withdraw](#auth) with [`morphSheet`](#sheet-morph) |
+| Trade | [Dollarized buy](#trade-drawer) · [Pay with chip](#pay-with) · social sponsored / EOA signs |
 | System | Light/dark tokens, web-haptics + WebAudio, session keys for hint / sound / sidebar |
 
 See `COMPONENT_UPDATE.txt` for the compact behaviour checklist and [CHANGELOG.md](CHANGELOG.md) for release notes.
