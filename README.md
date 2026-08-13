@@ -14,14 +14,17 @@ Porting / review: open the heading, not the whole README. Production: [https://k
 |-------|--------|
 | [`$SAUCE` Dare](#sauce-token) — OP first, then entries | [README.md#sauce-token](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sauce-token) |
 | [Token vs yap](#token-vs-yap) (tip, menu, token art) | [README.md#token-vs-yap](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-vs-yap) |
+| [Yap thread](#yap-thread) (entries wire into OP comments) | [README.md#yap-thread](https://github.com/frilo-eth/kby-feed/blob/main/README.md#yap-thread) |
 | [Morphing pill](#dare-role-badge) (Dare/Meme → OP / Entry / Content) | [README.md#dare-role-badge](https://github.com/frilo-eth/kby-feed/blob/main/README.md#dare-role-badge) · [#morphing-pill](https://github.com/frilo-eth/kby-feed/blob/main/README.md#morphing-pill) |
 | [Info tip](#info-hover-tip) (Image vs Video copy) | [README.md#info-hover-tip](https://github.com/frilo-eth/kby-feed/blob/main/README.md#info-hover-tip) |
-| [Token page](#token-page) (`/token`, empty stub) | [README.md#token-page](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-page) |
+| [Token page](#token-page) (`/token` — ticker + View token) | [README.md#token-page](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-page) |
 | [Auth (Option 4)](#auth) — social vs EOA | [README.md#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth) |
 | [Sheet morph](#sheet-morph) (`morphSheet` ~320ms) | [README.md#sheet-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sheet-morph) |
-| [Deposit](#deposit) | [README.md#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit) |
+| [Deposit](#deposit) (native chain/token selects + address tip) | [README.md#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit) |
 | [Withdraw](#withdraw) | [README.md#withdraw](https://github.com/frilo-eth/kby-feed/blob/main/README.md#withdraw) |
 | [Trade drawer](#trade-drawer) (dollarized buy) | [README.md#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer) |
+| [Trade CTA](#trade-cta) (Sign in → Deposit → green Buy) | [README.md#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta) |
+| [Slippage](#slippage) | [README.md#slippage](https://github.com/frilo-eth/kby-feed/blob/main/README.md#slippage) |
 | [Pay with](#pay-with) (ETH / WETH / USDm chip) | [README.md#pay-with](https://github.com/frilo-eth/kby-feed/blob/main/README.md#pay-with) |
 | [Meta affordances](#meta-affordances) | [README.md#meta-affordances](https://github.com/frilo-eth/kby-feed/blob/main/README.md#meta-affordances) |
 | [Animation system](#animation-system) | [README.md#animation-system](https://github.com/frilo-eth/kby-feed/blob/main/README.md#animation-system) |
@@ -40,8 +43,8 @@ Open [http://localhost:3000/feed](http://localhost:3000/feed). Token stub: [http
 |-----|--------|
 | `J` / `↓` | Next post |
 | `K` / `↑` | Previous post |
-| `L` | Like |
-| `D` | Dislike |
+| `L` | Like (no-ops on original posts) |
+| `D` | Dislike (no-ops on original posts) |
 | `T` | Tip (no-ops on original posts) |
 | `C` | Comment |
 | `S` | Share |
@@ -64,8 +67,9 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | [Video progress bar](#video-progress) | Bottom 3px track on `type=video` only (not gif-loops); `--orange` fill from `timeupdate`; non-interactive; loops with the clip |
 | Buy `$ticker` | Floating crystal pill on `.token-anchor` (desktop + mobile). **Mobile stagger:** `+` Buy bar marquees 2× first, then pill (no overlap). Hotzone/tab = pill only. Desktop: pill cadence + hover Buy bar. Wipe: `clip-path: inset(… round 999px)` |
 | Media frame | **Desktop always matches source aspect ratio** (`fitMediaBox` + `--ar`); one binding axis, the other `auto`. Mobile ≤860 stays full-bleed `object-fit:cover` |
-| Trade entry points | Avatar+, Buy CTA, ticker, token mini → trade drawer. Morphing [category pill](#dare-role-badge): hover/cycle explains OP vs Entry/Content; desktop click still trades |
-| [Token vs yap](#token-vs-yap) | OP = the token (no tip, View token → [`/token`](#token-page)). Entry/Content = yaps (tip + View in thread). Mini/plus/drawer = `tokenArtOf()`, never the yap frame |
+| Trade entry points | Avatar+, Buy CTA → trade drawer. **Ticker / `.token-tag` → [`/token`](#token-page)** (same as View token). Morphing [category pill](#dare-role-badge): hover/cycle explains OP vs Entry/Content; desktop click still trades |
+| [Token vs yap](#token-vs-yap) | OP = the token (no tip / like / dislike, View token → [`/token`](#token-page)). Entry/Content = yaps (tip + View in thread). Mini/plus/drawer = `tokenArtOf()`, never the yap frame |
+| [Yap thread](#yap-thread) | Entries are comments on the OP. `wireYapsIntoOpThreads()` shares each entry’s `commentList` as replies on that yap. OP rail count includes every yap + its comments |
 | Hover cards | Desktop only — user / token / **`>>` quote** preview portals (no Buy on the card) — meta triggers in [Meta affordances](#meta-affordances) |
 | [Meta affordances](#meta-affordances) | `@uname` opacity hover · **`.blockie`** lighten · morphing [category pill](#dare-role-badge) (Dare/Meme → Original Post / Entry / Content) · token mini · ticker · [Q&A](#meta-affordances) |
 | [2× hold → lock](#hold-lock-2x) | ≥240ms → glass `2x` badge with **charge ring** + **“Hold 3s to lock”** (`SPEED_LOCK_MS=3000`); no chevron pulse on this path; release early = back to 1×; lock survives finger-up; tap badge to unlock — [full technical overview](#hold-lock-2x) |
@@ -75,7 +79,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Tablet chrome | Keep chevron gutter (`--feed-chevron-gutter: 88px`); glass rail only when overlaid on media |
 | First-visit hint | Hand Lottie; `kb_feed_hint_v9`; idle = `display:none` (no backdrop veil) |
 | Topbar auto-hide | Mobile; overlays feed (no layout resize); after settle on next; page-step locked mid-swipe |
-| [Token page](#token-page) | OP `…` → **View token** navigates to `/token?t=TICKER` (empty stub). Not the trade drawer. |
+| [Token page](#token-page) | `.token-tag` and OP `…` → **View token** both go to `/token?t=TICKER` (empty stub). Buy / plus still open the trade drawer. |
 
 ### Comments
 
@@ -86,6 +90,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Compose chrome | Squircle input row (`border-radius:14px`) matching `.comment-send`; send haptic `sent` |
 | Anon vs public | Anon: no reacts/media; public: X-proof tip + reacts |
 | **Threaded replies** | One indent level under a root (`.comment-replies` pad-left 46px / 40px mobile); smaller reply avatars (28px) |
+| [Yap thread](#yap-thread) | Same-ticker entries are media comments on the OP (`wireYapsIntoOpThreads`). Shared `commentList` — not a copy |
 | **View / hide replies** | Collapsed by default. `View N replies` → reveal **5** at a time (`REPLY_PAGE`); then `View N more`; **Hide** collapses the whole indent. Hide hover pill stays inside the scroll gutter (no right-edge clip) |
 | **`>>id` quotes** | 4chan-style. Reply prefixes compose with `>>35355 `; send nests under that comment’s **root**; blue `.comment-quote` links in list + compose mirror |
 | Quote hover card | Desktop — hover `>>id` → `#quoteHoverCard` mini preview (180ms); works in list + compose mirror |
@@ -111,7 +116,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 |---------|----------|
 | [Option 4](#auth) | Social / email → embedded Kumbaya wallet, **sponsored** (no signature on gift/buy/sell). Crypto wallet (EOA) → that address is the account; gift/buy/sell/launch **sign** (`needsSig()`). No gates. Copy is **Deposit** / **Withdraw** |
 | Sign-in sheet | Google + Apple/X/Farcaster/email + detected wallet row. Same `.modal` chrome as share (`--card`, Inter, `--bg` `#F2EEEA`) |
-| [Deposit](#deposit) | Card or crypto. Crypto: collapsed **Ethereum ▾** unfolds Ethereum / Base / Solana with tray morph; **QR + address do not remount** on net toggle. Copy: **Deposit $25.00.** |
+| [Deposit](#deposit) | Card or crypto. Crypto: native `<select>` pair (chain + token). Copy: `Send USDC on Ethereum to this address.` No “need $X” on Fund your account. (i) on **Your deposit address** |
 | [Withdraw](#withdraw) | Amount → address → review. Empty balance routes to deposit first |
 
 ### Trade drawer
@@ -122,7 +127,8 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Sell helpers | `25% / 50% / All` of holdings (dollarized spend) |
 | Unit swap | `#tradeOut` **⇅** toggles `session.tradeUnit` `'usd'` \| `'token'`. Rate `TOKEN_PER_USD = 26120`. Token mode hides `$` via `#tradeBuyField.is-token` |
 | [Pay with](#pay-with) | Compact dropdown on the chip (ETH / WETH / USDm) — not a modal, not an in-drawer swap. Chip fill is `--bg`. Menu `position:fixed` under the chip |
-| CTA | Signed-out: **Sign in to buy/sell**. Short: **Deposit to buy**. EOA: note **Confirm in {wallet}**. Embedded: fires without a signature sheet |
+| [CTA](#trade-cta) | Unsigned → **Sign in to buy**. Funded short → **Deposit to buy**. Ready → big green **Buy** (`#3DDC97`). Completing signup/deposit does **not** auto-trade — the green button is the buy |
+| [Slippage](#slippage) | Gear chip unfolds AUTO / 0.5% / 0.3% / custom. Rest chrome is `--card` + hairline (not orange). **Auto** badge in You’ll pay is purple `#7B6CF0` + white |
 | Elevation | Sheet / drawer = `--card`. Controls at rest = `--card` + hairline. Hover = `color-mix` with white — never cream `--bg` wells (Pay-with chip is the exception; it matches the screenshot `--bg` fill) |
 
 ---
@@ -891,7 +897,7 @@ Swipe settle/dragtick = haptic only. Pull-refresh done plays a dedicated `refres
 
 **Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#meta-affordances](https://github.com/frilo-eth/kby-feed/blob/main/README.md#meta-affordances)
 
-Bottom-left post chrome (`.col-info` → `.meta-block`). **Rule:** hover is mostly color-graded; the **token mini is the exception** that may scale. Click opens trade for token surfaces; user surfaces are preview-only in this prototype (hover card, no profile route).
+Bottom-left post chrome (`.col-info` → `.meta-block`). **Rule:** hover is mostly color-graded; the **token mini is the exception** that may scale. Click on `.token-tag` goes to [`/token`](#token-page); user surfaces are preview-only in this prototype (hover card, no profile route).
 
 | Target | Hover affordance | Press | Click | Desktop hover card | Haptic |
 |--------|------------------|-------|-------|--------------------|--------|
@@ -899,11 +905,11 @@ Bottom-left post chrome (`.col-info` → `.meta-block`). **Rule:** hover is most
 | `.uname` (`@user`) | `opacity:.8` · `.15s` (no underline) | — | — *(no profile route yet)* | **user** · 280ms | — |
 | `.pill` (Dare / Meme) | Rest = category. Hover / cycle / tap morphs to **Original Post** (OP) · **Entry** (Dare) · **Content** (Meme) | `scale(.97)` | desktop click → **trade drawer**; mobile tap → explain tip | **info** · 180ms | `open` (desktop click) |
 | **`img.blockie`** (all instances) | same lighten — meta, comments, CFX, act-bubbles, hover cards, buyers, wallet | — | — | user card where bound | — |
-| `.token-tag` (wraps mini + ticker) | mini scale + ring; ticker color | mini `scale(.96)` | **trade drawer** | **token** · 280ms | `open` |
+| `.token-tag` (wraps mini + ticker) | mini scale + ring; ticker color | mini `scale(.96)` | **[`/token`](#token-page)** | **token** · 280ms | `open` |
 | `.token-mini` | `scale(1.14)` + orange ring `0 0 0 2px rgba(255,102,34,.35)` + brightness | `scale(.96)` · `.1s` | *(via `.token-tag`)* | *(via `.token-tag`)* | — |
 | `.tag-ticker` | `color: var(--coffee) → var(--coffee-hover)` · `.15s` | — | *(via `.token-tag`)* | *(via `.token-tag`)* | — |
 
-**Not on the card:** Buy CTA — hover cards are preview-only; the underlying click still opens the drawer.
+**Not on the card:** Buy CTA — hover cards are preview-only; Buy / plus still open the drawer; ticker goes to `/token`.
 
 ##### Markup
 
@@ -916,10 +922,10 @@ Bottom-left post chrome (`.col-info` → `.meta-block`). **Rule:** hover is most
     </div>
     <div class="desc">…</div>
     <div class="meta-tags">
-      <span class="token-tag">
+      <a class="token-tag" href="/token?t=SAUCE" aria-label="View $SAUCE">
         <img class="token-mini squircle" src="…" alt="">
         <span class="tag-ticker">${ticker}</span>  <!-- already includes $ -->
-      </span>
+      </a>
       <!-- morphing category pill — see #dare-role-badge -->
       <div class="pill dare">…</div>
     </div>
@@ -957,6 +963,7 @@ img.blockie{
   display:inline-flex; align-items:center; gap:8px; cursor:pointer;
   border-radius:999px; padding:2px 4px 2px 2px;
   margin:-2px -4px -2px -2px; /* expand hit area without shifting layout */
+  color:inherit; text-decoration:none;
   transition: background .18s ease;
 }
 .token-tag .token-mini{
@@ -993,8 +1000,11 @@ img.blockie{
 ```js
 item.querySelector('.token-tag')?.addEventListener('click', (e) => {
   e.stopPropagation();
-  openDrawer(posts[item.dataset.index]);
+  if(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  e.preventDefault();
+  hideHoverCards(true);
   haptic('open');
+  openTokenPage(posts[item.dataset.index]);
 });
 
 bindHoverCard(item.querySelector('.uname'), 'user', postRef, 280);
@@ -1053,7 +1063,7 @@ Gate: `width > 860` and `(hover:hover) and (pointer:fine)` · mouse `pointerente
 | Crossfade | opacity only (same slot — no blur) |
 | Press | `scale(.97)` · `160ms` `--ease-out` |
 | Cycle | active item only: rest 3.8s ↔ morph 2.4s after a 1.4s settle; pauses on hover/tap and while dragging |
-| Touch | tap toggles morph + `#infoHoverTip` (token-tag still opens trade) |
+| Touch | tap toggles morph + `#infoHoverTip` (token-tag still opens [`/token`](#token-page)) |
 | Desktop click | still opens the trade drawer |
 | Reduced motion | no cycle; snap width; keep color/opacity |
 
@@ -1080,11 +1090,37 @@ Gate: `width > 860` and `(hover:hover) and (pointer:fine)` · mouse `pointerente
 | Surface | Original Post | Entry / Content |
 |---------|---------------|-----------------|
 | Rail tip | **hidden** — you cannot tip an OP | `$` tip + count (immutable +$5) |
+| Rail like / dislike | **hidden** — same as tip (`canVote = canTip`) | like ↔ dislike exclusive |
 | `…` menu | **View token** (origin icon) → [token page](#token-page) | **View in thread** (list icon) → parent token comments |
 | Token mini + plus rail + drawer av | Token art = this media | Token art from the parent OP (`tokenArtOf`) — **not** the yap frame |
+| `.token-tag` click | [`/token?t=TICKER`](#token-page) | same — ticker is the token, not the yap |
 | Media container | Token launch media | Yap media (can differ from the mini) |
+| Comments | [Yap thread](#yap-thread) — OP list includes every same-ticker entry as a media comment | Rail still opens **this** post’s comments; those rows are the same objects as the OP yap’s replies |
 
 `tokenArtOf(post)` resolves `parentTokenPost` (same `ticker` + `role:"op"`), then `avatar` / `poster` / `src`. A token is **Dare or Meme, never both**.
+
+<a id="yap-thread"></a>
+
+##### Yap thread
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#yap-thread](https://github.com/frilo-eth/kby-feed/blob/main/README.md#yap-thread)
+
+Entries **are** comments on the original post. After `const posts = […]`, `wireYapsIntoOpThreads()`:
+
+1. For each `role:"op"`, collect same-`ticker` non-OP posts
+2. `entryAsYap(post)` builds a comment: user + caption + `media` from the entry frame; **`replies` is the entry’s `commentList` array** (shared reference, not a copy)
+3. Those yaps prepend the OP `commentList`. Duplicate user+text roots (e.g. gremlin on both) are dropped from the OP native list
+4. OP `comments` count += `1 + entry.comments` per yap
+
+| View | What you see |
+|------|----------------|
+| OP comment rail | Nathan’s kitchen photo as a yap, then p3dr0u / gremlin / … as replies, then the other `$SAUCE` entries, then OP-only comments |
+| Entry comment rail | That entry’s `commentList` only (same objects as the OP yap replies) |
+| View in thread | `openComments(parentTokenPost)` — the OP thread |
+
+New comments `bumpCommentCount(post)` increment the entry **and** the parent OP badge.
+
+Source: `entryAsYap()` · `wireYapsIntoOpThreads()` · `bumpCommentCount()` / `paintFeedCommentCount()`.
 
 <a id="sauce-token"></a>
 
@@ -1103,7 +1139,7 @@ All Tabasco media belongs to **`$SAUCE`**, a Dare: drink the Tabasco.
 | 3–7 | asuncion.eth → frilostudio | Entry | existing clips / stills | Prototype ratio pack |
 | 8–10 | ringside / bellcurve / edsnaps | Entry | `tabasco6.webp` · `tabasco7.webp` · `tabasco8.webp` | Live-product memes (wrestling / IQ curve / Ed) |
 
-Caption on the OP: *“the dare: drink the tabasco. one gallon, fridge-cold, no chaser.”* Token mini / plus / drawer on every `$SAUCE` yap resolve to `SAUCE.webp` via `tokenArtOf()`. Extra-media posts keep their own tickers. Pull-to-refresh may shuffle `posts[0]` — OP identity is `role:"op"` + ticker, not array index.
+Caption on the OP: *“the dare: drink the tabasco. one gallon, fridge-cold, no chaser.”* Token mini / plus / drawer on every `$SAUCE` yap resolve to `SAUCE.webp` via `tokenArtOf()`. **Comments:** Nathan’s thread (p3dr0u + 7 replies, gremlin, framefan, nightowl) is wired into the OP as that entry’s yap — see [yap thread](#yap-thread). Extra-media posts keep their own tickers. Pull-to-refresh may shuffle `posts[0]` — OP identity is `role:"op"` + ticker, not array index.
 
 <a id="token-page"></a>
 
@@ -1111,20 +1147,21 @@ Caption on the OP: *“the dare: drink the tabasco. one gallon, fridge-cold, no 
 
 **Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-page](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-page)
 
-OP `…` → **View token** is a **route**, not the trade drawer: `token.html` at `/token?t=SAUCE` (empty stub + ticker + back to feed). `openTokenPage()` / `tokenPageUrl()`. Trade / Buy still open the drawer. Local: `http://localhost:3000/token?t=SAUCE`. Vercel rewrite: `/token` → `token.html`.
+OP `…` → **View token** and the feed **`.token-tag`** (mini + `$SAUCE`) are a **route**, not the trade drawer: `token.html` at `/token?t=SAUCE` (empty stub + ticker + back to feed). `openTokenPage()` / `tokenPageUrl()`. Buy / plus still open the drawer. Local: `http://localhost:3000/token?t=SAUCE`. Vercel rewrite: `/token` → `token.html`.
 
 ##### Port checklist
 
-1. Keep **username** and **token** as separate targets — user → profile preview; token → trade.
-2. Hit target for ticker+mini is the **`.token-tag` wrapper** (negative margin padding), not two separate buttons.
+1. Keep **username** and **token** as separate targets — user → profile preview; token ticker → [`/token`](#token-page); Buy / plus → trade.
+2. Hit target for ticker+mini is the **`.token-tag` wrapper** (`<a href="/token?t=…">`, negative margin padding), not two separate buttons.
 3. Only the mini may scale on hover — ticker stays type-only (color). Do not scale the whole chip.
 4. Tag every `userAvatar()` `<img>` with **`.blockie`** so hover lighten is shared (meta, comments, CFX, bubbles, cards, wallet). Skip anon PNG / token photos.
 5. OP posts set `role: "op"` (any `cat`); Dare entries `role: "entry"` (or omit); Meme non-OP morphs to **Content**.
-6. Do not render the rail tip on OP. Menu item is **View token** (OP) vs **View in thread** (yap). Token mini / plus / drawer use `tokenArtOf()`, never the yap `src` on entries.
+6. Do not render the rail tip **or** like/dislike on OP. Menu item is **View token** (OP) vs **View in thread** (yap). Token mini / plus / drawer use `tokenArtOf()`, never the yap `src` on entries.
 7. Hover card delay **280ms** on token/user; pill info tip **180ms**. Leave trigger has a short bridge onto the card.
-8. `stopPropagation` on clicks so the scroller doesn’t treat them as feed gestures.
+8. `stopPropagation` on clicks so the scroller doesn’t treat them as feed gestures. Cmd/ctrl-click on `.token-tag` uses the native `<a>` (new tab).
 9. On float/mobile, switch to light-on-scrim tokens — coffee brown disappears on dark frames.
 10. Category `.pill` morphs in place — do not add a second username badge.
+11. Call `wireYapsIntoOpThreads()` once after `posts` exists so entries share `commentList` with the OP yap. Do not copy the array.
 
 ##### Q&A
 
@@ -1138,16 +1175,19 @@ A: Mini is a trade affordance (exception to the “no scale on hover” rule). U
 A: Blockies = deterministic `userAvatar(seed)` identicons for **people**. Token art = `tokenArtOf(post)` on `.token-mini` / rail `.avatar-plus` / drawer — the **token**, not the yap frame. On an OP those match the media; on Entry/Content the mini stays the parent token while `.media-inner` shows the yap.
 
 **Q: Why no tip on original posts?**  
-A: The OP **is** the token. Tips go to yaps (Entry/Content). The `$` rail control is omitted on `role:"op"` (keyboard `T` no-ops).
+A: The OP **is** the token. Tips go to yaps (Entry/Content). The `$` rail control is omitted on `role:"op"` (keyboard `T` no-ops). Like / dislike are omitted the same way.
 
 **Q: View token vs View in thread?**  
-A: OP → **token page** (`/token?t=SAUCE`, empty stub — not the trade drawer). Entry/Content → parent token’s comment thread (`openComments(parentTokenPost)`). Rail comment still opens **this** post’s comments. Trade still opens the drawer.
+A: OP → **token page** (`/token?t=SAUCE`, empty stub — not the trade drawer). Entry/Content → parent token’s comment thread (`openComments(parentTokenPost)`). Rail comment still opens **this** post’s comments. `.token-tag` always goes to `/token`. Buy / plus still open the drawer.
+
+**Q: Where do Nathan’s comments live?**  
+A: On the entry **and** on the OG. `nath4an.commentList` is the `replies` array on the OP yap. Open comments on `sauce.eth` to see the kitchen photo as a media comment plus that whole thread. See [#yap-thread](#yap-thread).
 
 **Q: Where does `.blockie` hover apply?**  
 A: Every tagged instance: meta `.avatar-sm`, comment avatars, CFX caption av, act-bubble discs (data-URL only), user/quote hover cards, chart buyer stack + markers, wallet chip. Compose input drops `.blockie` while anon.
 
 **Q: Click username/avatar — where do I go?**  
-A: Prototype has **no profile route**. Desktop opens the user hover card; mobile has no hover card. Token tag opens the **trade drawer** (`haptic('open')`). Desktop pill click also trades; mobile pill tap explains the role.
+A: Prototype has **no profile route**. Desktop opens the user hover card; mobile has no hover card. **`.token-tag` → `/token`**. Buy CTA / plus → **trade drawer** (`haptic('open')`). Desktop pill click also trades; mobile pill tap explains the role.
 
 **Q: Why bind hover cards on `.token-tag` instead of mini and ticker separately?**  
 A: One hit target, one delay timer, no flicker when the pointer crosses from mini → `$TICKER`.
@@ -1164,7 +1204,7 @@ Source: CSS `.pill` morph · `morphPillHtml()` / `bindMorphPill()` / `armPillCyc
 
 ### 10. Hover info cards (desktop)
 
-Preview-only popovers. **No CTA on the card** — click the underlying zone still opens the trade drawer / existing actions.
+Preview-only popovers. **No CTA on the card** — click the underlying zone still runs the real action (Buy / plus → drawer, `.token-tag` → `/token`).
 
 | | User (`#userHoverCard`) | Token (`#tokenHoverCard`) | Quote (`#quoteHoverCard`) |
 |--|--|--|--|
@@ -1250,7 +1290,7 @@ No product gates. Topbar: **Sign in** → after auth, wallet chip with `usdLabel
 | Panel switch (login ↔ wallets ↔ email ↔ funds) | [`morphSheet`](#sheet-morph) `.32s` |
 | Icon / row press | `scale(.97)` · `.12s` |
 | Hover on `--card` controls | `color-mix(in srgb, var(--card) 62%, white)` — not `--bg` |
-| Signed-in feedback | short “You’re signed in.” hold, then `afterAuth` (deposit if `totalBal() < need`) |
+| Signed-in feedback | short “You’re signed in.” hold, then `afterAuth` (deposit if `totalBal() < 1`, **without** a need amount in the title) |
 
 API: `completeLogin` · `requireAuth` · `requireSpend` · `requestSignature` · `paintAuthChrome`.
 
@@ -1264,26 +1304,36 @@ API: `completeLogin` · `requireAuth` · `requireSpend` · `requestSignature` ·
 
 `openDeposit(need, then)` / `session.flow.kind === 'deposit'`. Hosts: auth tray (`setAuthPanel('funds')`), wallet tray, or `#fundsOverlay`.
 
+**Do not show a need amount** on Fund your account (`Deposit $5.00.` leaked from tipping `requireSpend(5)`). `openTopUp(0, pending)` / `openDeposit(0, then)` always. Amount is chosen later (card presets / crypto Done credits `$25` in the prototype).
+
 | Step | UI |
 |------|----|
-| `home` | Card vs crypto methods |
-| `crypto` | QR + address + network disclosure |
-| `cash` | card placeholder |
-| `confirm` | complete |
+| `home` | Transfer crypto · Card · Apple Pay |
+| `crypto` | Native `<select>` pair + QR + **Your deposit address** + (i) + copy |
+| `cash` | card placeholder + presets |
+| `confirm` | “Confirming deposit” → `Deposited $25.00` |
 
-**Need copy:** `Deposit $25.00.` — not “You need $25.00 to continue.”
+**Chain / token:** two native `<select class="flow-select">` in `.flow-pickers` — not a custom overlay menu, not an expanding sheet.
 
-**Networks (progressive disclosure):** collapsed **Ethereum ▾**. Tap → `setFlowNetsOpen(true)` → [`morphSheet`](#sheet-morph) unhides `.flow-nets-clip`. Chevron rotates `.32s` Vaul. Rows stagger `flow-net-in` (0 / 50 / 100ms) from `translateY(-8px)`. **Do not call `paintFlowSheet()` on net toggle** — that remounts the QR. `depositAddr()` ignores network; QR seed is the active wallet id.
+| Chain | Tokens |
+|-------|--------|
+| Ethereum | ETH, USDC, USDT |
+| Base | ETH, USDC |
+| Solana | SOL, USDC |
 
-Address row: clipboard SVG (same as Copy url), regular weight, one line + ellipsis (`.flow-addr span`).
+Copy: `Send ${tick} on ${chain} to this address.` (`flowDepositCopy`). Later this is a [LI.FI](https://li.fi/) bridge — do not promise “any token.”
+
+**Your deposit address** — label + `#flowAddrInfo` (i). Reuses `#infoHoverTip` (`data-tip-title` / `data-tip-body`). Body: *Send only the token and chain selected above. It converts to cash in your account. Other assets sent here won't be credited.* Hover 180ms + click. Portal z-index 120 sits above the auth overlay (72).
+
+Address row: clipboard SVG, regular weight, one line + ellipsis (`.flow-addr span`). Crypto **Done** → `startCryptoConfirm()` → `creditFunds`.
 
 | Motion | Spec |
 |--------|------|
 | Method row hover | `--card` mix white · `.15s` |
 | Method press | `scale(.985)` · `.12s` |
-| Preset `$25/$50/$100` | on = ink fill; hover mix white |
-| Network unfold | sheet height morph + chevron 180° + stagger in |
-| Reduced motion | no chevron tween, no `flow-net-in` |
+| Native select hover | `--card` mix white · `.15s` |
+| (i) hover | ink + mix-white disc |
+| Reduced motion | confirm spin skipped |
 
 ---
 
@@ -1311,27 +1361,60 @@ Steps morph in the **wallet** tray (`session.walletView = 'flow'`). Same elevati
 
 **Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer)
 
-Same chrome as comments (desktop 360 / mobile sheet). Buy / Sell tabs. Amount is always a **USD spend** under the hood (`tradeUsdAmt()`); the field can display tokens.
+Same chrome as comments (desktop 360 / mobile sheet). Buy / Sell tabs. Amount is always a **USD spend** under the hood (`tradeUsdAmt()`); the field can display tokens. **Chart lives inside `#tokenDrawerScroll`** (not sticky chrome) — wheel/touch collapses the chart first, then chart+form scroll together.
 
 | Control | Buy | Sell |
 |---------|-----|------|
 | Helpers | `$25` / `$100` / `$500` | `25%` / `50%` / `All` of holdings |
 | Label | Buy `$TICKER` | Sell `$TICKER` |
 | `#tradePayWith` label | Pay with | Receive |
-| CTA | Buy · Sign in to buy · Deposit to buy | Sell · Sign in to sell |
+| [CTA](#trade-cta) | Buy · Sign in to buy · Deposit to buy | Sell · Sign in to sell |
 
 **Amount row:** `$` + `#tradePayInput` (32px / 800) + token chip `#tradeGetAsset` (aligned with the input, **not** the label row).
 
 **⇅ `#tradeOut`:** toggles `session.tradeUnit` `'usd'` ↔ `'token'`. Rate `TOKEN_PER_USD = 26120`. Token mode: `#tradeBuyField.is-token` hides `$`. Quote still converts through USD.
+
+**You’ll pay** (`#tradeMeta`) — collapsed summary + chevron. Open reveals Max slippage (purple **Auto** chip + %) / You receive / You pay / Fee (`PROTOCOL_FEE_PCT = 1.3`). **No top hairline** on `.trade-meta-inner`. Auto label is `color:#fff` (do not let `.trade-meta-inner span` wash it to `--ink-faint`).
 
 | Motion | Spec |
 |--------|------|
 | Field focus | background mix white · border mix ink · `.15s` |
 | Helper pills | rest mix 8% ink on `--card`; hover 12%; on 16%; press `scale(.97)` · `.12s` |
 | CTA | green `#3DDC97` buy / `--red` sell / ink gated; hover brightness `1.03`; press `scale(.985)` |
+| You’ll pay / slippage unfold | `grid-template-rows: 0fr → 1fr` · `.32s` Vaul |
 | Drawer open | existing comments/trade panel morph (not a new overlay) |
 
-Meta rows stay flat for now (Max slippage / You receive / You pay) — no accordion in this drop.
+<a id="trade-cta"></a>
+
+### 16b. Trade CTA
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta)
+
+`tradeCtaState()` → `'auth'` \| `'deposit'` \| `'go'`. The button is a **gate**, then a buy — completing signup or deposit must **not** auto-execute the trade (that spent the new $25 and jumped the chip back to Deposit to buy).
+
+| State | Label | Paint | Click |
+|-------|-------|-------|-------|
+| `'auth'` | Sign in to buy / sell | `.is-gated` ink | `requireAuth` → paint CTA; if still short, `openTopUp(0, paintTradeCta)` |
+| `'deposit'` | Deposit to buy | `.is-short` ink | `openTopUp(0, paintTradeCta)` — no pending buy |
+| `'go'` | **Buy** / Sell | green `#3DDC97` / `--red` | `requireSpend` / sell |
+
+After deposit, `creditFunds` → `paintAuthChrome()` → `paintTradeCta()`. Ready = big green Buy. Gifts/tips still auto-resume via `requireSpend` pending.
+
+<a id="slippage"></a>
+
+### 16c. Slippage
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#slippage](https://github.com/frilo-eth/kby-feed/blob/main/README.md#slippage)
+
+`#tradeAutoBtn` (gear + AUTO / `0.50%`) unfolds `#tradeSlip`. Presets: AUTO (`AUTO_SLIP_PCT = 1`), `0.5`, `0.3`, custom input. Quote uses `slipPct()` to guard You receive.
+
+| Rest | Open |
+|------|------|
+| `--card` + hairline, ink-soft. Custom `0.50%` stays **neutral** — not orange | slightly lifted `--card` mix white (still not orange) |
+
+You’ll pay **Auto** chip: background `#7B6CF0`, label **white**. Info (i) next to Slippage uses the same `#infoHoverTip` as the pill.
+
+Source: `paintSlippage()` · `setSlipMode()` · `.trade-auto-btn` · `.trade-slip-auto`.
 
 ---
 
@@ -1347,9 +1430,9 @@ Stay until a later PRD cut. **Not** a modal and **not** an in-drawer asset swap.
 |-------|--------|
 | Assets | ETH (default), WETH, USDm · `session.payAsset` |
 | Chip `#tradePayChip` | `--bg` fill + down chevron (`has-chev`) — screenshot exception to the “no `--bg` wells” rule |
+| Amount `#tradePayAssetInput` | native units (ETH) next to `#tradePayBal` (`0 ETH` unsigned) |
 | Menu `#tradePayMenu` | `position:fixed` under the chip (`placePayMenu`); `--card` + hairline + `--shadow`; radius 14px |
 | Close | outside click, Escape, drawer scroll, switching to Sell |
-| Balance row | **removed** — redundant when dollarized |
 
 Hover on menu rows / selected: `--bg`. Icons are inline SVG (`PAY_ETH_ICON` / `PAY_WETH_ICON` / `PAY_USDM_ICON`).
 
@@ -1377,10 +1460,10 @@ First tagged snapshot of the single-file prototype (`feed.html` + `public/`).
 |------|----------|
 | Feed | Spring doomscroll, infinite wrap, pull-to-refresh, mute morph, Buy CTA pill (enter/exit spring, mobile too) + hover Buy-bar marquee on `+`, hover cards, 2× hold→lock + “Hold 3s to lock” annotation, activity bubbles, new-pill soft-dismiss, first-visit hint |
 | Meta | Pinned left (flush) or float-on-media (padded inset + short desktop scrim) via `layoutMeta`; [username / token / ticker](#meta-affordances); [morphing pill](#dare-role-badge) |
-| Token vs yap | [OP vs Entry/Content](#token-vs-yap); [`$SAUCE` Dare](#sauce-token); [token page stub](#token-page) (`token.html`) |
-| Comments | Anon/public, **threaded replies** (indent + View 5 / Hide), **`>>id` quotes** + hover card, attach + fly-in, CFX gallery |
+| Token vs yap | [OP vs Entry/Content](#token-vs-yap); [yap thread](#yap-thread); [`$SAUCE` Dare](#sauce-token); [token page stub](#token-page) (`token.html`) |
+| Comments | Anon/public, **threaded replies** (indent + View 5 / Hide), **`>>id` quotes** + hover card, attach + fly-in, CFX gallery; entries share lists with the OP |
 | Sheets | Trade, share (auto-close on X/copy), more (auto-close incl. theme), sheet-colored close targets, [auth / deposit / withdraw](#auth) with [`morphSheet`](#sheet-morph) |
-| Trade | [Dollarized buy](#trade-drawer) · [Pay with chip](#pay-with) · social sponsored / EOA signs |
+| Trade | [Dollarized buy](#trade-drawer) · [CTA gate](#trade-cta) · [Slippage](#slippage) · [Pay with chip](#pay-with) · social sponsored / EOA signs |
 | System | Light/dark tokens, web-haptics + WebAudio, session keys for hint / sound / sidebar |
 
 See `COMPONENT_UPDATE.txt` for the compact behaviour checklist and [CHANGELOG.md](CHANGELOG.md) for release notes.

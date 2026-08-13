@@ -2,12 +2,26 @@
 
 ## Unreleased
 
+### Trade drawer
+- CTA is a gate: **Sign in to buy** → **Deposit to buy** → green **Buy**. Signup/deposit does not auto-trade. README [#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta)
+- Slippage chip unfolds AUTO / 0.5% / 0.3% / custom. Rest chrome stays `--card` (not orange). **Auto** badge is purple `#7B6CF0` + white. README [#slippage](https://github.com/frilo-eth/kby-feed/blob/main/README.md#slippage)
+- You’ll pay accordion (no top hairline). Fee 1.3%. Chart scrolls inside the drawer
+- Pay with: ETH amount + `0 ETH` balance when unsigned. README [#pay-with](https://github.com/frilo-eth/kby-feed/blob/main/README.md#pay-with)
+
+### Deposit
+- Native `<select>` pair for chain + token (Ethereum/Base/Solana). Copy: `Send USDC on Ethereum to this address.` README [#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit)
+- No need amount on Fund your account. (i) on **Your deposit address** explains the mechanic
+
+### Token vs yap
+- `.token-tag` (`$SAUCE`) → `/token?t=SAUCE` (same as View token). Buy / plus still trade. README [#token-page](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-page)
+- OP cannot be liked or disliked (same as tip)
+- Entries wire into the OP comment thread (`wireYapsIntoOpThreads`). Nathan’s kitchen yap + p3dr0u thread live on `sauce.eth`. README [#yap-thread](https://github.com/frilo-eth/kby-feed/blob/main/README.md#yap-thread)
+
 ### Auth, funds, trade
 - Option 4: social/email → embedded sponsored wallet; EOA wallet → signatures on gift/buy/sell. README [#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth)
 - One tray at a time; in-tray steps use `morphSheet` (~320ms Vaul). README [#sheet-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sheet-morph)
-- Deposit: **Deposit $25.00.** Crypto networks unfold Ethereum/Base/Solana without remounting QR. README [#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit)
 - Withdraw: amount → address → review. README [#withdraw](https://github.com/frilo-eth/kby-feed/blob/main/README.md#withdraw)
-- Trade: dollarized buy helpers; sell `%` of holdings; ⇅ USD↔token (`TOKEN_PER_USD`); Pay with chip (ETH/WETH/USDm). README [#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer) · [#pay-with](https://github.com/frilo-eth/kby-feed/blob/main/README.md#pay-with)
+- Trade: dollarized buy helpers; sell `%` of holdings; ⇅ USD↔token (`TOKEN_PER_USD`). README [#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer)
 
 ### `$SAUCE` catalog
 - Default first card is the OP: `sauce.eth` / `public/SAUCE.webp`. `nath4an` / `tabasco4.jpeg` is the second card (Entry). README [#sauce-token](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sauce-token)

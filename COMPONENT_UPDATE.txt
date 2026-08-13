@@ -11,13 +11,14 @@ Feed
 - Media card — shimmer→ready|error; hover topctl; drag-to-comment ghost; aspect --ar
 - Glass mute/more — 46px; pathLength mute↔sound morph; unmute/mute haptics+sounds; session persist
 - Media `…` menu — Reply · Trade · **View token** (OP → `/token` page, not the drawer) / **View in thread** (entry/content) · Token address · Copy link · Share on X · Hide post · Report
-- React rail — tip on yaps only (immutable +$5 float); **no tip on original posts**; like↔dislike exclusive; comment; share; pulse + haptics
+- React rail — tip on yaps only (immutable +$5 float); **no tip / like / dislike on original posts**; comment; share; pulse + haptics
 - Meta — pinned | float-on-media | overlay-mode (`layoutMeta`); pinned flush with media bottom; float inset by PAD (18px)
 - Morphing pill — category `.pill` rest = Dare/Meme; hover/cycle/tap morphs to Original Post (OP) · Entry (Dare) · Content (Meme); `--pill-morph` `.28s` `--ease-out`; overlay labels + measured width (no balloon); `#infoHoverTip`; README `#dare-role-badge`
-- Token vs yap — OP is the token (mini = media, no tip, View token → `/token`). Entry/Content are yaps: mini/plus/drawer use parent token art (`tokenArtOf`); media is the yap; tip + View in thread. README `#token-vs-yap`
+- Token vs yap — OP is the token (mini = media, no tip/vote, View token → `/token`). Entry/Content are yaps: mini/plus/drawer use parent token art (`tokenArtOf`); media is the yap; tip + View in thread. README `#token-vs-yap`
+- Yap thread — `wireYapsIntoOpThreads()`: each same-ticker entry is a media comment on the OP; `commentList` is shared as replies. Nathan’s p3dr0u thread lives on `sauce.eth`. README `#yap-thread`
 - `$SAUCE` — Dare token (drink the Tabasco). First card = OP `sauce.eth` / `SAUCE.webp`; second = nath4an Entry / `tabasco4.jpeg`; also `tabasco6–8.webp`. Token art = OP. README `#sauce-token`
 - Buy CTA — crystal glass `Buy $ticker` on `.token-anchor` (desktop + mobile). Mobile stagger: `+` marquees 2× first, then pill. Desktop: pill cadence + hover Buy bar. Wipe `clip-path: inset(… round 999px)`
-- Trade entry — avatar+ / buy CTA / ticker / mini → trade drawer (not hover card). Desktop pill click still trades; mobile pill tap explains role
+- Trade entry — avatar+ / buy CTA → trade drawer. **Ticker / mini → `/token`**. Desktop pill click still trades; mobile pill tap explains role
 - Hover cards (desktop) — user on uname/avatar; token chart on plus/buy/ticker/mini; pill → info tip (not token card); `>>id` quote card on comment quotes (no CTA)
 - Motion — spring doomscroll; infinite wrap; mid-swipe hides chrome; no mid-swipe/mobile scale; pull-refresh vs wrap
 - 2× hold → lock — hold video ≥240ms → glass `2x` + charge ring + annotation “Hold 3s to lock” (13px/700, 14px under pill); no chevron pulse (`.show.is-charging` in one step); lock survives release; tap badge unlocks (padlock morph + `lock`/`unlock` haptics)
@@ -31,6 +32,7 @@ Comments
 - Drawer — desktop 360 side panel; mobile 86vh sheet + scrim + drag dismiss
 - List — skeleton; empty; staggered `.comment-enter` (roots `--enter-d` ×42ms); fresh send uses `.comment-enter-fresh`
 - Threads — one indent level (`.comment-replies` pad 46/40); reply avatars 28px; collapsed by default
+- Yap thread — entries prepend the OP as media comments; shared `commentList`; `bumpCommentCount` ticks entry + OP. README `#yap-thread`
 - View / hide — `View N replies` → reveal 5 (`REPLY_PAGE`); `View N more`; `Hide` collapses all indented replies
 - `>>id` quotes — Reply prefixes compose; send nests under quoted root; blue `.comment-quote` in list + compose mirror
 - Quote hover — desktop `#quoteHoverCard` on `>>id` (list + mirror); missing id shows “not found”
@@ -43,9 +45,9 @@ Comments
   · caption tip/like/dislike stay synced with the comment row
 
 Overlays
-- Trade drawer — buy/sell; dollarized amount; `$25/$100/$500` buy helpers; sell `25%/50%/All`; ⇅ USD↔token; Pay with ETH/WETH/USDm chip (not a modal). README `#trade-drawer` `#pay-with`
+- Trade drawer — buy/sell; dollarized amount; `$25/$100/$500` buy helpers; sell `25%/50%/All`; ⇅ USD↔token; Pay with ETH/WETH/USDm + amount/balance; slippage AUTO/0.5/0.3/custom (rest chip not orange; Auto badge purple); You’ll pay accordion; CTA Sign in → Deposit → green Buy (no auto-trade). README `#trade-drawer` `#trade-cta` `#slippage` `#pay-with`
 - Auth (Option 4) — social → embedded sponsored; EOA → signatures. One tray at a time. README `#auth`
-- Deposit / Withdraw — `morphSheet` ~320ms Vaul; crypto nets unfold without remounting QR. Copy: Deposit / Withdraw. README `#deposit` `#withdraw` `#sheet-morph`
+- Deposit / Withdraw — `morphSheet` ~320ms Vaul; native chain/token `<select>`s; no need amount; (i) on deposit address. Copy: Deposit / Withdraw. README `#deposit` `#withdraw` `#sheet-morph`
 - Share — desktop modal; mobile sheet; X intent + copy url
   · minicard tint by cat: Dare = blue, Meme = orange; holo foil (idle + pointer)
   · auto-dismiss after Share on X or Copy url (copy flashes “Copied!” then closes)

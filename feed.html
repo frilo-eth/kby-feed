@@ -655,6 +655,7 @@ img.blockie{
 .token-tag{
   display:inline-flex;align-items:center;gap:8px;cursor:pointer;
   border-radius:999px;padding:2px 4px 2px 2px;margin:-2px -4px -2px -2px;
+  color:inherit;text-decoration:none;
   transition:background .18s ease;
 }
 .token-tag .token-mini{
@@ -1400,7 +1401,7 @@ html.dark .kbd-btn.active:hover{background:rgba(255,255,255,.1);}
   }
 }
 
-.token-drawer-chrome{flex-shrink:0;padding:16px 16px 0;background:var(--card);position:relative;z-index:2;}
+.token-drawer-chrome{flex-shrink:0;padding:16px 16px 0;background:var(--card);position:relative;z-index:1;}
 .token-drawer-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
 .token-drawer-identity{display:flex;align-items:center;gap:10px;min-width:0;}
 .token-drawer-av{width:40px;height:40px;object-fit:cover;flex-shrink:0;border-radius:50%;}
@@ -1431,8 +1432,8 @@ html.dark .token-view-btn{background:#f5f5f7;color:#111;}
   --ctrl-op: calc(1 - var(--collapse));
   --mcap-size: calc(26px - var(--collapse) * 8px);
   --canvas-pad: calc(8px - var(--collapse) * 4px);
-  position:relative;
-  margin-bottom:calc(10px - var(--collapse) * 4px);
+  position:relative;overflow:hidden;flex-shrink:0;
+  margin-bottom:calc(14px - var(--collapse) * 4px);
   transition:margin .05s linear;
 }
 .token-chart-meta{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:var(--meta-gap);}
@@ -1494,7 +1495,7 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
 .token-section-tabs{
   display:flex;gap:18px;align-items:flex-end;
   background:transparent;border-radius:0;padding:0;
-  border-bottom:1px solid var(--line);margin:0 0 14px;
+  border-bottom:1px solid var(--line);margin:0;
 }
 .token-section-tab{
   flex:0 0 auto;border:none;background:transparent;color:var(--ink-faint);
@@ -1523,7 +1524,7 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
 .token-drawer-scroll:has(#tokenPanelComments:not([hidden])){
   display:flex;flex-direction:column;padding-bottom:0;overflow:hidden;
 }
-.token-panel{min-height:calc(100% + 148px);}
+.token-drawer-scroll:has(#tokenPanelComments:not([hidden])) .token-chart{display:none !important;}
 .token-panel-comments.token-panel{
   min-height:0;flex:1;display:flex;flex-direction:column;
   margin:0;padding:0;width:auto;
@@ -1544,9 +1545,72 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
   border:1px solid var(--line);background:var(--card);color:var(--ink-soft);
   font-size:11px;font-weight:800;letter-spacing:.04em;padding:7px 10px;border-radius:8px;cursor:pointer;
   display:inline-flex;align-items:center;gap:5px;
+  appearance:none;-webkit-appearance:none;
+  transition:background .15s,border-color .15s,color .15s,transform .12s;
 }
 .trade-auto-btn svg{width:13px;height:13px;opacity:.75;}
-.trade-auto-btn:hover{color:var(--ink);}
+.trade-auto-btn:hover{color:var(--ink);background:color-mix(in srgb, var(--card) 55%, white);}
+.trade-auto-btn.is-open{
+  background:color-mix(in srgb, var(--card) 55%, white);
+  color:var(--ink);
+  border-color:color-mix(in srgb, var(--ink) 22%, var(--line));
+}
+.trade-auto-btn:active{transform:scale(.97);}
+.trade-slip{
+  display:grid;grid-template-rows:0fr;margin:0 0 10px;
+  transition:grid-template-rows .32s cubic-bezier(.32,.72,0,1),margin .32s cubic-bezier(.32,.72,0,1);
+  pointer-events:none;
+}
+.trade-slip.is-open{grid-template-rows:1fr;margin-bottom:12px;pointer-events:auto;}
+.trade-slip-inner{overflow:hidden;min-height:0;}
+.trade-slip-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:2px 0 2px;
+}
+.trade-slip-lab{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:13px;font-weight:600;color:var(--ink);flex-shrink:0;white-space:nowrap;
+}
+.trade-slip-info{
+  width:16px;height:16px;padding:0;border:none;background:transparent;cursor:pointer;
+  color:var(--ink-faint);display:grid;place-items:center;border-radius:50%;
+  appearance:none;-webkit-appearance:none;
+  transition:color .15s,background .15s;
+}
+.trade-slip-info:hover{color:var(--ink);background:color-mix(in srgb, var(--card) 40%, white);}
+.trade-slip-info svg{width:14px;height:14px;display:block;}
+.trade-slip-ctrls{display:flex;align-items:center;gap:6px;min-width:0;}
+.trade-slip-custom{
+  display:flex;align-items:center;gap:1px;
+  height:30px;padding:0 8px 0 9px;min-width:52px;max-width:68px;
+  border:1px solid var(--line);border-radius:8px;background:var(--card);
+  transition:background .15s,border-color .15s;
+}
+.trade-slip-custom:focus-within,
+.trade-slip-custom.is-on{
+  border-color:color-mix(in srgb, var(--ink) 35%, var(--line));
+  background:color-mix(in srgb, var(--card) 55%, white);
+}
+.trade-slip-custom input{
+  width:100%;min-width:0;border:none;background:transparent;outline:none;padding:0;
+  font-size:12px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;
+  caret-color:var(--orange);
+}
+.trade-slip-custom span{font-size:12px;font-weight:700;color:var(--ink-faint);flex-shrink:0;}
+.trade-slip-ctrls > button{
+  height:30px;padding:0 10px;border:1px solid var(--line);border-radius:8px;
+  background:var(--card);color:var(--ink);font-size:11px;font-weight:800;letter-spacing:.03em;
+  cursor:pointer;appearance:none;-webkit-appearance:none;white-space:nowrap;
+  transition:background .15s,border-color .15s,color .15s,transform .12s;
+}
+.trade-slip-ctrls > button:hover{background:color-mix(in srgb, var(--card) 55%, white);}
+.trade-slip-ctrls > button.is-on{
+  background:var(--orange-dim);color:var(--ink);border-color:color-mix(in srgb, var(--orange) 32%, var(--line));
+}
+.trade-slip-ctrls > button:active{transform:scale(.97);}
+@media (prefers-reduced-motion:reduce){
+  .trade-slip{transition:none;}
+}
 .trade-field{
   background:var(--card);border:1px solid var(--line);border-radius:16px;
   padding:12px 14px;margin-bottom:8px;width:100%;text-align:left;
@@ -1558,7 +1622,17 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
   border-color:color-mix(in srgb, var(--ink) 22%, var(--line));
 }
 .trade-field-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;min-height:28px;}
-#tradePayWith .trade-field-top{margin-bottom:0;}
+#tradePayWith .trade-field-top{margin-bottom:8px;}
+.trade-pay-row{
+  display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
+  min-height:36px;
+}
+.trade-pay-row .trade-usd{flex:1;min-width:0;}
+.trade-pay-bal{
+  font-size:13px;font-weight:600;color:var(--ink-faint);
+  flex-shrink:0;padding-bottom:4px;font-variant-numeric:tabular-nums;
+  white-space:nowrap;line-height:1;
+}
 .trade-field-label{font-size:13px;font-weight:600;color:var(--ink-faint);flex-shrink:0;}
 .trade-helpers{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0;}
 .trade-helpers button{
@@ -1620,10 +1694,51 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
 .trade-out:hover{color:var(--ink);}
 .trade-out-swap{font-size:14px;line-height:1;}
 #tradeBuyField.is-token .trade-usd-sign{display:none;}
-.trade-meta{margin:14px 2px 0;display:flex;flex-direction:column;gap:8px;}
-.trade-meta div{display:flex;justify-content:space-between;gap:12px;font-size:13px;font-weight:600;}
-.trade-meta span{color:var(--ink-faint);}
-.trade-meta b{color:var(--ink);font-weight:700;text-align:right;font-variant-numeric:tabular-nums;}
+.trade-meta{margin:12px 2px 0;}
+.trade-meta-sum{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  width:100%;border:none;background:transparent;padding:2px 0;cursor:pointer;
+  font-size:13px;font-weight:600;color:var(--ink-soft);text-align:left;
+  appearance:none;-webkit-appearance:none;
+  transition:color .15s;
+}
+.trade-meta-sum:hover{color:var(--ink);}
+.trade-meta-sum-end{display:inline-flex;align-items:center;gap:6px;flex-shrink:0;}
+.trade-meta-sum-end b{
+  font-weight:600;font-variant-numeric:tabular-nums;color:inherit;
+}
+.trade-meta-chev{
+  width:12px;height:12px;display:block;color:var(--ink-faint);
+  transition:transform .32s cubic-bezier(.32,.72,0,1);
+}
+.trade-meta.is-open .trade-meta-chev{transform:rotate(180deg);}
+.trade-meta-body{
+  display:grid;grid-template-rows:0fr;
+  transition:grid-template-rows .32s cubic-bezier(.32,.72,0,1);
+}
+.trade-meta.is-open .trade-meta-body{grid-template-rows:1fr;}
+.trade-meta-inner{
+  overflow:hidden;min-height:0;
+  display:flex;flex-direction:column;gap:8px;
+  margin-top:8px;
+}
+.trade-meta-inner > div{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  font-size:13px;font-weight:600;
+}
+.trade-meta-inner span{color:var(--ink-faint);}
+.trade-meta-inner b{color:var(--ink-soft);font-weight:600;text-align:right;font-variant-numeric:tabular-nums;}
+.trade-slip-val{display:inline-flex;align-items:center;gap:6px;}
+.trade-slip-auto{
+  display:inline-flex;align-items:center;height:18px;padding:0 7px;border-radius:999px;
+  background:#7B6CF0;color:#fff;
+  font-size:10px;font-weight:800;letter-spacing:.02em;line-height:1;
+}
+.trade-meta-inner .trade-slip-auto{color:#fff;}
+.trade-slip-auto[hidden]{display:none;}
+@media (prefers-reduced-motion:reduce){
+  .trade-meta-chev,.trade-meta-body{transition:none;}
+}
 .buy-btn,.trade-buy-btn{
   margin-top:14px;width:100%;background:#3DDC97;color:#111;border:none;border-radius:14px;
   padding:15px;font-weight:800;font-size:16px;cursor:pointer;
@@ -2209,7 +2324,10 @@ body.cfx-on #drawer{z-index:50;}
 .wallet-modal{width:360px;max-width:calc(100vw - 32px);}
 .sig-modal,.funds-modal{width:340px;max-width:calc(100vw - 32px);}
 .auth-modal.is-flow .auth-head h4{
-  visibility:visible;font-size:16px;font-weight:700;color:var(--ink);text-align:left;
+  visibility:visible;font-size:16px;font-weight:700;color:var(--ink);text-align:center;
+}
+.auth-modal.is-flow .auth-back.show{
+  width:40px;min-width:40px;overflow:visible;visibility:visible;pointer-events:auto;margin:0;
 }
 .auth-modal.is-flow .auth-brand,
 .auth-modal.is-flow .auth-foot{display:none;}
@@ -2539,42 +2657,36 @@ html.dark .flow-method .ic{background:rgba(255,102,34,.18);}
   width:16px;height:16px;border:2px solid rgba(255,255,255,.35);border-top-color:currentColor;
   border-radius:50%;animation:kb-spin .8s linear infinite;
 }
-.flow-select{
-  display:flex;align-items:center;gap:10px;width:100%;
-  border:1px solid var(--line);border-radius:14px;padding:12px 14px;
-  background:var(--card);color:var(--ink);font-size:14px;font-weight:700;cursor:pointer;
-  margin-bottom:12px;
-  appearance:none;-webkit-appearance:none;
+.flow-pickers{display:flex;gap:8px;margin-bottom:10px;}
+.flow-pickers .flow-select-wrap{flex:1;min-width:0;margin:0;}
+.flow-select-wrap{position:relative;display:block;margin-bottom:12px;}
+.flow-select-wrap::after{
+  content:"";position:absolute;right:14px;top:50%;width:0;height:0;margin-top:-2px;
+  border-left:4px solid transparent;border-right:4px solid transparent;
+  border-top:5px solid var(--ink-faint);pointer-events:none;
+}
+select.flow-select{
+  display:block;width:100%;
+  border:1px solid var(--line);border-radius:14px;padding:12px 32px 12px 14px;
+  background:var(--card);color:var(--ink);font-size:14px;font-weight:700;
+  cursor:pointer;appearance:none;-webkit-appearance:none;
   transition:background .15s,border-color .15s;
 }
-.flow-select:hover{background:color-mix(in srgb, var(--card) 55%, white);border-color:color-mix(in srgb, var(--line) 45%, white);}
-.flow-select .chev{margin-left:auto;color:var(--ink-faint);display:inline-block;transition:transform .32s cubic-bezier(.32,.72,0,1);}
-.flow-select.is-open .chev{transform:rotate(180deg);}
-.flow-nets-clip{margin:-4px 0 12px;}
-.flow-nets{display:flex;flex-direction:column;gap:6px;}
-.flow-nets button{
-  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
-  border:1px solid var(--line);border-radius:12px;padding:10px 12px;
-  background:var(--card);color:var(--ink);font-size:13px;font-weight:700;cursor:pointer;
+select.flow-select:hover{background:color-mix(in srgb, var(--card) 55%, white);border-color:color-mix(in srgb, var(--line) 45%, white);}
+select.flow-select:focus{outline:none;border-color:color-mix(in srgb, var(--ink) 22%, var(--line));}
+.flow-copy{font-size:13px;color:var(--ink-soft);line-height:1.45;margin:0 2px 14px;text-align:left;}
+.flow-addr-lab{
+  display:flex;align-items:center;gap:6px;
+  font-size:13px;font-weight:600;color:var(--ink);margin:0 2px 8px;
+}
+.flow-info{
+  width:16px;height:16px;padding:0;border:none;background:transparent;cursor:pointer;
+  color:var(--ink-faint);display:grid;place-items:center;border-radius:50%;
   appearance:none;-webkit-appearance:none;
-  transition:background .15s,border-color .15s;
+  transition:color .15s,background .15s;
 }
-.flow-nets button:hover{background:color-mix(in srgb, var(--card) 55%, white);border-color:color-mix(in srgb, var(--line) 45%, white);}
-.flow-nets button.is-on{border-color:var(--ink);}
-.flow-nets-clip:not([hidden]) .flow-nets button{
-  animation:flow-net-in .32s cubic-bezier(.32,.72,0,1) both;
-}
-.flow-nets-clip:not([hidden]) .flow-nets button:nth-child(2){animation-delay:.05s;}
-.flow-nets-clip:not([hidden]) .flow-nets button:nth-child(3){animation-delay:.1s;}
-@keyframes flow-net-in{
-  from{opacity:0;transform:translateY(-8px);}
-  to{opacity:1;transform:none;}
-}
-@media (prefers-reduced-motion:reduce){
-  .flow-select .chev{transition:none;}
-  .flow-nets-clip:not([hidden]) .flow-nets button{animation:none;}
-}
-.flow-copy{font-size:13px;color:var(--ink-soft);line-height:1.45;margin:0 0 14px;text-align:center;}
+.flow-info:hover{color:var(--ink);background:color-mix(in srgb, var(--card) 40%, white);}
+.flow-info svg{width:14px;height:14px;display:block;}
 .flow-qr-wrap{
   display:grid;place-items:center;padding:12px;margin:0 auto 14px;
   background:#fff;border-radius:16px;width:min(220px,100%);
@@ -3387,7 +3499,9 @@ html.dark .qhc-id{color:#6BA3FF;}
           <button type="button" class="token-section-tab active" role="tab" aria-selected="true" data-tab="trade" id="tokenTabTrade">Trade</button>
           <button type="button" class="token-section-tab" role="tab" aria-selected="false" data-tab="comments" id="tokenTabComments">Comments</button>
         </div>
+      </div>
 
+      <div class="token-drawer-scroll" id="tokenDrawerScroll">
         <div class="token-chart" id="tokenChart" style="--collapse:0">
           <div class="token-chart-meta">
             <div class="token-chart-mcap-block">
@@ -3421,19 +3535,39 @@ html.dark .qhc-id{color:#6BA3FF;}
             </div>
           </div>
         </div>
-      </div>
-
-      <div class="token-drawer-scroll" id="tokenDrawerScroll">
         <div class="token-panel token-panel-trade" id="tokenPanelTrade" data-panel="trade">
           <div class="trade-side-row">
             <div class="trade-side-tabs" id="tradeSideTabs">
               <button type="button" class="active" data-side="buy">Buy</button>
               <button type="button" data-side="sell">Sell</button>
             </div>
-            <button type="button" class="trade-auto-btn" id="tradeAutoBtn" title="Auto settings">
+            <button type="button" class="trade-auto-btn" id="tradeAutoBtn" title="Slippage" aria-expanded="false" aria-controls="tradeSlip">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" stroke="currentColor" stroke-width="1.7"/><path d="M19.4 13.1a1.4 1.4 0 0 0 .3 1.5l.1.1a1.7 1.7 0 1 1-2.4 2.4l-.1-.1a1.4 1.4 0 0 0-1.5-.3 1.4 1.4 0 0 0-.9 1.3V18a1.7 1.7 0 1 1-3.4 0v-.1a1.4 1.4 0 0 0-.9-1.3 1.4 1.4 0 0 0-1.5.3l-.1.1a1.7 1.7 0 1 1-2.4-2.4l.1-.1a1.4 1.4 0 0 0 .3-1.5 1.4 1.4 0 0 0-1.3-.9H6a1.7 1.7 0 1 1 0-3.4h.1a1.4 1.4 0 0 0 1.3-.9 1.4 1.4 0 0 0-.3-1.5l-.1-.1a1.7 1.7 0 1 1 2.4-2.4l.1.1a1.4 1.4 0 0 0 1.5.3h.1a1.4 1.4 0 0 0 .9-1.3V6a1.7 1.7 0 1 1 3.4 0v.1a1.4 1.4 0 0 0 .9 1.3 1.4 1.4 0 0 0 1.5-.3l.1-.1a1.7 1.7 0 1 1 2.4 2.4l-.1.1a1.4 1.4 0 0 0-.3 1.5v.1a1.4 1.4 0 0 0 1.3.9H18a1.7 1.7 0 1 1 0 3.4h-.1a1.4 1.4 0 0 0-1.3.9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
-              AUTO
+              <span id="tradeAutoLbl">AUTO</span>
             </button>
+          </div>
+          <div class="trade-slip" id="tradeSlip" aria-hidden="true">
+            <div class="trade-slip-inner">
+              <div class="trade-slip-row">
+                <div class="trade-slip-lab">
+                  Slippage
+                  <button type="button" class="trade-slip-info" id="tradeSlipInfo" aria-label="What is slippage"
+                    data-tip-title="Slippage"
+                    data-tip-body="The most the price can move while this trade fills. You receive is the minimum after that tolerance. Auto uses 1%.">
+                    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.2V11.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="5.15" r=".85" fill="currentColor"/></svg>
+                  </button>
+                </div>
+                <div class="trade-slip-ctrls">
+                  <label class="trade-slip-custom" id="tradeSlipCustomWrap">
+                    <input id="tradeSlipCustom" value="0" inputmode="decimal" autocomplete="off" aria-label="Custom slippage percent">
+                    <span>%</span>
+                  </label>
+                  <button type="button" data-slip="auto" class="is-on">AUTO</button>
+                  <button type="button" data-slip="0.5">0.5%</button>
+                  <button type="button" data-slip="0.3">0.3%</button>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="trade-field" id="tradeBuyField">
             <div class="trade-field-top">
@@ -3463,11 +3597,35 @@ html.dark .qhc-id{color:#6BA3FF;}
                 <div class="trade-pay-menu" id="tradePayMenu" hidden role="listbox" aria-label="Pay with"></div>
               </div>
             </div>
+            <div class="trade-pay-row">
+              <label class="trade-usd">
+                <input id="tradePayAssetInput" value="0" inputmode="decimal" autocomplete="off" aria-label="Amount in ETH">
+              </label>
+              <span class="trade-pay-bal" id="tradePayBal">0 ETH</span>
+            </div>
           </div>
-          <div class="trade-meta">
-            <div><span>Max slippage</span><b>Auto</b></div>
-            <div><span id="tradeRecvLbl">You receive</span><b id="tradeRecv">653.0K TOKEN</b></div>
-            <div><span id="tradePayAmtLbl">You pay</span><b id="tradePayAmt">$25.00</b></div>
+          <div class="trade-meta" id="tradeMeta">
+            <button type="button" class="trade-meta-sum" id="tradeMetaSum" aria-expanded="false" aria-controls="tradeMetaBody">
+              <span id="tradeMetaSumLbl">You’ll pay</span>
+              <span class="trade-meta-sum-end">
+                <b id="tradeMetaSumVal">$25.33</b>
+                <svg class="trade-meta-chev" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.4 4.2L6 7.8L9.6 4.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </span>
+            </button>
+            <div class="trade-meta-body" id="tradeMetaBody" aria-hidden="true">
+              <div class="trade-meta-inner">
+                <div>
+                  <span>Max slippage</span>
+                  <b class="trade-slip-val">
+                    <span class="trade-slip-auto" id="tradeSlipAuto">Auto</span>
+                    <span id="tradeSlipMeta">1%</span>
+                  </b>
+                </div>
+                <div><span id="tradeRecvLbl">You receive</span><b id="tradeRecv">646.5K TOKEN</b></div>
+                <div><span id="tradePayAmtLbl">You pay</span><b id="tradePayAmt">$25.00</b></div>
+                <div><span id="tradeFeeLbl">Fee (1.30%)</span><b id="tradeFeeAmt">$0.33</b></div>
+              </div>
+            </div>
           </div>
           <button type="button" class="buy-btn trade-buy-btn" id="tradeBuyBtn">Buy</button>
           <div class="trade-pay-note" id="tradePayNote"></div>
@@ -3876,6 +4034,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     flowTimer: 0,
     payAsset: 'eth',
     tradeUnit: 'usd',
+    slipMode: 'auto',
+    slipCustom: '0',
+    slipOpen: false,
+    metaOpen: false,
   };
   function mintWallet(id, extra){
     const src = WALLET_CATALOG[id] || WALLET_CATALOG.mm;
@@ -3977,6 +4139,75 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
 
   const TOKEN_PER_USD = 26120;
+  const AUTO_SLIP_PCT = 1;
+  const PROTOCOL_FEE_PCT = 1.3;
+  function fmtSlipPct(n){
+    const x = Math.round((Number(n) || 0) * 100) / 100;
+    if(Math.abs(x - Math.round(x)) < 1e-9) return Math.round(x) + '%';
+    return x.toFixed(2) + '%';
+  }
+  function slipPct(){
+    if(session.slipMode === 'auto') return AUTO_SLIP_PCT;
+    if(session.slipMode === 'custom'){
+      const n = parseFloat(String(session.slipCustom || '').replace(',', '.'));
+      if(!Number.isFinite(n)) return 0;
+      return Math.min(50, Math.max(0, n));
+    }
+    const n = parseFloat(session.slipMode);
+    return Number.isFinite(n) ? n : AUTO_SLIP_PCT;
+  }
+  function slipMetaLabel(){
+    return fmtSlipPct(slipPct());
+  }
+  function slipChipLabel(){
+    return session.slipMode === 'auto' ? 'AUTO' : slipMetaLabel();
+  }
+  function paintTradeMeta(){
+    const box = document.getElementById('tradeMeta');
+    const sum = document.getElementById('tradeMetaSum');
+    const body = document.getElementById('tradeMetaBody');
+    box?.classList.toggle('is-open', !!session.metaOpen);
+    sum?.setAttribute('aria-expanded', session.metaOpen ? 'true' : 'false');
+    if(body) body.setAttribute('aria-hidden', session.metaOpen ? 'false' : 'true');
+  }
+  function setMetaOpen(open){
+    session.metaOpen = !!open;
+    paintTradeMeta();
+  }
+  function paintSlippage(){
+    const row = document.getElementById('tradeSlip');
+    const autoBtn = document.getElementById('tradeAutoBtn');
+    const lbl = document.getElementById('tradeAutoLbl');
+    const wrap = document.getElementById('tradeSlipCustomWrap');
+    const input = document.getElementById('tradeSlipCustom');
+    const meta = document.getElementById('tradeSlipMeta');
+    const autoTag = document.getElementById('tradeSlipAuto');
+    row?.classList.toggle('is-open', !!session.slipOpen);
+    if(row) row.setAttribute('aria-hidden', session.slipOpen ? 'false' : 'true');
+    autoBtn?.classList.toggle('is-open', !!session.slipOpen);
+    autoBtn?.classList.toggle('is-custom', session.slipMode !== 'auto');
+    autoBtn?.setAttribute('aria-expanded', session.slipOpen ? 'true' : 'false');
+    if(lbl) lbl.textContent = slipChipLabel();
+    wrap?.classList.toggle('is-on', session.slipMode === 'custom');
+    if(input && document.activeElement !== input){
+      input.value = session.slipMode === 'custom' ? String(session.slipCustom || '0') : (input.value || '0');
+    }
+    row?.querySelectorAll('[data-slip]').forEach(btn=>{
+      btn.classList.toggle('is-on', btn.dataset.slip === session.slipMode);
+    });
+    if(meta) meta.textContent = slipMetaLabel();
+    if(autoTag) autoTag.hidden = session.slipMode !== 'auto';
+  }
+  function setSlipOpen(open){
+    session.slipOpen = !!open;
+    paintSlippage();
+  }
+  function setSlipMode(mode, custom){
+    session.slipMode = mode;
+    if(mode === 'custom' && custom != null) session.slipCustom = String(custom);
+    paintSlippage();
+    syncTradeQuote();
+  }
   function formatTokenOut(usd){
     const raw = Math.max(0, Number(usd) || 0) * TOKEN_PER_USD;
     if(raw >= 1e6){
@@ -4028,7 +4259,9 @@ html.dark .qhc-id{color:#6BA3FF;}
     const amt = tradeUsdAmt();
     const ticker = tradeTicker();
     const isSell = document.getElementById('tradeBuyBtn')?.classList.contains('is-sell');
+    const guarded = Math.max(0, amt * (1 - slipPct() / 100));
     const out = formatTokenOut(amt);
+    const minOut = formatTokenOut(guarded);
     const outVal = document.getElementById('tradeOutVal');
     if(outVal) outVal.textContent = session.tradeUnit === 'token' ? usdLabel(amt) : `${out} ${ticker}`;
     const recv = document.getElementById('tradeRecv');
@@ -4036,9 +4269,23 @@ html.dark .qhc-id{color:#6BA3FF;}
     const payAmt = document.getElementById('tradePayAmt');
     const payAmtLbl = document.getElementById('tradePayAmtLbl');
     if(recvLbl) recvLbl.textContent = isSell ? 'You sell' : 'You receive';
-    if(recv) recv.textContent = `${out} ${ticker}`;
+    if(recv) recv.textContent = isSell ? `${out} ${ticker}` : `${minOut} ${ticker}`;
     if(payAmtLbl) payAmtLbl.textContent = isSell ? 'You receive' : 'You pay';
-    if(payAmt) payAmt.textContent = usdLabel(amt);
+    if(payAmt) payAmt.textContent = isSell ? usdLabel(guarded) : usdLabel(amt);
+    const fee = Math.max(0, amt * PROTOCOL_FEE_PCT / 100);
+    const feeLbl = document.getElementById('tradeFeeLbl');
+    const feeAmt = document.getElementById('tradeFeeAmt');
+    if(feeLbl) feeLbl.textContent = `Fee (${fmtSlipPct(PROTOCOL_FEE_PCT)})`;
+    if(feeAmt) feeAmt.textContent = usdLabel(fee);
+    const sumLbl = document.getElementById('tradeMetaSumLbl');
+    const sumVal = document.getElementById('tradeMetaSumVal');
+    if(sumLbl) sumLbl.textContent = isSell ? 'You’ll receive' : 'You’ll pay';
+    if(sumVal) sumVal.textContent = isSell ? usdLabel(Math.max(0, guarded - fee)) : usdLabel(amt + fee);
+    const slipMeta = document.getElementById('tradeSlipMeta');
+    if(slipMeta) slipMeta.textContent = slipMetaLabel();
+    const autoTag = document.getElementById('tradeSlipAuto');
+    if(autoTag) autoTag.hidden = session.slipMode !== 'auto';
+    paintPayAssetField(isSell ? guarded : amt);
     const helpers = document.getElementById('tradeHelpers');
     if(helpers){
       if(isSell){
@@ -4075,18 +4322,25 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
   }
 
+  function tradeCtaState(){
+    const isSell = document.getElementById('tradeBuyBtn')?.classList.contains('is-sell');
+    const a = activeWallet();
+    const amt = tradeUsdAmt();
+    if(!isAuthed()) return 'auth';
+    if(!isSell && (!a || a.bal < amt)) return 'deposit';
+    return 'go';
+  }
   function paintTradeCta(){
     const buyBtn = document.getElementById('tradeBuyBtn');
     const note = document.getElementById('tradePayNote');
     if(!buyBtn) return;
     const isSell = buyBtn.classList.contains('is-sell');
     const a = activeWallet();
-    const amt = tradeUsdAmt();
-    const short = isAuthed() && !isSell && (!a || a.bal < amt);
-    buyBtn.classList.toggle('is-gated', !isAuthed());
-    buyBtn.classList.toggle('is-short', !!short);
-    if(!isAuthed()) buyBtn.textContent = isSell ? 'Sign in to sell' : 'Sign in to buy';
-    else if(short) buyBtn.textContent = 'Deposit to buy';
+    const state = tradeCtaState();
+    buyBtn.classList.toggle('is-gated', state === 'auth');
+    buyBtn.classList.toggle('is-short', state === 'deposit');
+    if(state === 'auth') buyBtn.textContent = isSell ? 'Sign in to sell' : 'Sign in to buy';
+    else if(state === 'deposit') buyBtn.textContent = 'Deposit to buy';
     else buyBtn.textContent = isSell ? 'Sell' : 'Buy';
     const payLabel = document.getElementById('tradePayAssetLabel');
     const asset = PAY_ASSETS[session.payAsset] || PAY_ASSETS.eth;
@@ -4099,21 +4353,48 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(payLbl) payLbl.textContent = isSell ? 'Receive' : 'Pay with';
     if(buyLbl) buyLbl.textContent = isSell ? `Sell ${ticker}` : `Buy ${ticker}`;
     if(note){
-      const show = isAuthed() && !short && needsSig();
+      const show = state === 'go' && needsSig();
       note.classList.toggle('show', show);
       note.textContent = show ? `Confirm in ${a.name}` : '';
     }
     syncTradeQuote();
+    paintSlippage();
+    paintTradeMeta();
   }
 
   const PAY_ETH_ICON = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#627EEA"/><path fill="#fff" fill-opacity=".7" d="M16.5 5v8.2l6.9 3.1z"/><path fill="#fff" d="M16.5 5 9.6 16.3l6.9-3.1z"/><path fill="#fff" fill-opacity=".7" d="M16.5 21.1v5.6L23.5 17.6z"/><path fill="#fff" d="M16.5 26.7v-5.6l-6.9-3.5z"/><path fill="#fff" fill-opacity=".4" d="M16.5 19.8l6.9-3.5-6.9-3.1z"/><path fill="#fff" fill-opacity=".7" d="M9.6 16.3l6.9 3.5v-6.6z"/></svg>';
   const PAY_WETH_ICON = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#E7E7EA"/><path fill="#3D3D40" fill-opacity=".75" d="M16.5 5v8.2l6.9 3.1z"/><path fill="#3D3D40" d="M16.5 5 9.6 16.3l6.9-3.1z"/><path fill="#3D3D40" fill-opacity=".75" d="M16.5 21.1v5.6L23.5 17.6z"/><path fill="#3D3D40" d="M16.5 26.7v-5.6l-6.9-3.5z"/><path fill="#3D3D40" fill-opacity=".4" d="M16.5 19.8l6.9-3.5-6.9-3.1z"/><path fill="#3D3D40" fill-opacity=".75" d="M9.6 16.3l6.9 3.5v-6.6z"/></svg>';
   const PAY_USDM_ICON = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#1B7A4A"/><path fill="#fff" d="M9.2 21.4V10.6h2.4l4.4 7.2 4.4-7.2h2.4v10.8h-2.3v-6.7l-3.4 5.4h-2.2l-3.4-5.4v6.7z"/></svg>';
   const PAY_ASSETS = {
-    eth: { tick: 'ETH', ic: PAY_ETH_ICON },
-    weth: { tick: 'WETH', ic: PAY_WETH_ICON },
-    usdm: { tick: 'USDm', ic: PAY_USDM_ICON },
+    eth: { tick: 'ETH', ic: PAY_ETH_ICON, usd: 3240 },
+    weth: { tick: 'WETH', ic: PAY_WETH_ICON, usd: 3240 },
+    usdm: { tick: 'USDm', ic: PAY_USDM_ICON, usd: 1 },
   };
+  function payAssetOf(){ return PAY_ASSETS[session.payAsset] || PAY_ASSETS.eth; }
+  function payUsdPrice(){ return payAssetOf().usd || 1; }
+  function usdToPayAmt(usd){ return Math.max(0, Number(usd) || 0) / payUsdPrice(); }
+  function payAmtToUsd(raw){ return Math.max(0, Number(raw) || 0) * payUsdPrice(); }
+  function formatPayAssetAmt(usd){
+    const n = usdToPayAmt(usd);
+    if(n <= 0) return '0';
+    if(n >= 100) return n.toFixed(2);
+    if(n >= 1) return String(+n.toFixed(4));
+    return String(+n.toFixed(6));
+  }
+  function paintPayAssetField(usd){
+    const input = document.getElementById('tradePayAssetInput');
+    const bal = document.getElementById('tradePayBal');
+    const asset = payAssetOf();
+    const spend = Math.max(0, Number(usd) || 0);
+    if(input && document.activeElement !== input){
+      input.value = formatPayAssetAmt(spend);
+      input.setAttribute('aria-label', 'Amount in ' + asset.tick);
+    }
+    if(bal){
+      const hold = isAuthed() ? (activeWallet()?.bal || 0) : 0;
+      bal.textContent = formatPayAssetAmt(hold) + ' ' + asset.tick;
+    }
+  }
   function hidePayPicker(){
     const menu = document.getElementById('tradePayMenu');
     const chip = document.getElementById('tradePayChip');
@@ -4333,7 +4614,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(typeof haptic === 'function') haptic('like');
     const short = totalBal() < 1 || (need > 0 && totalBal() < need);
     if(short){
-      openTopUp(need, pending);
+      openTopUp(0, pending);
       return;
     }
     closeLogin();
@@ -4366,7 +4647,7 @@ html.dark .qhc-id{color:#6BA3FF;}
           openWalletModal();
           return;
         }
-        openTopUp(amt, ()=> requireSpend(amt, then, label));
+        openTopUp(0, ()=> requireSpend(amt, then, label));
         return;
       }
       const fire = ()=>{ spendFromActive(amt); then(); };
@@ -4610,7 +4891,35 @@ html.dark .qhc-id{color:#6BA3FF;}
     { id:'base', name:'Base' },
     { id:'solana', name:'Solana' },
   ];
+  const FLOW_USDC_ICON = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#2775CA"/><path fill="#fff" d="M16 8.2c.4 0 .8.3.9.7l.3 1.4c2.3.3 3.8 1.4 3.8 3.3 0 1.6-1.1 2.6-3 3v.1c2.2.4 3.4 1.4 3.4 3.3 0 2.2-1.9 3.5-4.6 3.8v1.5c0 .5-.4.8-.8.8h-.4c-.5 0-.8-.3-.8-.8v-1.4c-2.6-.2-4.3-1.5-4.4-3.6 0-.4.3-.8.8-.8h.3c.4 0 .7.3.8.7.1 1.1 1.3 1.8 3.3 2v-3.2c-2.2-.3-3.3-1.4-3.3-3 0-2 1.6-3.2 4-3.5l-.3-1.4c-.1-.4.3-.8.8-.8H16Zm0 7.8v-2.9c-1.4.2-2.1.8-2.1 1.5 0 .7.6 1.2 2.1 1.4Zm0 5.2c1.6-.2 2.4-.8 2.4-1.7 0-.8-.7-1.3-2.4-1.5V21.2Z"/></svg>';
+  const FLOW_USDT_ICON = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#26A17B"/><path fill="#fff" d="M17.4 14.6V12h4.2V9.2H10.4V12h4.2v2.6C10.8 14.8 9 16 9 17.6c0 1.8 2.2 3.1 5.6 3.3v3.1h2.8v-3.1c3.4-.2 5.6-1.5 5.6-3.3 0-1.6-1.8-2.8-5.6-3Zm-1.4 4.7c-2.8 0-4.6-.8-4.6-1.7s1.8-1.7 4.6-1.7 4.6.8 4.6 1.7-1.8 1.7-4.6 1.7Z"/></svg>';
+  const FLOW_SOL_ICON = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#9945FF"/><path fill="#fff" d="M10.2 19.6c.2-.2.4-.2.6-.2h11.2c.4 0 .6.4.3.7l-2.2 2.2c-.2.2-.4.2-.6.2H8.3c-.4 0-.6-.4-.3-.7l2.2-2.2Zm0-6.8c.2-.2.4-.2.6-.2h11.2c.4 0 .6.4.3.7l-2.2 2.2c-.2.2-.4.2-.6.2H8.3c-.4 0-.6-.4-.3-.7l2.2-2.2ZM21.8 12.4c-.2.2-.4.2-.6.2H10c-.4 0-.6-.4-.3-.7l2.2-2.2c.2-.2.4-.2.6-.2h11.2c.4 0 .6.4.3.7l-2.2 2.2Z"/></svg>';
+  const FLOW_TOKENS = {
+    ethereum: [
+      { id:'eth', tick:'ETH', ic: PAY_ETH_ICON },
+      { id:'usdc', tick:'USDC', ic: FLOW_USDC_ICON },
+      { id:'usdt', tick:'USDT', ic: FLOW_USDT_ICON },
+    ],
+    base: [
+      { id:'eth', tick:'ETH', ic: PAY_ETH_ICON },
+      { id:'usdc', tick:'USDC', ic: FLOW_USDC_ICON },
+    ],
+    solana: [
+      { id:'sol', tick:'SOL', ic: FLOW_SOL_ICON },
+      { id:'usdc', tick:'USDC', ic: FLOW_USDC_ICON },
+    ],
+  };
   function chainOf(id){ return CHAINS.find(c => c.id === id) || CHAINS[0]; }
+  function tokensForNet(net){ return FLOW_TOKENS[net] || FLOW_TOKENS.ethereum; }
+  function tokenOf(f){
+    const list = tokensForNet(f?.net);
+    return list.find(t => t.id === f?.token) || list[0];
+  }
+  function flowDepositCopy(f){
+    const chain = chainOf(f.net).name;
+    const tick = tokenOf(f).tick;
+    return `Send ${tick} on ${chain} to this address.`;
+  }
   function defaultFlow(kind, need){
     const needN = need || 0;
     return {
@@ -4621,10 +4930,10 @@ html.dark .qhc-id{color:#6BA3FF;}
         ? Math.min(25, totalBal() || 0)
         : (needN > 25 ? (needN > 50 ? 100 : 50) : 25),
       net: 'ethereum',
+      token: 'eth',
       addr: '',
       understood: false,
       method: 'Card',
-      netsOpen: false,
     };
   }
   function flowTitle(){
@@ -4659,7 +4968,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       }
       return;
     }
-    if(f.step === 'crypto' || f.step === 'cash'){ f.step = 'home'; f.netsOpen = false; }
+    if(f.step === 'crypto' || f.step === 'cash'){ f.step = 'home'; }
     else if(f.step === 'addr') f.step = 'amount';
     else if(f.step === 'review') f.step = 'addr';
     paintFlowSheet();
@@ -4717,63 +5026,74 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(s.length < 12) return s;
     return s.slice(0,6) + '…' + s.slice(-4);
   }
-  function flowNetsMarkup(f){
-    const chain = chainOf(f.net);
+  function flowSelectEl({ name, aria, value, options }){
     return `
-      <button type="button" class="flow-select${f.netsOpen?' is-open':''}" data-flow-toggle-nets aria-expanded="${f.netsOpen?'true':'false'}">
-        <span class="flow-select-lab">${chain.name}</span>
-        <span class="chev" aria-hidden="true">▾</span>
-      </button>
-      <div class="flow-nets-clip" ${f.netsOpen?'':'hidden'}>
-        <div class="flow-nets">
-          ${CHAINS.map(c => `<button type="button" data-flow-net="${c.id}" class="${c.id===f.net?'is-on':''}">${c.name}</button>`).join('')}
-        </div>
-      </div>`;
+      <label class="flow-select-wrap">
+        <select class="flow-select" data-flow-select="${name}" aria-label="${aria}">
+          ${options.map(o => `<option value="${o.id}" ${o.id===value?'selected':''}>${o.label}</option>`).join('')}
+        </select>
+      </label>`;
   }
-  function flowModalEl(){
-    const host = flowHost();
-    if(host === 'auth') return authOverlay?.querySelector('.auth-modal');
-    if(host === 'wallet') return walletOverlay?.querySelector('.wallet-modal');
-    return fundsOverlay?.querySelector('.funds-modal');
+  function flowNetsMarkup(f){
+    return flowSelectEl({
+      name: 'net',
+      aria: 'Network',
+      value: f.net,
+      options: CHAINS.map(c => ({ id:c.id, label:c.name })),
+    });
   }
-  function setFlowNetsOpen(open){
+  function flowTokenMarkup(f){
+    return flowSelectEl({
+      name: 'token',
+      aria: 'Token',
+      value: tokenOf(f).id,
+      options: tokensForNet(f.net).map(t => ({ id:t.id, label:t.tick })),
+    });
+  }
+  function flowDepositPickersMarkup(f){
+    return `<div class="flow-pickers">${flowNetsMarkup(f)}${flowTokenMarkup(f)}</div>`;
+  }
+  function syncFlowCopy(){
     const f = session.flow;
-    if(!f) return;
-    f.netsOpen = !!open;
-    const body = flowBodyEl();
-    const sel = body?.querySelector('[data-flow-toggle-nets]');
-    const clip = body?.querySelector('.flow-nets-clip');
-    sel?.classList.toggle('is-open', f.netsOpen);
-    sel?.setAttribute('aria-expanded', String(f.netsOpen));
-    morphSheet(flowModalEl(), ()=>{ if(clip) clip.hidden = !f.netsOpen; });
+    const copy = flowBodyEl()?.querySelector('[data-flow-net-copy]');
+    if(!f || !copy) return;
+    copy.textContent = f.kind === 'deposit' ? flowDepositCopy(f) : `You'll receive USDC on ${chainOf(f.net).name}.`;
+  }
+  function paintTokenSelect(){
+    const f = session.flow;
+    const sel = flowBodyEl()?.querySelector('[data-flow-select="token"]');
+    if(!f || !sel) return;
+    const tok = tokenOf(f);
+    sel.innerHTML = tokensForNet(f.net).map(t => `<option value="${t.id}" ${t.id===tok.id?'selected':''}>${t.tick}</option>`).join('');
   }
   function pickFlowNet(id){
     const f = session.flow;
     if(!f) return;
     f.net = id;
-    const chain = chainOf(id);
-    const body = flowBodyEl();
-    const lab = body?.querySelector('.flow-select-lab');
-    if(lab) lab.textContent = chain.name;
-    const copy = body?.querySelector('[data-flow-net-copy]');
-    if(copy){
-      copy.textContent = f.kind === 'deposit'
-        ? `Send any token on ${chain.name} to this address. Send USDC to add to your cash balance.`
-        : `You'll receive USDC on ${chain.name}.`;
-    }
-    body?.querySelectorAll('[data-flow-net]').forEach(b=> b.classList.toggle('is-on', b.dataset.flowNet === id));
-    setFlowNetsOpen(false);
+    const tokens = tokensForNet(id);
+    if(!tokens.some(t => t.id === f.token)) f.token = tokens[0].id;
+    const netSel = flowBodyEl()?.querySelector('[data-flow-select="net"]');
+    if(netSel && netSel.value !== id) netSel.value = id;
+    paintTokenSelect();
+    syncFlowCopy();
+  }
+  function pickFlowToken(id){
+    const f = session.flow;
+    if(!f) return;
+    f.token = id;
+    const sel = flowBodyEl()?.querySelector('[data-flow-select="token"]');
+    if(sel && sel.value !== id) sel.value = id;
+    syncFlowCopy();
   }
   function paintFlowInto(body){
     if(!body) return;
+    if(typeof hideHoverCards === 'function') hideHoverCards(true);
     if(!session.flow) session.flow = defaultFlow('deposit', session.fundsNeed || 0);
     const f = session.flow;
     const chain = chainOf(f.net);
-    const need = session.fundsNeed || 0;
     let html = '';
     if(f.kind === 'deposit' && f.step === 'home'){
       html = `
-        ${need ? `<p class="auth-sub">Deposit ${usdLabel(need)}.</p>` : ''}
         <button type="button" class="flow-method" data-flow-go="crypto">
           <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M7 8h11M15 5l3 3-3 3M17 16H6M9 13l-3 3 3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
           <span><b>Transfer crypto</b><span>No limit · Instant</span></span>
@@ -4793,9 +5113,17 @@ html.dark .qhc-id{color:#6BA3FF;}
     } else if(f.kind === 'deposit' && f.step === 'crypto'){
       const addr = depositAddr();
       html = `
-        ${flowNetsMarkup(f)}
-        <p class="flow-copy" data-flow-net-copy>Send any token on ${chain.name} to this address. Send USDC to add to your cash balance.</p>
+        ${flowDepositPickersMarkup(f)}
+        <p class="flow-copy" data-flow-net-copy>${flowDepositCopy(f)}</p>
         <div class="flow-qr-wrap">${qrSvg(addr)}</div>
+        <div class="flow-addr-lab">
+          Your deposit address
+          <button type="button" class="flow-info" id="flowAddrInfo" aria-label="How deposits work"
+            data-tip-title="Deposit address"
+            data-tip-body="Send only the token and chain selected above. It converts to cash in your account. Other assets sent here won't be credited.">
+            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.2V11.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="5.15" r=".85" fill="currentColor"/></svg>
+          </button>
+        </div>
         <div class="flow-addr"><span>${addr}</span><button type="button" data-flow-copy aria-label="Copy address"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
         <button type="button" class="flow-cta" data-flow-sent>Done</button>`;
     } else if(f.kind === 'deposit' && f.step === 'confirm'){
@@ -4878,16 +5206,20 @@ html.dark .qhc-id{color:#6BA3FF;}
     body.querySelectorAll('[data-flow-tab]').forEach(btn=>{
       btn.addEventListener('click', ()=>{ f.tab = btn.dataset.flowTab; paintFlowSheet(); });
     });
-    body.querySelector('[data-flow-go="crypto"]')?.addEventListener('click', ()=>{ f.step = 'crypto'; f.netsOpen = false; paintFlowSheet(); });
+    body.querySelector('[data-flow-go="crypto"]')?.addEventListener('click', ()=>{ f.step = 'crypto'; paintFlowSheet(); });
     body.querySelectorAll('[data-flow-method]').forEach(btn=>{
       btn.addEventListener('click', ()=>{ f.method = btn.dataset.flowMethod; f.step = 'cash'; paintFlowSheet(); });
     });
-    body.querySelector('[data-flow-toggle-nets]')?.addEventListener('click', ()=>{
-      setFlowNetsOpen(!f.netsOpen);
-    });
-    body.querySelectorAll('[data-flow-net]').forEach(btn=>{
-      btn.addEventListener('click', ()=> pickFlowNet(btn.dataset.flowNet));
-    });
+    body.querySelector('[data-flow-select="net"]')?.addEventListener('change', (e)=> pickFlowNet(e.target.value));
+    body.querySelector('[data-flow-select="token"]')?.addEventListener('change', (e)=> pickFlowToken(e.target.value));
+    const flowAddrInfo = body.querySelector('#flowAddrInfo');
+    if(flowAddrInfo){
+      bindHoverCard(flowAddrInfo, 'info', null, 180);
+      flowAddrInfo.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        showHoverCard('info', null, flowAddrInfo);
+      });
+    }
     body.querySelectorAll('[data-flow-preset]').forEach(btn=>{
       btn.addEventListener('click', ()=>{ f.amt = +btn.dataset.flowPreset; session.fundsAmt = f.amt; paintFlowSheet(); });
     });
@@ -4965,10 +5297,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     }, spinMs);
   }
   function openDeposit(need, then){
-    session.fundsNeed = need || 0;
-    session.fundsAmt = need > 25 ? (need > 50 ? 100 : 50) : 25;
+    session.fundsNeed = 0;
+    session.fundsAmt = 25;
     session.pendingFunds = then || null;
-    session.flow = defaultFlow('deposit', need);
+    session.flow = defaultFlow('deposit', 0);
     const host = flowHost();
     if(host === 'auth'){ setAuthPanel('funds'); return; }
     if(host === 'wallet'){ session.walletView = 'flow'; renderWalletBody(); return; }
@@ -5844,6 +6176,44 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(isOpPost(post)) return post;
     return posts.find(p => p && p.ticker === post.ticker && p.role === 'op') || post;
   }
+  function entryAsYap(post){
+    if(!post.commentList) post.commentList = [];
+    return {
+      user: post.user,
+      time: post.yapTime || '12 h',
+      text: post.desc || '',
+      tips: post.tips || 0,
+      likes: post.likes || 0,
+      xHandle: post.xHandle,
+      media:{
+        type: post.type || 'image',
+        w: post.w,
+        h: post.h,
+        src: post.src,
+        poster: post.poster,
+        tips: post.tips || 0,
+        comments: post.comments || 0,
+        likes: post.likes || 0
+      },
+      replies: post.commentList
+    };
+  }
+  function commentDedupeKey(c){
+    return String(c?.user || '') + '\n' + String(c?.text || '');
+  }
+  function wireYapsIntoOpThreads(){
+    posts.forEach(op => {
+      if(!isOpPost(op)) return;
+      const yaps = posts.filter(p => p !== op && p.ticker === op.ticker && !isOpPost(p));
+      if(!yaps.length) return;
+      const yapComments = yaps.map(entryAsYap);
+      const taken = new Set(yapComments.flatMap(y => (y.replies || []).map(commentDedupeKey)));
+      const native = (op.commentList || []).filter(c => !taken.has(commentDedupeKey(c)));
+      op.commentList = yapComments.concat(native);
+      op.comments = (op.comments || 0) + yaps.reduce((n, p) => n + 1 + (p.comments || 0), 0);
+    });
+  }
+  wireYapsIntoOpThreads();
   function tokenArtOf(post){
     if(!post) return '';
     const token = parentTokenPost(post);
@@ -6678,8 +7048,11 @@ html.dark .qhc-id{color:#6BA3FF;}
     const item = itemEls()[lastActiveIdx];
     if(!item?.classList.contains('media-ready')) return;
     const roll = Math.random();
-    const canTip = !isOpPost(posts[lastActiveIdx]);
-    if(canTip && roll < 0.28){
+    if(isOpPost(posts[lastActiveIdx])){
+      signalActivity('comment', { item, seed: 'cm'+Math.floor(Math.random()*99) });
+      return;
+    }
+    if(roll < 0.28){
       signalActivity('tip', { item, seed: 'tipper'+Math.floor(Math.random()*99) });
     } else if(roll < 0.52){
       signalActivity('comment', { item, seed: 'cm'+Math.floor(Math.random()*99) });
@@ -6698,6 +7071,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       item.dataset.index = i;
       const tokenArt = tokenArtOf(p);
       const canTip = !isOpPost(p);
+      const canVote = canTip;
       const isVideo = p.type==='video' || p.type==='gif';
       const eager = i <= 2;
       const posterLayer = isVideo && p.poster
@@ -6775,8 +7149,8 @@ html.dark .qhc-id{color:#6BA3FF;}
             </div>
             ${canTip ? `<div class="react-col"><button type="button" class="react-btn tip" data-tips="${p.tips}">${svgIcon('tip')}</button><div class="react-count tip-count">${fmt(p.tips)}</div></div>` : ''}
             <div class="react-col"><button type="button" class="react-btn comment">${svgIcon('comment')}</button><div class="react-count comment-count">${fmt(p.comments)}</div></div>
-            <div class="react-col"><button type="button" class="react-btn like" data-likes="${p.likes}">${svgIcon('like')}</button><div class="react-count like-count">${fmt(p.likes)}</div></div>
-            <div class="react-col"><button type="button" class="react-btn dislike">${svgIcon('dislike')}</button><div class="react-count dislike-count"></div></div>
+            ${canVote ? `<div class="react-col"><button type="button" class="react-btn like" data-likes="${p.likes}">${svgIcon('like')}</button><div class="react-count like-count">${fmt(p.likes)}</div></div>
+            <div class="react-col"><button type="button" class="react-btn dislike">${svgIcon('dislike')}</button><div class="react-count dislike-count"></div></div>` : ''}
             <div class="react-col"><button type="button" class="react-btn share">${svgIcon('share')}</button><div class="react-count"></div></div>
           </div>
         </div>
@@ -6784,7 +7158,7 @@ html.dark .qhc-id{color:#6BA3FF;}
           <div class="meta-block">
             <div class="row1"><img class="avatar-sm circle blockie" src="${userAvatar(p.user)}"><div class="uname">@${p.user}</div></div>
             <div class="desc">${p.desc}</div>
-            <div class="meta-tags"><span class="token-tag"><img class="token-mini squircle" src="${tokenArt}" alt=""><span class="tag-ticker">${p.ticker}</span></span>${morphPillHtml(p)}</div>
+            <div class="meta-tags"><a class="token-tag" href="${tokenPageUrl(p)}" aria-label="View ${p.ticker}"><img class="token-mini squircle" src="${tokenArt}" alt=""><span class="tag-ticker">${p.ticker}</span></a>${morphPillHtml(p)}</div>
           </div>
         </div>`;
       track.appendChild(item);
@@ -7031,6 +7405,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       const likeCountEl = item.querySelector('.like-count');
       const dislikeBtn = item.querySelector('.react-btn.dislike');
       const dislikeCountEl = item.querySelector('.dislike-count');
+      if(likeBtn && dislikeBtn){
       // The dislike tally only surfaces when a post has been disliked but has no
       // likes — otherwise the row stays empty and collapses (no phantom gap).
       function refreshDislikeCount(){
@@ -7079,6 +7454,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         signalActivity('dislike', { item, avatar: MY_AVATAR });
       });
       refreshDislikeCount();
+      }
 
       item.querySelector('.react-btn.share').addEventListener('click',(e)=>{
         e.stopPropagation();
@@ -7099,7 +7475,14 @@ html.dark .qhc-id{color:#6BA3FF;}
         if(!e.currentTarget.classList.contains('is-locked')) return;
         unlockSpeed();
       });
-      item.querySelector('.token-tag')?.addEventListener('click',(e)=>{ e.stopPropagation(); openDrawer(posts[item.dataset.index]); haptic('open'); });
+      item.querySelector('.token-tag')?.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        if(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+        e.preventDefault();
+        if(typeof hideHoverCards === 'function') hideHoverCards(true);
+        haptic('open');
+        openTokenPage(posts[item.dataset.index]);
+      });
 
       const postRef = posts[item.dataset.index];
       bindHoverCard(item.querySelector('.avatar-plus'), 'token', postRef, 280);
@@ -8668,8 +9051,8 @@ html.dark .qhc-id{color:#6BA3FF;}
       case 'ArrowUp': case 'k': case 'K': e.preventDefault(); goToIndex(-1); break;
       case ' ': e.preventDefault(); togglePlayPause(itemEls()[lastActiveIdx]); break;
       case 'Enter': e.preventDefault(); goToIndex(e.shiftKey ? -1 : 1); break;
-      case 'l': case 'L': itemEls()[lastActiveIdx].querySelector('.react-btn.like').click(); break;
-      case 'd': case 'D': itemEls()[lastActiveIdx].querySelector('.react-btn.dislike').click(); break;
+      case 'l': case 'L': itemEls()[lastActiveIdx]?.querySelector('.react-btn.like')?.click(); break;
+      case 'd': case 'D': itemEls()[lastActiveIdx]?.querySelector('.react-btn.dislike')?.click(); break;
       case 't': case 'T': itemEls()[lastActiveIdx]?.querySelector('.react-btn.tip')?.click(); break;
       case 'c': case 'C': openComments(posts[lastActiveIdx]); break;
       case 's': case 'S': openShare(posts[lastActiveIdx]); break;
@@ -8922,6 +9305,9 @@ html.dark .qhc-id{color:#6BA3FF;}
   let tokenLiveline = null;
   let tokenDrawerPost = null;
   let tokenDrawerTab = 'trade';
+  let chartCollapse = 0;
+  let chartTouchY = 0;
+  const CHART_COLLAPSE_PX = 160;
   let commentPendingMedia = null;
   let commentObjectUrl = null;
 
@@ -9462,13 +9848,70 @@ html.dark .qhc-id{color:#6BA3FF;}
       }
     };
   }
+  function syncChartScrollLock(){
+    if(!tokenDrawerScroll) return;
+    tokenDrawerScroll.style.touchAction = (tokenDrawerTab === 'trade' && chartCollapse < 1) ? 'none' : 'pan-y';
+  }
   function syncTokenChartCollapse(){
-    if(!tokenChartEl || !tokenDrawerScroll) return;
-    const t = Math.max(0, tokenDrawerScroll.scrollTop);
-    const collapse = Math.max(0, Math.min(1, t / 140));
+    if(!tokenChartEl) return;
+    const collapse = Math.max(0, Math.min(1, chartCollapse));
+    chartCollapse = collapse;
     tokenChartEl.style.setProperty('--collapse', collapse.toFixed(4));
     tokenChartEl.classList.toggle('is-min', collapse > 0.92);
     tokenLiveline?.setCollapse(collapse);
+    syncChartScrollLock();
+  }
+  function setChartCollapse(v){
+    chartCollapse = Math.max(0, Math.min(1, v));
+    syncTokenChartCollapse();
+  }
+  function applyChartCollapseDelta(dy){
+    if(!dy) return 0;
+    const t = tokenDrawerScroll?.scrollTop || 0;
+    if(dy > 0 && chartCollapse < 1 && t <= 0){
+      const next = chartCollapse + dy / CHART_COLLAPSE_PX;
+      setChartCollapse(next);
+      return next >= 1 ? (next - 1) * CHART_COLLAPSE_PX : 0;
+    }
+    if(dy < 0 && t <= 0 && chartCollapse > 0){
+      setChartCollapse(chartCollapse + dy / CHART_COLLAPSE_PX);
+      return 0;
+    }
+    return dy;
+  }
+  function onDrawerChartWheel(e){
+    if(tokenDrawerTab !== 'trade' || tokenChartEl?.hidden || e.ctrlKey) return;
+    let dy = e.deltaY;
+    if(e.deltaMode === 1) dy *= 16;
+    if(e.deltaMode === 2) dy *= 140;
+    if(!dy) return;
+    const t = tokenDrawerScroll?.scrollTop || 0;
+    const collapsing = dy > 0 && chartCollapse < 1 && t <= 0;
+    const expanding = dy < 0 && t <= 0 && chartCollapse > 0;
+    if(!collapsing && !expanding) return;
+    e.preventDefault();
+    const leftover = applyChartCollapseDelta(dy);
+    if(leftover > 0 && tokenDrawerScroll) tokenDrawerScroll.scrollTop += leftover;
+  }
+  function onDrawerChartTouchStart(e){
+    if(!e.touches || !e.touches[0]) return;
+    chartTouchY = e.touches[0].clientY;
+  }
+  function onDrawerChartTouchMove(e){
+    if(tokenDrawerTab !== 'trade' || tokenChartEl?.hidden) return;
+    if(e.target?.closest?.('.token-drawer-head, .sheet-handle, .token-section-tabs')) return;
+    if(!e.touches || !e.touches[0]) return;
+    const y = e.touches[0].clientY;
+    const dy = chartTouchY - y;
+    chartTouchY = y;
+    if(!dy) return;
+    const t = tokenDrawerScroll?.scrollTop || 0;
+    const collapsing = dy > 0 && chartCollapse < 1 && t <= 0;
+    const expanding = dy < 0 && t <= 0 && chartCollapse > 0;
+    if(!collapsing && !expanding) return;
+    e.preventDefault();
+    const leftover = applyChartCollapseDelta(dy);
+    if(leftover > 0 && tokenDrawerScroll) tokenDrawerScroll.scrollTop += leftover;
   }
   function fillTokenDrawerHeader(post){
     tokenDrawerPost = post;
@@ -9544,12 +9987,14 @@ html.dark .qhc-id{color:#6BA3FF;}
     feedWrap?.classList.toggle('comments-open', state.commentsOpen && !!state.focusedComment);
     syncSheetScrim();
     reflowDuringChrome();
+    syncChartScrollLock();
   }
   function closeTokenDrawer(){
     const hadOpen = drawer.classList.contains('open');
     drawer.classList.remove('open');
     state.tradeOpen = false;
     state.commentsOpen = false;
+    setChartCollapse(0);
     hidePayPicker();
     stopTokenLiveline();
     clearCommentDropActive();
@@ -9574,7 +10019,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     fillTokenDrawerHeader(post);
     drawer.classList.add('open');
     if(tokenDrawerScroll) tokenDrawerScroll.scrollTop = 0;
-    syncTokenChartCollapse();
+    setChartCollapse(0);
     startTokenLiveline(post);
     setTokenDrawerTab(tab || 'trade');
     paintTradeCta();
@@ -10057,10 +10502,13 @@ html.dark .qhc-id{color:#6BA3FF;}
   enableSheetDrag(drawer, drawer.querySelector('.token-drawer-head'), closeTokenDrawer, sheetScrim);
 
   tokenDrawerScroll?.addEventListener('scroll', ()=>{
-    syncTokenChartCollapse();
     hideHoverCards(true);
     hidePayPicker();
   }, {passive:true});
+  const tokenDrawerInner = document.getElementById('tokenDrawerInner');
+  tokenDrawerInner?.addEventListener('wheel', onDrawerChartWheel, {passive:false});
+  tokenDrawerInner?.addEventListener('touchstart', onDrawerChartTouchStart, {passive:true});
+  tokenDrawerInner?.addEventListener('touchmove', onDrawerChartTouchMove, {passive:false});
   document.getElementById('tokenSectionTabs')?.addEventListener('click', (e)=>{
     const btn = e.target.closest('[data-tab]');
     if(!btn || !tokenDrawerPost) return;
@@ -10104,8 +10552,60 @@ html.dark .qhc-id{color:#6BA3FF;}
     paintTradeCta();
     haptic('selection');
   });
+  document.getElementById('tradeAutoBtn')?.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    hidePayPicker();
+    setSlipOpen(!session.slipOpen);
+    haptic('selection');
+  });
+  document.getElementById('tradeMetaSum')?.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    setMetaOpen(!session.metaOpen);
+    haptic('selection');
+  });
+  document.getElementById('tradeSlip')?.addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-slip]');
+    if(!btn) return;
+    setSlipMode(btn.dataset.slip);
+    haptic('selection');
+  });
+  const tradeSlipCustom = document.getElementById('tradeSlipCustom');
+  tradeSlipCustom?.addEventListener('focus', ()=>{
+    setSlipMode('custom', tradeSlipCustom.value);
+  });
+  tradeSlipCustom?.addEventListener('input', ()=>{
+    const raw = tradeSlipCustom.value.replace(/[^\d.]/g,'');
+    const parts = raw.split('.');
+    const clean = parts.length > 1 ? parts[0] + '.' + parts.slice(1).join('') : raw;
+    if(clean !== tradeSlipCustom.value) tradeSlipCustom.value = clean;
+    session.slipCustom = clean === '' ? '0' : clean;
+    session.slipMode = 'custom';
+    paintSlippage();
+    syncTradeQuote();
+  });
+  const tradeSlipInfo = document.getElementById('tradeSlipInfo');
+  if(tradeSlipInfo){
+    bindHoverCard(tradeSlipInfo, 'info', null, 180);
+    tradeSlipInfo.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      showHoverCard('info', null, tradeSlipInfo);
+    });
+  }
   document.getElementById('tradePayInput')?.addEventListener('input', ()=>{
     paintTradeCta();
+  });
+  document.getElementById('tradePayAssetInput')?.addEventListener('input', ()=>{
+    const raw = parseFloat(String(document.getElementById('tradePayAssetInput')?.value || '').replace(/,/g,'')) || 0;
+    const usd = payAmtToUsd(raw);
+    const input = document.getElementById('tradePayInput');
+    if(input){
+      input.value = session.tradeUnit === 'token' ? formatTokenInput(usd) : String(+(usd.toFixed(2)));
+    }
+    paintTradeCta();
+  });
+  document.getElementById('tradePayWith')?.addEventListener('click', (e)=>{
+    if(e.target.closest('#tradePaySelect, #tradePayMenu, button')) return;
+    document.getElementById('tradePayAssetInput')?.focus();
   });
   document.getElementById('tradeOut')?.addEventListener('click', (e)=>{
     e.stopPropagation();
@@ -10159,15 +10659,26 @@ html.dark .qhc-id{color:#6BA3FF;}
     const amt = tradeUsdAmt();
     const post = tokenDrawerPost || posts[lastActiveIdx];
     const ticker = post?.ticker || '';
-    if(isSell){
+    const state = tradeCtaState();
+    if(state === 'auth'){
       requireAuth(()=>{
-        const fin = ()=>{
-          haptic('dislike');
-          showToast(needsSig() ? `Sold ${ticker} from ${activeWallet().name}.` : `Sold ${ticker}.`);
-        };
-        if(needsSig()) requestSignature(`Sell ${usdLabel(amt)} ${ticker}`, fin);
-        else fin();
+        paintTradeCta();
+        if(tradeCtaState() === 'deposit') openTopUp(0, ()=> paintTradeCta());
       });
+      return;
+    }
+    if(state === 'deposit'){
+      openTopUp(0, ()=> paintTradeCta());
+      return;
+    }
+    if(isSell){
+      const fin = ()=>{
+        haptic('dislike');
+        showToast(needsSig() ? `Sold ${ticker} from ${activeWallet().name}.` : `Sold ${ticker}.`);
+        paintTradeCta();
+      };
+      if(needsSig()) requestSignature(`Sell ${usdLabel(amt)} ${ticker}`, fin);
+      else fin();
       return;
     }
     requireSpend(amt, ()=>{
@@ -10177,7 +10688,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         ? `Bought ${ticker} from ${activeWallet().name}.`
         : `Bought ${ticker}.`);
       paintTradeCta();
-    }, `${amt ? 'Buy' : 'Buy'} ${usdLabel(amt)} ${ticker}`);
+    }, `Buy ${usdLabel(amt)} ${ticker}`);
   });
 
   /* ---------------- comments drawer ---------------- */
@@ -11105,6 +11616,22 @@ html.dark .qhc-id{color:#6BA3FF;}
     syncCommentSendReady();
   }
 
+  function paintFeedCommentCount(post){
+    const idx = posts.indexOf(post);
+    if(idx < 0) return;
+    const el = itemEls()[idx]?.querySelector('.comment-count');
+    if(el) el.textContent = fmt(post.comments);
+  }
+  function bumpCommentCount(post){
+    if(!post) return;
+    post.comments = (post.comments || 0) + 1;
+    paintFeedCommentCount(post);
+    const op = parentTokenPost(post);
+    if(op && op !== post){
+      op.comments = (op.comments || 0) + 1;
+      paintFeedCommentCount(op);
+    }
+  }
   function sendComment(){
     const text = commentInput.value.trim();
     if(!state.commentsOpen) return;
@@ -11137,7 +11664,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       post.commentList.push(comment);
     }
 
-    post.comments = (post.comments || 0) + 1;
+    bumpCommentCount(post);
     commentsLoadToken++; // cancel any in-flight swap
     const item = itemEls()[lastActiveIdx];
     if(!appendLiveComment(comment, post, {root})){
@@ -11152,8 +11679,6 @@ html.dark .qhc-id{color:#6BA3FF;}
       const scroller = commentsScrollEl();
       if(scroller) scroller.scrollTop = scroller.scrollHeight;
     }
-    const countEl = item?.querySelector('.comment-count');
-    if(countEl) countEl.textContent = fmt(post.comments);
     commentInput.value = '';
     syncCommentInputMirror();
     clearCommentPendingMedia({ keepBlob:true, animate:false });
