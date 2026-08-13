@@ -20,6 +20,7 @@
 - Token mini / plus / drawer use `tokenArtOf()` (parent OP art), not the yap frame
 - Empty token page: `token.html` · `/token?t=SAUCE`. README [#token-page](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-page)
 - `$SAUCE` is a Dare (drink the Tabasco); OP `sauce.eth`. README [#sauce-token](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sauce-token)
+- Pill info tip uses Image vs Video copy (`postMediaNoun`). README [#info-hover-tip](https://github.com/frilo-eth/kby-feed/blob/main/README.md#info-hover-tip)
 
 ### Feed — swipe-silk
 - Wall-clock spring `dt` (same feel on 60/120Hz); critically damped ~0.5s settle; hard flicks ζ≈0.90

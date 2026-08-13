@@ -1190,7 +1190,7 @@ Portal: `#kbHoverPortal`. Stats/chart are deterministic from `hashSeed(user|tick
 |-------|------|-----|
 | `type:"video"` or `"gif"` | **Video** | gif counts as video |
 | `.mp4` / `.webm` / `.mov` src | **Video** | extension fallback |
-| everything else | **Image** | default, including `$SAUCE` OP / nath4an / memes |
+| everything else | **Image** | default, including `$SAUCE` OP and still memes |
 
 Bodies: `{noun} posted by the token creator at launch.` · `{noun} participating on a Dare.` · `{noun} posted on a Meme thread.`
 
