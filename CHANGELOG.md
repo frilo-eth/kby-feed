@@ -9,19 +9,25 @@
 - Pay with: ETH amount + `0 ETH` balance when unsigned. README [#pay-with](https://github.com/frilo-eth/kby-feed/blob/main/README.md#pay-with)
 
 ### Deposit
-- Native `<select>` pair for chain + token (Ethereum/Base/Solana). Copy: `Send USDC on Ethereum to this address.` README [#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit)
-- UI copy is **Add funds**. No need amount in the title. (i) on **Your address** explains the mechanic
+- Hub is **Cash** or **Crypto**; method icons are ink on `--bg`. Empty-account sheet is titled **Fund your account** (hub body TBD); later opens stay **Add funds**. Not forced after signup — showable on `?deposit`. Cash is a MoonPay stand-in (amount, currency pill, payment method, accordion Solana note below Continue). Transfer on MegaETH receive is the MegaETH accepted set (ETH, USDm, USDT0, BTC.b, wstETH, stcUSD, USDe, cUSD). Transfer crypto skips isolated network/token lists and opens a real QR (`qrcode-generator`). Address **Info** is an accordion under the address. Connect wallet is wallet first, then EVM/Solana. README [#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit)
+- UI copy is **Add funds**. No need amount in the title. Short receive hints sit under **I've sent it**
 
 ### Token vs yap
 - `.token-tag` (`$SAUCE`) → `/token?t=SAUCE` (same as View token). Buy / plus still trade. README [#token-page](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-page)
 - OP cannot be liked or disliked (same as tip)
+- Tip totals display as dollars (`$5.00`), including rail, comments, and the +$5.00 float
 - Entries wire into the OP comment thread (`wireYapsIntoOpThreads`). Nathan’s kitchen yap + p3dr0u thread live on `sauce.eth`. README [#yap-thread](https://github.com/frilo-eth/kby-feed/blob/main/README.md#yap-thread)
 
 ### Auth, funds, trade
-- Option 4: social/email → embedded sponsored wallet; EOA wallet → signatures on gift/buy/sell. README [#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth)
+- Account drawer close is the same ✕ as the trade drawer (`share-close`). Confirm still locks it; returning to Account clears that lock.
 - One tray at a time; in-tray steps use `morphSheet` (~320ms Vaul). README [#sheet-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sheet-morph)
 - Send: From / To / amount on one sheet. Linked wallets as destinations + paste any address. README [#send](https://github.com/frilo-eth/kby-feed/blob/main/README.md#send)
 - Trade: dollarized buy helpers; sell `%` of holdings; ⇅ USD↔token (`TOKEN_PER_USD`). README [#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer)
+- Notifications: inbox starts all read (no badge unsigned). Showcase badge pop on [`?notiff`](https://kby-feed.vercel.app/feed?notiff). README [#notifications](https://github.com/frilo-eth/kby-feed/blob/main/README.md#notifications)
+- Signals: same full-height tray as Notifications. Live toast stack is parked. README [#signals](https://github.com/frilo-eth/kby-feed/blob/main/README.md#signals)
+- Theme flip: 400ms lights on/off fade (no circular clip). CSS var interpolations stay frozen so the swap is not a muddy wash.
+- New posts pill (`#newPill`) is parked — it sat on the feed after ~3 min. Pull-to-refresh still works.
+- Icons: [Central Icons](https://www.npmjs.com/package/@central-icons-react/all) sharp (square, stroke 1.5, 16×16). Pools is a custom glyph. README [#icons](https://github.com/frilo-eth/kby-feed/blob/main/README.md#icons)
 
 ### `$SAUCE` catalog
 - Default first card is the OP: `sauce.eth` / `public/SAUCE.webp`. `nath4an` / `tabasco4.jpeg` is the second card (Entry). README [#sauce-token](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sauce-token)
@@ -48,6 +54,7 @@
 - Softer exit rise + smaller idle drift so the flock doesn’t climb the feed over idle time
 
 ### Comments
+- Posting is auth-gated (`requireAuth`): compose, reply, attach, send. Like / dislike (rail, comments, CFX) too. Reading the thread and **Share** stay open. Placeholder **Sign in to comment** until signed in
 - Compose docked to drawer floor; `.comments-body` owns scroll
 - Squircle compose input (`14px`) matching send button
 - Restored 16px gutters (negative-margin panel + `padding:0` conflict had flushed avatars to the edge)

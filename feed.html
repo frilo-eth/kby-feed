@@ -44,6 +44,38 @@ html.dark{
   --ix-like:#33C285;--ix-dislike:#FF6A63;
   color-scheme: dark;
 }
+/* Theme flip: freeze CSS var interpolations so snapshots stay clean.
+   Lighting is a global fade — lights off = old dissolves, lights on = new arrives. */
+html.theme-switching,
+html.theme-switching *{
+  transition:none!important;
+  animation:none!important;
+}
+::view-transition-old(root),
+::view-transition-new(root){
+  animation:none;
+  mix-blend-mode:normal;
+}
+::view-transition-group(root){
+  animation-duration:.4s;
+  animation-timing-function:cubic-bezier(.2,0,0,1);
+}
+html.theme-to-dark::view-transition-old(root){
+  z-index:1;
+  animation:themeLightsOff .4s cubic-bezier(.2,0,0,1) both;
+}
+html.theme-to-dark::view-transition-new(root){z-index:0;}
+html.theme-to-light::view-transition-new(root){
+  z-index:1;
+  animation:themeLightsOn .4s cubic-bezier(.2,0,0,1) both;
+}
+html.theme-to-light::view-transition-old(root){z-index:0;}
+@keyframes themeLightsOff{to{opacity:0;}}
+@keyframes themeLightsOn{from{opacity:0;}}
+@media (prefers-reduced-motion:reduce){
+  html.theme-to-dark::view-transition-old(root),
+  html.theme-to-light::view-transition-new(root){animation:none;}
+}
 *{box-sizing:border-box;}
 body{margin:0;font-family:'Inter',ui-sans-serif,system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);overflow:hidden;-webkit-tap-highlight-color:transparent;}
 button{font-family:inherit;}
@@ -72,12 +104,6 @@ html.dark .side-brand .mark-dark{display:block;}
 .sidebar.collapsed .side-brand{flex:0;justify-content:center;padding:4px;}
 .sidebar.collapsed .word{opacity:0;max-width:0;}
 .side-nav{flex:1;display:flex;flex-direction:column;gap:4px;}
-.side-collapse-btn{margin-top:auto;width:100%;height:38px;border:1px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--ink-soft);font-size:12px;font-weight:700;transition:background .15s,width .32s,padding .32s;}
-.side-collapse-btn:hover{background:var(--line);color:var(--ink);}
-.side-collapse-btn svg{flex-shrink:0;transition:transform .32s cubic-bezier(.65,0,.35,1);}
-.sidebar.collapsed .side-collapse-btn{width:44px;height:44px;padding:0;align-self:center;border-radius:12px;}
-.sidebar.collapsed .side-collapse-btn .collapse-label{display:none;}
-.sidebar.collapsed .side-collapse-btn svg{transform:rotate(180deg);}
 .nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;cursor:pointer;color:var(--ink-soft);font-size:14px;font-weight:600;transition:background .15s,color .15s;white-space:nowrap;overflow:hidden;}
 .nav-item svg{flex-shrink:0;}
 .nav-item .label{transition:opacity .2s,max-width .25s;max-width:140px;overflow:hidden;}
@@ -86,7 +112,8 @@ html.dark .side-brand .mark-dark{display:block;}
 .sidebar.collapsed .label{opacity:0;max-width:0;width:0;margin:0;}
 .nav-item:hover{background:var(--line);color:var(--ink);}
 .nav-item.active{background:var(--orange-dim);color:var(--orange);}
-.nav-item.active svg path{stroke:var(--orange);}
+.nav-item.active svg:not(.ic-fill) path{stroke:var(--orange);}
+.nav-item svg.ic-fill path{fill:currentColor;}
 .main{flex:1;display:flex;flex-direction:column;min-width:0;position:relative;}
 .topbar{height:64px;flex-shrink:0;display:flex;align-items:center;gap:14px;padding:0 22px;border-bottom:1px solid var(--line);z-index:30;background:var(--bg);}
 .search{flex:1;max-width:360px;min-width:0;display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 12px;color:var(--ink-faint);font-size:13px;overflow:hidden;}
@@ -97,10 +124,46 @@ html.dark .side-brand .mark-dark{display:block;}
 @keyframes searchMarquee{from{transform:translateX(0);}to{transform:translateX(var(--mq,0px));}}
 .search svg{flex-shrink:0;opacity:.6;}
 .topbar-spacer{flex:1;}
+.topbar-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .brand-logo{display:none;width:36px;height:36px;object-fit:contain;flex-shrink:0;}
-.icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);transition:transform .15s, background .15s;}
-.icon-btn:hover{background:var(--line);}
+.icon-btn{
+  width:36px;height:36px;border-radius:10px;border:none;background:transparent;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;
+  color:var(--ink-soft);transition:background .15s,color .15s,transform .12s;
+}
+.icon-btn:hover{background:var(--line);color:var(--ink);}
 .icon-btn:active{transform:scale(.9);}
+.icon-btn:focus-visible{outline:2px solid var(--orange);outline-offset:2px;}
+.icon-btn .notif-badge{
+  position:absolute;top:4px;right:3px;min-width:14px;height:14px;padding:0 4px;
+  border-radius:99px;background:var(--orange);color:#fff;
+  font-size:9px;font-weight:800;line-height:14px;letter-spacing:-.02em;
+  display:flex;align-items:center;justify-content:center;pointer-events:none;
+  opacity:0;visibility:hidden;transform:scale(.92);
+  transition:opacity .24s var(--ease-out),transform .24s var(--ease-out),visibility .24s;
+}
+.icon-btn .notif-badge.show{
+  opacity:1;visibility:visible;transform:scale(1);
+}
+.icon-btn .notif-badge.is-pop{animation:notifBadgePop .24s var(--ease-out);}
+.icon-btn .notif-badge.is-bump{animation:notifBadgeBump .16s var(--ease-out);}
+@keyframes notifBadgePop{
+  from{opacity:0;transform:scale(.92);}
+  to{opacity:1;transform:scale(1);}
+}
+@keyframes notifBadgeBump{
+  from{transform:scale(1);}
+  45%{transform:scale(1.08);}
+  to{transform:scale(1);}
+}
+@media (prefers-reduced-motion:reduce){
+  .icon-btn .notif-badge,
+  .icon-btn .notif-badge.show,
+  .icon-btn .notif-badge.is-pop,
+  .icon-btn .notif-badge.is-bump{
+    animation:none;transition:opacity .08s;transform:none;
+  }
+}
 .btn-launch{background:var(--orange);color:#fff;border:none;border-radius:10px;padding:9px 16px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(255,102,34,.35);transition:transform .15s;display:inline-flex;align-items:center;gap:7px;}
 .btn-launch svg{flex-shrink:0;}
 .btn-launch:active{transform:scale(.95);}
@@ -1121,6 +1184,7 @@ html.dark .react-btn{
   font-size:11px;font-weight:700;color:var(--ink-faint);text-align:center;width:100%;line-height:1;
   transition:color .2s ease, opacity .2s ease;
 }
+.tip-count{font-variant-numeric:tabular-nums;white-space:nowrap;letter-spacing:-.03em;width:auto;min-width:100%;}
 .react-count:empty{display:none;}
 /* active reaction colours are a strong semantic signal — they must always win over the
    theme/mobile glass chrome (which otherwise outranks these by specificity in dark mode). */
@@ -1359,6 +1423,56 @@ html.dark .kbd-btn.active{background:rgba(255,255,255,.08);}
 html.dark .kbd-btn.active:hover{background:rgba(255,255,255,.1);}
 .kbd-panel{position:absolute;right:20px;bottom:82px;z-index:25;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-width:200px;transform-origin:bottom right;transform:scale(.9) translateY(10px);opacity:0;pointer-events:none;transition:transform .2s cubic-bezier(.22,1,.36,1), opacity .18s;}
 .kbd-panel.show{transform:scale(1) translateY(0);opacity:1;pointer-events:auto;}
+.sig-dock{display:none!important;} /* parked — live stack felt off */
+.sig-toast-host{
+  width:214px;display:flex;flex-direction:column;align-items:center;
+  pointer-events:none;
+}
+.sig-toast-host:not(:empty) + .sig-stack{margin-top:-52px;}
+.sig-stack{
+  width:214px;display:flex;flex-direction:column;align-items:center;
+  border:none;background:none;padding:0;cursor:pointer;pointer-events:auto;
+  font:inherit;color:inherit;text-align:left;
+}
+.sig-stack:empty{display:none;}
+.sig-dock.is-drawer .sig-stack{visibility:hidden;pointer-events:none;}
+.sig-card{
+  background:var(--card);border:1px solid var(--line);border-radius:8px;
+  min-height:62px;padding:8px 12px;display:flex;align-items:flex-start;gap:8px;
+  width:200px;box-shadow:0 4px 6px rgba(26,21,15,.1);
+  transition:transform .38s cubic-bezier(.32,.72,0,1),opacity .28s ease,width .32s cubic-bezier(.32,.72,0,1);
+  will-change:transform;
+}
+.sig-stack .sig-card + .sig-card{margin-top:-52px;}
+.sig-stack .sig-card:last-child{width:200px;z-index:3;}
+.sig-stack .sig-card:nth-last-child(2){width:208px;z-index:2;}
+.sig-stack .sig-card:nth-last-child(3){width:214px;z-index:1;}
+.sig-stack .sig-card{overflow:hidden;}
+.sig-stack .sig-card:not(.is-front){height:62px;}
+html.dark .sig-card{box-shadow:0 4px 10px rgba(0,0,0,.35);}
+.sig-card.is-vaul{transform:translateY(110%);opacity:.45;}
+.sig-card.is-in{transform:translateY(0);opacity:1;}
+.sig-card.is-out{transform:translateY(16px);opacity:0;}
+.sig-card:not(.is-front) .notif-thumb,
+.sig-card:not(.is-front) .notif-copy{opacity:0;}
+.sig-card.is-toast{
+  min-height:44px;align-items:center;width:200px;z-index:5;pointer-events:auto;
+  font-size:12px;font-weight:600;color:var(--ink);margin-bottom:0;
+}
+.sig-card.is-toast.is-err{color:var(--red);}
+.sig-toast-copy{flex:1;min-width:0;line-height:1.3;}
+.signals-live{display:inline-flex!important;}
+@media (max-width:860px){
+  .sig-dock{
+    right:12px;
+    bottom:calc(var(--mobile-nav-h) + env(safe-area-inset-bottom) + 12px);
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .sig-card,.sig-card.is-vaul,.sig-card.is-in,.sig-card.is-out{
+    transition:opacity .08s ease;transform:none;
+  }
+}
 .kbd-row{display:flex;align-items:center;gap:12px;font-size:13px;color:var(--ink-soft);font-weight:600;}
 .kbd-key{min-width:24px;height:24px;padding:0 5px;border-radius:6px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--ink);background:var(--bg);flex-shrink:0;}
 
@@ -1823,7 +1937,7 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
 .comment-drop-card svg{width:28px;height:28px;opacity:.9;}
 .comment-drop-hint{font-size:14px;font-weight:700;letter-spacing:.01em;color:var(--orange);}
 html.dark .comment-drop-card{background:rgba(255,102,34,.1);border-color:rgba(255,102,34,.5);}
-.comment-skel{display:flex;gap:10px;align-items:flex-start;pointer-events:none;}
+.comment-skel{display:flex;gap:10px;align-items:flex-start;pointer-events:none;padding:8px 10px;}
 .comment-skel-avatar{width:36px;height:36px;border-radius:50%;flex-shrink:0;background:var(--line);position:relative;overflow:hidden;}
 .comment-skel-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;padding-top:2px;}
 .comment-skel-line{height:11px;border-radius:6px;background:var(--line);position:relative;overflow:hidden;}
@@ -1877,7 +1991,7 @@ html.dark .comment-skel-line::after{background:linear-gradient(105deg,transparen
 }
 .comments-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--ink-faint);padding:40px 20px;text-align:center;}
 .comments-empty svg{opacity:.5;}
-.comment-item{display:flex;gap:10px;align-items:flex-start;border-radius:14px;transition:background .22s cubic-bezier(.23,1,.32,1);}
+.comment-item{display:flex;gap:10px;align-items:flex-start;border-radius:14px;padding:8px 10px;transition:background .22s cubic-bezier(.23,1,.32,1);}
 .comment-thread{display:flex;flex-direction:column;gap:0;}
 .comment-replies{display:flex;flex-direction:column;gap:14px;padding:12px 0 0 46px;}
 .comment-replies:empty{display:none;padding:0;}
@@ -2364,7 +2478,7 @@ body.cfx-on #drawer{z-index:50;}
   .share-modal,.auth-modal,.wallet-modal,.sig-modal,.funds-modal,.swap-modal{width:100%!important;max-width:none!important;}
   .share-head{padding-top:22px;}
   .share-body{padding-bottom:calc(env(safe-area-inset-bottom) + 18px);}
-  .auth-head,.wallet-head,.sig-head,.funds-head,.swap-head{padding-top:22px;}
+  .auth-head,.wallet-head,.sig-head,.funds-head,.swap-head,.notif-head{padding-top:22px;}
   .auth-body,.wallet-body,.sig-body,.funds-body,.swap-body{padding-bottom:calc(env(safe-area-inset-bottom) + 18px);}
 }
 
@@ -2393,6 +2507,8 @@ body.cfx-on #drawer{z-index:50;}
   .wallet-overlay .wallet-head{flex-shrink:0;padding:16px 16px 0;}
   .wallet-overlay .wallet-body{flex:1;min-height:0;max-height:none;}
   .wallet-overlay .sheet-handle{display:none;}
+  /* Signals = same full-bleed tray as Notifications. Do not cap height. */
+  #signalsOverlay .wallet-modal{height:100%;max-height:none;border-radius:0;}
 }
 @media (prefers-reduced-motion:reduce){
   .wallet-overlay,.wallet-overlay .wallet-modal{transition:none;}
@@ -2428,6 +2544,107 @@ body.cfx-on #drawer{z-index:50;}
 .wallet-head .auth-back.show,.funds-head .auth-back.show{
   width:40px;min-width:40px;overflow:visible;
 }
+.wallet-head-actions{
+  display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto;
+}
+.notif-head{
+  align-items:center;padding-bottom:12px;
+}
+.notif-head-title{
+  display:flex;align-items:center;gap:6px;min-width:0;flex:1;
+}
+.notif-head-title svg{width:16px;height:16px;flex-shrink:0;color:var(--ink-soft);}
+.notif-head h4{flex:none;margin:0;font-size:14px;font-weight:700;color:var(--ink);letter-spacing:.01em;}
+.notif-count-pill{
+  min-width:16px;height:16px;padding:0 6px;border-radius:99px;
+  background:#FFB38B;color:#610000;font-size:10px;font-weight:700;
+  display:none;align-items:center;justify-content:center;line-height:1;
+}
+html.dark .notif-count-pill{background:rgba(255,102,34,.35);color:#FFE4D6;}
+.notif-count-pill.show{display:inline-flex;}
+.notif-tabs{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:0 12px;border-bottom:1px solid var(--line);flex-shrink:0;
+}
+.notif-tab-list{display:flex;align-items:center;gap:8px;}
+.notif-tab{
+  border:none;background:none;padding:12px 0;margin:0;
+  font-size:12px;font-weight:700;color:var(--ink-faint);cursor:pointer;
+  box-shadow:inset 0 -2px 0 transparent;transition:color .15s,box-shadow .15s;
+}
+.notif-tab:hover{color:var(--ink-soft);}
+.notif-tab.active{color:var(--ink);box-shadow:inset 0 -2px 0 var(--ink);}
+.notif-tab-actions{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.notif-mark{
+  border:none;background:none;padding:0;cursor:pointer;
+  font-size:12px;font-weight:700;color:#B50023;
+  transition:opacity .15s,color .15s;
+}
+.notif-mark:hover{color:var(--red);}
+.notif-mark:disabled{opacity:.35;cursor:default;}
+html.dark .notif-mark{color:#FF8A96;}
+.notif-gear{
+  width:28px;height:28px;border:none;background:transparent;border-radius:8px;
+  color:var(--ink-faint);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;
+  transition:background .15s,color .15s;
+}
+.notif-gear:hover{background:var(--line);color:var(--ink);}
+.notif-gear svg{width:16px;height:16px;display:block;}
+.wallet-overlay .notif-body{padding:0;max-height:none;}
+@media (min-width:861px){
+  .wallet-overlay .notif-body{flex:1;min-height:0;overflow-y:auto;}
+}
+#signalsOverlay .notif-body{flex:1;min-height:0;overflow-y:auto;}
+.notif-group{
+  display:flex;align-items:center;padding:12px 12px 8px;
+  font-size:12px;font-weight:700;color:var(--ink-faint);
+}
+.notif-group.is-sub{padding:8px 12px;font-size:10px;font-weight:600;letter-spacing:.02em;}
+.notif-row{
+  display:flex;align-items:flex-start;gap:8px;width:100%;
+  min-height:56px;padding:8px 12px;cursor:pointer;
+  border:none;background:none;font:inherit;color:inherit;text-align:left;
+  transition:background .15s;
+}
+.notif-row:hover{background:color-mix(in srgb, var(--card) 62%, white);}
+html.dark .notif-row:hover{background:rgba(255,255,255,.04);}
+.notif-thumb{position:relative;width:32px;height:32px;flex-shrink:0;}
+.notif-thumb .notif-av{
+  width:32px;height:32px;border-radius:50%;object-fit:cover;display:block;
+}
+.notif-thumb.is-media .notif-media{
+  width:32px;height:32px;border-radius:8px;object-fit:cover;display:block;
+}
+.notif-thumb.is-media .notif-av{
+  position:absolute;left:-4px;top:20px;width:20px;height:20px;
+  border:1.5px solid var(--card);border-radius:50%;
+}
+.notif-badge-ic{
+  position:absolute;left:-4px;top:20px;width:16px;height:16px;padding:2px;
+  border-radius:4px;background:var(--card);border:1px solid var(--card);
+  display:flex;align-items:center;justify-content:center;color:var(--ink-soft);
+}
+.notif-badge-ic svg{width:12px;height:12px;display:block;}
+.notif-badge-ic.is-buy{color:var(--green);}
+.notif-badge-ic.is-sell{color:var(--red);}
+.notif-badge-ic.is-launch{color:#7B6CF0;}
+.notif-badge-ic.is-fire{color:var(--orange);}
+.notif-badge-ic.is-comment{color:var(--ix-comment);}
+.notif-copy{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.notif-line1{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+.notif-user{font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.notif-meta{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+.notif-dot{width:8px;height:8px;border-radius:50%;background:var(--orange);flex-shrink:0;}
+.notif-time{font-size:10px;font-weight:500;color:var(--ink-faint);letter-spacing:.02em;white-space:nowrap;}
+.notif-action{
+  display:flex;align-items:center;gap:4px;min-width:0;
+  font-size:12px;font-weight:400;color:var(--ink);white-space:nowrap;
+}
+.notif-action .dot{color:var(--ink);}
+.notif-ref{color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;}
+.notif-ref.is-id{color:var(--quote-blue,#2B6DE8);font-weight:700;}
+.notif-snip{font-size:12px;color:var(--ink-faint);line-height:1.2;max-height:54px;overflow:hidden;}
+.notif-empty{padding:40px 20px;text-align:center;font-size:13px;font-weight:600;color:var(--ink-faint);}
 .auth-back{
   width:40px;height:40px;border:none;border-radius:10px;background:transparent;
   color:var(--ink-soft);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;padding:0;
@@ -2518,6 +2735,7 @@ html.dark .auth-email-go{background:rgba(255,255,255,.08);}
 }
 .auth-wrow:hover{background:color-mix(in srgb, var(--card) 62%, white);border-color:color-mix(in srgb, var(--line) 55%, white);}
 .auth-wrow:active{transform:scale(.985);}
+.auth-wrow .auth-chev{margin-left:auto;color:var(--ink-soft);width:14px;height:14px;flex-shrink:0;}
 .auth-wicon{
   position:relative;width:36px;height:36px;border-radius:10px;flex-shrink:0;
   display:grid;place-items:center;overflow:visible;font-size:18px;color:#fff;
@@ -2728,7 +2946,7 @@ html.dark .kb-wrow.is-add .kb-wrow-av.ic{background:rgba(255,255,255,.08);}
 }
 
 .funds-amt{font-size:28px;font-weight:800;letter-spacing:-.04em;margin:4px 0 12px;}
-.funds-presets{display:flex;gap:8px;margin-bottom:14px;}
+.funds-presets{display:flex;gap:8px;margin:6px 0 20px;}
 .funds-presets button{
   flex:1;border:1px solid var(--line);border-radius:12px;padding:9px 0;
   background:var(--card);color:var(--ink);font-size:13px;font-weight:700;cursor:pointer;
@@ -2781,13 +2999,65 @@ html.dark .auth-detected{color:#4ade80;background:rgba(31,164,99,.18);}
 }
 .flow-method:hover{background:color-mix(in srgb, var(--card) 55%, white);border-color:color-mix(in srgb, var(--line) 45%, white);}
 .flow-method:active{transform:scale(.985);}
-.flow-method .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--orange-dim);flex-shrink:0;color:var(--orange);}
-html.dark .flow-method .ic{background:rgba(255,102,34,.18);}
-.flow-method .ic svg{width:18px;height:18px;display:block;}
+.flow-method .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--bg);flex-shrink:0;color:var(--ink);}
+.flow-method .ic svg{width:16px;height:16px;display:block;}
 .flow-method .end svg{width:14px;height:14px;display:block;}
+.flow-method-copy{min-width:0;flex:1;}
 .flow-method b{display:block;font-size:14px;font-weight:700;color:var(--ink);}
-.flow-method span{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);margin-top:2px;}
-.flow-method .end{margin-left:auto;color:var(--ink-soft);display:flex;gap:4px;font-size:13px;font-weight:700;}
+.flow-method-sub{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);margin-top:2px;}
+.flow-method .flow-chips{margin-top:8px;}
+.flow-method .end{margin-left:auto;color:var(--ink-soft);display:flex;align-items:center;flex-shrink:0;}
+.flow-chips{display:flex;gap:4px;flex-shrink:0;}
+.flow-chips i{
+  width:18px;height:18px;border-radius:50%;overflow:hidden;display:grid;place-items:center;
+  background:var(--card);border:1px solid var(--line);
+}
+.flow-chips i svg,.flow-chips i img{width:18px;height:18px;display:block;}
+.flow-select.is-lock{cursor:default;opacity:.88;}
+.flow-select.is-lock:hover{background:var(--card);border-color:var(--line);}
+.flow-skel{
+  height:52px;border-radius:16px;margin-bottom:8px;
+  background:color-mix(in srgb, var(--line) 55%, var(--card));
+}
+.flow-pick-row{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:12px 14px;margin-bottom:8px;font-size:15px;font-weight:700;color:var(--ink);cursor:pointer;
+  appearance:none;-webkit-appearance:none;
+  transition:background .15s,border-color .15s,transform .12s;
+}
+.flow-pick-row:hover{background:color-mix(in srgb, var(--card) 62%, white);border-color:color-mix(in srgb, var(--line) 55%, white);}
+.flow-pick-row:active{transform:scale(.985);}
+.flow-pick-row .ic{
+  width:28px;height:28px;border-radius:50%;overflow:hidden;flex-shrink:0;
+  display:grid;place-items:center;
+}
+.flow-pick-row .ic svg{width:28px;height:28px;display:block;}
+.flow-pick-row .end{margin-left:auto;color:var(--ink-soft);width:14px;height:14px;flex-shrink:0;}
+.flow-pick-row .ic img{width:28px;height:28px;display:block;}
+.flow-empty{
+  text-align:center;padding:28px 8px;font-size:13px;font-weight:600;color:var(--ink-faint);
+}
+.flow-watch{
+  display:flex;align-items:center;gap:10px;margin-top:14px;
+  font-size:13px;font-weight:600;color:var(--ink-soft);
+}
+.flow-watch .spin{
+  width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--orange);
+  border-radius:50%;animation:kb-spin .8s linear infinite;flex-shrink:0;
+}
+.flow-bal-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px;background:var(--card);
+}
+.flow-bal-row b{display:block;font-size:14px;font-weight:700;}
+.flow-bal-row span{font-size:12px;font-weight:600;color:var(--ink-faint);}
+.flow-dis{
+  display:inline-flex;align-items:center;gap:6px;margin-left:auto;
+  border:none;background:none;color:var(--ink-soft);font-size:12px;font-weight:700;cursor:pointer;
+  appearance:none;-webkit-appearance:none;
+}
+.flow-dis:hover{color:var(--ink);}
 .flow-cta{
   display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
   border:none;border-radius:14px;padding:13px 16px;margin-top:12px;
@@ -2917,16 +3187,22 @@ html.dark .flow-method .ic{background:rgba(255,102,34,.18);}
 .flow-pickers .flow-select-wrap{flex:1;min-width:0;margin:0;}
 .flow-select-wrap{position:relative;display:block;margin-bottom:12px;}
 .flow-select{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
-  border:1px solid var(--line);border-radius:14px;padding:12px 14px;
+  display:flex;align-items:center;gap:10px;width:100%;
+  border:1px solid var(--line);border-radius:14px;padding:10px 12px;
   background:var(--card);color:var(--ink);font-size:14px;font-weight:700;
   cursor:pointer;appearance:none;-webkit-appearance:none;text-align:left;
   transition:background .15s,border-color .15s;
 }
+.flow-select-ic{
+  width:20px;height:20px;border-radius:50%;overflow:hidden;flex-shrink:0;
+  display:grid;place-items:center;
+}
+.flow-select-ic img,.flow-select-ic svg{width:20px;height:20px;display:block;}
+.flow-select [data-flow-label]{flex:1;min-width:0;}
 .flow-select:hover{background:color-mix(in srgb, var(--card) 55%, white);border-color:color-mix(in srgb, var(--line) 45%, white);}
 .flow-select[aria-expanded="true"]{border-color:color-mix(in srgb, var(--ink) 22%, var(--line));}
 .flow-select-chev{
-  width:0;height:0;flex-shrink:0;margin-top:1px;
+  width:0;height:0;flex-shrink:0;margin-top:1px;margin-left:auto;
   border-left:4px solid transparent;border-right:4px solid transparent;
   border-top:5px solid var(--ink-faint);
 }
@@ -2935,22 +3211,52 @@ html.dark .flow-method .ic{background:rgba(255,102,34,.18);}
   background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);
   transform:scale(.94) translateY(-4px);transform-origin:top left;
   opacity:0;pointer-events:none;transition:transform .14s,opacity .14s;
+  max-height:min(52vh,360px);overflow-y:auto;
 }
 .flow-select-menu.show{opacity:1;transform:scale(1) translateY(0);pointer-events:auto;}
 .flow-select-menu button{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+  display:flex;align-items:center;gap:10px;width:100%;
   text-align:left;background:none;border:none;padding:9px 12px;border-radius:8px;
   font-size:13px;font-weight:500;color:var(--ink);cursor:pointer;
 }
+.flow-select-menu .flow-select-ic{width:22px;height:22px;}
+.flow-select-menu .flow-select-ic img,.flow-select-menu .flow-select-ic svg{width:22px;height:22px;}
+.flow-select-menu span{flex:1;min-width:0;}
+.flow-select-menu span em{display:block;font-style:normal;font-size:11px;font-weight:600;color:var(--ink-faint);margin-top:1px;}
 .flow-select-menu button:hover{background:var(--line);}
 .flow-select-menu button.is-on{font-weight:700;}
-.flow-select-check{width:16px;height:16px;flex-shrink:0;opacity:0;color:var(--ink);}
+.flow-select-check{width:16px;height:16px;flex-shrink:0;opacity:0;color:var(--ink);margin-left:auto;}
 .flow-select-menu button.is-on .flow-select-check{opacity:1;}
 .flow-copy{font-size:13px;color:var(--ink-soft);line-height:1.45;margin:0 2px 14px;text-align:left;}
 .flow-addr-lab{
   display:flex;align-items:center;gap:6px;
   font-size:13px;font-weight:600;color:var(--ink);margin:0 2px 8px;
 }
+.flow-qr-info{
+  margin-left:auto;display:inline-flex;align-items:center;gap:4px;
+  border:none;background:transparent;cursor:pointer;padding:4px 2px;
+  font-size:13px;font-weight:700;color:var(--ink-soft);
+  appearance:none;-webkit-appearance:none;
+}
+.flow-qr-info:hover{color:var(--ink);}
+.flow-qr-info .flow-note-chev{margin-top:0;color:currentColor;}
+.flow-addr-block.is-open .flow-qr-info .flow-note-chev{transform:rotate(180deg);transition-duration:.24s;}
+.flow-qr-info-panel{
+  display:grid;grid-template-rows:0fr;
+  transition:grid-template-rows .16s var(--ease-out);
+}
+.flow-addr-block.is-open .flow-qr-info-panel{grid-template-rows:1fr;transition-duration:.24s;}
+.flow-qr-info-clip{overflow:hidden;min-height:0;}
+.flow-qr-info-card{
+  margin-top:8px;padding:10px 14px;border-radius:14px;
+  border:1px solid var(--line);background:var(--card);
+  opacity:0;transform:translateY(-4px);
+  transition:opacity .16s var(--ease-out),transform .16s var(--ease-out);
+}
+.flow-addr-block.is-open .flow-qr-info-card{opacity:1;transform:none;transition-duration:.24s;}
+.flow-qr-info-card .flow-kv{padding:6px 0;}
+.flow-qr-info-card .flow-kv:first-child{padding-top:2px;}
+.flow-qr-info-card .flow-kv:last-child{padding-bottom:2px;}
 .flow-info{
   width:16px;height:16px;padding:0;border:none;background:transparent;cursor:pointer;
   color:var(--ink-faint);display:grid;place-items:center;border-radius:50%;
@@ -2960,10 +3266,21 @@ html.dark .flow-method .ic{background:rgba(255,102,34,.18);}
 .flow-info:hover{color:var(--ink);background:color-mix(in srgb, var(--card) 40%, white);}
 .flow-info svg{width:14px;height:14px;display:block;}
 .flow-qr-wrap{
-  display:grid;place-items:center;padding:12px;margin:0 auto 14px;
-  background:#fff;border-radius:16px;width:min(220px,100%);
+  position:relative;display:grid;place-items:center;padding:14px;margin:0 auto 16px;
+  background:#fff;border-radius:24px;width:min(228px,100%);
 }
-.flow-qr-wrap svg{width:100%;height:auto;display:block;fill:#111;}
+.flow-qr-wrap > svg{width:100%;height:auto;display:block;fill:#111;color:#111;}
+.flow-qr-logo{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:48px;height:48px;border-radius:50%;background:#fff;color:#111;
+  display:grid;place-items:center;overflow:visible;
+}
+.flow-qr-logo img,.flow-qr-logo > svg{width:32px;height:32px;display:block;border-radius:50%;}
+.flow-qr-logo .net{
+  position:absolute;right:-2px;bottom:-2px;width:16px;height:16px;border-radius:50%;
+  background:#fff;display:grid;place-items:center;overflow:hidden;
+}
+.flow-qr-logo .net img,.flow-qr-logo .net svg{width:14px;height:14px;display:block;}
 .flow-addr{
   display:flex;align-items:center;gap:8px;
   border:1px solid var(--line);border-radius:14px;padding:8px 10px 8px 12px;background:var(--card);
@@ -3004,7 +3321,7 @@ html.dark .flow-method .ic{background:rgba(255,102,34,.18);}
 }
 .flow-warn label{display:flex;align-items:flex-start;gap:8px;font-weight:700;color:var(--ink);margin-bottom:8px;cursor:pointer;}
 .flow-warn ul{margin:0;padding-left:18px;}
-.flow-big{text-align:center;padding:12px 8px 4px;}
+.flow-big{text-align:center;padding:4px 8px 10px;}
 .flow-big .lbl{font-size:12px;font-weight:600;color:var(--ink-faint);margin-bottom:6px;}
 .flow-big .amt{font-size:40px;font-weight:800;letter-spacing:-.04em;color:var(--ink);line-height:1.05;}
 .flow-big label.amt{
@@ -3022,6 +3339,96 @@ html.dark .flow-method .ic{background:rgba(255,102,34,.18);}
 .flow-big.is-over .amt,
 .flow-big.is-over .amt input{color:var(--red);caret-color:var(--red);}
 .flow-big .sub.is-err{color:var(--red);}
+.flow-note{
+  display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;
+  margin:16px 0 0;padding:12px 14px;border-radius:14px;
+  border:1px solid var(--line);
+  background:var(--card);color:var(--ink-soft);
+  cursor:pointer;appearance:none;-webkit-appearance:none;
+  opacity:0;transform:translateY(6px);
+}
+.flow-note.is-in{
+  opacity:1;transform:none;
+  transition:opacity .24s var(--ease-out),transform .24s var(--ease-out),background .15s,border-color .15s;
+}
+.flow-note.is-out{
+  opacity:0;transform:translateY(6px);
+  transition:opacity .16s var(--ease-out),transform .16s var(--ease-out);
+  pointer-events:none;
+}
+.flow-note:hover{background:color-mix(in srgb, var(--card) 55%, white);border-color:color-mix(in srgb, var(--line) 45%, white);}
+.flow-note-ic{width:16px;height:16px;flex-shrink:0;margin-top:1px;color:var(--coffee);}
+.flow-note-ic svg{width:16px;height:16px;display:block;}
+.flow-note-copy{min-width:0;flex:1;}
+.flow-note-head{display:flex;align-items:flex-start;gap:8px;}
+.flow-note b{display:block;flex:1;min-width:0;font-size:13px;font-weight:700;color:var(--ink-soft);}
+.flow-note-chev{
+  width:12px;height:12px;flex-shrink:0;margin-top:3px;color:var(--ink-faint);
+  transition:transform .16s var(--ease-out);
+}
+.flow-note.is-open .flow-note-chev{transform:rotate(180deg);transition-duration:.24s;}
+.flow-note-panel{
+  display:grid;grid-template-rows:0fr;
+  transition:grid-template-rows .16s var(--ease-out);
+}
+.flow-note.is-open .flow-note-panel{grid-template-rows:1fr;transition-duration:.24s;}
+.flow-note-clip{overflow:hidden;min-height:0;}
+.flow-note-body{
+  display:block;margin:6px 0 0;font-size:12px;font-weight:600;line-height:1.45;color:var(--ink-faint);
+  opacity:0;transform:translateY(-4px);
+  transition:opacity .16s var(--ease-out),transform .16s var(--ease-out);
+}
+.flow-note.is-open .flow-note-body{opacity:1;transform:none;transition-duration:.24s;}
+.flow-ccy{
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  width:fit-content;margin:0 auto 10px;border:1px solid var(--line);border-radius:999px;
+  padding:6px 10px 6px 12px;background:var(--card);
+  font-size:12px;font-weight:700;color:var(--ink);
+  cursor:pointer;appearance:none;-webkit-appearance:none;
+}
+.flow-ccy:hover{background:color-mix(in srgb, var(--card) 55%, white);border-color:color-mix(in srgb, var(--line) 45%, white);}
+.flow-ccy:active{transform:scale(.97);}
+.flow-powered{
+  text-align:center;font-size:11px;font-weight:600;color:var(--ink-faint);
+  margin:0 0 12px;
+}
+.flow-pay,.flow-pay-row{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:12px 14px;cursor:pointer;color:var(--ink);
+  appearance:none;-webkit-appearance:none;
+  transition:background .15s,border-color .15s,transform .12s;
+}
+.flow-pay{margin:0 0 18px;}
+.flow-pay-row{margin-bottom:8px;font-size:15px;font-weight:700;}
+.flow-pay:hover,.flow-pay-row:hover{background:color-mix(in srgb, var(--card) 55%, white);border-color:color-mix(in srgb, var(--line) 45%, white);}
+.flow-pay:active,.flow-pay-row:active{transform:scale(.985);}
+.flow-pay-row.is-on{background:color-mix(in srgb, var(--card) 70%, white);border-color:color-mix(in srgb, var(--line) 55%, white);}
+.flow-pay-ic{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  display:grid;place-items:center;background:#fff;color:#111;overflow:hidden;
+  border:1px solid var(--line);
+}
+.flow-pay-ic svg{width:20px;height:20px;display:block;}
+.flow-pay-ic.is-letter{font-size:15px;font-weight:800;letter-spacing:-.04em;}
+.flow-pay-ic.is-paypal{color:#003087;}
+.flow-pay-copy{min-width:0;}
+.flow-pay-lab{display:block;font-size:11px;font-weight:600;color:var(--ink-faint);}
+.flow-pay-copy b,.flow-pay-name{display:block;font-size:14px;font-weight:700;color:var(--ink);}
+.flow-pay-name{font-size:15px;}
+.flow-instant{
+  display:inline-flex;align-items:center;gap:4px;flex-shrink:0;
+  background:color-mix(in srgb, var(--green) 16%, var(--card));
+  color:var(--green);font-size:11px;font-weight:700;
+  padding:4px 8px;border-radius:999px;
+}
+.flow-pay .flow-instant{margin-left:auto;}
+.flow-pay-row .flow-instant{margin-left:4px;}
+.flow-instant svg{width:10px;height:10px;display:block;}
+.flow-pay-end{margin-left:4px;color:var(--ink-soft);display:grid;place-items:center;flex-shrink:0;}
+.flow-pay-end svg{width:14px;height:14px;display:block;}
+.flow-pay-row .flow-pay-end{margin-left:auto;color:var(--ink);}
+.flow-pay-list{max-height:min(52vh,380px);overflow-y:auto;padding:0 2px 4px;}
 .flow-quiet{
   display:block;width:100%;margin-top:8px;border:none;background:none;
   color:var(--ink-faint);font-size:12px;font-weight:600;cursor:pointer;padding:8px;
@@ -3211,6 +3618,16 @@ html.dark .flow-status-ok circle{fill:rgba(31,164,99,.22);}
   .flow-status.is-done .flow-status-ok{transition:none;transform:none;}
   .flow-status.is-done .flow-status-ok path{animation:none;stroke-dashoffset:0;}
   .flow-select-menu{transition:none;transform:none;}
+  .flow-note,.flow-note.is-in,.flow-note.is-out{
+    transform:none;transition:opacity .08s;
+  }
+  .flow-note-chev,.flow-note-panel,.flow-note.is-open .flow-note-panel,
+  .flow-note-body,.flow-note.is-open .flow-note-body,
+  .flow-qr-info-panel,.flow-addr-block.is-open .flow-qr-info-panel,
+  .flow-qr-info-card,.flow-addr-block.is-open .flow-qr-info-card,
+  .flow-qr-info .flow-note-chev{
+    transition:none;transform:none;
+  }
 }
 
 .more-menu{
@@ -3251,7 +3668,7 @@ html.dark .flow-status-ok circle{fill:rgba(31,164,99,.22);}
   transition:background .15s;
 }
 .nav-more-pop button:hover{background:var(--line);}
-.nav-more-pop button svg{width:18px;height:18px;flex-shrink:0;color:var(--ink-soft);}
+.nav-more-pop button svg{width:16px;height:16px;flex-shrink:0;color:var(--ink-soft);}
 .nav-more-pop button:hover svg{color:var(--ink);}
 .sidebar.collapsed .nav-more-pop{left:calc(100% + 12px);top:50%;transform:translate(-6px,-50%) scale(.96);}
 .sidebar.collapsed .nav-more-pop.show{transform:translate(0,-50%);}
@@ -3284,7 +3701,7 @@ html.dark .flow-status-ok circle{fill:rgba(31,164,99,.22);}
     transition:background .15s;
   }
   .more-sheet-inner button:active{background:var(--line);}
-  .more-sheet-inner button svg{width:22px;height:22px;flex-shrink:0;color:var(--ink);}
+  .more-sheet-inner button svg{width:20px;height:20px;flex-shrink:0;color:var(--ink);}
   .mnav-item.more-open{
     background:var(--card);color:var(--ink);
     box-shadow:0 1px 0 rgba(0,0,0,.04),0 4px 12px rgba(42,36,28,.08);
@@ -3377,14 +3794,15 @@ html.dark .flow-status-ok circle{fill:rgba(31,164,99,.22);}
   .btn-wallet-label{display:inline;}
   .btn-wallet-avatar{display:none;}
   .btn-wallet-ic{width:20px;height:20px;}
-  .topbar #themeBtn{display:none;}
+  .topbar-actions{order:3;gap:8px;}
+  .topbar #themeBtn,.topbar #notifBtn{display:none;}
   .topbar-spacer{display:none;}
   /* search collapses to a squircle icon button on mobile */
   .search{flex:0 0 auto;width:38px;height:38px;min-width:0;max-width:none;padding:0;gap:0;border-radius:10px;justify-content:center;background:var(--bg);border:1px solid var(--line);color:var(--ink-soft);cursor:pointer;transition:transform .15s,background .15s;margin-left:auto;}
   .search:active{transform:scale(.9);}
   .search svg{color:var(--ink-soft);opacity:.9;}
   .search-text{display:none;}
-  .icon-btn{background:var(--bg);border:1px solid var(--line);color:var(--ink-soft);}
+  .icon-btn{background:transparent;border:none;color:var(--ink-soft);}
 
   .feed-wrap{position:relative;flex:1;min-height:0;inset:auto;margin-bottom:calc(var(--mobile-nav-h) + env(safe-area-inset-bottom));}
   /* topbar is out of flow — feed always owns the full main height */
@@ -3620,9 +4038,10 @@ html.dark .pull-spin.is-spinning{
 .feed-track.pull-animate{transition:none;}
 
 .new-pill{
+  display:none!important; /* parked — felt out of place over the feed */
   position:absolute;top:20px;left:50%;
   transform:translate(-50%,-8px);z-index:26;
-  display:inline-flex;align-items:center;gap:7px;
+  align-items:center;gap:7px;
   padding:9px 15px 9px 11px;border-radius:999px;
   background:var(--card);color:var(--ink);
   font-size:13px;font-weight:700;letter-spacing:-.01em;
@@ -3806,7 +4225,7 @@ html.dark .qhc-id{color:#6BA3FF;}
 <div class="app" id="app">
   <div class="sidebar" id="sidebar">
     <div class="side-head">
-      <div class="side-brand" id="brandToggle" title="Kumbaya">
+      <div class="side-brand" id="brandToggle" title="Kumbaya" role="button" tabindex="0" aria-expanded="true" aria-label="Collapse sidebar">
         <img class="mark mark-light" src="/public/logo-light.png" width="28" height="28" alt="">
         <img class="mark mark-dark" src="/public/logo-dark.png" width="28" height="28" alt="">
         <span class="word">Kumbaya</span>
@@ -3817,22 +4236,18 @@ html.dark .qhc-id{color:#6BA3FF;}
     <div class="nav-item active" title="Feed"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2.33203 2.33325H13.6654V6.99992H2.33203V2.33325Z" stroke="#FF6622" stroke-width="1.5" stroke-linecap="round"/><path d="M2.33203 8.99992H13.6654V13.6666H2.33203V8.99992Z" stroke="#FF6622" stroke-width="1.5" stroke-linecap="round"/></svg><span class="label">Feed</span></div>
     <div class="nav-item" title="Tokens"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14.3332 8.00002C14.3332 11.4978 11.4976 14.3334 7.99984 14.3334C4.50203 14.3334 1.6665 11.4978 1.6665 8.00002C1.6665 4.50221 4.50203 1.66669 7.99984 1.66669C11.4976 1.66669 14.3332 4.50221 14.3332 8.00002Z" stroke="#6D6153" stroke-width="1.5" stroke-linecap="square"/><path d="M5.33447 7.99986L8.00114 5.33319L10.6678 7.99986L8.00114 10.6665L5.33447 7.99986Z" stroke="#6D6153" stroke-width="1.5" stroke-linecap="square"/></svg><span class="label">Tokens</span></div>
     <div class="nav-item" title="Swap"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M9.92317 4.82457C9.23077 3.35255 7.7343 2.33351 5.99984 2.33351C3.6066 2.33351 1.6665 4.27361 1.6665 6.66684C1.6665 8.99398 3.50086 10.8926 5.8025 10.9958M2.48999 12.2464L2.86852 13.2594C3.26051 14.3084 4.42864 14.8409 5.47762 14.449M4.50667 12.5842L2.48999 12.2464L2.11058 14.5113M13.5098 3.75362L13.1312 2.74065C12.7392 1.69167 11.5711 1.15908 10.5221 1.55107M11.4931 3.41579L13.5098 3.75362L13.8892 1.48869M14.3332 9.33351C14.3332 11.7268 12.3931 13.6668 9.99984 13.6668C7.60657 13.6668 5.6665 11.7268 5.6665 9.33351C5.6665 6.94024 7.60657 5.00018 9.99984 5.00018C12.3931 5.00018 14.3332 6.94024 14.3332 9.33351Z" stroke="#6D6153" stroke-width="1.5" stroke-linecap="square"/></svg><span class="label">Swap</span></div>
-    <div class="nav-item" title="Pools"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M5.5 2.5v8.5M10.5 2.5v8.5" stroke="#6D6153" stroke-width="1.5" stroke-linecap="round"/><path d="M5.5 7h5" stroke="#6D6153" stroke-width="1.5" stroke-linecap="round"/><path d="M2.5 11.25c1.1-.85 2.2-.85 3.3 0s2.2.85 3.3 0 2.2-.85 3.3 0" stroke="#6D6153" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.5 13.5c1.1-.85 2.2-.85 3.3 0s2.2.85 3.3 0 2.2-.85 3.3 0" stroke="#6D6153" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="label">Pools</span></div>
+    <div class="nav-item" title="Pools"><svg class="ic-fill" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M1.66666 11.0491H0.916656V12.5491H1.66666V11.7991V11.0491ZM14.3333 12.5491H15.0833V11.0491H14.3333V11.7991V12.5491ZM1.66666 13.3111H0.916656V14.8111H1.66666V14.0611V13.3111ZM14.3333 14.8111H15.0833V13.3111H14.3333V14.0611V14.8111ZM1.66666 11.7991V12.5491C2.43809 12.5491 3.15066 12.1248 3.62932 11.8533C3.9016 11.6988 4.12664 11.5718 4.34306 11.4792C4.55663 11.3879 4.7127 11.3527 4.83332 11.3527V10.6027V9.85266C4.43151 9.85266 4.06423 9.96703 3.75323 10.1C3.44508 10.2318 3.14433 10.4039 2.88926 10.5485C2.31323 10.8753 1.96491 11.0491 1.66666 11.0491V11.7991ZM4.83332 10.6027V11.3527C5.12558 11.3527 5.46967 11.5252 6.04809 11.8533C6.52339 12.1229 7.23456 12.5491 7.99999 12.5491V11.7991V11.0491C7.71002 11.0491 7.36753 10.8772 6.78818 10.5485C6.31196 10.2784 5.60041 9.85266 4.83332 9.85266V10.6027ZM7.99999 11.7991V12.5491C8.76254 12.5491 9.47312 12.122 9.94683 11.8533C10.5237 11.526 10.8705 11.3527 11.1667 11.3527V10.6027V9.85266C10.3968 9.85266 9.68457 10.2775 9.20676 10.5485C8.62579 10.8781 8.28604 11.0491 7.99999 11.0491V11.7991ZM11.1667 10.6027V11.3527C11.2851 11.3527 11.4398 11.3875 11.6529 11.4789C11.8689 11.5715 12.0937 11.6986 12.3663 11.8533C12.8463 12.1255 13.5595 12.5491 14.3333 12.5491V11.7991V11.0491C14.0317 11.0491 13.6811 10.8745 13.1064 10.5485C12.8517 10.4041 12.5513 10.232 12.2441 10.1003C11.9342 9.96741 11.5677 9.85266 11.1667 9.85266V10.6027ZM1.66666 14.0611V14.8111C2.43809 14.8111 3.15066 14.3867 3.62932 14.1152C3.9016 13.9608 4.12664 13.8337 4.34306 13.7412C4.55663 13.6498 4.7127 13.6146 4.83332 13.6146V12.8646V12.1146C4.43151 12.1146 4.06423 12.229 3.75323 12.362C3.44508 12.4938 3.14433 12.6658 2.88926 12.8105C2.31323 13.1372 1.96491 13.3111 1.66666 13.3111V14.0611ZM4.83332 12.8646V13.6146C5.12558 13.6146 5.46967 13.7871 6.04809 14.1152C6.52339 14.3848 7.23456 14.8111 7.99999 14.8111V14.0611V13.3111C7.71002 13.3111 7.36753 13.1392 6.78818 12.8105C6.31196 12.5404 5.60041 12.1146 4.83332 12.1146V12.8646ZM7.99999 14.0611V14.8111C8.76254 14.8111 9.47312 14.3839 9.94683 14.1152C10.5237 13.788 10.8705 13.6146 11.1667 13.6146V12.8646V12.1146C10.3968 12.1146 9.68457 12.5395 9.20676 12.8105C8.62579 13.1401 8.28604 13.3111 7.99999 13.3111V14.0611ZM11.1667 12.8646V13.6146C11.2851 13.6146 11.4398 13.6495 11.6529 13.7409C11.8689 13.8335 12.0937 13.9606 12.3663 14.1152C12.8463 14.3875 13.5595 14.8111 14.3333 14.8111V14.0611V13.3111C14.0317 13.3111 13.6811 13.1365 13.1064 12.8105C12.8517 12.666 12.5513 12.494 12.2441 12.3623C11.9342 12.2294 11.5677 12.1146 11.1667 12.1146V12.8646ZM6.18124 9.4993H6.93124V4.08179H6.18124H5.43124V9.4993H6.18124ZM6.18124 4.08179H6.93124C6.93124 3.03636 6.08374 2.18887 5.03831 2.18887V2.93887V3.68887C5.25533 3.68887 5.43124 3.86479 5.43124 4.08179H6.18124ZM5.03831 2.93887V2.18887C3.99289 2.18887 3.1454 3.03635 3.1454 4.08178H3.8954H4.6454C4.6454 3.86479 4.82131 3.68887 5.03831 3.68887V2.93887ZM3.8954 4.08178H3.1454V4.73772H3.8954H4.6454V4.08178H3.8954ZM11.4034 8.83763H12.1534V4.08179H11.4034H10.6534V8.83763H11.4034ZM11.4034 4.08179H12.1534C12.1534 3.03636 11.3059 2.18887 10.2605 2.18887V2.93887V3.68887C10.4775 3.68887 10.6534 3.86479 10.6534 4.08179H11.4034ZM10.2605 2.93887V2.18887C9.21505 2.18887 8.36755 3.03635 8.36755 4.08178H9.11755H9.86755C9.86755 3.86479 10.0435 3.68887 10.2605 3.68887V2.93887ZM9.11755 4.08178H8.36755V4.73772H9.11755H9.86755V4.08178H9.11755ZM6.18902 6.97009V7.72009H8.80584V6.97009V6.22009H6.18902V6.97009ZM8.80584 6.97009V7.72009H11.4227V6.97009V6.22009H8.80584V6.97009Z" fill="currentColor"/></svg><span class="label">Pools</span></div>
     <div class="nav-more-wrap" id="navMoreWrap">
-      <div class="nav-item" id="sideMoreBtn" title="More" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.44838 8.00013H3.45975M7.99786 8.00013H8.00923M12.546 8.00013H12.5574" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="label">More</span></div>
+      <div class="nav-item" id="sideMoreBtn" title="More" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"><svg class="ic-fill" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="10" width="4" height="4" fill="currentColor"/><rect x="10" y="10" width="4" height="4" fill="currentColor"/><rect x="17" y="10" width="4" height="4" fill="currentColor"/></svg><span class="label">More</span></div>
       <div class="nav-more-pop" id="navMorePop" role="menu" aria-label="More">
-        <button type="button" role="menuitem" data-more="signals"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke="currentColor" stroke-width="1.6"/><path d="M7.5 9.2a6.2 6.2 0 0 1 0 5.6M16.5 9.2a6.2 6.2 0 0 0 0 5.6M4.2 6.8a10 10 0 0 1 0 10.4M19.8 6.8a10 10 0 0 0 0 10.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Signals</button>
-        <button type="button" role="menuitem" data-more="tipjar"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4.5" y="6.5" width="15" height="11" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 10.5h15M12 13.2v2.6M12 13.2c.9 0 1.5-.5 1.5-1.2S12.9 10.8 12 10.8s-1.5.5-1.5 1.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Tip Jar</button>
-        <button type="button" role="menuitem" data-more="notifications"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4.5a5 5 0 0 1 5 5v2.2c0 .8.3 1.6.8 2.2l.7.8H5.5l.7-.8c.5-.6.8-1.4.8-2.2V9.5a5 5 0 0 1 5-5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 18.5a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Notifications</button>
-        <button type="button" role="menuitem" data-more="profile"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="9" r="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M5.8 18.5c1.4-2.4 3.5-3.6 6.2-3.6s4.8 1.2 6.2 3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Profile</button>
-        <button type="button" role="menuitem" data-more="account"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3.8 14.2 5l2.5.3.9 2.3 1.9 1.7-.5 2.5.5 2.5-1.9 1.7-.9 2.3-2.5.3L12 20.2 9.8 19l-2.5-.3-.9-2.3-1.9-1.7.5-2.5-.5-2.5 1.9-1.7.9-2.3 2.5-.3L12 3.8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.4" stroke="currentColor" stroke-width="1.6"/></svg>Account</button>
+        <button type="button" role="menuitem" data-more="signals"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 8L9 7M14.3333 8C14.3333 4.50218 11.4978 1.66666 8 1.66666M12.3333 8C12.3333 5.60676 10.3933 3.66666 8 3.66666M1.66666 8C1.66666 11.4978 4.50218 14.3333 8 14.3333C9.66412 14.3333 11.1783 13.6915 12.3086 12.6419L3.35806 3.6914C2.30847 4.82167 1.66666 6.33588 1.66666 8Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>Signals</button>
+        <button type="button" role="menuitem" data-more="tipjar"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8.75 10.75C8.75 11.0261 8.52614 11.25 8.25 11.25C7.97386 11.25 7.75 11.0261 7.75 10.75C7.75 10.4739 7.97386 10.25 8.25 10.25C8.52614 10.25 8.75 10.4739 8.75 10.75Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/><path d="M14.004 5.75H10.004C9.93732 5.75 9.87088 5.75104 9.8047 5.75312C8.32457 3.97909 6.38818 3.75 5.75 3.75V7.4211C5.06066 8.06182 4.51621 8.85631 4.17124 9.75H1.75V14.25H4.17124C4.51621 15.1437 5.06066 15.9382 5.75 16.5789V20.25H10.25V18.25H13.75V20.25H18.25V16.5863C18.8686 16.0134 19.371 15.3168 19.7181 14.5359C20.0626 13.7609 20.254 12.9028 20.254 12C20.254 8.54822 17.4558 5.75 14.004 5.75Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/><path d="M8 10.75H8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/><path d="M22.8113 12C23.0858 12.3424 23.25 12.777 23.25 13.25C23.25 14.3546 22.3546 15.25 21.25 15.25C20.777 15.25 20.3424 15.0858 20 14.8113" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>Tip Jar</button>
+        <button type="button" role="menuitem" data-more="notifications"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.58581 9.4153C4.99017 5.62501 8.18819 2.75 12 2.75C15.8118 2.75 19.0098 5.62501 19.4142 9.4153L20.25 17.25H3.75L4.58581 9.4153Z" stroke="currentColor" stroke-width="1.5"/><path d="M16 17.25C16 19.4591 14.2091 21.25 12 21.25C9.79086 21.25 8 19.4591 8 17.25" stroke="currentColor" stroke-width="1.5"/></svg>Notifications</button>
+        <button type="button" role="menuitem" data-more="profile"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.75 20.25V19.5C4.75 15.4959 7.99594 12.25 12 12.25C16.0041 12.25 19.25 15.4959 19.25 19.5V20.25H4.75Z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="7.75" r="4.5" stroke="currentColor" stroke-width="1.5"/></svg>Profile</button>
+        <button type="button" role="menuitem" data-more="account"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.75 7.75V4.75H21.25V7.75M2.75 7.75H21.25M2.75 7.75V10.75M21.25 7.75V10.75M21.25 10.75V19.25H2.75V10.75M21.25 10.75H15.25V13.25H8.75V10.75H2.75" stroke="currentColor" stroke-width="1.5"/></svg>Account</button>
       </div>
     </div>
     </div>
-    <button type="button" class="side-collapse-btn" id="sidebarToggle" aria-label="Collapse sidebar" aria-expanded="true">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span class="collapse-label">Collapse</span>
-    </button>
   </div>
 
   <div class="main">
@@ -3841,15 +4256,21 @@ html.dark .qhc-id{color:#6BA3FF;}
       <img class="brand-logo brand-logo-dark" src="/public/logo-dark.png" width="36" height="36" alt="Kumbaya">
       <div class="search" role="button" tabindex="0" aria-label="Search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="search-text"><span class="st">Search for a token, wallet or contract</span></span></div>
       <div class="topbar-spacer"></div>
-      <button class="icon-btn" id="themeBtn" title="Toggle theme"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-      <button class="btn-signin" type="button" id="signInBtn">Sign in</button>
-      <button class="btn-wallet" type="button" id="walletBtn" title="Balance" aria-label="Open account" hidden>
-        <span class="btn-wallet-ic" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none"><ellipse cx="8.5" cy="14.2" rx="4.2" ry="3.4" fill="#F4F7FA"/><ellipse cx="14.2" cy="13.4" rx="5.2" ry="4.4" fill="#fff"/><ellipse cx="11.6" cy="10.4" rx="3.6" ry="3.1" fill="#E6EEF5"/></svg>
-        </span>
-        <span class="btn-wallet-label" id="walletLabel">$0.00</span>
-      </button>
-      <button class="btn-launch" type="button" id="launchBtn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.67796 10.8918L1.86133 12.7084M4.88905 12.1029L3.67796 13.314M2.46687 7.86404C2.46687 7.86404 4.87571 8.69425 5.98113 9.79967C7.08652 10.9051 7.91678 13.314 7.91678 13.314L10.339 11.4973V9.68068C12.8948 8.40274 14.2875 6.28543 13.9681 1.81274C9.49538 1.49326 7.37803 2.886 6.10015 5.44182H4.28351L2.46687 7.86404ZM11.5501 5.44184C11.5501 6.1107 11.0078 6.65295 10.339 6.65295C9.67008 6.65295 9.12787 6.1107 9.12787 5.44184C9.12787 4.77297 9.67008 4.23075 10.339 4.23075C11.0078 4.23075 11.5501 4.77297 11.5501 5.44184Z" stroke="currentColor" stroke-linecap="square"/></svg><span>Launch Token</span></button>
+      <div class="topbar-actions">
+        <button class="icon-btn" type="button" id="notifBtn" title="Notifications" aria-label="Notifications">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10.6667 11.6667C10.6667 13.1394 9.47274 14.3333 8.00001 14.3333C6.52725 14.3333 5.33334 13.1394 5.33334 11.6667M2.90939 6.24505C3.18598 3.64178 5.38209 1.66666 8.00001 1.66666C10.6179 1.66666 12.814 3.64178 13.0906 6.24506L13.6667 11.6667H2.33334L2.90939 6.24505Z" stroke="currentColor" stroke-width="1.5"/></svg>
+          <span class="notif-badge" id="notifBadge"></span>
+        </button>
+        <button class="icon-btn" type="button" id="themeBtn" title="Toggle theme" aria-label="Toggle theme"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <button class="btn-signin" type="button" id="signInBtn">Sign in</button>
+        <button class="btn-wallet" type="button" id="walletBtn" title="Balance" aria-label="Open account" hidden>
+          <span class="btn-wallet-ic" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><ellipse cx="8.5" cy="14.2" rx="4.2" ry="3.4" fill="#F4F7FA"/><ellipse cx="14.2" cy="13.4" rx="5.2" ry="4.4" fill="#fff"/><ellipse cx="11.6" cy="10.4" rx="3.6" ry="3.1" fill="#E6EEF5"/></svg>
+          </span>
+          <span class="btn-wallet-label" id="walletLabel">$0.00</span>
+        </button>
+        <button class="btn-launch" type="button" id="launchBtn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.67796 10.8918L1.86133 12.7084M4.88905 12.1029L3.67796 13.314M2.46687 7.86404C2.46687 7.86404 4.87571 8.69425 5.98113 9.79967C7.08652 10.9051 7.91678 13.314 7.91678 13.314L10.339 11.4973V9.68068C12.8948 8.40274 14.2875 6.28543 13.9681 1.81274C9.49538 1.49326 7.37803 2.886 6.10015 5.44182H4.28351L2.46687 7.86404ZM11.5501 5.44184C11.5501 6.1107 11.0078 6.65295 10.339 6.65295C9.67008 6.65295 9.12787 6.1107 9.12787 5.44184C9.12787 4.77297 9.67008 4.23075 10.339 4.23075C11.0078 4.23075 11.5501 4.77297 11.5501 5.44184Z" stroke="currentColor" stroke-linecap="square"/></svg><span>Launch Token</span></button>
+      </div>
     </div>
 
     <div class="feed-wrap" id="feedWrap">
@@ -3864,7 +4285,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         <span class="pull-label">Refreshing</span>
       </button>
       <div class="act-bubbles" id="actBubbles" aria-live="polite"></div>
-      <button type="button" class="new-pill" id="newPill" aria-label="Load new posts"><svg viewBox="0 0 24 24" fill="none"><path d="M20 12a8 8 0 1 1-2.34-5.66" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M20 4v5h-5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>New posts</button>
+      <button type="button" class="new-pill" id="newPill" hidden aria-hidden="true" aria-label="Load new posts"><svg viewBox="0 0 24 24" fill="none"><path d="M20 12a8 8 0 1 1-2.34-5.66" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M20 4v5h-5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>New posts</button>
       <div class="feed-hint" id="feedHint" aria-hidden="true">
         <div class="hint-lottie" id="hintLottie" aria-hidden="true"></div>
         <div class="hint-label">Swipe up for more</div>
@@ -4107,20 +4528,20 @@ html.dark .qhc-id{color:#6BA3FF;}
     <button type="button" class="mnav-item" data-nav="tokens" aria-label="Tokens"><svg viewBox="0 0 16 16" fill="none"><path d="M14.3332 8.00002C14.3332 11.4978 11.4976 14.3334 7.99984 14.3334C4.50203 14.3334 1.6665 11.4978 1.6665 8.00002C1.6665 4.50221 4.50203 1.66669 7.99984 1.66669C11.4976 1.66669 14.3332 4.50221 14.3332 8.00002Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/><path d="M5.33447 7.99986L8.00114 5.33319L10.6678 7.99986L8.00114 10.6665L5.33447 7.99986Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg></button>
     <button type="button" class="mnav-item mnav-launch" data-nav="launch" aria-label="Launch Token"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.67796 10.8918L1.86133 12.7084M4.88905 12.1029L3.67796 13.314M2.46687 7.86404C2.46687 7.86404 4.87571 8.69425 5.98113 9.79967C7.08652 10.9051 7.91678 13.314 7.91678 13.314L10.339 11.4973V9.68068C12.8948 8.40274 14.2875 6.28543 13.9681 1.81274C9.49538 1.49326 7.37803 2.886 6.10015 5.44182H4.28351L2.46687 7.86404ZM11.5501 5.44184C11.5501 6.1107 11.0078 6.65295 10.339 6.65295C9.67008 6.65295 9.12787 6.1107 9.12787 5.44184C9.12787 4.77297 9.67008 4.23075 10.339 4.23075C11.0078 4.23075 11.5501 4.77297 11.5501 5.44184Z" stroke="currentColor" stroke-linecap="square"/></svg></button>
     <button type="button" class="mnav-item" data-nav="swap" aria-label="Swap"><svg viewBox="0 0 16 16" fill="none"><path d="M9.92317 4.82457C9.23077 3.35255 7.7343 2.33351 5.99984 2.33351C3.6066 2.33351 1.6665 4.27361 1.6665 6.66684C1.6665 8.99398 3.50086 10.8926 5.8025 10.9958M2.48999 12.2464L2.86852 13.2594C3.26051 14.3084 4.42864 14.8409 5.47762 14.449M4.50667 12.5842L2.48999 12.2464L2.11058 14.5113M13.5098 3.75362L13.1312 2.74065C12.7392 1.69167 11.5711 1.15908 10.5221 1.55107M11.4931 3.41579L13.5098 3.75362L13.8892 1.48869M14.3332 9.33351C14.3332 11.7268 12.3931 13.6668 9.99984 13.6668C7.60657 13.6668 5.6665 11.7268 5.6665 9.33351C5.6665 6.94024 7.60657 5.00018 9.99984 5.00018C12.3931 5.00018 14.3332 6.94024 14.3332 9.33351Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg></button>
-    <button type="button" class="mnav-item" data-nav="pools" aria-label="Pools"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M5.5 2.5v8.5M10.5 2.5v8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M5.5 7h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2.5 11.25c1.1-.85 2.2-.85 3.3 0s2.2.85 3.3 0 2.2-.85 3.3 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.5 13.5c1.1-.85 2.2-.85 3.3 0s2.2.85 3.3 0 2.2-.85 3.3 0" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-    <button type="button" class="mnav-item" data-nav="more" aria-label="More" aria-haspopup="true" aria-expanded="false"><svg viewBox="0 0 16 16" fill="none"><path d="M3.44838 8.00013H3.45975M7.99786 8.00013H8.00923M12.546 8.00013H12.5574" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button>
+    <button type="button" class="mnav-item" data-nav="pools" aria-label="Pools"><svg class="ic-fill" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M1.66666 11.0491H0.916656V12.5491H1.66666V11.7991V11.0491ZM14.3333 12.5491H15.0833V11.0491H14.3333V11.7991V12.5491ZM1.66666 13.3111H0.916656V14.8111H1.66666V14.0611V13.3111ZM14.3333 14.8111H15.0833V13.3111H14.3333V14.0611V14.8111ZM1.66666 11.7991V12.5491C2.43809 12.5491 3.15066 12.1248 3.62932 11.8533C3.9016 11.6988 4.12664 11.5718 4.34306 11.4792C4.55663 11.3879 4.7127 11.3527 4.83332 11.3527V10.6027V9.85266C4.43151 9.85266 4.06423 9.96703 3.75323 10.1C3.44508 10.2318 3.14433 10.4039 2.88926 10.5485C2.31323 10.8753 1.96491 11.0491 1.66666 11.0491V11.7991ZM4.83332 10.6027V11.3527C5.12558 11.3527 5.46967 11.5252 6.04809 11.8533C6.52339 12.1229 7.23456 12.5491 7.99999 12.5491V11.7991V11.0491C7.71002 11.0491 7.36753 10.8772 6.78818 10.5485C6.31196 10.2784 5.60041 9.85266 4.83332 9.85266V10.6027ZM7.99999 11.7991V12.5491C8.76254 12.5491 9.47312 12.122 9.94683 11.8533C10.5237 11.526 10.8705 11.3527 11.1667 11.3527V10.6027V9.85266C10.3968 9.85266 9.68457 10.2775 9.20676 10.5485C8.62579 10.8781 8.28604 11.0491 7.99999 11.0491V11.7991ZM11.1667 10.6027V11.3527C11.2851 11.3527 11.4398 11.3875 11.6529 11.4789C11.8689 11.5715 12.0937 11.6986 12.3663 11.8533C12.8463 12.1255 13.5595 12.5491 14.3333 12.5491V11.7991V11.0491C14.0317 11.0491 13.6811 10.8745 13.1064 10.5485C12.8517 10.4041 12.5513 10.232 12.2441 10.1003C11.9342 9.96741 11.5677 9.85266 11.1667 9.85266V10.6027ZM1.66666 14.0611V14.8111C2.43809 14.8111 3.15066 14.3867 3.62932 14.1152C3.9016 13.9608 4.12664 13.8337 4.34306 13.7412C4.55663 13.6498 4.7127 13.6146 4.83332 13.6146V12.8646V12.1146C4.43151 12.1146 4.06423 12.229 3.75323 12.362C3.44508 12.4938 3.14433 12.6658 2.88926 12.8105C2.31323 13.1372 1.96491 13.3111 1.66666 13.3111V14.0611ZM4.83332 12.8646V13.6146C5.12558 13.6146 5.46967 13.7871 6.04809 14.1152C6.52339 14.3848 7.23456 14.8111 7.99999 14.8111V14.0611V13.3111C7.71002 13.3111 7.36753 13.1392 6.78818 12.8105C6.31196 12.5404 5.60041 12.1146 4.83332 12.1146V12.8646ZM7.99999 14.0611V14.8111C8.76254 14.8111 9.47312 14.3839 9.94683 14.1152C10.5237 13.788 10.8705 13.6146 11.1667 13.6146V12.8646V12.1146C10.3968 12.1146 9.68457 12.5395 9.20676 12.8105C8.62579 13.1401 8.28604 13.3111 7.99999 13.3111V14.0611ZM11.1667 12.8646V13.6146C11.2851 13.6146 11.4398 13.6495 11.6529 13.7409C11.8689 13.8335 12.0937 13.9606 12.3663 14.1152C12.8463 14.3875 13.5595 14.8111 14.3333 14.8111V14.0611V13.3111C14.0317 13.3111 13.6811 13.1365 13.1064 12.8105C12.8517 12.666 12.5513 12.494 12.2441 12.3623C11.9342 12.2294 11.5677 12.1146 11.1667 12.1146V12.8646ZM6.18124 9.4993H6.93124V4.08179H6.18124H5.43124V9.4993H6.18124ZM6.18124 4.08179H6.93124C6.93124 3.03636 6.08374 2.18887 5.03831 2.18887V2.93887V3.68887C5.25533 3.68887 5.43124 3.86479 5.43124 4.08179H6.18124ZM5.03831 2.93887V2.18887C3.99289 2.18887 3.1454 3.03635 3.1454 4.08178H3.8954H4.6454C4.6454 3.86479 4.82131 3.68887 5.03831 3.68887V2.93887ZM3.8954 4.08178H3.1454V4.73772H3.8954H4.6454V4.08178H3.8954ZM11.4034 8.83763H12.1534V4.08179H11.4034H10.6534V8.83763H11.4034ZM11.4034 4.08179H12.1534C12.1534 3.03636 11.3059 2.18887 10.2605 2.18887V2.93887V3.68887C10.4775 3.68887 10.6534 3.86479 10.6534 4.08179H11.4034ZM10.2605 2.93887V2.18887C9.21505 2.18887 8.36755 3.03635 8.36755 4.08178H9.11755H9.86755C9.86755 3.86479 10.0435 3.68887 10.2605 3.68887V2.93887ZM9.11755 4.08178H8.36755V4.73772H9.11755H9.86755V4.08178H9.11755ZM6.18902 6.97009V7.72009H8.80584V6.97009V6.22009H6.18902V6.97009ZM8.80584 6.97009V7.72009H11.4227V6.97009V6.22009H8.80584V6.97009Z" fill="currentColor"/></svg></button>
+    <button type="button" class="mnav-item" data-nav="more" aria-label="More" aria-haspopup="true" aria-expanded="false"><svg class="ic-fill" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="10" width="4" height="4" fill="currentColor"/><rect x="10" y="10" width="4" height="4" fill="currentColor"/><rect x="17" y="10" width="4" height="4" fill="currentColor"/></svg></button>
   </nav>
 
   <div class="more-sheet-scrim" id="moreSheetScrim"></div>
   <div class="more-sheet" id="moreSheet" aria-hidden="true">
     <div class="sheet-handle" id="moreSheetHandle"></div>
     <div class="more-sheet-inner">
-      <button type="button" data-more="theme"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5v1.8M12 18.7v1.8M3.5 12h1.8M18.7 12h1.8M5.6 5.6l1.3 1.3M17.1 17.1l1.3 1.3M5.6 18.4l1.3-1.3M17.1 6.9l1.3-1.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Toggle theme</button>
-      <button type="button" data-more="profile"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="9" r="3.2" stroke="currentColor" stroke-width="1.6"/><path d="M5.8 18.5c1.4-2.4 3.5-3.6 6.2-3.6s4.8 1.2 6.2 3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Profile</button>
-      <button type="button" data-more="signals"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 14.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" stroke="currentColor" stroke-width="1.6"/><path d="M7.5 9.2a6.2 6.2 0 0 1 0 5.6M16.5 9.2a6.2 6.2 0 0 0 0 5.6M4.2 6.8a10 10 0 0 1 0 10.4M19.8 6.8a10 10 0 0 0 0 10.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Signals</button>
-      <button type="button" data-more="notifications"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4.5a5 5 0 0 1 5 5v2.2c0 .8.3 1.6.8 2.2l.7.8H5.5l.7-.8c.5-.6.8-1.4.8-2.2V9.5a5 5 0 0 1 5-5Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 18.5a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Notifications</button>
-      <button type="button" data-more="tipjar"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4.5" y="6.5" width="15" height="11" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M4.5 10.5h15M12 13.2v2.6M12 13.2c.9 0 1.5-.5 1.5-1.2S12.9 10.8 12 10.8s-1.5.5-1.5 1.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Tip Jar</button>
-      <button type="button" data-more="account"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3.8 14.2 5l2.5.3.9 2.3 1.9 1.7-.5 2.5.5 2.5-1.9 1.7-.9 2.3-2.5.3L12 20.2 9.8 19l-2.5-.3-.9-2.3-1.9-1.7.5-2.5-.5-2.5 1.9-1.7.9-2.3 2.5-.3L12 3.8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.4" stroke="currentColor" stroke-width="1.6"/></svg>Account</button>
+      <button type="button" data-more="theme"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M11.9982 3.29071V1.76746M5.83985 18.1585L4.76275 19.2356M11.9982 22.2326V20.7093M19.2338 4.76456L18.1567 5.84166M20.7075 12H22.2308M18.1566 18.1584L19.2337 19.2355M1.76562 12H3.28888M4.76267 4.7645L5.83977 5.8416M15.7104 8.2877C17.7606 10.338 17.7606 13.6621 15.7104 15.7123C13.6601 17.7626 10.336 17.7626 8.28575 15.7123C6.2355 13.6621 6.2355 10.338 8.28575 8.2877C10.336 6.23745 13.6601 6.23745 15.7104 8.2877Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" stroke-linejoin="round"/></svg>Toggle theme</button>
+      <button type="button" data-more="profile"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.75 20.25V19.5C4.75 15.4959 7.99594 12.25 12 12.25C16.0041 12.25 19.25 15.4959 19.25 19.5V20.25H4.75Z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="7.75" r="4.5" stroke="currentColor" stroke-width="1.5"/></svg>Profile</button>
+      <button type="button" data-more="signals"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 8L9 7M14.3333 8C14.3333 4.50218 11.4978 1.66666 8 1.66666M12.3333 8C12.3333 5.60676 10.3933 3.66666 8 3.66666M1.66666 8C1.66666 11.4978 4.50218 14.3333 8 14.3333C9.66412 14.3333 11.1783 13.6915 12.3086 12.6419L3.35806 3.6914C2.30847 4.82167 1.66666 6.33588 1.66666 8Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>Signals</button>
+      <button type="button" data-more="notifications"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.58581 9.4153C4.99017 5.62501 8.18819 2.75 12 2.75C15.8118 2.75 19.0098 5.62501 19.4142 9.4153L20.25 17.25H3.75L4.58581 9.4153Z" stroke="currentColor" stroke-width="1.5"/><path d="M16 17.25C16 19.4591 14.2091 21.25 12 21.25C9.79086 21.25 8 19.4591 8 17.25" stroke="currentColor" stroke-width="1.5"/></svg>Notifications</button>
+      <button type="button" data-more="tipjar"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8.75 10.75C8.75 11.0261 8.52614 11.25 8.25 11.25C7.97386 11.25 7.75 11.0261 7.75 10.75C7.75 10.4739 7.97386 10.25 8.25 10.25C8.52614 10.25 8.75 10.4739 8.75 10.75Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/><path d="M14.004 5.75H10.004C9.93732 5.75 9.87088 5.75104 9.8047 5.75312C8.32457 3.97909 6.38818 3.75 5.75 3.75V7.4211C5.06066 8.06182 4.51621 8.85631 4.17124 9.75H1.75V14.25H4.17124C4.51621 15.1437 5.06066 15.9382 5.75 16.5789V20.25H10.25V18.25H13.75V20.25H18.25V16.5863C18.8686 16.0134 19.371 15.3168 19.7181 14.5359C20.0626 13.7609 20.254 12.9028 20.254 12C20.254 8.54822 17.4558 5.75 14.004 5.75Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/><path d="M8 10.75H8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/><path d="M22.8113 12C23.0858 12.3424 23.25 12.777 23.25 13.25C23.25 14.3546 22.3546 15.25 21.25 15.25C20.777 15.25 20.3424 15.0858 20 14.8113" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>Tip Jar</button>
+      <button type="button" data-more="account"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.75 7.75V4.75H21.25V7.75M2.75 7.75H21.25M2.75 7.75V10.75M21.25 7.75V10.75M21.25 10.75V19.25H2.75V10.75M21.25 10.75H15.25V13.25H8.75V10.75H2.75" stroke="currentColor" stroke-width="1.5"/></svg>Account</button>
     </div>
   </div>
 </div>
@@ -4232,9 +4653,57 @@ html.dark .qhc-id{color:#6BA3FF;}
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <h4 id="walletTitle">Account</h4>
-      <button type="button" class="share-close" id="walletClose" aria-label="Close">✕</button>
+      <div class="wallet-head-actions">
+        <button type="button" class="share-close" id="walletClose" aria-label="Close">✕</button>
+      </div>
     </div>
     <div class="wallet-body" id="walletBody"></div>
+  </div>
+</div>
+
+<div class="modal-overlay wallet-overlay" id="notifOverlay" aria-hidden="true">
+  <div class="modal wallet-modal" role="dialog" aria-labelledby="notifTitle">
+    <div class="sheet-handle"></div>
+    <div class="wallet-head notif-head">
+      <div class="notif-head-title">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M10.6667 11.6667C10.6667 13.1394 9.47274 14.3333 8.00001 14.3333C6.52725 14.3333 5.33334 13.1394 5.33334 11.6667M2.90939 6.24505C3.18598 3.64178 5.38209 1.66666 8.00001 1.66666C10.6179 1.66666 12.814 3.64178 13.0906 6.24506L13.6667 11.6667H2.33334L2.90939 6.24505Z" stroke="currentColor" stroke-width="1.5"/></svg>
+        <h4 id="notifTitle">Notifications</h4>
+        <span class="notif-count-pill" id="notifCountPill"></span>
+      </div>
+      <div class="wallet-head-actions">
+        <button type="button" class="share-close" id="notifClose" aria-label="Close">✕</button>
+      </div>
+    </div>
+    <div class="notif-tabs">
+      <div class="notif-tab-list" role="tablist" aria-label="Notifications">
+        <button type="button" class="notif-tab active" role="tab" aria-selected="true" data-notif-tab="all">All</button>
+        <button type="button" class="notif-tab" role="tab" aria-selected="false" data-notif-tab="unread" id="notifUnreadTab">Unread</button>
+      </div>
+      <div class="notif-tab-actions">
+        <button type="button" class="notif-mark" id="notifMarkRead">Mark as read</button>
+        <button type="button" class="notif-gear" id="notifSettings" title="Notification settings" aria-label="Notification settings">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 1.66666C5.38208 1.66666 3.18598 3.64178 2.90938 6.24506L2.33334 11.6667H13.6667L13.0906 6.24506M10.6667 11.6667C10.6667 13.1394 9.47274 14.3333 8 14.3333C6.52724 14.3333 5.33334 13.1394 5.33334 11.6667M13.0906 1.11183L11.6764 2.52603M11.6764 2.52603L10.2622 3.94023M11.6764 2.52603L10.2622 1.11183M11.6764 2.52603L13.0906 3.94023" stroke="currentColor" stroke-width="1.5"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="wallet-body notif-body" id="notifBody"></div>
+  </div>
+</div>
+
+<div class="modal-overlay wallet-overlay" id="signalsOverlay" aria-hidden="true">
+  <div class="modal wallet-modal" role="dialog" aria-labelledby="signalsTitle">
+    <div class="sheet-handle"></div>
+    <div class="wallet-head notif-head">
+      <div class="notif-head-title">
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 8L9 7M14.3333 8C14.3333 4.50218 11.4978 1.66666 8 1.66666M12.3333 8C12.3333 5.60676 10.3933 3.66666 8 3.66666M1.66666 8C1.66666 11.4978 4.50218 14.3333 8 14.3333C9.66412 14.3333 11.1783 13.6915 12.3086 12.6419L3.35806 3.6914C2.30847 4.82167 1.66666 6.33588 1.66666 8Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>
+        <h4 id="signalsTitle">Signals</h4>
+        <span class="notif-count-pill show signals-live">Live</span>
+      </div>
+      <div class="wallet-head-actions">
+        <button type="button" class="share-close" id="signalsClose" aria-label="Close">✕</button>
+      </div>
+    </div>
+    <div class="wallet-body notif-body" id="signalsBody"></div>
   </div>
 </div>
 
@@ -4315,6 +4784,7 @@ html.dark .qhc-id{color:#6BA3FF;}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <script>
 (function(){
   const M = '/public';
@@ -4389,6 +4859,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   const LOGIN_WALLETS = [
     { id:'mm', name:'MetaMask', detected:true, bg:'#E8831B', mark:'🦊' },
     { id:'ph', name:'Phantom', detected:false, bg:'#AB9FF2', mark:'👻' },
+    { id:'solflare', name:'Solflare', detected:false, bg:'#FC7224', mark:'S' },
     { id:'cb', name:'Coinbase Wallet', detected:false, bg:'#0052FF', mark:'◉' },
     { id:'wc', name:'WalletConnect', detected:false, bg:'#3B99FC', mark:'W' },
     { id:'inch', name:'1inch Wallet', detected:false, bg:'#111111', mark:'1"' },
@@ -4563,24 +5034,26 @@ html.dark .qhc-id{color:#6BA3FF;}
   const walletLabel = document.getElementById('walletLabel');
   const authOverlay = document.getElementById('authOverlay');
   const walletOverlay = document.getElementById('walletOverlay');
+  const notifOverlay = document.getElementById('notifOverlay');
+  const signalsOverlay = document.getElementById('signalsOverlay');
   const sigOverlay = document.getElementById('sigOverlay');
   const fundsOverlay = document.getElementById('fundsOverlay');
   const swapOverlay = document.getElementById('swapOverlay');
   const kbToast = document.getElementById('kbToast');
   let toastTimer = 0;
+  const TRAY_FAMILY = [authOverlay, walletOverlay, notifOverlay, signalsOverlay, sigOverlay, fundsOverlay, swapOverlay];
 
   function showToast(msg){
-    if(!kbToast) return;
-    kbToast.textContent = msg;
+    if(!kbToast || !msg) return;
+    kbToast.textContent = String(msg);
     kbToast.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(()=> kbToast.classList.remove('show'), 4200);
   }
   function overlayOpen(el){
     if(!el) return;
-    const family = [authOverlay, walletOverlay, sigOverlay, fundsOverlay, swapOverlay];
-    if(family.includes(el)){
-      family.forEach(o => { if(o && o !== el) overlayClose(o); });
+    if(TRAY_FAMILY.includes(el)){
+      TRAY_FAMILY.forEach(o => { if(o && o !== el) overlayClose(o); });
     }
     el.classList.add('show');
     el.setAttribute('aria-hidden', 'false');
@@ -4592,7 +5065,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(typeof closeFlowSelect === 'function') closeFlowSelect();
   }
   function anyAuthOverlayOpen(){
-    return [authOverlay, walletOverlay, sigOverlay, fundsOverlay, swapOverlay].some(el => el?.classList.contains('show'));
+    return TRAY_FAMILY.some(el => el?.classList.contains('show'));
   }
   function morphSheet(modal, mutate){
     if(!modal){ mutate(); return; }
@@ -4648,6 +5121,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(walletBtn) walletBtn.hidden = !authed;
     if(walletLabel) walletLabel.textContent = usdLabel(totalBal());
     paintTradeCta();
+    if(typeof paintCommentComposeAuth === 'function') paintCommentComposeAuth();
   }
 
   const TOKEN_PER_USD = 26120;
@@ -5491,6 +5965,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     const showBack = session.walletView === 'connect' || session.walletView === 'import' || (session.walletView === 'flow' && flowCanBack());
     document.getElementById('walletBack')?.classList.toggle('show', showBack);
+    const confirming = session.walletView === 'flow' && session.flow && session.flow.kind === 'deposit' && session.flow.step === 'confirm';
+    body.closest('.modal')?.classList.toggle('is-confirming', confirming);
     if(session.walletView === 'connect'){
       const has = new Set(session.wallets.map(w => w.id));
       body.innerHTML = `
@@ -5557,7 +6033,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     const ident = authIdentity();
     if(session.walletView === 'settings') session.walletView = 'list';
-    const tab = session.walletTab || 'tokens';
+    const tab = session.walletTab === 'settings' ? 'tokens' : (session.walletTab || 'tokens');
+    if(session.walletTab === 'settings') session.walletTab = 'tokens';
     const copySvg = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
     const copyDoneSvg = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     const cash = session.wallets.find(w => w.kind === 'embedded');
@@ -5595,23 +6072,6 @@ html.dark .qhc-id{color:#6BA3FF;}
         ${holds}`
       : tab === 'activity' ? acts
       : tab === 'tips' ? `<div class="wallet-empty">Tips you send land here.</div>`
-      : tab === 'settings' ? `
-        <div class="wallet-set">
-          <button type="button" class="kb-wrow" id="walletSetNotif">
-            <span class="kb-wrow-av ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4.5a5 5 0 0 1 5 5v2.2c0 .8.3 1.6.8 2.2l.7.8H5.5l.7-.8c.5-.6.8-1.4.8-2.2V9.5a5 5 0 0 1 5-5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 18.5a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
-            <span class="kb-wrow-meta">
-              <span class="kb-wrow-name">Notifications</span>
-              <span class="kb-wrow-addr">Coming soon</span>
-            </span>
-          </button>
-          <button type="button" class="kb-wrow" id="walletSetTheme">
-            <span class="kb-wrow-av ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5v1.8M12 18.7v1.8M3.5 12h1.8M18.7 12h1.8M5.6 5.6l1.3 1.3M17.1 17.1l1.3 1.3M5.6 18.4l1.3-1.3M17.1 6.9l1.3-1.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
-            <span class="kb-wrow-meta">
-              <span class="kb-wrow-name">Appearance</span>
-              <span class="kb-wrow-addr">${document.documentElement.classList.contains('dark') ? 'Dark' : 'Light'}</span>
-            </span>
-          </button>
-        </div>`
       : `<div class="kb-hold">
           <img class="kb-hold-av" src="${ident.avatar}" alt="">
           <div>
@@ -5655,7 +6115,6 @@ html.dark .qhc-id{color:#6BA3FF;}
           ['activity','Activity','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4.4l3 1.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
           ['tips','Tips','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 11.2V7.6a1.4 1.4 0 0 1 2.8 0v3.4M10.8 10.6V6.6a1.4 1.4 0 0 1 2.8 0v4.2M13.6 10.6V7.8a1.4 1.4 0 0 1 2.8 0V13c0 2.8-1.8 4.8-4.6 4.8h-.8C8.4 17.8 6 15.8 6 12.6v-1.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
           ['profile','Profile','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8.2" r="3.1" stroke="currentColor" stroke-width="1.8"/><path d="M5.6 19c.7-3.1 3.1-4.8 6.4-4.8s5.7 1.7 6.4 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'],
-          ['settings','Settings','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 13a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.5-1 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3 1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1.5 1 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8 1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>'],
         ].map(([id,lab,ic]) =>
           `<button type="button" data-wtab="${id}" class="${tab===id?'is-on':''}">${ic}<span>${lab}</span></button>`).join('')}
       </nav>
@@ -5670,11 +6129,6 @@ html.dark .qhc-id{color:#6BA3FF;}
     body.querySelector('#walletAddBtn')?.addEventListener('click', ()=> openDeposit(0, null));
     body.querySelector('#walletSendBtn')?.addEventListener('click', ()=> openSend());
     body.querySelector('#signOutBtn')?.addEventListener('click', signOut);
-    body.querySelector('#walletSetNotif')?.addEventListener('click', ()=> showToast('Notifications coming soon.'));
-    body.querySelector('#walletSetTheme')?.addEventListener('click', ()=>{
-      toggleTheme();
-      fillWalletBody();
-    });
     body.querySelector('#walletImportBtn')?.addEventListener('click', ()=>{
       session.walletView = 'import';
       renderWalletBody();
@@ -5721,6 +6175,184 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.walletView = 'list';
     overlayClose(walletOverlay);
   }
+
+  const NOTIF_ICONS = {
+    launch:'<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.68 10.89L1.86 12.71M4.89 12.1L3.68 13.31M2.47 7.86s2.41.83 3.51 1.94c1.11 1.1 1.94 3.51 1.94 3.51L10.34 11.5V9.68c2.55-1.28 3.95-3.4 3.63-7.87C9.5 1.49 7.38 2.89 6.1 5.44H4.28L2.47 7.86Z" stroke="currentColor" stroke-linecap="square"/></svg>',
+    buy:'<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 12.5V3.5M8 3.5L4.5 7M8 3.5L11.5 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    sell:'<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3.5v9M8 12.5L4.5 9M8 12.5L11.5 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    grad:'<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 6.5L8 3.5l5.5 3L8 9.5 2.5 6.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M4.5 8v2.6c0 .7 1.6 1.6 3.5 1.6s3.5-.9 3.5-1.6V8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+    comment:'<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 4.2h10v6.4H7.2L4.2 13V10.6H3V4.2Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
+    fire:'<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13.2c2.1 0 3.6-1.5 3.6-3.4 0-1.7-1-2.8-2.2-3.9.2 1.4-.4 2.3-1.2 2.6C8.8 6.3 8.4 4.4 8 3c-1.5 1.5-3.6 3.4-3.6 6.8 0 1.9 1.5 3.4 3.6 3.4Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
+  };
+  const notifs = [
+    {id:1, day:'Today', unread:false, user:'nath4an', avatar:`${M}/tabasco4.jpeg`, media:`${M}/SAUCE.webp`, thumb:'media', badge:'launch', action:'Launched', ref:'$SAUCE', time:'1hr'},
+    {id:2, day:'Today', unread:false, user:'nath4an', avatar:`${M}/tabasco4.jpeg`, thumb:'avatar', badge:'buy', action:'Bought', ref:'$SAUCE', time:'1hr'},
+    {id:3, day:'Today', unread:false, user:'nath4an', avatar:`${M}/tabasco4.jpeg`, thumb:'avatar', badge:'sell', action:'Sold', ref:'$SAUCE', time:'1hr'},
+    {id:4, day:'Today', unread:false, user:'Thinck boutit', avatar:`${M}/SAUCE.webp`, media:`${M}/SAUCE.webp`, thumb:'media', badge:'grad', action:'Just graduated!', ref:'$SAUCE', time:'1hr'},
+    {id:5, day:'Today', unread:false, user:'dani3l', avatar:`${M}/tabasco.png`, media:`${M}/SAUCE.webp`, thumb:'media', action:'Yapped', ref:'$SAUCE', time:'1hr', snippet:'this is litt!!'},
+    {id:6, day:'Yesterday', unread:false, user:'dani3l', avatar:`${M}/tabasco.png`, media:`${M}/SAUCE.webp`, thumb:'media', action:'Replied to you', ref:'#126458', refKind:'id', time:'1hr', snippet:'>>this is litt!!'},
+    {id:7, day:'Yesterday', unread:false, user:'dani3l', avatar:`${M}/tabasco.png`, media:`${M}/tabasco2.png`, thumb:'media', action:'Replied with media', ref:'#126458', refKind:'id', time:'1hr', snippet:'>>bro, can’t wait!'},
+    {id:8, day:'Yesterday', unread:false, user:'nath4an', avatar:`${M}/tabasco4.jpeg`, media:`${M}/tabasco.png`, thumb:'media', badge:'fire', action:'Fueled your content', ref:'$SAUCE', time:'1hr'},
+  ];
+  let notifTab = 'all';
+  const NOTIF_DEMO = (()=>{
+    try{
+      const q = new URLSearchParams(location.search);
+      if(q.has('notiff') || q.has('notif')) return true;
+      const h = (location.hash || '').replace(/^#/, '');
+      return h === 'notiff' || h === 'notif';
+    }catch(_){ return false; }
+  })();
+
+  function unreadNotifs(){ return notifs.filter(n => n.unread); }
+  function paintNotifChrome(){
+    const n = unreadNotifs().length;
+    const badge = document.getElementById('notifBadge');
+    const pill = document.getElementById('notifCountPill');
+    const unreadTab = document.getElementById('notifUnreadTab');
+    const mark = document.getElementById('notifMarkRead');
+    if(badge){
+      const prev = parseInt(badge.textContent, 10) || 0;
+      const wasOn = badge.classList.contains('show');
+      badge.textContent = n ? String(n) : '';
+      badge.classList.toggle('show', n > 0);
+      badge.classList.remove('is-pop', 'is-bump');
+      if(n > 0 && n > prev){
+        void badge.offsetWidth;
+        badge.classList.add(wasOn ? 'is-bump' : 'is-pop');
+      }
+    }
+    if(pill){ pill.textContent = String(n); pill.classList.toggle('show', n > 0); }
+    if(unreadTab) unreadTab.textContent = n ? `Unread (${n})` : 'Unread';
+    if(mark) mark.disabled = n === 0;
+  }
+  function playNotifDemo(){
+    if(!NOTIF_DEMO) return;
+    const ids = [1, 2, 3];
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const mark = (id)=>{
+      const hit = notifs.find(n => n.id === id);
+      if(hit) hit.unread = true;
+    };
+    if(reduce){
+      ids.forEach(mark);
+      paintNotifChrome();
+      if(notifOverlay?.classList.contains('show')) renderNotifList();
+      return;
+    }
+    let i = 0;
+    const step = ()=>{
+      if(i >= ids.length) return;
+      mark(ids[i]);
+      i += 1;
+      paintNotifChrome();
+      if(typeof haptic === 'function') haptic('selection');
+      if(notifOverlay?.classList.contains('show')) renderNotifList();
+      if(i < ids.length) setTimeout(step, 400);
+    };
+    setTimeout(step, 480);
+  }
+  function escapeNotif(s){
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function notifThumbHtml(n){
+    const isMedia = n.thumb === 'media' && n.media;
+    const badge = n.badge ? `<span class="notif-badge-ic is-${n.badge}">${NOTIF_ICONS[n.badge] || ''}</span>` : '';
+    const av = `<img class="notif-av circle blockie" src="${n.avatar}" alt="">`;
+    return isMedia
+      ? `<div class="notif-thumb is-media"><img class="notif-media" src="${n.media}" alt="">${n.badge ? badge : av}</div>`
+      : `<div class="notif-thumb">${av}${badge}</div>`;
+  }
+  function notifCopyHtml(n, {meta=true}={}){
+    const refClass = n.refKind === 'id' ? 'notif-ref is-id' : 'notif-ref';
+    const metaHtml = meta
+      ? `<span class="notif-meta">${n.unread ? '<span class="notif-dot"></span>' : ''}<span class="notif-time">${escapeNotif(n.time||'')}</span></span>`
+      : '';
+    return `<div class="notif-copy">
+      <div class="notif-line1">
+        <span class="notif-user">${escapeNotif(n.user)}</span>
+        ${metaHtml}
+      </div>
+      <div class="notif-action"><span>${escapeNotif(n.action)}</span><span class="dot">·</span><span class="${refClass}">${escapeNotif(n.ref)}</span></div>
+      ${n.snippet ? `<div class="notif-snip">${escapeNotif(n.snippet)}</div>` : ''}
+    </div>`;
+  }
+  function renderNotifList(){
+    const body = document.getElementById('notifBody');
+    if(!body) return;
+    const list = notifTab === 'unread' ? unreadNotifs() : notifs;
+    if(!list.length){
+      body.innerHTML = `<div class="notif-empty">${notifTab === 'unread' ? 'You’re all caught up.' : 'No notifications yet.'}</div>`;
+      return;
+    }
+    let html = '';
+    let lastDay = '';
+    list.forEach(n => {
+      if(n.day !== lastDay){
+        html += `<div class="notif-group${lastDay ? ' is-sub' : ''}">${escapeNotif(n.day)}</div>`;
+        lastDay = n.day;
+      }
+      html += `<button type="button" class="notif-row" data-nid="${n.id}">${notifThumbHtml(n)}${notifCopyHtml(n)}</button>`;
+    });
+    body.innerHTML = html;
+  }
+  function openNotifs(){
+    notifTab = 'all';
+    document.querySelectorAll('[data-notif-tab]').forEach(btn=>{
+      const on = btn.dataset.notifTab === 'all';
+      btn.classList.toggle('active', on);
+      btn.setAttribute('aria-selected', String(on));
+    });
+    paintNotifChrome();
+    renderNotifList();
+    overlayOpen(notifOverlay);
+  }
+  function closeNotifs(){ overlayClose(notifOverlay); }
+
+  const SIGNAL_POOL = [
+    { user:'nath4an', avatar:`${M}/tabasco4.jpeg`, media:`${M}/SAUCE.webp`, thumb:'media', badge:'launch', action:'Launched', ref:'$SAUCE' },
+    { user:'nath4an', avatar:`${M}/tabasco4.jpeg`, thumb:'avatar', badge:'buy', action:'Bought', ref:'$SAUCE' },
+    { user:'nath4an', avatar:`${M}/tabasco4.jpeg`, thumb:'avatar', badge:'sell', action:'Sold', ref:'$SAUCE' },
+    { user:'Thinck boutit', avatar:`${M}/SAUCE.webp`, media:`${M}/SAUCE.webp`, thumb:'media', badge:'grad', action:'Just graduated!', ref:'$SAUCE' },
+    { user:'dani3l', avatar:`${M}/tabasco.png`, media:`${M}/SAUCE.webp`, thumb:'media', action:'Yapped', ref:'$THINCK', snippet:'this is litt!!' },
+    { user:'dani3l', avatar:`${M}/tabasco.png`, media:`${M}/tabasco2.png`, thumb:'media', action:'Replied', ref:'#126458', refKind:'id', snippet:'>>bro, can’t wait!' },
+    { user:'nath4an', avatar:`${M}/tabasco4.jpeg`, media:`${M}/tabasco.png`, thumb:'media', badge:'fire', action:'Fueled', ref:'$SAUCE' },
+  ];
+  let signals = [];
+  let signalId = 0;
+
+  function mintSignal(src){
+    return Object.assign({ id: ++signalId }, src);
+  }
+  function renderSignalsList(){
+    const body = document.getElementById('signalsBody');
+    if(!body) return;
+    if(!signals.length){
+      body.innerHTML = `<div class="notif-empty">Live activity will print here.</div>`;
+      return;
+    }
+    body.innerHTML = signals.map(n =>
+      `<button type="button" class="notif-row" data-sid="${n.id}">${notifThumbHtml(n)}${notifCopyHtml(n, {meta:false})}</button>`
+    ).join('');
+  }
+  function pushSignal(src){
+    signals.unshift(mintSignal(src));
+    if(signals.length > 40) signals.length = 40;
+    if(signalsOverlay?.classList.contains('show')) renderSignalsList();
+  }
+  function openSignals(){
+    if(signalsOverlay?.classList.contains('show')){ closeSignals(); return; }
+    renderSignalsList();
+    overlayOpen(signalsOverlay);
+  }
+  function closeSignals(){ overlayClose(signalsOverlay); }
+  function seedSignals(){
+    if(signals.length) return;
+    SIGNAL_POOL.forEach(src => signals.push(mintSignal(src)));
+  }
+  seedSignals();
+  document.getElementById('signalsClose')?.addEventListener('click', closeSignals);
+  signalsOverlay?.addEventListener('click', (e)=>{ if(e.target === signalsOverlay) closeSignals(); });
   function switchActiveWallet(id){
     session.wallets.forEach(w => { w.active = w.id === id; });
     paintAuthChrome();
@@ -5769,6 +6401,24 @@ html.dark .qhc-id{color:#6BA3FF;}
     showToast('Signed out.');
   }
 
+  const FLOW_MEGA_ICON = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path fill="currentColor" d="M5.87354 5.60386V4.85386H5.12354V5.60386H5.87354ZM6.59146 5.60386L7.29086 5.33305L7.10531 4.85386H6.59146V5.60386ZM7.9928 9.22296L7.2934 9.49377L7.47895 9.97296H7.9928V9.22296ZM9.47945 5.60386V4.85386H8.97546L8.78504 5.32049L9.47945 5.60386ZM10.1253 5.60386H10.8753V4.85386H10.1253V5.60386ZM8.00257 9.22296V9.97296H8.50656L8.69698 9.50633L8.00257 9.22296ZM6.66843 9.99789C6.25422 9.99789 5.91843 10.3337 5.91843 10.7479C5.91843 11.1621 6.25422 11.4979 6.66843 11.4979V10.7479V9.99789ZM6.67509 11.4979C7.0893 11.4979 7.42509 11.1621 7.42509 10.7479C7.42509 10.3337 7.0893 9.99789 6.67509 9.99789V10.7479V11.4979ZM9.33232 9.99789C8.9181 9.99789 8.58232 10.3337 8.58232 10.7479C8.58232 11.1621 8.9181 11.4979 9.33232 11.4979V10.7479V9.99789ZM9.33898 11.4979C9.75319 11.4979 10.089 11.1621 10.089 10.7479C10.089 10.3337 9.75319 9.99789 9.33898 9.99789V10.7479V11.4979ZM5.87354 9.6373H6.62354V5.60386H5.87354H5.12354V9.6373H5.87354ZM5.87354 5.60386V6.35386H6.59146V5.60386V4.85386H5.87354V5.60386ZM6.59146 5.60386L5.89206 5.87467L7.2934 9.49377L7.9928 9.22296L8.6922 8.95215L7.29086 5.33305L6.59146 5.60386ZM9.47945 5.60386V6.35386H10.1253V5.60386V4.85386H9.47945V5.60386ZM10.1253 5.60386H9.37529V9.6373H10.1253H10.8753V5.60386H10.1253ZM7.9928 9.22296V9.97296H8.00257V9.22296V8.47296H7.9928V9.22296ZM8.00257 9.22296L8.69698 9.50633L10.1739 5.88723L9.47945 5.60386L8.78504 5.32049L7.30817 8.93959L8.00257 9.22296ZM14.5 8H13.75C13.75 11.1756 11.1756 13.75 8 13.75V14.5V15.25C12.0041 15.25 15.25 12.0041 15.25 8H14.5ZM8 14.5V13.75C4.82436 13.75 2.25 11.1756 2.25 8H1.5H0.75C0.75 12.0041 3.99594 15.25 8 15.25V14.5ZM1.5 8H2.25C2.25 4.82436 4.82436 2.25 8 2.25V1.5V0.75C3.99594 0.75 0.75 3.99594 0.75 8H1.5ZM8 1.5V2.25C11.1756 2.25 13.75 4.82436 13.75 8H14.5H15.25C15.25 3.99594 12.0041 0.75 8 0.75V1.5ZM6.66843 10.7479V11.4979H6.67509V10.7479V9.99789H6.66843V10.7479ZM6.83491 10.7479H7.58491C7.58491 10.2417 7.17452 9.83142 6.66843 9.83142V10.5814V11.3314C6.34622 11.3314 6.08491 11.0702 6.08491 10.7479H6.83491ZM6.66843 10.5814V9.83142C6.16233 9.83142 5.75195 10.2417 5.75195 10.7479H6.50195H7.25195C7.25195 11.0702 6.99064 11.3314 6.66843 11.3314V10.5814ZM6.50195 10.7479H5.75195C5.75195 11.2541 6.16233 11.6644 6.66843 11.6644V10.9144V10.1644C6.99064 10.1644 7.25195 10.4256 7.25195 10.7479H6.50195ZM6.66843 10.9144V11.6644C7.17453 11.6644 7.58491 11.2541 7.58491 10.7479H6.83491H6.08491C6.08491 10.4256 6.34622 10.1644 6.66843 10.1644V10.9144ZM9.33232 10.7479V11.4979H9.33898V10.7479V9.99789H9.33232V10.7479ZM9.49879 10.7479H10.2488C10.2488 10.2417 9.83849 9.83142 9.33232 9.83142V10.5814V11.3314C9.01007 11.3314 8.74879 11.0701 8.74879 10.7479H9.49879ZM9.33232 10.5814V9.83142C8.82614 9.83142 8.41584 10.2417 8.41584 10.7479H9.16584H9.91584C9.91584 11.0701 9.65457 11.3314 9.33232 11.3314V10.5814ZM9.16584 10.7479H8.41584C8.41584 11.2541 8.82614 11.6644 9.33232 11.6644V10.9144V10.1644C9.65457 10.1644 9.91584 10.4256 9.91584 10.7479H9.16584ZM9.33232 10.9144V11.6644C9.83849 11.6644 10.2488 11.2541 10.2488 10.7479H9.49879H8.74879C8.74879 10.4256 9.01007 10.1644 9.33232 10.1644V10.9144Z"/></svg>';
+  const FLOW_XFER_ICON = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M9 9v2h2M11.667 9h2M13.667 11.667h-2V13.667M9 13.667V13M7 2.333H2.333V7H7V2.333ZM2.333 9H7v4.667H2.333V9ZM9 2.333h4.667V7H9V2.333Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>';
+  const FLOW_CW_ICON = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path fill="currentColor" d="M13.6667 5.66668H14.4167V4.91668H13.6667V5.66668ZM13.6667 13.6667V14.4167H14.4167V13.6667H13.6667ZM8.33332 12.9167H7.58332V14.4167H8.33332V13.6667V12.9167ZM11 2.33334H11.75V1.58334H11V2.33334ZM1.58332 7.1228V7.8728H3.08332V7.1228H2.33332H1.58332ZM9.58332 9.66668C9.58332 10.0809 9.91911 10.4167 10.3333 10.4167C10.7475 10.4167 11.0833 10.0809 11.0833 9.66668H10.3333H9.58332ZM11.0833 9.66001C11.0833 9.2458 10.7475 8.91001 10.3333 8.91001C9.91911 8.91001 9.58332 9.2458 9.58332 9.66001H10.3333H11.0833ZM2.82428 9.46359L2.44637 8.81576L2.82428 9.46359ZM5.1757 9.46359L5.55361 8.81576L5.1757 9.46359ZM11 5.66668V4.91668H3.99999V5.66668V6.41668H11V5.66668ZM3.99999 5.66668V4.91668C3.49373 4.91668 3.08332 4.50627 3.08332 4.00001H2.33332H1.58332C1.58332 5.3347 2.6653 6.41668 3.99999 6.41668V5.66668ZM11 5.66668V6.41668H13.6667V5.66668V4.91668H11V5.66668ZM13.6667 5.66668H12.9167V13.6667H13.6667H14.4167V5.66668H13.6667ZM13.6667 13.6667V12.9167H8.33332V13.6667V14.4167H13.6667V13.6667ZM11 5.66668H11.75V2.33334H11H10.25V5.66668H11ZM11 2.33334V1.58334H3.99999V2.33334V3.08334H11V2.33334ZM3.99999 2.33334V1.58334C2.6653 1.58334 1.58332 2.66532 1.58332 4.00001H2.33332H3.08332C3.08332 3.49375 3.49373 3.08334 3.99999 3.08334V2.33334ZM2.33332 7.1228H3.08332V4.00001H2.33332H1.58332V7.1228H2.33332ZM6.33332 11.4791H5.58332V11.5209H6.33332H7.08332V11.4791H6.33332ZM1.66666 11.5209H2.41666V11.4791H1.66666H0.916656V11.5209H1.66666ZM10.3333 9.66668H11.0833V9.66001H10.3333H9.58332V9.66668H10.3333ZM10.5 9.66668H9.74999C9.74999 9.34453 10.0112 9.08334 10.3333 9.08334V9.83334V10.5833C10.8396 10.5833 11.25 10.173 11.25 9.66668H10.5ZM10.3333 9.83334V9.08334C10.6555 9.08334 10.9167 9.34453 10.9167 9.66668H10.1667H9.41666C9.41666 10.173 9.82705 10.5833 10.3333 10.5833V9.83334ZM10.1667 9.66668H10.9167C10.9167 9.98883 10.6555 10.25 10.3333 10.25V9.50001V8.75001C9.82705 8.75001 9.41666 9.16039 9.41666 9.66668H10.1667ZM10.3333 9.50001V10.25C10.0112 10.25 9.74999 9.98883 9.74999 9.66668H10.5H11.25C11.25 9.16039 10.8396 8.75001 10.3333 8.75001V9.50001ZM1.66666 11.4791H2.41666C2.41666 10.9159 2.71576 10.3952 3.20218 10.1114L2.82428 9.46359L2.44637 8.81576C1.49912 9.36832 0.916656 10.3824 0.916656 11.4791H1.66666ZM2.82428 13.5364L3.20218 12.8885C2.71576 12.6048 2.41666 12.084 2.41666 11.5209H1.66666H0.916656C0.916656 12.6175 1.49912 13.6316 2.44637 14.1842L2.82428 13.5364ZM5.1757 13.5364L4.7978 12.8885C4.3048 13.1761 3.69518 13.1761 3.20218 12.8885L2.82428 13.5364L2.44637 14.1842C3.40641 14.7442 4.59357 14.7442 5.55361 14.1842L5.1757 13.5364ZM6.33332 11.5209H5.58332C5.58332 12.084 5.28422 12.6048 4.7978 12.8885L5.1757 13.5364L5.55361 14.1842C6.50085 13.6316 7.08332 12.6175 7.08332 11.5209H6.33332ZM5.1757 9.46359L4.79779 10.1114C5.28422 10.3952 5.58332 10.9159 5.58332 11.4791H6.33332H7.08332C7.08332 10.3824 6.50085 9.36832 5.55361 8.81576L5.1757 9.46359ZM5.1757 9.46359L5.55361 8.81576C4.59357 8.25572 3.40641 8.25572 2.44637 8.81576L2.82428 9.46359L3.20218 10.1114C3.69518 9.82383 4.3048 9.82383 4.79779 10.1114L5.1757 9.46359Z"/></svg>';
+  const FLOW_EX_ICON = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.4024 9.69502C13.4658 9.36075 13.4989 9.01575 13.4989 8.66309C13.4989 7.27989 12.9887 6.01588 12.1462 5.04901M2.76562 6.94315C3.28785 5.35431 4.51396 4.08483 6.07507 3.5036M9.02713 14.0702C8.69293 14.1336 8.34793 14.1668 7.99527 14.1668C6.6926 14.1668 5.49562 13.7142 4.55301 12.9577M9.83333 3.50002C9.83333 4.51254 9.01252 5.33335 8 5.33335C6.98748 5.33335 6.16666 4.51254 6.16666 3.50002C6.16666 2.4875 6.98748 1.66669 8 1.66669C9.01252 1.66669 9.83333 2.4875 9.83333 3.50002ZM2.46369 9.91255C3.34042 9.40642 4.46148 9.70675 4.96765 10.5835C5.47383 11.4602 5.17344 12.5813 4.29672 13.0875C3.42 13.5936 2.29894 13.2933 1.79276 12.4166C1.28658 11.5398 1.58697 10.4188 2.46369 9.91255ZM11.6981 13.0875C10.8213 12.5813 10.5209 11.4602 11.0271 10.5835C11.5333 9.70675 12.6544 9.40642 13.5311 9.91255C14.4078 10.4188 14.7082 11.5398 14.202 12.4166C13.6959 13.2933 12.5748 13.5936 11.6981 13.0875Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>';
+  const FLOW_LOGO = {
+    eth: 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/32/color/eth.png',
+    usdc: 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/32/color/usdc.png',
+    usdt: 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/32/color/usdt.png',
+    sol: 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/32/color/sol.png',
+    ethereum: 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/32/color/eth.png',
+    base: 'https://cdn.jsdelivr.net/gh/trustwallet/assets@master/blockchains/base/info/logo.png',
+    solana: 'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/32/color/sol.png',
+  };
+  const FLOW_CCY = [
+    { id:'usd', tick:'USD', sign:'$' },
+    { id:'eur', tick:'EUR', sign:'€' },
+    { id:'gbp', tick:'GBP', sign:'£' },
+  ];
   const CHAINS = [
     { id:'ethereum', name:'Ethereum' },
     { id:'megaeth', name:'MegaETH' },
@@ -5777,7 +6427,13 @@ html.dark .qhc-id{color:#6BA3FF;}
   ];
   const FLOW_USDC_ICON = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#2775CA"/><path fill="#fff" d="M16 8.2c.4 0 .8.3.9.7l.3 1.4c2.3.3 3.8 1.4 3.8 3.3 0 1.6-1.1 2.6-3 3v.1c2.2.4 3.4 1.4 3.4 3.3 0 2.2-1.9 3.5-4.6 3.8v1.5c0 .5-.4.8-.8.8h-.4c-.5 0-.8-.3-.8-.8v-1.4c-2.6-.2-4.3-1.5-4.4-3.6 0-.4.3-.8.8-.8h.3c.4 0 .7.3.8.7.1 1.1 1.3 1.8 3.3 2v-3.2c-2.2-.3-3.3-1.4-3.3-3 0-2 1.6-3.2 4-3.5l-.3-1.4c-.1-.4.3-.8.8-.8H16Zm0 7.8v-2.9c-1.4.2-2.1.8-2.1 1.5 0 .7.6 1.2 2.1 1.4Zm0 5.2c1.6-.2 2.4-.8 2.4-1.7 0-.8-.7-1.3-2.4-1.5V21.2Z"/></svg>';
   const FLOW_USDT_ICON = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#26A17B"/><path fill="#fff" d="M17.4 14.6V12h4.2V9.2H10.4V12h4.2v2.6C10.8 14.8 9 16 9 17.6c0 1.8 2.2 3.1 5.6 3.3v3.1h2.8v-3.1c3.4-.2 5.6-1.5 5.6-3.3 0-1.6-1.8-2.8-5.6-3Zm-1.4 4.7c-2.8 0-4.6-.8-4.6-1.7s1.8-1.7 4.6-1.7 4.6.8 4.6 1.7-1.8 1.7-4.6 1.7Z"/></svg>';
-  const FLOW_SOL_ICON = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#9945FF"/><path fill="#fff" d="M10.2 19.6c.2-.2.4-.2.6-.2h11.2c.4 0 .6.4.3.7l-2.2 2.2c-.2.2-.4.2-.6.2H8.3c-.4 0-.6-.4-.3-.7l2.2-2.2Zm0-6.8c.2-.2.4-.2.6-.2h11.2c.4 0 .6.4.3.7l-2.2 2.2c-.2.2-.4.2-.6.2H8.3c-.4 0-.6-.4-.3-.7l2.2-2.2ZM21.8 12.4c-.2.2-.4.2-.6.2H10c-.4 0-.6-.4-.3-.7l2.2-2.2c.2-.2.4-.2.6-.2h11.2c.4 0 .6.4.3.7l-2.2 2.2Z"/></svg>';
+  const FLOW_SOL_ICON = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#9945FF"/><path fill="#fff" d="M10.2 19.6c.2-.2.4-.2.6-.2h11.2c.4 0 .6.4.3.7l-2.2 2.2c-.2.2-.4.2-.6.2H8.3c-.4 0-.6-.4-.3-.7l2.2-2.2Zm0-6.8c.2-.2.4-.2.6-.2h11.2c.4 0 .6.4.3.7l-2.2 2.2c-.2.2-.4.2-.6.2H8.3c-.4 0-.6-.4-.3-.7l2.2-2.2ZM21.8 12.4c-.2.2-.4.2-.6.2H10c-.4 0-.6-.4-.3-.7l2.2-2.2c.2-.2.4-.2.6-.2h11.2c.4 0 .6.4.3.7l2.2 2.2Z"/></svg>';
+  const FLOW_BTC_ICON = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#F7931A"/><path fill="#fff" d="M18.4 16.6c1.4-.4 2.3-1.3 2.1-2.8-.2-1.4-1.3-1.9-2.8-2.1V9.4h-1.6v2.2h-1.2V9.4h-1.6v2.2H11v1.5h1.2c.3 0 .4.1.4.4v6.9c0 .3-.1.4-.4.4H11v1.5h2.2v2.2h1.6v-2.2h1.2v2.2h1.6v-2.2c2 0 3.4-.8 3.6-2.5.2-1.2-.4-2-1.6-2.4Zm-3.2-3.4h1.5c.9 0 1.5.4 1.6 1.1.1.8-.4 1.3-1.5 1.3h-1.6v-2.4Zm1.7 6.7h-1.7v-2.6h1.8c1.1 0 1.7.5 1.6 1.3-.1.8-.8 1.3-1.7 1.3Z"/></svg>';
+  const FLOW_WSTETH_ICON = '<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#00A3FF"/><path fill="#fff" fill-opacity=".75" d="M16.5 5v8.2l6.9 3.1z"/><path fill="#fff" d="M16.5 5 9.6 16.3l6.9-3.1z"/><path fill="#fff" fill-opacity=".75" d="M16.5 21.1v5.6L23.5 17.6z"/><path fill="#fff" d="M16.5 26.7v-5.6l-6.9-3.5z"/><path fill="#fff" fill-opacity=".4" d="M16.5 19.8l6.9-3.5-6.9-3.1z"/><path fill="#fff" fill-opacity=".75" d="M9.6 16.3l6.9 3.5v-6.6z"/></svg>';
+  const FLOW_DOLLAR_IC = (bg, fg)=> `<svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="${bg}"/><path fill="${fg}" d="M16.9 8.4v1.3c1.9.3 3.2 1.4 3.2 3.2 0 2.1-1.6 3.1-3.2 3.4v4.1c1.1-.2 1.9-.9 2.1-1.8h2.2c-.3 2.1-1.9 3.5-4.3 3.8v1.4h-1.6v-1.4c-2.2-.3-3.7-1.6-3.7-3.6 0-2.1 1.5-3.2 3.7-3.5v-3.9c-1.1.2-2 .9-2.2 2H11c.3-2.2 2-3.6 4.1-3.9V8.4h1.8Zm0 8.2c1.2-.2 2-.9 2-2 0-1.1-.8-1.7-2-1.9v3.9Zm-1.6 1.5c-1.3.3-2.1 1-2.1 2.1 0 1.1.8 1.8 2.1 2v-4.1Z"/></svg>`;
+  const FLOW_STCUSD_ICON = FLOW_DOLLAR_IC('#8BE04A', '#14330A');
+  const FLOW_USDE_ICON = FLOW_DOLLAR_IC('#111111', '#fff');
+  const FLOW_CUSD_ICON = FLOW_DOLLAR_IC('#146C43', '#fff');
   const FLOW_TOKENS = {
     ethereum: [
       { id:'eth', tick:'ETH', ic: PAY_ETH_ICON },
@@ -5785,9 +6441,14 @@ html.dark .qhc-id{color:#6BA3FF;}
       { id:'usdt', tick:'USDT', ic: FLOW_USDT_ICON },
     ],
     megaeth: [
-      { id:'eth', tick:'ETH', ic: PAY_ETH_ICON },
-      { id:'usdc', tick:'USDC', ic: FLOW_USDC_ICON },
-      { id:'usdm', tick:'USDm', ic: PAY_USDM_ICON },
+      { id:'eth', tick:'ETH', name:'ETH', ic: PAY_ETH_ICON },
+      { id:'usdm', tick:'USDm', name:'MegaUSD', ic: PAY_USDM_ICON },
+      { id:'usdt0', tick:'USDT0', name:'USD₮0', ic: FLOW_USDT_ICON },
+      { id:'btcb', tick:'BTC.b', name:'Bitcoin', ic: FLOW_BTC_ICON },
+      { id:'wsteth', tick:'wstETH', name:'Wrapped liquid staked Ether 2.0', ic: FLOW_WSTETH_ICON },
+      { id:'stcusd', tick:'stcUSD', name:'Staked Cap USD', ic: FLOW_STCUSD_ICON },
+      { id:'usde', tick:'USDe', name:'USDe', ic: FLOW_USDE_ICON },
+      { id:'cusd', tick:'cUSD', name:'Cap USD', ic: FLOW_CUSD_ICON },
     ],
     base: [
       { id:'eth', tick:'ETH', ic: PAY_ETH_ICON },
@@ -5804,6 +6465,26 @@ html.dark .qhc-id{color:#6BA3FF;}
     const list = tokensForNet(f?.net);
     return list.find(t => t.id === f?.token) || list[0];
   }
+  function flowCcy(){
+    const id = session.flow && session.flow.ccy;
+    return FLOW_CCY.find(c => c.id === id) || FLOW_CCY[0];
+  }
+  function flowLogoHtml(key, fallback){
+    if(key === 'megaeth') return fallback || FLOW_MEGA_ICON;
+    const src = FLOW_LOGO[key];
+    if(!src) return fallback || '';
+    return `<img src="${src}" alt="" draggable="false">`;
+  }
+  function chainLogoHtml(id){
+    if(id === 'megaeth') return FLOW_MEGA_ICON;
+    return flowLogoHtml(id, id === 'solana' ? FLOW_SOL_ICON : PAY_ETH_ICON);
+  }
+  function tokenLogoHtml(t){
+    return flowLogoHtml(t && t.id, (t && t.ic) || PAY_ETH_ICON);
+  }
+  function showMegaBetween(){
+    return session.wallets.filter(w => w.kind === 'embedded').length > 1;
+  }
   function flowDepositCopy(f){
     const chain = chainOf(f.net).name;
     const tick = tokenOf(f).tick;
@@ -5815,14 +6496,21 @@ html.dark .qhc-id{color:#6BA3FF;}
     return {
       kind,
       step: kind === 'send' ? 'form' : 'home',
-      tab: 'crypto',
+      tab: 'external',
       amt: kind === 'send' ? 0 : (needN > 25 ? (needN > 50 ? 100 : 50) : 25),
       net: 'ethereum',
       token: 'eth',
       addr: '',
       fromId: from ? from.id : '',
       understood: false,
-      method: 'Card',
+      method: 'MoonPay',
+      payMethod: 'apple',
+      ccy: 'usd',
+      family: '',
+      walletId: '',
+      exchange: '',
+      q: '',
+      listReady: true,
     };
   }
   function sendFromWallet(){
@@ -5894,22 +6582,57 @@ html.dark .qhc-id{color:#6BA3FF;}
     const f = session.flow;
     return `<div class="send-or">or select a wallet</div>${rows.map(w => sendPickRow(w, !!(f && f.addr && addrsMatch(w.addr, f.addr)))).join('')}`;
   }
+  function flowHubTitle(){
+    return totalBal() < 1 ? 'Fund your account' : 'Add funds';
+  }
   function flowTitle(){
     const f = session.flow;
-    if(!f) return 'Add funds';
+    if(!f) return flowHubTitle();
     if(f.kind === 'deposit'){
-      if(f.step === 'crypto') return 'Add funds with crypto';
-      return 'Add funds';
+      const titles = {
+        methods: 'Crypto',
+        mega: 'Transfer on MegaETH',
+        qr: 'Transfer crypto',
+        cash: 'Buy with cash',
+        cashPay: 'Select payment method',
+        cashWait: 'Buy with cash',
+        watch: 'Add funds',
+        confirm: 'Add funds',
+        cwFamily: 'EVM or Solana',
+        cwWallets: 'Connect wallet',
+        cwWait: 'Connect wallet',
+        cwBalances: 'Balances',
+        exList: 'Connect exchange',
+        exWait: 'Connect exchange',
+      };
+      return titles[f.step] || flowHubTitle();
     }
     return 'Send';
   }
+  const FLOW_BACK = {
+    methods: 'home',
+    mega: 'methods',
+    qr: 'methods',
+    cash: 'home',
+    cashPay: 'cash',
+    cashWait: 'cash',
+    watch: null,
+    confirm: null,
+    cwFamily: 'cwWallets',
+    cwWallets: 'methods',
+    cwWait: 'cwFamily',
+    cwBalances: 'cwWallets',
+    exList: 'methods',
+    exWait: 'exList',
+  };
   function flowCanBack(){
     const f = session.flow;
     if(!f) return false;
-    if(['crypto','cash'].includes(f.step)) return true;
     if(f.kind === 'send' && f.step === 'form') return flowHost() === 'wallet';
-    if(f.kind === 'deposit' && f.step === 'home') return flowHost() === 'wallet';
-    return false;
+    if(f.kind !== 'deposit') return false;
+    if(f.step === 'home') return flowHost() === 'wallet';
+    if(f.step === 'confirm') return false;
+    return !!FLOW_BACK[f.step] || f.step === 'watch';
   }
   function flowBack(){
     const f = session.flow;
@@ -5921,7 +6644,20 @@ html.dark .qhc-id{color:#6BA3FF;}
       }
       return;
     }
-    if(f.step === 'crypto' || f.step === 'cash'){ f.step = 'home'; }
+    if(f.kind !== 'deposit') return;
+    if(f.step === 'watch'){
+      clearFlowTimer();
+      f.step = f.entry === 'mega' ? 'mega' : f.entry === 'cw' ? 'cwBalances' : 'qr';
+      if(f.step === 'cwBalances') f.listReady = true;
+      paintFlowSheet();
+      return;
+    }
+    const prev = FLOW_BACK[f.step];
+    if(!prev) return;
+    clearFlowTimer();
+    f.step = prev;
+    f.q = '';
+    if(prev === 'cwWallets' || prev === 'exList') f.listReady = true;
     paintFlowSheet();
   }
   function paintFlowSheet(){
@@ -5949,28 +6685,34 @@ html.dark .qhc-id{color:#6BA3FF;}
     const hex = ((h>>>0).toString(16) + (Math.imul(h, 1103515245)>>>0).toString(16) + 'a1c1456727f5cf75bc9b71f46b8568ac8e');
     return '0x' + hex.slice(0, 40);
   }
-  function qrSvg(seed){
-    const n = 21;
-    let h = 2166136261;
-    const s = String(seed || 'qr');
-    for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
-    const bits = new Uint8Array(n*n);
-    for(let i=0;i<n*n;i++){ h = Math.imul(h, 1664525) + 1013904223; bits[i] = (h>>>31)&1; }
-    const finder = (ox, oy)=>{
-      for(let y=0;y<7;y++) for(let x=0;x<7;x++){
-        const edge = x===0||y===0||x===6||y===6;
-        const inner = x>=2&&x<=4&&y>=2&&y<=4;
-        bits[(oy+y)*n + (ox+x)] = (edge || inner) ? 1 : 0;
+  function qrSvg(text){
+    if(typeof qrcode !== 'function') return '';
+    const qr = qrcode(0, 'H');
+    qr.addData(String(text || ''), 'Byte');
+    qr.make();
+    const n = qr.getModuleCount();
+    const quiet = 2;
+    let d = '';
+    for(let y = 0; y < n; y++){
+      for(let x = 0; x < n; x++){
+        if(qr.isDark(y, x)) d += `M${x + quiet} ${y + quiet}h1v1h-1z`;
       }
-    };
-    finder(0,0); finder(n-7,0); finder(0,n-7);
-    const cell = 8;
-    let rects = '';
-    for(let y=0;y<n;y++) for(let x=0;x<n;x++){
-      if(bits[y*n+x]) rects += `<rect x="${x*cell}" y="${y*cell}" width="${cell}" height="${cell}"/>`;
     }
-    const w = n*cell;
-    return `<svg viewBox="0 0 ${w} ${w}" xmlns="http://www.w3.org/2000/svg">${rects}</svg>`;
+    const size = n + quiet * 2;
+    return `<svg viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"><path fill="#111" d="${d}"/></svg>`;
+  }
+  function flowQrCenterHtml(f, mega){
+    if(mega){
+      return `<span class="flow-qr-logo" data-flow-qr-logo>${FLOW_MEGA_ICON}</span>`;
+    }
+    const t = tokenOf(f);
+    return `<span class="flow-qr-logo" data-flow-qr-logo>${tokenLogoHtml(t)}<span class="net">${chainLogoHtml(f.net)}</span></span>`;
+  }
+  function flowHintsHtml(f){
+    const tick = tokenOf(f).tick;
+    const chain = chainOf(f.net).name;
+    return `<div class="flow-kv"><dt>Processing time</dt><dd>~15 secs</dd></div>
+      <div class="flow-kv"><dt>Send only</dt><dd>${tick} on ${chain}</dd></div>`;
   }
   function shortAddr(addr){
     const s = String(addr || '');
@@ -5982,17 +6724,25 @@ html.dark .qhc-id{color:#6BA3FF;}
     return `
       <div class="flow-select-wrap" data-flow-picker="${name}">
         <button type="button" class="flow-select" data-flow-trigger="${name}" aria-haspopup="listbox" aria-expanded="false" aria-label="${aria}">
+          <span class="flow-select-ic" data-flow-ic>${current ? current.ic : ''}</span>
           <span data-flow-label>${current ? current.label : ''}</span>
           <span class="flow-select-chev" aria-hidden="true"></span>
         </button>
       </div>`;
+  }
+  function flowNetOptions(f){
+    const nets = f && f.entry === 'mega' ? CHAINS.filter(c => c.id === 'megaeth') : CHAINS.filter(c => c.id !== 'megaeth');
+    return nets.map(c => ({ id:c.id, label:c.name, ic: chainLogoHtml(c.id) }));
+  }
+  function flowTokenOptions(f){
+    return tokensForNet(f.net).map(t => ({ id:t.id, label:t.tick, sub:t.name, ic: tokenLogoHtml(t) }));
   }
   function flowNetsMarkup(f){
     return flowSelectEl({
       name: 'net',
       aria: 'Network',
       value: f.net,
-      options: CHAINS.map(c => ({ id:c.id, label:c.name })),
+      options: flowNetOptions(f),
     });
   }
   function flowTokenMarkup(f){
@@ -6000,7 +6750,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       name: 'token',
       aria: 'Token',
       value: tokenOf(f).id,
-      options: tokensForNet(f.net).map(t => ({ id:t.id, label:t.tick })),
+      options: flowTokenOptions(f),
     });
   }
   function flowDepositPickersMarkup(f){
@@ -6015,8 +6765,20 @@ html.dark .qhc-id{color:#6BA3FF;}
   function paintTokenSelect(){
     const f = session.flow;
     const lab = flowBodyEl()?.querySelector('[data-flow-picker="token"] [data-flow-label]');
+    const ic = flowBodyEl()?.querySelector('[data-flow-picker="token"] [data-flow-ic]');
     if(!f || !lab) return;
-    lab.textContent = tokenOf(f).tick;
+    const t = tokenOf(f);
+    lab.textContent = t.tick;
+    if(ic) ic.innerHTML = tokenLogoHtml(t);
+  }
+  function paintQrChrome(){
+    const f = session.flow;
+    const body = flowBodyEl();
+    if(!f || !body) return;
+    const logo = body.querySelector('[data-flow-qr-logo]');
+    if(logo) logo.outerHTML = flowQrCenterHtml(f, f.entry === 'mega' || f.step === 'mega');
+    const hints = body.querySelector('[data-flow-hints]');
+    if(hints) hints.innerHTML = flowHintsHtml(f);
   }
   function pickFlowNet(id){
     const f = session.flow;
@@ -6025,17 +6787,29 @@ html.dark .qhc-id{color:#6BA3FF;}
     const tokens = tokensForNet(id);
     if(!tokens.some(t => t.id === f.token)) f.token = tokens[0].id;
     const lab = flowBodyEl()?.querySelector('[data-flow-picker="net"] [data-flow-label]');
+    const ic = flowBodyEl()?.querySelector('[data-flow-picker="net"] [data-flow-ic]');
     if(lab) lab.textContent = chainOf(id).name;
+    if(ic) ic.innerHTML = chainLogoHtml(id);
     paintTokenSelect();
     syncFlowCopy();
+    paintQrChrome();
   }
   function pickFlowToken(id){
     const f = session.flow;
     if(!f) return;
     f.token = id;
     const lab = flowBodyEl()?.querySelector('[data-flow-picker="token"] [data-flow-label]');
+    const ic = flowBodyEl()?.querySelector('[data-flow-picker="token"] [data-flow-ic]');
     if(lab) lab.textContent = tokenOf(f).tick;
+    if(ic) ic.innerHTML = tokenLogoHtml(tokenOf(f));
     syncFlowCopy();
+    paintQrChrome();
+  }
+  function pickFlowCcy(id){
+    const f = session.flow;
+    if(!f) return;
+    f.ccy = id;
+    paintFlowSheet();
   }
   let flowSelectOpen = null;
   function closeFlowSelect(){
@@ -6056,14 +6830,15 @@ html.dark .qhc-id{color:#6BA3FF;}
       menu.setAttribute('role', 'listbox');
       document.body.appendChild(menu);
     }
-    const options = name === 'net'
-      ? CHAINS.map(c => ({ id:c.id, label:c.name }))
-      : tokensForNet(f.net).map(t => ({ id:t.id, label:t.tick }));
-    const value = name === 'net' ? f.net : tokenOf(f).id;
+    const options = name === 'net' ? flowNetOptions(f)
+      : name === 'token' ? flowTokenOptions(f)
+      : FLOW_CCY.map(c => ({ id:c.id, label:c.tick, ic:'' }));
+    const value = name === 'net' ? f.net : name === 'token' ? tokenOf(f).id : flowCcy().id;
     menu.setAttribute('aria-label', trigger.getAttribute('aria-label') || '');
     menu.innerHTML = options.map(o => `
       <button type="button" role="option" data-flow-opt="${o.id}" class="${o.id===value?'is-on':''}" aria-selected="${o.id===value}">
-        <span>${o.label}</span>
+        ${o.ic ? `<span class="flow-select-ic">${o.ic}</span>` : ''}
+        <span>${o.label}${o.sub && o.sub !== o.label ? `<em>${o.sub}</em>` : ''}</span>
         <svg class="flow-select-check" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.2 8.2l3 3.2 6.6-6.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>`).join('');
     menu.querySelectorAll('[data-flow-opt]').forEach(btn=>{
@@ -6071,14 +6846,15 @@ html.dark .qhc-id{color:#6BA3FF;}
         e.stopPropagation();
         const id = btn.dataset.flowOpt;
         if(name === 'net') pickFlowNet(id);
-        else pickFlowToken(id);
+        else if(name === 'token') pickFlowToken(id);
+        else pickFlowCcy(id);
         closeFlowSelect();
       });
     });
     flowBodyEl()?.querySelectorAll('[data-flow-trigger]').forEach(b => b.setAttribute('aria-expanded', String(b === trigger)));
     flowSelectOpen = name;
     const r = trigger.getBoundingClientRect();
-    menu.style.minWidth = Math.round(r.width) + 'px';
+    menu.style.minWidth = Math.round(Math.max(r.width, name === 'ccy' ? 140 : name === 'token' ? 240 : r.width)) + 'px';
     menu.classList.add('show');
     const mw = menu.offsetWidth, mh = menu.offsetHeight;
     let left = r.left;
@@ -6089,71 +6865,397 @@ html.dark .qhc-id{color:#6BA3FF;}
     menu.style.top = Math.round(top) + 'px';
     menu.style.transformOrigin = top < r.top ? 'bottom left' : 'top left';
   }
+  const FLOW_CHEV = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const FLOW_CW = {
+    evm: ['mm','rabby','trust','okx'],
+    solana: ['ph','solflare','okx'],
+  };
+  const FLOW_PAY = [
+    { id:'apple', name:'Apple Pay', instant:true },
+    { id:'revolut', name:'Revolut Pay' },
+    { id:'gpay', name:'Google Pay' },
+    { id:'sepa', name:'SEPA' },
+    { id:'mpbal', name:'MoonPay Balance' },
+    { id:'sepaob', name:'SEPA Open Banking' },
+    { id:'paypal', name:'PayPal' },
+  ];
+  const FLOW_PAY_IC = {
+    apple: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.3 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-.1 2.9-2.3c1.1-1.5 1.5-2.9 1.5-3 0-.1-2.8-1.1-2.8-3.4ZM14.7 6.4c.6-.8 1.1-1.9.9-3-1 .1-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1.1.1 2.2-.6 2.9-1.4Z"/></svg>',
+    revolut: '',
+    gpay: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.04 12.26c0-.81-.07-1.59-.21-2.34H12v4.43h6.19a5.29 5.29 0 0 1-2.3 3.47v2.88h3.72c2.18-2 3.43-4.96 3.43-8.44Z"/><path fill="#34A853" d="M12 24c3.11 0 5.72-1.03 7.63-2.8l-3.72-2.88c-1.03.7-2.36 1.11-3.91 1.11-3 0-5.55-2.03-6.46-4.76H1.7v2.97A12 12 0 0 0 12 24Z"/><path fill="#FBBC05" d="M5.54 14.67A7.2 7.2 0 0 1 5.16 12c0-.93.16-1.83.38-2.67V6.36H1.7A12 12 0 0 0 0 12c0 1.94.46 3.77 1.7 5.64l3.84-2.97Z"/><path fill="#EA4335" d="M12 4.75c1.69 0 3.21.58 4.41 1.72l3.31-3.31C17.72 1.19 15.11 0 12 0 7.31 0 3.26 2.69 1.7 6.36l3.84 2.97C6.45 6.6 9 4.75 12 4.75Z"/></svg>',
+    sepa: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" fill="#1A3D8F"/><path d="M7 9h10M7 12h10M7 15h10" stroke="#F6C945" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    mpbal: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="6.5" width="17" height="11" rx="2" stroke="#111" stroke-width="1.7"/><path d="M3.5 10h17M8 14.2h4" stroke="#111" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    sepaob: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" fill="#1A3D8F"/><path d="M7 9h10M7 12h10M7 15h10" stroke="#F6C945" stroke-width="1.7" stroke-linecap="round"/></svg>',
+    paypal: '',
+  };
+  const FLOW_INSTANT = `<span class="flow-instant"><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M9.2 1 3 9.2h4.6L6.8 15 13 6.8H8.4L9.2 1Z"/></svg>Instant</span>`;
+  const FLOW_PAY_CHECK = `<span class="flow-pay-end" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.2 4.2L19 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+  function flowPayOf(id){
+    return FLOW_PAY.find(m => m.id === id) || FLOW_PAY[0];
+  }
+  function flowPayMethod(){
+    const f = session.flow;
+    return flowPayOf(f && f.payMethod);
+  }
+  function flowPayIc(id){
+    const letters = { revolut:['R',''], paypal:['P','is-paypal'] };
+    if(letters[id]){
+      return `<span class="flow-pay-ic is-letter ${letters[id][1]}" aria-hidden="true">${letters[id][0]}</span>`;
+    }
+    return `<span class="flow-pay-ic" aria-hidden="true">${FLOW_PAY_IC[id] || FLOW_PAY_IC.apple}</span>`;
+  }
+  function flowCashNoteHtml(){
+    return `<button type="button" class="flow-note" data-flow-note aria-expanded="false" aria-controls="flowCashNoteBody">
+      <span class="flow-note-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3.8 2.6 20.2h18.8L12 3.8Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M12 10v5.2M12 17.8v.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      <span class="flow-note-copy">
+        <span class="flow-note-head">
+          <b>A Solana wallet may appear</b>
+          <svg class="flow-note-chev" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.4 4.2L6 7.8L9.6 4.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <span class="flow-note-panel" id="flowCashNoteBody">
+          <span class="flow-note-clip">
+            <span class="flow-note-body">MoonPay may show a Solana routing wallet during checkout—not your account. Your purchase is converted and delivered as ETH or USDm to your wallet on MegaETH.</span>
+          </span>
+        </span>
+      </span>
+    </button>`;
+  }
+  function armCashNote(body){
+    const note = body && body.querySelector('[data-flow-note]');
+    if(!note) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduce){
+      note.classList.add('is-in');
+      return;
+    }
+    requestAnimationFrame(()=> requestAnimationFrame(()=> note.classList.add('is-in')));
+  }
+  function openCashPay(){
+    const f = session.flow;
+    if(!f || f.step !== 'cash') return;
+    const note = flowBodyEl()?.querySelector('[data-flow-note]');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const go = ()=>{
+      if(session.flow && session.flow.step === 'cash') beginFlowStep('cashPay');
+    };
+    if(!note || reduce || note.classList.contains('is-out')){
+      go();
+      return;
+    }
+    note.classList.add('is-out');
+    note.classList.remove('is-in');
+    clearTimeout(session.cashPayTimer);
+    session.cashPayTimer = setTimeout(()=>{
+      session.cashPayTimer = 0;
+      go();
+    }, 160);
+  }
+  const FLOW_EX = [
+    { id:'coinbase', name:'Coinbase', bg:'#0052FF', mark:'C' },
+    { id:'binance', name:'Binance', bg:'#F0B90B', mark:'B' },
+    { id:'kraken', name:'Kraken', bg:'#5741D9', mark:'K' },
+    { id:'okx', name:'OKX', bg:'#000', mark:'OKX' },
+    { id:'bybit', name:'Bybit', bg:'#F7A600', mark:'By' },
+    { id:'cdc', name:'Crypto.com', bg:'#002D74', mark:'C' },
+    { id:'gemini', name:'Gemini', bg:'#00DCFA', mark:'G' },
+    { id:'bitget', name:'Bitget', bg:'#00F0FF', mark:'BG' },
+  ];
+  function flowChipIcons(ids){
+    const map = { eth: tokenLogoHtml({ id:'eth', ic: PAY_ETH_ICON }), weth: tokenLogoHtml({ id:'weth', ic: PAY_WETH_ICON }), usdm: tokenLogoHtml({ id:'usdm', ic: PAY_USDM_ICON }), usdc: tokenLogoHtml({ id:'usdc', ic: FLOW_USDC_ICON }), usdt: tokenLogoHtml({ id:'usdt', ic: FLOW_USDT_ICON }), sol: tokenLogoHtml({ id:'sol', ic: FLOW_SOL_ICON }), base: chainLogoHtml('base') };
+    return `<span class="flow-chips">${ids.map(id => `<i>${map[id] || ''}</i>`).join('')}</span>`;
+  }
+  function flowMethodHtml(go, title, sub, ic, chipsHtml){
+    return `<button type="button" class="flow-method" data-flow-go="${go}">
+      <span class="ic" aria-hidden="true">${ic}</span>
+      <span class="flow-method-copy"><b>${title}</b><span class="flow-method-sub">${sub}</span>${chipsHtml || ''}</span>
+      <span class="end">${FLOW_CHEV}</span>
+    </button>`;
+  }
+  function flowSearchHtml(placeholder){
+    const f = session.flow;
+    return `<div class="auth-wallet-search">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="search" id="flowSearch" placeholder="${placeholder}" value="${f && f.q ? f.q : ''}" autocomplete="off">
+    </div>`;
+  }
+  function flowSkelHtml(n){
+    return Array.from({ length: n || 4 }, ()=> '<div class="flow-skel" aria-hidden="true"></div>').join('');
+  }
+  function flowStatusHtml(heading, sub){
+    return `<div class="flow-status">
+      <div class="flow-status-mark" aria-hidden="true">
+        <svg class="flow-status-spin" viewBox="0 0 52 52"><circle cx="26" cy="26" r="20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" pathLength="100" stroke-dasharray="72 28"/></svg>
+        <svg class="flow-status-ok" viewBox="0 0 52 52"><circle cx="26" cy="26" r="22"/><path d="M16.5 26.5l6.5 6.5 12.5-13"/></svg>
+      </div>
+      <p class="flow-status-copy">${heading}</p>
+      <p class="flow-status-sub">${sub}</p>
+    </div>`;
+  }
+  function flowQrMarkup(f, mega){
+    const addr = depositAddr();
+    const netLock = mega;
+    const net = netLock
+      ? `<div class="flow-select-wrap"><div class="flow-select is-lock" aria-label="Network"><span class="flow-select-ic">${FLOW_MEGA_ICON}</span><span>MegaETH</span></div></div>`
+      : flowNetsMarkup(f);
+    const tabs = mega && showMegaBetween() ? `<div class="flow-tabs">
+      <button type="button" data-flow-tab="external" class="${f.tab !== 'between' ? 'is-on' : ''}">From external wallet</button>
+      <button type="button" data-flow-tab="between" class="${f.tab === 'between' ? 'is-on' : ''}">Between my wallets</button>
+    </div>` : '';
+    if(mega && f.tab === 'between' && showMegaBetween()) return tabs + flowBetweenMarkup();
+    return `${tabs}
+      <div class="flow-pickers">${net}${flowTokenMarkup(f)}</div>
+      <p class="flow-copy" data-flow-net-copy>${flowDepositCopy(f)}</p>
+      <div class="flow-qr-wrap">${qrSvg(addr)}${flowQrCenterHtml(f, mega)}</div>
+      <div class="flow-addr-block">
+        <div class="flow-addr-lab">Your address
+          <button type="button" class="flow-qr-info" data-flow-qr-info aria-expanded="false" aria-controls="flowQrInfoBody">Info<svg class="flow-note-chev" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.4 4.2L6 7.8L9.6 4.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+        <div class="flow-addr"><span>${addr}</span><button type="button" data-flow-copy aria-label="Copy address"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
+        <div class="flow-qr-info-panel" id="flowQrInfoBody">
+          <div class="flow-qr-info-clip">
+            <div class="flow-qr-info-card" data-flow-hints>${flowHintsHtml(f)}</div>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="flow-cta" data-flow-sent>I've sent it</button>`;
+  }
+  function flowBetweenMarkup(){
+    const cash = cashWallet() || activeWallet();
+    const others = session.wallets.filter(w => cash && w.id !== cash.id);
+    if(!others.length){
+      return `<div class="flow-empty">No other wallets on this account.</div>
+        <button type="button" class="flow-cta" data-flow-go="cw">Connect wallet</button>`;
+    }
+    const f = session.flow;
+    const from = sendFromWallet();
+    const cta = sendCtaState();
+    const bal = from ? (from.bal || 0) : 0;
+    const over = f.amt > bal;
+    return `
+      <div class="send-field">
+        <div class="send-lab">From</div>
+        <div class="send-box" data-send-box="from">
+          <button type="button" class="send-trigger" data-send-toggle="from">
+            ${from ? sendWalletBits(from) : '<span class="send-wname">No wallet</span>'}
+            ${SEND_CHEV}
+          </button>
+          <div class="send-drop"><div class="send-drop-inner" data-send-from-list>
+            ${others.map(w => sendPickRow(w, w.id === (from && from.id))).join('')}
+          </div></div>
+        </div>
+      </div>
+      <div class="send-field">
+        <div class="send-lab">To</div>
+        <div class="send-box">
+          <button type="button" class="send-trigger is-static" tabindex="-1">
+            ${cash ? sendWalletBits(cash) : '<span class="send-wname">Account</span>'}
+          </button>
+        </div>
+      </div>
+      <div class="send-amt">
+        <div class="send-amt-top">
+          <div class="send-lab">Amount</div>
+          <div class="send-amt-pct">
+            <button type="button" data-send-pct="0.5">50%</button>
+            <button type="button" data-send-pct="1">MAX</button>
+          </div>
+        </div>
+        <input class="flow-input ${over ? 'is-over' : ''}" id="sendAmt" inputmode="decimal" value="${f.amt ? usdLabel(f.amt) : ''}" placeholder="$0.00" aria-label="Amount">
+        <span class="send-avail" data-send-avail>Available ${usdLabel(bal)}</span>
+      </div>
+      <button type="button" class="flow-cta ${cta.enabled ? '' : 'is-wait'}" data-send-go ${cta.enabled ? '' : 'disabled'}><span class="flow-cta-lab">${cta.label}</span></button>`;
+  }
+  function beginFlowStep(step, extra){
+    const f = session.flow;
+    if(!f) return;
+    Object.assign(f, extra || {});
+    if(step === 'xferNet' || step === 'xferAsset') step = 'qr';
+    f.step = step;
+    f.q = '';
+    const loading = ['cwWallets','exList','cwBalances'].includes(step);
+    f.listReady = !loading;
+    paintFlowSheet();
+    if(!loading) return;
+    clearFlowTimer();
+    session.flowTimer = setTimeout(()=>{
+      if(session.flow && session.flow.step === step){
+        session.flow.listReady = true;
+        paintFlowSheet();
+      }
+    }, 420);
+  }
+  function startInboundWatch(){
+    const f = session.flow;
+    if(!f || f.step === 'watch' || f.step === 'confirm') return;
+    f.creditLabel = chainOf(f.net).name;
+    f.step = 'watch';
+    paintFlowSheet();
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    clearFlowTimer();
+    session.flowTimer = setTimeout(()=> startCryptoConfirm(), reduce ? 0 : 1400);
+  }
+  function startMoonPayWait(){
+    const f = session.flow;
+    if(!f) return;
+    f.method = 'MoonPay';
+    f.creditLabel = 'MoonPay';
+    f.step = 'cashWait';
+    paintFlowSheet();
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    clearFlowTimer();
+    session.flowTimer = setTimeout(()=> startCryptoConfirm(), reduce ? 0 : 1600);
+  }
+  function startCwWait(walletId){
+    const f = session.flow;
+    if(!f) return;
+    f.walletId = walletId;
+    f.step = 'cwWait';
+    paintFlowSheet();
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    clearFlowTimer();
+    session.flowTimer = setTimeout(()=>{
+      if(!session.wallets.some(w => w.id === walletId)){
+        session.wallets.push(mintWallet(walletId, { bal: 0, active: false }));
+        paintAuthChrome();
+      }
+      beginFlowStep('cwBalances');
+    }, reduce ? 0 : 1200);
+  }
+  function startExWait(id){
+    const f = session.flow;
+    const ex = FLOW_EX.find(x => x.id === id);
+    if(!f || !ex) return;
+    f.exchange = ex.name;
+    f.creditLabel = ex.name;
+    f.step = 'exWait';
+    paintFlowSheet();
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    clearFlowTimer();
+    session.flowTimer = setTimeout(()=> startCryptoConfirm(), reduce ? 0 : 1600);
+  }
+  function flowCancelWait(){
+    const f = session.flow;
+    if(!f) return;
+    clearFlowTimer();
+    if(f.step === 'cashWait'){
+      showToast('Checkout declined.');
+      f.step = 'cash';
+    } else if(f.step === 'cwWait'){
+      showToast('Connection rejected.');
+      f.step = 'cwFamily';
+      f.listReady = true;
+    } else if(f.step === 'exWait'){
+      showToast('Authorization cancelled.');
+      f.step = 'exList';
+      f.listReady = true;
+    } else if(f.step === 'watch'){
+      f.step = f.entry === 'mega' ? 'mega' : 'qr';
+    }
+    paintFlowSheet();
+  }
   function paintFlowInto(body){
     if(!body) return;
     if(typeof hideHoverCards === 'function') hideHoverCards(true);
     closeFlowSelect();
     if(!session.flow) session.flow = defaultFlow('deposit', session.fundsNeed || 0);
     const f = session.flow;
+    if(f.kind === 'deposit' && (f.step === 'xferNet' || f.step === 'xferAsset')){
+      f.step = 'qr';
+      f.entry = f.entry || 'xfer';
+    }
     let html = '';
     if(f.kind === 'deposit' && f.step === 'home'){
       html = `
-        <button type="button" class="flow-method" data-flow-go="crypto">
-          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M7 8h11M15 5l3 3-3 3M17 16H6M9 13l-3 3 3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-          <span><b>Transfer crypto</b><span>Instant</span></span>
-          <span class="end"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        </button>
-        <button type="button" class="flow-method" data-flow-method="Card">
-          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.2" y="6.2" width="17.6" height="11.6" rx="2.2" stroke="currentColor" stroke-width="1.7"/><path d="M3.2 10.2h17.6M7 15h4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
-          <span><b>Card</b><span>Instant</span></span>
-          <span class="end"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        </button>
-        <button type="button" class="flow-method" data-flow-method="Apple Pay">
-          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.3 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-.1 2.9-2.3c1.1-1.5 1.5-2.9 1.5-3 0-.1-2.8-1.1-2.8-3.4ZM14.7 6.4c.6-.8 1.1-1.9.9-3-1 .1-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1.1.1 2.2-.6 2.9-1.4Z"/></svg></span>
-          <span><b>Apple Pay</b><span>Instant</span></span>
-          <span class="end"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        </button>
+        ${flowMethodHtml('cash', 'Cash', 'Card or Apple Pay', '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8.00001 4.83333V4.12962M8.00001 11.1667V11.8704M9.66667 6C9.36247 5.57932 8.65121 5.18518 8.00001 5.18518C7.23847 5.18518 6.24075 5.51099 6.24075 6.43621C6.24075 8.43986 9.75927 7.5966 9.75927 9.51006C9.75927 10.4283 8.77354 10.8148 8.00001 10.8148C7.34881 10.8148 6.54493 10.4207 6.24075 10M14.3333 8C14.3333 11.4978 11.4978 14.3333 8.00001 14.3333C4.5022 14.3333 1.66667 11.4978 1.66667 8C1.66667 4.50219 4.5022 1.66666 8.00001 1.66666C11.4978 1.66666 14.3333 4.50219 14.3333 8Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>')}
+        ${flowMethodHtml('methods', 'Crypto', 'From a chain, wallet, or exchange', '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M14.3333 8C14.3333 11.4978 11.4978 14.3333 8.00001 14.3333C4.5022 14.3333 1.66667 11.4978 1.66667 8C1.66667 4.50219 4.5022 1.66666 8.00001 1.66666C11.4978 1.66666 14.3333 4.50219 14.3333 8Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/><path d="M5.33464 7.99984L8.00131 5.33317L10.668 7.99984L8.00131 10.6665L5.33464 7.99984Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>')}
         <div class="flow-kv"><dt>Account balance</dt><dd>${usdLabel(totalBal())}</dd></div>`;
-    } else if(f.kind === 'deposit' && f.step === 'crypto'){
-      const addr = depositAddr();
+    } else if(f.kind === 'deposit' && f.step === 'methods'){
       html = `
-        ${flowDepositPickersMarkup(f)}
-        <p class="flow-copy" data-flow-net-copy>${flowDepositCopy(f)}</p>
-        <div class="flow-qr-wrap">${qrSvg(addr)}</div>
-        <div class="flow-addr-lab">
-          Your address
-          <button type="button" class="flow-info" id="flowAddrInfo" aria-label="How adding funds works"
-            data-tip-title="Your address"
-            data-tip-body="Send only the token and chain selected above. It converts to cash in your account. Other assets sent here won't be credited.">
-            <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.2V11.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="5.15" r=".85" fill="currentColor"/></svg>
-          </button>
-        </div>
-        <div class="flow-addr"><span>${addr}</span><button type="button" data-flow-copy aria-label="Copy address"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div>
-        <button type="button" class="flow-cta" data-flow-sent>Done</button>`;
-    } else if(f.kind === 'deposit' && f.step === 'confirm'){
-      html = `
-        <div class="flow-status">
-          <div class="flow-status-mark" aria-hidden="true">
-            <svg class="flow-status-spin" viewBox="0 0 52 52"><circle cx="26" cy="26" r="20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" pathLength="100" stroke-dasharray="72 28"/></svg>
-            <svg class="flow-status-ok" viewBox="0 0 52 52"><circle cx="26" cy="26" r="22"/><path d="M16.5 26.5l6.5 6.5 12.5-13"/></svg>
-          </div>
-          <p class="flow-status-copy">Adding funds</p>
-          <p class="flow-status-sub">This usually takes a moment.</p>
-        </div>`;
+        ${flowMethodHtml('mega', 'Transfer on MegaETH', 'ETH, USDm, and more', FLOW_MEGA_ICON)}
+        ${flowMethodHtml('xfer', 'Transfer crypto', 'Ethereum, Base, or Solana', FLOW_XFER_ICON)}
+        ${flowMethodHtml('cw', 'Connect wallet', 'Move funds from an external wallet', FLOW_CW_ICON)}
+        ${flowMethodHtml('ex', 'Connect exchange', 'Transfer from an exchange account', FLOW_EX_ICON)}
+        <div class="flow-kv"><dt>Account balance</dt><dd>${usdLabel(totalBal())}</dd></div>`;
+    } else if(f.kind === 'deposit' && f.step === 'mega'){
+      html = flowQrMarkup(f, true);
+    } else if(f.kind === 'deposit' && f.step === 'qr'){
+      html = flowQrMarkup(f, false);
     } else if(f.kind === 'deposit' && f.step === 'cash'){
+      const pay = flowPayMethod();
+      const ccy = flowCcy();
       html = `
         <div class="flow-big${cashAmtOver(f.amt)?' is-over':''}">
-          <div class="lbl">Total</div>
+          <div class="lbl">Add money</div>
+          <button type="button" class="flow-ccy" data-flow-trigger="ccy" aria-haspopup="listbox" aria-expanded="false" aria-label="Currency">${ccy.tick}<span class="flow-select-chev" aria-hidden="true"></span></button>
           <label class="amt">
-            <span class="amt-sign">$</span>
-            <input id="cashAmt" inputmode="decimal" autocomplete="off" value="${fmtAmtInput(f.amt)}" aria-label="Amount in USD" aria-invalid="${cashAmtOver(f.amt)?'true':'false'}" aria-describedby="cashAmtSub">
+            <span class="amt-sign">${ccy.sign}</span>
+            <input id="cashAmt" inputmode="decimal" autocomplete="off" value="${fmtAmtInput(f.amt)}" aria-label="Amount in ${ccy.tick}" aria-invalid="${cashAmtOver(f.amt)?'true':'false'}" aria-describedby="cashAmtSub">
           </label>
-          <div class="sub${cashAmtOver(f.amt)?' is-err':''}" id="cashAmtSub">${cashAmtSub(f.method, f.amt)}</div>
+          <div class="sub${cashAmtOver(f.amt)?' is-err':''}" id="cashAmtSub">${cashAmtSub(pay.name, f.amt)}</div>
         </div>
         <div class="funds-presets">
-          ${[25,50,100].map(v => `<button type="button" data-flow-preset="${v}" class="${v===f.amt?'is-on':''}">$${v}</button>`).join('')}
+          ${[25,50,100].map(v => `<button type="button" data-flow-preset="${v}" class="${v===f.amt?'is-on':''}">${ccy.sign}${v}</button>`).join('')}
         </div>
-        <button type="button" class="flow-cta" data-flow-continue ${cashAmtOk(f.amt)?'':'disabled'}>Continue</button>`;
+        <button type="button" class="flow-pay" data-flow-pay>
+          ${flowPayIc(pay.id)}
+          <span class="flow-pay-copy"><span class="flow-pay-lab">Paying with</span><b>${pay.name}</b></span>
+          ${pay.instant ? FLOW_INSTANT : ''}
+          <span class="flow-pay-end">${FLOW_CHEV}</span>
+        </button>
+        <button type="button" class="flow-cta" data-flow-continue ${cashAmtOk(f.amt)?'':'disabled'}>Continue</button>
+        ${flowCashNoteHtml()}`;
+    } else if(f.kind === 'deposit' && f.step === 'cashPay'){
+      const cur = flowPayMethod();
+      html = `
+        <div class="flow-powered">Powered by MoonPay</div>
+        <div class="flow-pay-list">
+          ${FLOW_PAY.map(m => `<button type="button" class="flow-pay-row${m.id===cur.id?' is-on':''}" data-flow-pay-pick="${m.id}">
+            ${flowPayIc(m.id)}
+            <span class="flow-pay-name">${m.name}</span>
+            ${m.instant ? FLOW_INSTANT : ''}
+            ${m.id===cur.id ? FLOW_PAY_CHECK : ''}
+          </button>`).join('')}
+        </div>`;
+    } else if(f.kind === 'deposit' && f.step === 'cashWait'){
+      html = `${flowStatusHtml('Complete checkout in MoonPay', `Finish ${flowPayMethod().name}, then return here.`)}
+        <button type="button" class="flow-quiet" data-flow-cancel>Cancel</button>`;
+    } else if(f.kind === 'deposit' && f.step === 'watch'){
+      html = `${flowStatusHtml('Watching for deposit', 'Send only the selected token and chain.')}
+        <button type="button" class="flow-quiet" data-flow-cancel>Cancel</button>`;
+    } else if(f.kind === 'deposit' && f.step === 'confirm'){
+      html = flowStatusHtml('Adding funds', 'This usually takes a moment.');
+    } else if(f.kind === 'deposit' && f.step === 'cwFamily'){
+      html = `
+        ${flowMethodHtml('cw-evm', 'EVM', 'Ethereum, Base, and L2s', PAY_ETH_ICON, flowChipIcons(['eth','usdc','usdt','base']))}
+        ${flowMethodHtml('cw-solana', 'Solana', 'SOL, USDC, USDT', FLOW_SOL_ICON, flowChipIcons(['sol','usdc','usdt']))}`;
+    } else if(f.kind === 'deposit' && f.step === 'cwWallets'){
+      const ids = [...new Set([].concat(FLOW_CW.evm, FLOW_CW.solana))];
+      const q = String(f.q || '').toLowerCase();
+      const rows = LOGIN_WALLETS.filter(w => ids.includes(w.id) && (!q || w.name.toLowerCase().includes(q)));
+      html = `${flowSearchHtml('Search wallets')}${f.listReady
+        ? (rows.length ? rows.map(w => `<button type="button" class="auth-wrow" data-flow-cw="${w.id}">${walletIconHtml(w)}${w.name}${FLOW_CHEV.replace('<svg', '<svg class="auth-chev"')}</button>`).join('') : '<div class="flow-empty">No wallets match</div>')
+        : flowSkelHtml(4)}`;
+    } else if(f.kind === 'deposit' && f.step === 'cwWait'){
+      const w = LOGIN_WALLETS.find(x => x.id === f.walletId);
+      html = `${flowStatusHtml('Waiting for ' + (w ? w.name : 'wallet'), 'For the best experience, connect only one wallet at a time.')}
+        <button type="button" class="flow-quiet" data-flow-cancel>Cancel</button>`;
+    } else if(f.kind === 'deposit' && f.step === 'cwBalances'){
+      const w = LOGIN_WALLETS.find(x => x.id === f.walletId);
+      html = f.listReady ? `
+        <div class="flow-addr-lab">${w ? w.name : 'Wallet'}
+          <button type="button" class="flow-dis" data-flow-disconnect>Disconnect</button>
+        </div>
+        <div class="flow-empty">No token balances found.</div>
+        <button type="button" class="flow-cta" data-flow-pull>Transfer to account</button>` : flowSkelHtml(2);
+    } else if(f.kind === 'deposit' && f.step === 'exList'){
+      const q = String(f.q || '').toLowerCase();
+      const rows = FLOW_EX.filter(x => !q || x.name.toLowerCase().includes(q));
+      html = `${flowSearchHtml('Search exchanges')}${f.listReady
+        ? (rows.length ? rows.map(x => `<button type="button" class="auth-wrow" data-flow-ex="${x.id}">${walletIconHtml(x)}${x.name}${FLOW_CHEV.replace('<svg', '<svg class="auth-chev"')}</button>`).join('') : '<div class="flow-empty">No exchanges match</div>')
+        : flowSkelHtml(5)}`;
+    } else if(f.kind === 'deposit' && f.step === 'exWait'){
+      html = `${flowStatusHtml('Waiting', `Complete authorization in the ${f.exchange || 'exchange'} tab, then return here to continue.`)}
+        <button type="button" class="flow-quiet" data-flow-cancel>Cancel</button>`;
     } else if(f.kind === 'send'){
       const from = sendFromWallet();
       const many = session.wallets.length > 1;
@@ -6205,16 +7307,52 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(ft && flowHost() === 'funds') ft.textContent = flowTitle();
     document.getElementById('fundsBack')?.classList.toggle('show', flowHost() === 'funds' && flowCanBack());
     bindFlow(body);
+    armCashNote(body);
   }
   function bindFlow(body){
     const f = session.flow;
     if(!f || !body) return;
     body.querySelectorAll('[data-flow-tab]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{ f.tab = btn.dataset.flowTab; paintFlowSheet(); });
+      btn.addEventListener('click', ()=>{
+        f.tab = btn.dataset.flowTab;
+        if(f.tab === 'between'){
+          const cash = cashWallet() || activeWallet();
+          const other = session.wallets.find(w => cash && w.id !== cash.id);
+          f.addr = cash ? cash.addr : '';
+          f.fromId = other ? other.id : (cash ? cash.id : '');
+          f.amt = 0;
+        }
+        paintFlowSheet();
+      });
     });
-    body.querySelector('[data-flow-go="crypto"]')?.addEventListener('click', ()=>{ f.step = 'crypto'; paintFlowSheet(); });
-    body.querySelectorAll('[data-flow-method]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{ f.method = btn.dataset.flowMethod; f.step = 'cash'; paintFlowSheet(); });
+    body.querySelectorAll('[data-flow-go]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const go = btn.dataset.flowGo;
+        if(go === 'cash'){ f.method = 'MoonPay'; f.payMethod = f.payMethod || 'apple'; beginFlowStep('cash'); return; }
+        if(go === 'methods'){ beginFlowStep('methods'); return; }
+        if(go === 'mega'){ beginFlowStep('mega', { entry:'mega', net:'megaeth', token:'eth', tab:'external' }); return; }
+        if(go === 'xfer'){ beginFlowStep('qr', { entry:'xfer', net:'ethereum', token:'eth' }); return; }
+        if(go === 'cw'){ beginFlowStep('cwWallets'); return; }
+        if(go === 'ex'){ beginFlowStep('exList'); return; }
+        if(go === 'cw-evm'){ f.family = 'evm'; startCwWait(f.walletId); return; }
+        if(go === 'cw-solana'){ f.family = 'solana'; startCwWait(f.walletId); return; }
+      });
+    });
+    body.querySelectorAll('[data-flow-cw]').forEach(btn=>{
+      btn.addEventListener('click', ()=> beginFlowStep('cwFamily', { walletId: btn.dataset.flowCw }));
+    });
+    body.querySelectorAll('[data-flow-ex]').forEach(btn=>{
+      btn.addEventListener('click', ()=> startExWait(btn.dataset.flowEx));
+    });
+    body.querySelector('#flowSearch')?.addEventListener('input', (e)=>{
+      f.q = e.target.value;
+      const pos = e.target.selectionStart;
+      paintFlowInto(body);
+      const inp = flowBodyEl()?.querySelector('#flowSearch');
+      if(inp){
+        inp.focus();
+        try{ inp.setSelectionRange(pos, pos); }catch(_){}
+      }
     });
     body.querySelectorAll('[data-flow-trigger]').forEach(btn=>{
       btn.addEventListener('click', (e)=>{
@@ -6222,14 +7360,12 @@ html.dark .qhc-id{color:#6BA3FF;}
         openFlowSelect(btn);
       });
     });
-    const flowAddrInfo = body.querySelector('#flowAddrInfo');
-    if(flowAddrInfo){
-      bindHoverCard(flowAddrInfo, 'info', null, 180);
-      flowAddrInfo.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        showHoverCard('info', null, flowAddrInfo);
-      });
-    }
+    body.querySelector('[data-flow-qr-info]')?.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const wrap = e.currentTarget.closest('.flow-addr-block');
+      const open = wrap ? wrap.classList.toggle('is-open') : false;
+      e.currentTarget.setAttribute('aria-expanded', String(open));
+    });
     function syncCashAmtUi(){
       const inp = body.querySelector('#cashAmt');
       const cta = body.querySelector('[data-flow-continue]');
@@ -6240,7 +7376,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       wrap?.classList.toggle('is-over', over);
       if(inp) inp.setAttribute('aria-invalid', over ? 'true' : 'false');
       if(sub){
-        sub.textContent = cashAmtSub(f.method, f.amt);
+        sub.textContent = cashAmtSub(flowPayMethod().name, f.amt);
         sub.classList.toggle('is-err', over);
       }
       body.querySelectorAll('[data-flow-preset]').forEach(b => b.classList.toggle('is-on', +b.dataset.flowPreset === f.amt));
@@ -6254,8 +7390,6 @@ html.dark .qhc-id{color:#6BA3FF;}
         if(inp){
           inp.value = fmtAmtInput(f.amt);
           syncCashAmtUi();
-          inp.focus();
-          inp.select();
         } else paintFlowSheet();
       });
     });
@@ -6268,21 +7402,43 @@ html.dark .qhc-id{color:#6BA3FF;}
         session.fundsAmt = n;
         syncCashAmtUi();
       });
-      cashIn.addEventListener('focus', ()=> cashIn.select());
     }
     body.querySelector('[data-flow-copy]')?.addEventListener('click', ()=>{
       const addr = depositAddr();
       try{ navigator.clipboard && navigator.clipboard.writeText(addr); }catch(_){}
       showToast('Address copied.');
     });
-    body.querySelector('[data-flow-sent]')?.addEventListener('click', ()=> startCryptoConfirm());
+    body.querySelector('[data-flow-sent]')?.addEventListener('click', ()=> startInboundWatch());
+    body.querySelector('[data-flow-pay]')?.addEventListener('click', ()=> openCashPay());
+    body.querySelector('[data-flow-note]')?.addEventListener('click', (e)=>{
+      const note = e.currentTarget;
+      const open = note.classList.toggle('is-open');
+      note.setAttribute('aria-expanded', String(open));
+    });
+    body.querySelectorAll('[data-flow-pay-pick]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        f.payMethod = btn.dataset.flowPayPick;
+        beginFlowStep('cash');
+      });
+    });
     body.querySelector('[data-flow-continue]')?.addEventListener('click', ()=>{
       if(f.kind === 'deposit'){
         if(!cashAmtOk(f.amt)) return;
-        creditFunds(f.amt, f.method);
+        startMoonPayWait();
       }
     });
-    if(f.kind === 'send') bindSendForm(body);
+    body.querySelector('[data-flow-cancel]')?.addEventListener('click', ()=> flowCancelWait());
+    body.querySelector('[data-flow-disconnect]')?.addEventListener('click', ()=>{
+      showToast('Wallet disconnected.');
+      beginFlowStep('cwWallets');
+    });
+    body.querySelector('[data-flow-pull]')?.addEventListener('click', ()=>{
+      f.entry = 'cw';
+      f.creditLabel = (LOGIN_WALLETS.find(x => x.id === f.walletId) || {}).name || 'wallet';
+      f.amt = f.amt || 25;
+      startInboundWatch();
+    });
+    if(f.kind === 'send' || (f.kind === 'deposit' && f.step === 'mega' && f.tab === 'between')) bindSendForm(body);
   }
   function sendBoxOpen(box, open){
     if(!box) return;
@@ -6456,7 +7612,13 @@ html.dark .qhc-id{color:#6BA3FF;}
       });
     });
     body.querySelector('[data-send-go]')?.addEventListener('click', ()=>{
-      if(sendCtaState().kind === 'short') openAddFundsFromSend();
+      if(sendCtaState().kind === 'short'){
+        if(session.flow && session.flow.kind === 'deposit'){
+          showToast('Not enough in this wallet.');
+          return;
+        }
+        openAddFundsFromSend();
+      }
       else confirmSend();
     });
   }
@@ -6469,6 +7631,8 @@ html.dark .qhc-id{color:#6BA3FF;}
   function clearFlowTimer(){
     clearTimeout(session.flowTimer);
     session.flowTimer = 0;
+    clearTimeout(session.cashPayTimer);
+    session.cashPayTimer = 0;
   }
   function startCryptoConfirm(){
     const f = session.flow;
@@ -6493,7 +7657,8 @@ html.dark .qhc-id{color:#6BA3FF;}
       status?.classList.add('is-done');
       fade(copy, `Added ${usdLabel(f.amt)}`);
       fade(sub, "You're ready to go.");
-      session.flowTimer = setTimeout(()=> creditFunds(f.amt, chainOf(f.net).name, { silent:true }), holdMs);
+      const label = f.creditLabel || f.method || chainOf(f.net).name;
+      session.flowTimer = setTimeout(()=> creditFunds(f.amt, label, { silent:true }), holdMs);
     }, spinMs);
   }
   function openDeposit(need, then){
@@ -6513,7 +7678,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(host === 'auth'){ setAuthPanel('funds'); return; }
     if(host === 'wallet'){ session.walletView = 'flow'; renderWalletBody(); return; }
     const title = document.getElementById('fundsTitle');
-    if(title) title.textContent = 'Add funds';
+    if(title) title.textContent = flowTitle();
     paintFlowInto(document.getElementById('fundsBody'));
     overlayOpen(fundsOverlay);
   }
@@ -6629,8 +7794,14 @@ html.dark .qhc-id{color:#6BA3FF;}
     paintSendCta(body);
     const go = ()=>{
       applySend(from, toWallet, amt);
-      logActivity('send', toWallet ? `Send · ${sendWalletLabel(toWallet)}` : `Send · ${shortAddr(f.addr)}`, amt);
-      finishSend(toWallet ? `Sent ${usdLabel(amt)} to ${sendWalletLabel(toWallet)}.` : `Sent ${usdLabel(amt)}.`);
+      const toLabel = toWallet ? sendWalletLabel(toWallet) : shortAddr(f.addr);
+      logActivity('send', `Send · ${toLabel}`, amt);
+      const toast = `Sent ${usdLabel(amt)} to ${toLabel}.`;
+      if(f.kind === 'deposit'){
+        finishFundsSheet();
+        paintAuthChrome();
+        showToast(toast);
+      } else finishSend(toast);
     };
     if(from.kind === 'eoa'){
       requestSignature(`Send ${usdLabel(amt)}`, go, { wallet: from });
@@ -6828,6 +7999,44 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(walletOverlay?.classList.contains('show')) closeWalletModal();
     else openWalletModal();
   });
+  document.getElementById('notifBtn')?.addEventListener('click', ()=>{
+    if(notifOverlay?.classList.contains('show')) closeNotifs();
+    else openNotifs();
+  });
+  document.getElementById('notifClose')?.addEventListener('click', closeNotifs);
+  notifOverlay?.addEventListener('click', (e)=>{ if(e.target === notifOverlay) closeNotifs(); });
+  document.querySelectorAll('[data-notif-tab]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      notifTab = btn.dataset.notifTab || 'all';
+      document.querySelectorAll('[data-notif-tab]').forEach(b=>{
+        const on = b === btn;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-selected', String(on));
+      });
+      renderNotifList();
+      haptic('selection');
+    });
+  });
+  document.getElementById('notifMarkRead')?.addEventListener('click', ()=>{
+    notifs.forEach(n => { n.unread = false; });
+    paintNotifChrome();
+    renderNotifList();
+    haptic('selection');
+  });
+  document.getElementById('notifSettings')?.addEventListener('click', ()=> haptic('selection'));
+  document.getElementById('notifBody')?.addEventListener('click', (e)=>{
+    const row = e.target.closest?.('.notif-row');
+    if(!row) return;
+    const hit = notifs.find(n => String(n.id) === row.dataset.nid);
+    if(hit && hit.unread){
+      hit.unread = false;
+      paintNotifChrome();
+      renderNotifList();
+    }
+    haptic('selection');
+  });
+  paintNotifChrome();
+  playNotifDemo();
   document.getElementById('authClose')?.addEventListener('click', closeAuthFromUser);
   document.getElementById('authBack')?.addEventListener('click', ()=>{
     if(session.authPanel === 'sig'){
@@ -7600,7 +8809,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     const icons = {
       mute: muteIconHtml(),
       sound: muteIconHtml(),
-      more:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="19" r="1.8" fill="currentColor"/></svg>',
+      more:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="5" r="1.8" fill="currentColor"/><circle cx="12" cy="12" r="1.8" fill="currentColor"/><circle cx="12" cy="19" r="1.8" fill="currentColor"/></svg>',
       play:'<svg viewBox="0 0 24 24" fill="none"><path d="M8 5.5v13l11-6.5-11-6.5z" fill="currentColor"/></svg>',
       pause:'<svg viewBox="0 0 24 24" fill="none"><rect x="6.5" y="5" width="4" height="14" rx="1.4" fill="currentColor"/><rect x="13.5" y="5" width="4" height="14" rx="1.4" fill="currentColor"/></svg>',
       broken:'<svg width="40" height="40" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="M3 14l4.5-4 3.5 3 4-4.5L21 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 4l16 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
@@ -7963,10 +9172,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   function actBubbleExpr(kind, opts={}){
     if(kind === 'tip'){
       const n = opts.amount != null ? Number(opts.amount) : (4 + Math.random() * 28);
-      const shown = Number.isFinite(n)
-        ? (Math.abs(n - Math.round(n)) < 1e-6 ? String(Math.round(n)) : n.toFixed(2))
-        : '5';
-      return `tipped $${shown}`;
+      return `tipped ${usdLabel(Number.isFinite(n) ? n : 5)}`;
     }
     if(kind === 'like') return 'liked it';
     if(kind === 'dislike') return 'disliked it';
@@ -8601,7 +9807,7 @@ html.dark .qhc-id{color:#6BA3FF;}
                 </span>
               </div>
             </div>
-            ${canTip ? `<div class="react-col"><button type="button" class="react-btn tip" data-tips="${p.tips}">${svgIcon('tip')}</button><div class="react-count tip-count">${fmt(p.tips)}</div></div>` : ''}
+            ${canTip ? `<div class="react-col"><button type="button" class="react-btn tip" data-tips="${p.tips}">${svgIcon('tip')}</button><div class="react-count tip-count">${usdLabel(p.tips)}</div></div>` : ''}
             <div class="react-col"><button type="button" class="react-btn comment">${svgIcon('comment')}</button><div class="react-count comment-count">${fmt(p.comments)}</div></div>
             ${canVote ? `<div class="react-col"><button type="button" class="react-btn like" data-likes="${p.likes}">${svgIcon('like')}</button><div class="react-count like-count">${fmt(p.likes)}</div></div>
             <div class="react-col"><button type="button" class="react-btn dislike">${svgIcon('dislike')}</button><div class="react-count dislike-count"></div></div>` : ''}
@@ -8749,7 +9955,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     return `
       <div class="col-actions">
         <div class="avatar-plus"><div class="avatar-plus-inner circle"><img src="${avatar}" alt=""></div></div>
-        <div class="react-col"><button type="button" class="react-btn tip" data-tips="${tips}">${svgIcon('tip')}</button><div class="react-count tip-count">${fmt(tips)}</div></div>
+        <div class="react-col"><button type="button" class="react-btn tip" data-tips="${tips}">${svgIcon('tip')}</button><div class="react-count tip-count">${usdLabel(tips)}</div></div>
         <div class="react-col"><button type="button" class="react-btn comment">${svgIcon('comment')}</button><div class="react-count comment-count">${fmt(comments)}</div></div>
         <div class="react-col"><button type="button" class="react-btn like" data-likes="${likes}">${svgIcon('like')}</button><div class="react-count like-count">${fmt(likes)}</div></div>
         <div class="react-col"><button type="button" class="react-btn dislike">${svgIcon('dislike')}</button><div class="react-count">&nbsp;</div></div>
@@ -8850,7 +10056,7 @@ html.dark .qhc-id{color:#6BA3FF;}
           e.stopPropagation(); if(tipBtn.classList.contains('active')) return;
           requireSpend(5, ()=>{
             tipBtn.classList.add('active','pulse'); setTimeout(()=>tipBtn.classList.remove('pulse'),450);
-            let val=parseInt(tipBtn.dataset.tips,10)+5; tipBtn.dataset.tips=val; tipCountEl.textContent=fmt(val);
+            let val=parseInt(tipBtn.dataset.tips,10)+5; tipBtn.dataset.tips=val; tipCountEl.textContent=usdLabel(val);
             spawnTipFloat(tipBtn); haptic('tip');
             signalActivity('tip', { item, avatar: MY_AVATAR, amount: 5 });
           }, 'Gift $5.00');
@@ -8871,6 +10077,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       }
       likeBtn.addEventListener('click',(e)=>{
         e.stopPropagation();
+        requireAuth(()=>{
         if(likeBtn.classList.contains('active')){
           likeBtn.classList.remove('active');
           let val=Math.max(0, parseInt(likeBtn.dataset.likes,10)-1);
@@ -8888,9 +10095,11 @@ html.dark .qhc-id{color:#6BA3FF;}
         refreshDislikeCount();
         haptic('like');
         signalActivity('like', { item, avatar: MY_AVATAR });
+        });
       });
       dislikeBtn.addEventListener('click',(e)=>{
         e.stopPropagation();
+        requireAuth(()=>{
         if(dislikeBtn.classList.contains('active')){
           dislikeBtn.classList.remove('active');
           dislikeBtn.dataset.dislikes=Math.max(0, parseInt(dislikeBtn.dataset.dislikes||'0',10)-1);
@@ -8908,6 +10117,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         refreshDislikeCount();
         haptic('dislike');
         signalActivity('dislike', { item, avatar: MY_AVATAR });
+        });
       });
       refreshDislikeCount();
       }
@@ -8988,7 +10198,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   function flashIcon(flashEl, which){ flashEl.innerHTML=`<div class="flash-btn">${svgIcon(which)}</div>`; flashEl.classList.remove('show'); void flashEl.offsetWidth; flashEl.classList.add('show'); }
   function spawnTipFloat(btn){
     if(!btn) return;
-    const f=document.createElement('div'); f.className='tip-float'; f.textContent='+$5';
+    const f=document.createElement('div'); f.className='tip-float'; f.textContent='+$5.00';
     const rect=btn.getBoundingClientRect(); f.style.left=(rect.left+rect.width/2-12)+'px'; f.style.top=(rect.top-6)+'px';
     document.body.appendChild(f); setTimeout(()=>f.remove(),1000);
   }
@@ -10216,16 +11426,19 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
   }
 
+  const NEW_PILL_ENABLED = false; // parked — pill sat on the feed and felt out of place
   const NEW_PILL_DELAY = 3 * 60 * 1000; // simmer ~3 min before offering new posts
   const NEW_PILL_SWIPES = 2; // hide after a couple of settled navigations so it doesn't linger
   let newPillSwipes = 0;
   function armNewContent(delay){
+    if(!NEW_PILL_ENABLED) return;
     clearTimeout(newTimer);
     newTimer = setTimeout(()=>{
       newContentReady = true;
       newPillSwipes = 0;
       if(!refreshing && !pulling){
         newPill.classList.add('show');
+        newPill.hidden = false;
         positionFeedOverlays();
       }
     }, delay);
@@ -10234,10 +11447,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     newContentReady = false;
     newPillSwipes = 0;
     newPill.classList.remove('show');
-    armNewContent(NEW_PILL_DELAY);
+    if(NEW_PILL_ENABLED) armNewContent(NEW_PILL_DELAY);
   }
   function noteNewPillSwipe(){
-    if(!newPill?.classList.contains('show')) return;
+    if(!NEW_PILL_ENABLED || !newPill?.classList.contains('show')) return;
     newPillSwipes += 1;
     if(newPillSwipes < NEW_PILL_SWIPES) return;
     // Soft dismiss — not a refresh; re-arm so it can return later
@@ -10252,7 +11465,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     e.stopPropagation();
     doRefresh(true);
   });
-  armNewContent(REFRESH_DEMO ? 0 : NEW_PILL_DELAY);
+  if(NEW_PILL_ENABLED) armNewContent(REFRESH_DEMO ? 0 : NEW_PILL_DELAY);
 
   /** Cinematic in-place pull → refresh for shareable ?refresh (does not alter root feed). */
   function playRefreshDemo(){
@@ -10771,12 +11984,12 @@ html.dark .qhc-id{color:#6BA3FF;}
   function isCommentAnon(){
     return !!document.getElementById('commentAnonToggle')?.classList.contains('active');
   }
-  // Media attach is allowed whenever comments are open; anon is auto-exited on drop.
+  // Media attach is allowed when signed in and comments are open; anon is auto-exited on drop.
   function canOfferCommentMedia(){
-    return state.commentsOpen;
+    return state.commentsOpen && isAuthed();
   }
   function canAttachCommentMedia(){
-    return state.commentsOpen && !isCommentAnon();
+    return state.commentsOpen && isAuthed() && !isCommentAnon();
   }
   function ensurePublicForMedia(){
     if(!isCommentAnon()) return false;
@@ -11705,7 +12918,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       <div class="thc-foot">
         <div class="thc-buyers"><span class="thc-buyer-stack">${buyerImgs}</span>${fmtHoverCount(stats.buyers)} Buyers</div>
         <div class="thc-foot-stat"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21C16.97 21 21 16.97 21 12S16.97 3 12 3 3 7.03 3 12c0 1.49.36 2.89 1 4.13L3 21l5-.94A8.96 8.96 0 0 0 12 21Z" stroke="currentColor" stroke-width="1.8"/></svg>${fmtHoverCount(stats.comments)}</div>
-        <div class="thc-foot-stat"><svg viewBox="0 0 24 24" fill="none"><path d="M12 6.4C18.5-.3 29.7 12.1 12 22C-5.7 12.1 5.5-.3 12 6.4Z" stroke="currentColor" stroke-width="1.8"/></svg>${fmtHoverCount(stats.tips)}</div>
+        <div class="thc-foot-stat"><svg viewBox="0 0 24 24" fill="none"><path d="M12 6.4C18.5-.3 29.7 12.1 12 22C-5.7 12.1 5.5-.3 12 6.4Z" stroke="currentColor" stroke-width="1.8"/></svg>${usdLabel(stats.tips)}</div>
         <div class="thc-heat"><svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M12 3c2.2 3.2 4 5.4 4 8.2A4 4 0 1 1 8 11.2C8 8.4 9.8 6.2 12 3Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>${stats.heat}%<span class="thc-heat-bar"><span class="thc-heat-fill" style="width:${stats.heat}%"></span></span></div>
       </div>`;
   }
@@ -12235,6 +13448,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     );
   }
   function startReplyTo(c){
+    if(!isAuthed()){
+      requireAuth(()=> startReplyTo(c));
+      return;
+    }
     ensureCommentId(c);
     const input = document.getElementById('commentInput');
     if(!input || !state.commentsOpen) return;
@@ -12291,7 +13508,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     const dislikeBtn = row?.querySelector('.c-pill.dislike');
     if(tipBtn){
       tipBtn.dataset.v = c.tips;
-      tipBtn.querySelector('span').textContent = fmt(c.tips);
+      tipBtn.querySelector('span').textContent = usdLabel(c.tips);
       tipBtn.classList.toggle('active', !!c.tipped);
     }
     if(likeBtn){
@@ -12307,7 +13524,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       const cfxDislike = cfxCaption.querySelector('.cfx-react.dislike');
       if(cfxTip){
         cfxTip.dataset.v = c.tips;
-        cfxTip.querySelector('span').textContent = fmt(c.tips);
+        cfxTip.querySelector('span').textContent = usdLabel(c.tips);
         cfxTip.classList.toggle('active', !!c.tipped);
       }
       if(cfxLike){
@@ -12319,6 +13536,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
   }
   function reactOnComment(c, kind, originBtn){
+    if((kind === 'like' || kind === 'dislike') && !isAuthed()){
+      requireAuth(()=> reactOnComment(c, kind, originBtn));
+      return;
+    }
     commentReactState(c);
     const pulse = (el)=>{ if(!el) return; el.classList.add('pulse'); setTimeout(()=>el.classList.remove('pulse'),450); };
 
@@ -12382,7 +13603,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(isAnonComment(c)) return '';
     commentReactState(c);
     return `<div class="comment-reacts">
-      <button type="button" class="c-pill tip${c.tipped ? ' active' : ''}" data-v="${c.tips}">${commentTipSvg}<span>${fmt(c.tips)}</span></button>
+      <button type="button" class="c-pill tip${c.tipped ? ' active' : ''}" data-v="${c.tips}">${commentTipSvg}<span>${usdLabel(c.tips)}</span></button>
       <button type="button" class="c-pill like${c.liked ? ' active' : ''}" data-v="${c.likes}">${commentLikeSvg}<span>${fmt(c.likes)}</span></button>
       <button type="button" class="c-pill dislike${c.disliked ? ' active' : ''}">${commentDislikeSvg}</button>
     </div>`;
@@ -12916,7 +14137,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         <div class="cap">${renderCommentText(c.text)}</div>
       </div>
       <div class="cfx-reacts">
-        <button type="button" class="cfx-react tip${c.tipped ? ' active' : ''}" data-v="${c.tips}">${svgIcon('tip')}<span>${fmt(c.tips)}</span></button>
+        <button type="button" class="cfx-react tip${c.tipped ? ' active' : ''}" data-v="${c.tips}">${svgIcon('tip')}<span>${usdLabel(c.tips)}</span></button>
         <button type="button" class="cfx-react like${c.liked ? ' active' : ''}" data-v="${c.likes}">${svgIcon('like')}<span>${fmt(c.likes)}</span></button>
         <button type="button" class="cfx-react dislike${c.disliked ? ' active' : ''}">${svgIcon('dislike')}</button>
       </div>`;
@@ -13081,6 +14302,10 @@ html.dark .qhc-id{color:#6BA3FF;}
   });
   commentAttachBtn?.addEventListener('click', (e)=>{
     e.preventDefault();
+    if(!isAuthed()){
+      requireAuth(()=> commentInput?.focus());
+      return;
+    }
     if(!canAttachCommentMedia()) return;
     closeCommentAnonPop();
     commentFileInput?.click();
@@ -13148,7 +14373,21 @@ html.dark .qhc-id{color:#6BA3FF;}
       paintFeedCommentCount(op);
     }
   }
+  function paintCommentComposeAuth(){
+    const input = document.getElementById('commentInput');
+    const authed = isAuthed();
+    if(!input) return;
+    input.placeholder = authed ? 'Post content to earn' : 'Sign in to comment';
+    input.readOnly = !authed;
+  }
   function sendComment(){
+    if(!isAuthed()){
+      requireAuth(()=>{
+        if(commentInput?.value.trim() || commentPendingMedia) sendComment();
+        else commentInput?.focus();
+      });
+      return;
+    }
     const text = commentInput.value.trim();
     if(!state.commentsOpen) return;
     if(!text && !commentPendingMedia) return;
@@ -13207,6 +14446,10 @@ html.dark .qhc-id{color:#6BA3FF;}
   commentIdentityBtn?.addEventListener('click',(e)=>{
     e.preventDefault();
     e.stopPropagation();
+    if(!isAuthed()){
+      requireAuth(()=> openCommentAnonPop());
+      return;
+    }
     if(commentAnonPop?.classList.contains('show')) closeCommentAnonPop();
     else openCommentAnonPop();
     haptic('selection');
@@ -13220,6 +14463,11 @@ html.dark .qhc-id{color:#6BA3FF;}
   document.addEventListener('click',(e)=>{
     if(!e.target.closest?.('#commentIdentity')) closeCommentAnonPop();
   });
+  commentInput.addEventListener('pointerdown', (e)=>{
+    if(isAuthed()) return;
+    e.preventDefault();
+    requireAuth(()=> commentInput.focus());
+  });
   commentInput.addEventListener('input', ()=>{
     syncCommentInputMirror();
     syncCommentSendReady();
@@ -13231,6 +14479,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendComment(); }
   });
   commentSendBtn.addEventListener('click',(e)=>{ e.preventDefault(); sendComment(); });
+  paintCommentComposeAuth();
   syncCommentAvatar();
   syncCommentInputMirror();
   syncCommentSendReady();
@@ -13308,12 +14557,16 @@ html.dark .qhc-id{color:#6BA3FF;}
   [
     [authOverlay, closeAuthFromUser],
     [walletOverlay, closeWalletModal],
+    [notifOverlay, closeNotifs],
+    [signalsOverlay, closeSignals],
     [fundsOverlay, ()=>{ session.pendingFunds = null; overlayClose(fundsOverlay); }],
     [swapOverlay, closeSwap],
   ].forEach(([el, closeFn])=>{
     const modal = el?.querySelector('.modal');
     if(!el || !modal || typeof enableSheetDrag !== 'function') return;
     enableSheetDrag(modal, modal.querySelector('.sheet-handle'), closeFn, el);
+    const head = modal.querySelector('.wallet-head, .notif-head, .auth-head, .funds-head');
+    if(head) enableSheetDrag(modal, head, closeFn, el);
   });
   {
     const swapModal = swapOverlay?.querySelector('.modal');
@@ -13344,23 +14597,24 @@ html.dark .qhc-id{color:#6BA3FF;}
   });
 
   const sidebar = document.getElementById('sidebar');
-  const sidebarToggle = document.getElementById('sidebarToggle');
+  const brandToggle = document.getElementById('brandToggle');
   function setSidebarCollapsed(collapsed){
     sidebar.classList.toggle('collapsed', collapsed);
-    sidebarToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-    sidebarToggle.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
-    sidebarToggle.title = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
-    const label = sidebarToggle.querySelector('.collapse-label');
-    if(label) label.textContent = collapsed ? 'Expand' : 'Collapse';
+    if(brandToggle){
+      brandToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+      brandToggle.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar');
+    }
     try{ localStorage.setItem('kb_sidebar_collapsed', collapsed ? '1' : '0'); }catch(e){}
     reflowDuringChrome();
   }
   function toggleSidebar(){ setSidebarCollapsed(!sidebar.classList.contains('collapsed')); }
   if(localStorage.getItem('kb_sidebar_collapsed')==='1') setSidebarCollapsed(true);
-  document.getElementById('brandToggle').addEventListener('click', toggleSidebar);
-  sidebarToggle.addEventListener('click', toggleSidebar);
+  brandToggle?.addEventListener('click', toggleSidebar);
+  brandToggle?.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggleSidebar(); }
+  });
   sidebar.addEventListener('transitionend', (e)=>{ if(e.propertyName==='width') checkOverlayMode(); });
-  document.getElementById('themeBtn').addEventListener('click', ()=>{ toggleTheme(); });
+  document.getElementById('themeBtn').addEventListener('click', (e)=>{ toggleTheme(e); });
 
   // ---- More menus (desktop popover + mobile bottom sheet) ----
   const mobileNav = document.getElementById('mobileNav');
@@ -13372,10 +14626,29 @@ html.dark .qhc-id{color:#6BA3FF;}
   const mnavMoreBtn = mobileNav?.querySelector('[data-nav="more"]');
 
   function toggleTheme(){
-    document.documentElement.classList.toggle('dark');
+    const root = document.documentElement;
+    const goingDark = !root.classList.contains('dark');
+    const apply = ()=>{
+      root.classList.toggle('dark');
+      try{
+        localStorage.setItem('kb_theme', root.classList.contains('dark') ? 'dark' : 'light');
+      }catch(_){}
+    };
+    const finish = ()=> root.classList.remove('theme-switching','theme-to-dark','theme-to-light');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(reduce || typeof document.startViewTransition !== 'function'){
+      root.classList.add('theme-switching');
+      apply();
+      requestAnimationFrame(finish);
+      return;
+    }
+    root.classList.add('theme-switching', goingDark ? 'theme-to-dark' : 'theme-to-light');
     try{
-      localStorage.setItem('kb_theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-    }catch(_){}
+      document.startViewTransition(apply).finished.finally(finish);
+    }catch(_){
+      apply();
+      finish();
+    }
   }
 
   function closeNavMorePop(){
@@ -13407,9 +14680,9 @@ html.dark .qhc-id{color:#6BA3FF;}
       if(b.dataset.nav !== 'more') b.classList.remove('active');
     });
   }
-  function handleMoreAction(action){
+  function handleMoreAction(action, ev){
     if(action === 'theme'){
-      toggleTheme();
+      toggleTheme(ev);
       haptic('toggle');
       return;
     }
@@ -13418,8 +14691,17 @@ html.dark .qhc-id{color:#6BA3FF;}
       requireAuth(()=> openWalletModal());
       return;
     }
+    if(action === 'notifications'){
+      haptic('open');
+      openNotifs();
+      return;
+    }
+    if(action === 'signals'){
+      haptic('open');
+      openSignals();
+      return;
+    }
     haptic('selection');
-    // prototype stubs — destinations not wired yet
   }
 
   sideMoreBtn?.addEventListener('click', (e)=>{
@@ -13435,7 +14717,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   navMorePop?.addEventListener('click', (e)=>{
     const btn = e.target.closest('button[data-more]');
     if(!btn) return;
-    handleMoreAction(btn.dataset.more);
+    handleMoreAction(btn.dataset.more, e);
     closeNavMorePop();
   });
   document.addEventListener('click', (e)=>{
@@ -13459,6 +14741,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(sigOverlay?.classList.contains('show')){ return; }
     if(authOverlay?.classList.contains('show') && session.authPanel === 'sig') return;
     if(fundsOverlay?.classList.contains('show')){ session.pendingFunds = null; overlayClose(fundsOverlay); return; }
+    if(notifOverlay?.classList.contains('show')){ closeNotifs(); return; }
+    if(signalsOverlay?.classList.contains('show')){ closeSignals(); return; }
     if(walletOverlay?.classList.contains('show')){ closeWalletModal(); return; }
     if(document.getElementById('tradePayMenu') && !document.getElementById('tradePayMenu').hidden){ hidePayPicker(); return; }
     if(session.slipOpen){ closeSlippage(); return; }
@@ -13472,7 +14756,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   moreSheet?.addEventListener('click', (e)=>{
     const btn = e.target.closest('button[data-more]');
     if(!btn) return;
-    handleMoreAction(btn.dataset.more);
+    handleMoreAction(btn.dataset.more, e);
     closeMoreSheet();
   });
   if(moreSheet && typeof enableSheetDrag === 'function'){

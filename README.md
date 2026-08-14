@@ -20,8 +20,11 @@ Porting / review: open the heading, not the whole README. Production: [https://k
 | [Token page](#token-page) (`/token` — ticker + View token) | [README.md#token-page](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-page) |
 | [Auth (Option 4)](#auth) — social vs EOA | [README.md#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth) |
 | [Sheet morph](#sheet-morph) (`morphSheet` ~320ms) | [README.md#sheet-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sheet-morph) |
-| [Deposit](#deposit) (native chain/token selects + address tip) | [README.md#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit) |
+| [Deposit](#deposit) (Cash vs Crypto, unified QR) | [README.md#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit) |
 | [Send](#send) | [README.md#send](https://github.com/frilo-eth/kby-feed/blob/main/README.md#send) |
+| [Notifications](#notifications) | [README.md#notifications](https://github.com/frilo-eth/kby-feed/blob/main/README.md#notifications) |
+| [Signals](#signals) | [README.md#signals](https://github.com/frilo-eth/kby-feed/blob/main/README.md#signals) |
+| [Icons](#icons) | [README.md#icons](https://github.com/frilo-eth/kby-feed/blob/main/README.md#icons) |
 | [Trade drawer](#trade-drawer) (dollarized buy) | [README.md#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer) |
 | [Trade CTA](#trade-cta) (Sign in → Add funds → green Buy) | [README.md#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta) |
 | [Slippage](#slippage) | [README.md#slippage](https://github.com/frilo-eth/kby-feed/blob/main/README.md#slippage) |
@@ -87,7 +90,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 |---------|----------|
 | Drawer / sheet | Desktop 360 side panel; mobile 86vh bottom sheet + scrim + drag dismiss |
 | Compose dock | Comments tab: list scrolls in `.comments-body`; compose stays on the drawer floor (not sticky-inside-scroll). Keep scroll **16px** gutters — do not negative-margin the whole panel |
-| Compose chrome | Squircle input row (`border-radius:14px`) matching `.comment-send`; send haptic `sent` |
+| Compose chrome | Squircle input row (`border-radius:14px`) matching `.comment-send`; send haptic `sent`. Viewing the thread is open; posting (compose, reply, attach, send) and like / dislike are `requireAuth`. **Share** is ungated |
 | Anon vs public | Anon: no reacts/media; public: X-proof tip + reacts |
 | **Threaded replies** | One indent level under a root (`.comment-replies` pad-left 46px / 40px mobile); smaller reply avatars (28px) |
 | [Yap thread](#yap-thread) | Same-ticker entries are media comments on the OP (`wireYapsIntoOpThreads`). Shared `commentList` — not a copy |
@@ -114,10 +117,13 @@ Use this as the checklist when reimplementing — these are the UX details that 
 
 | Feature | Behavior |
 |---------|----------|
-| [Option 4](#auth) | Social / email → embedded Kumbaya wallet, **sponsored** (no signature on gift/buy/sell). Crypto wallet (EOA) → that address is the account; gift/buy/sell/launch **sign** (`needsSig()`). No gates. Copy is **Add funds** / **Send** |
+| [Option 4](#auth) | Social / email → embedded Kumbaya wallet, **sponsored** (no signature on gift/buy/sell). Crypto wallet (EOA) → that address is the account; gift/buy/sell/launch **sign** (`needsSig()`). Comment, like, dislike, gift, buy, sell, and launch are `requireAuth`. **Share** is ungated. Copy is **Add funds** / **Send** |
 | Sign-in sheet | Google + Apple/X/Farcaster/email + detected wallet row. Same `.modal` chrome as share (`--card`, Inter, `--bg` `#F2EEEA`) |
-| [Deposit](#deposit) | Card or crypto. UI copy is **Add funds**. Crypto: native `<select>` pair (chain + token). Copy: `Send USDC on Ethereum to this address.` No “need $X” in the title. (i) on **Your address** |
+| [Deposit](#deposit) | Hub is **Cash** or **Crypto**. Cash is a MoonPay stand-in. Transfer crypto opens the QR with icons. Connect wallet is wallet first, then EVM/Solana. Copy: `Send USDC on Ethereum to this address.` |
 | [Send](#send) | From / To / amount on one sheet. Linked wallets as recommended destinations + paste any address. Short From → **Add funds to send** |
+| [Notifications](#notifications) | Ghost bell left of theme in the topbar (desktop). Mobile: More sheet. Same tray as Account — side drawer / bottom sheet. All / Unread, Mark as read |
+| [Signals](#signals) | Sitewide live activity. Same full-height tray as Notifications. Live stack is parked |
+| [Icons](#icons) | [Central Icons](https://www.npmjs.com/package/@central-icons-react/all) **sharp** (square join, outlined, radius 0, stroke 1.5, 16×16). Inline SVG + `currentColor`. Custom glyphs when handed (Pools) |
 
 ### Trade drawer
 
@@ -261,7 +267,7 @@ Non-token `.avatar-plus:hover .plus-badge` still uses the soft pop (`scale(1.12)
 |--------|------|--------|
 | Click pulse (btn) | `@keyframes reactPulse` | `.48s` `(.22,1.5,.36,1)` — brightness flash (no size) |
 | Click pulse (icon) | `@keyframes reactIconPop` | same — opacity dip |
-| Tip float `+$5` | `@keyframes tipFloat` | `1s ease-out` — rise `−52px`, fade |
+| Tip float `+$5.00` | `@keyframes tipFloat` | `1s ease-out` — rise `−52px`, fade |
 | Active fill | tip `orange` / like `green` / dislike `red` | bg/color `.22s`, glow shadow |
 | Tip lock | once tipped, no hover brighten | cursor `default` |
 
@@ -280,9 +286,9 @@ Floating IG-style avatars for ambient / live tip · comment · like · dislike. 
 | Ring | Opaque disc + white hairline on `.act-hit-av`; no colored `--act` outer ring / brown drop shadow |
 | Chip closed | `.act-hit-rx` — 16×16 color badge with reaction icon |
 | Chip open | `.is-rx-open` — blooms to pill (`max-width:168px`, `.32s` `(.22,1,.36,1)`) |
-| Copy | tip `tipped $N` · like `liked it` · dislike `disliked it` · comment short text |
+| Copy | tip `tipped $5.00` · like `liked it` · dislike `disliked it` · comment short text |
 | Marquee | `@keyframes actRxMarquee` — **comments only**, and only when the label overflows (`syncActRxMarquee`) |
-| Never marquee | tip (`tipped $N`), like (`liked it`), dislike (`disliked it`), short comment snips (`wow`, `love this`) |
+| Never marquee | tip (`tipped $5.00`), like (`liked it`), dislike (`disliked it`), short comment snips (`wow`, `love this`) |
 | API | `spawnActivityBubble` · `signalActivity` · `setActDisclosure` · `layoutActivityBubbles` · `nextActBubbleSlot` |
 
 ```css
@@ -734,6 +740,7 @@ pos  += v * h
 | Chevron gutter | `--feed-chevron-gutter: 88px` on `.feed-item` (incl. `meta-overlay-mode` ≥861px) | keeps rail clear of `.chevron-nav` |
 | Media chrome | `mediaChromePx()` reserves pad + rail + chevron column | tablet / expanded sidebar |
 | Reaction glass | glass rail styles **only ≤860** (on-media); tablet keeps light `#FAFAFA` rail beside card | — |
+| **Theme flip** | Lights on/off: view-transition fade (400ms `cubic-bezier(.2,0,0,1)`). Dark = old snapshot dissolves; light = new snapshot arrives. No circular clip. `html.theme-switching` freezes CSS vars. Reduced-motion: class toggle only | `.4s` |
 
 ---
 
@@ -1089,7 +1096,7 @@ Gate: `width > 860` and `(hover:hover) and (pointer:fine)` · mouse `pointerente
 
 | Surface | Original Post | Entry / Content |
 |---------|---------------|-----------------|
-| Rail tip | **hidden** — you cannot tip an OP | `$` tip + count (immutable +$5) |
+| Rail tip | **hidden** — you cannot tip an OP | `$` tip + `usdLabel` total (immutable +$5.00) |
 | Rail like / dislike | **hidden** — same as tip (`canVote = canTip`) | like ↔ dislike exclusive |
 | `…` menu | **View token** (origin icon) → [token page](#token-page) | **View in thread** (list icon) → parent token comments |
 | Token mini + plus rail + drawer av | Token art = this media | Token art from the parent OP (`tokenArtOf`) — **not** the yap frame |
@@ -1269,6 +1276,46 @@ Mobile enter of `.modal` itself is still `transform: translateY(100%+24px) → 0
 
 ---
 
+<a id="notifications"></a>
+
+### 12b. Notifications
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#notifications](https://github.com/frilo-eth/kby-feed/blob/main/README.md#notifications)
+
+Inbox is a **wallet-class tray**: desktop right drawer (400px), mobile Vaul sheet. One tray at a time (`overlayOpen`). Topbar: ghost bell **left of** ghost theme. Count badge on the bell + title pill. Inbox starts **all read** (no badge when signed out). Badge pop demo: `?notiff` (`?notif` / `#notiff` also). Tabs **All** / **Unread (N)**; **Mark as read** clears unread. Settings is a stub. Mobile uses More → Notifications (topbar icons hide).
+
+Rows: 32px thumb (avatar or token media) + action badge or small avatar overlay; user · action · `$TICKER` or `#id`; unread orange dot + `1hr`. Hover is `color-mix` on `--card`, not `--bg`.
+
+API: `openNotifs` · `closeNotifs` · `paintNotifChrome`.
+
+---
+
+<a id="signals"></a>
+
+### 12c. Signals
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#signals](https://github.com/frilo-eth/kby-feed/blob/main/README.md#signals)
+
+Sitewide live activity (launched / bought / sold / yapped / graduated / fueled) — not personal inbox. Same row anatomy as [Notifications](#notifications) (`notif-row`, 32px thumb, action · `$TICKER` / `#id`).
+
+Same full-height tray as Account / Notifications (`#signalsOverlay`, 400px desktop drawer / mobile sheet). Header: radar glyph + **Signals** + orange **Live** pill. More → Signals. One tray at a time. Live toast stack is parked.
+
+API: `openSignals` · `closeSignals` · `pushSignal`. Center `showToast` pills are unchanged (copy / signed out / etc).
+
+---
+
+<a id="icons"></a>
+
+### Icons
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#icons](https://github.com/frilo-eth/kby-feed/blob/main/README.md#icons)
+
+UI glyphs are **[Central Icons](https://iconists.co/central)** — the **sharp** set: square join, outlined, radius 0, stroke **1.5**, 16×16 ([`@central-icons-react/all`](https://www.npmjs.com/package/@central-icons-react/all)). This file inlines the SVG (no React package). Use `currentColor` so light/dark and active nav follow `--ink-soft` / `--ink` / `--orange`.
+
+Do not invent rounded substitutes. If a mark is missing from Central (or the product has a custom one), use the SVG that was handed — **Pools** is custom. Filled custom paths get `.ic-fill` so active nav does not paint an extra stroke.
+
+---
+
 <a id="auth"></a>
 
 ### 13. Auth (Option 4)
@@ -1277,12 +1324,12 @@ Mobile enter of `.modal` itself is still `transform: translateY(100%+24px) → 0
 
 One login, one paying wallet. Prototype only — no real keys.
 
-| Path | `session.auth` | Wallet | Gift / buy / sell / launch |
-|------|----------------|--------|----------------------------|
+| Path | `session.auth` | Wallet | Gift / buy / sell / launch / comment / like |
+|------|----------------|--------|---------------------------------------------|
 | Google, Apple, X, Farcaster, email | `'social'` | minted **embedded** (`kind:'embedded'`, name Kumbaya) | **sponsored** — no signature sheet |
 | MetaMask / Phantom / … | `'eoa'` | that catalog row (`kind:'eoa'`) | **`needsSig()`** → signature sheet, then proceed |
 
-No product gates. Topbar: **Sign in** → after auth, wallet chip with `usdLabel(totalBal())`. Copy is **Add funds** / **Send**.
+Comment, like, and dislike use `requireAuth`, same family as gift/buy. Reading comments and **Share** are ungated. Topbar: **Sign in** → after auth, wallet chip with `usdLabel(totalBal())`. Copy is **Add funds** / **Send**.
 
 | Motion | Spec |
 |--------|------|
@@ -1290,7 +1337,7 @@ No product gates. Topbar: **Sign in** → after auth, wallet chip with `usdLabel
 | Panel switch (login ↔ wallets ↔ email ↔ funds) | [`morphSheet`](#sheet-morph) `.32s` |
 | Icon / row press | `scale(.97)` · `.12s` |
 | Hover on `--card` controls | `color-mix(in srgb, var(--card) 62%, white)` — not `--bg` |
-| Signed-in feedback | short “You’re signed in.” hold, then `afterAuth` (deposit if `totalBal() < 1`, **without** a need amount in the title) |
+| Signed-in feedback | short “You’re signed in.” hold, then `afterAuth`. Does **not** auto-open funds |
 
 API: `completeLogin` · `requireAuth` · `requireSpend` · `requestSignature` · `paintAuthChrome`.
 
@@ -1302,38 +1349,55 @@ API: `completeLogin` · `requireAuth` · `requireSpend` · `requestSignature` ·
 
 **Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit)
 
-`openDeposit(need, then)` / `session.flow.kind === 'deposit'`. Hosts: auth tray (`setAuthPanel('funds')`), wallet tray, or `#fundsOverlay`. UI copy is **Add funds** (sheet title, account button, toasts, activity).
+`openDeposit(need, then)` / `session.flow.kind === 'deposit'`. Hosts: auth tray (`setAuthPanel('funds')`), wallet tray, or `#fundsOverlay`. Hub title is **Fund your account** when `totalBal() < 1`, otherwise **Add funds**. Account button, toasts, and activity stay **Add funds**. Signup does **not** force this sheet — it is a showable feature on `?deposit` (`#deposit` / `demo=deposit` also). Hub body TBD.
 
-**Do not show a need amount** in the title (`Add funds $5.00.` leaked from tipping `requireSpend(5)`). `openTopUp(0, pending)` / `openDeposit(0, then)` always. Amount is chosen later (card presets / crypto Done credits `$25` in the prototype).
+**Do not show a need amount** in the title (`Add funds $5.00.` leaked from tipping `requireSpend(5)`). `openTopUp(0, pending)` / `openDeposit(0, then)` always. Amount is chosen later (MoonPay stand-in / inbound credit `$25` in the prototype). Completing add funds must **not** auto-trade.
+
+Hub is two jobs. One back chevron + [`morphSheet`](#sheet-morph). No stacked breadcrumbs.
 
 | Step | UI |
 |------|----|
-| `home` | Transfer crypto · Card · Apple Pay |
-| `crypto` | Native `<select>` pair + QR + **Your address** + (i) + copy |
-| `cash` | card placeholder + presets |
-| `confirm` | “Adding funds” → `Added $25.00` |
+| `home` | **Cash** · **Crypto** |
+| `methods` | Transfer on MegaETH (first) · Transfer crypto · Connect wallet · Connect exchange |
+| `mega` | Unified QR, `net` locked MegaETH. **Between my wallets** only if 2+ MegaETH (embedded) wallets |
+| `qr` | Transfer crypto: network + asset pills with icons, real QR (`qrcode-generator`, ECC H) + Mega/token center. **Info** accordion under the address |
+| `watch` | Watching for deposit (close allowed) → `confirm` |
+| `cash` | MoonPay stand-in: amount, USD/EUR/GBP pill, presets, paying-with row, Continue, then collapsible Solana note |
+| `cashPay` | Select payment method. Warning is not on this step |
+| `cashWait` | Complete checkout in MoonPay (Cancel = declined) |
+| `cwWallets` | Wallet first, then EVM or Solana |
+| `cwFamily` | EVM or Solana (token chips under the copy) |
+| `cwWait` | Waiting for {wallet}. Cancel = rejected |
+| `cwBalances` | Loading → empty. Disconnect. **Transfer to account** → watch |
+| `exList` → `exWait` | Exchange list. Waiting: *Complete authorization in the Coinbase tab…* |
+| `confirm` | “Adding funds” → `Added $25.00` (`is-confirming`, close locked) |
 
-**Chain / token:** two native `<select class="flow-select">` in `.flow-pickers` — not a custom overlay menu, not an expanding sheet.
+**Cash** is a MoonPay stand-in. Currency pill (USD / EUR / GBP) matches the trade chip. Warning sits **below Continue**: title *A Solana wallet may appear*; accordion chevron expands the body on tap/click (same at every breakpoint — no hover-open). Neutral (`--coffee`), not red. Opening the method list exits the note then [`morphSheet`](#sheet-morph).
+
+**Transfer crypto** opens the QR (no full-screen network list). Network and token pills use [cryptocurrency-icons](https://github.com/spothq/cryptocurrency-icons) / Trust Wallet assets via jsDelivr. QR encodes the receive address with [qrcode-generator](https://github.com/kazuhikoarai/qrcode-generator) (error correction H). Center mark stays MegaETH on Mega, token + network badge otherwise. **Info** on the address row opens an accordion *below the address*: processing time and “send only” token/network. Same chevron + `grid-template-rows` motion as the cash note. MegaETH receive is the MegaETH accepted set (ETH, USDm, USDT0, BTC.b, wstETH, stcUSD, USDe, cUSD). Other chains do not list USDm. Later this is [LI.FI](https://li.fi/) — do not promise “any token.”
+
+**Between my wallets** (Mega only) shows if there are 2+ embedded MegaETH wallets. Linked ETH addresses with no Mega balance do not count. When shown: From a linked wallet → To the cash account. EOA From → `requestSignature`.
+
+**Connect wallet** is wallet first, then EVM or Solana. Token chips sit under the subtitle. It is a deposit pull, not Account → Connect wallet (link).
 
 | Chain | Tokens |
 |-------|--------|
+| MegaETH (Transfer on MegaETH) | ETH, USDm, USDT0, BTC.b, wstETH, stcUSD, USDe, cUSD |
 | Ethereum | ETH, USDC, USDT |
 | Base | ETH, USDC |
 | Solana | SOL, USDC |
-
-Copy: `Send ${tick} on ${chain} to this address.` (`flowDepositCopy`). Later this is a [LI.FI](https://li.fi/) bridge — do not promise “any token.”
-
-**Your address** — label + `#flowAddrInfo` (i). Reuses `#infoHoverTip` (`data-tip-title` / `data-tip-body`). Body: *Send only the token and chain selected above. It converts to cash in your account. Other assets sent here won't be credited.* Hover 180ms + click. Portal z-index 120 sits above the auth overlay (72).
-
-Address row: clipboard SVG, regular weight, one line + ellipsis (`.flow-addr span`). Crypto **Done** → `startCryptoConfirm()` → `creditFunds`.
 
 | Motion | Spec |
 |--------|------|
 | Method row hover | `--card` mix white · `.15s` |
 | Method press | `scale(.985)` · `.12s` |
 | Native select hover | `--card` mix white · `.15s` |
-| (i) hover | ink + mix-white disc |
-| Reduced motion | confirm spin skipped |
+| List load | skeleton ~420ms |
+| Cash warning enter | opacity + `translateY(6px)` · `.24s` `--ease-out` |
+| Cash warning exit | same props · `.16s`, then morph to method list |
+| Cash warning accordion | chevron 180° + `grid-template-rows` 0fr→1fr · `.24s` open / `.16s` close |
+| QR Info accordion | same motion, panel under the address |
+| Reduced motion | confirm / wait spins skipped; warning opacity only · `.08s`; accordion instant |
 
 ---
 
