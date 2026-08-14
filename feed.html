@@ -1383,45 +1383,36 @@ html.dark .kbd-btn.active:hover{background:rgba(255,255,255,.1);}
 .drawer{width:0;flex-shrink:0;overflow:hidden;border-left:1px solid var(--line);background:var(--card);transition:width .38s cubic-bezier(.22,1,.36,1);z-index:35;}
 .drawer.open{width:400px;}
 .drawer-inner,.token-drawer-inner{width:400px;height:100%;display:flex;flex-direction:column;padding:0;min-height:0;}
-.drawer-close{
-  width:36px;height:36px;min-width:36px;min-height:36px;
-  border-radius:10px;border:none;padding:0;
-  background:var(--bg);color:var(--ink-soft);
-  cursor:pointer;flex-shrink:0;
-  display:inline-flex;align-items:center;justify-content:center;
-  font-size:18px;line-height:1;
-  transition:color .15s, background .15s, transform .1s;
-}
-.drawer-close:hover{color:var(--ink);background:var(--line);}
-.drawer-close:active{transform:scale(.92);}
-@media (max-width:860px){
-  .drawer-close{
-    width:40px;height:40px;min-width:40px;min-height:40px;
-    border-radius:12px;font-size:20px;
-  }
-}
-
 .token-drawer-chrome{flex-shrink:0;padding:16px 16px 0;background:var(--card);position:relative;z-index:1;}
 .token-drawer-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
-.token-drawer-identity{display:flex;align-items:center;gap:10px;min-width:0;}
-.token-drawer-av{width:40px;height:40px;object-fit:cover;flex-shrink:0;border-radius:50%;}
+.token-drawer-identity{
+  display:flex;align-items:center;gap:10px;min-width:0;
+  text-decoration:none;color:inherit;cursor:pointer;
+  border-radius:12px;margin:-4px 0;padding:4px 0;
+}
+.token-drawer-av{
+  width:40px;height:40px;object-fit:cover;flex-shrink:0;
+}
 .token-drawer-titles{min-width:0;}
 .token-drawer-ticker-row{display:flex;align-items:center;gap:6px;}
-.token-drawer-ticker{font-size:15px;font-weight:800;letter-spacing:-.01em;color:var(--ink);}
+.token-drawer-ticker{
+  font-size:15px;font-weight:800;letter-spacing:-.01em;color:var(--ink);
+  transition:color .15s;
+}
+.token-drawer-identity:hover .token-drawer-ticker{color:var(--coffee-hover);}
 .token-drawer-cat{
-  font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;
-  background:var(--orange);color:#fff;border:none;
+  font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  padding:2px 8px;border-radius:999px;border:none;
+  background:var(--dare-bg);color:var(--dare-fg);
 }
+.token-drawer-cat.meme{background:var(--meme-bg);color:var(--meme-fg);}
 .token-drawer-name{font-size:12px;color:var(--ink-soft);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;}
-.token-drawer-head-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
-.token-view-btn{
-  border:none;background:#111;color:#fff;
-  font-size:12px;font-weight:700;padding:9px 14px;border-radius:10px;cursor:pointer;
-  transition:filter .15s, transform .1s;
+.token-drawer-go{
+  width:14px;height:14px;flex-shrink:0;color:var(--ink-faint);margin-left:2px;
+  transition:color .15s,transform .15s;
 }
-html.dark .token-view-btn{background:#f5f5f7;color:#111;}
-.token-view-btn:hover{filter:brightness(1.12);}
-.token-view-btn:active{transform:scale(.97);}
+.token-drawer-identity:hover .token-drawer-go{color:var(--ink);transform:translateX(2px);}
+.token-drawer-head-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
 
 /* chart shell — --collapse: 0 (full) → 1 (minimal sparkline) */
 .token-chart{
@@ -1532,7 +1523,18 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
 .token-panel[hidden]{display:none !important;}
 .token-chart[hidden]{display:none !important;}
 
-.trade-side-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}
+.trade-side-row{
+  display:grid;grid-template-columns:1fr;align-items:center;
+  min-height:30px;margin-bottom:12px;position:relative;
+}
+.trade-side-rest{
+  grid-area:1/1;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  min-width:0;z-index:1;
+  transition:opacity .28s cubic-bezier(.23,1,.32,1), transform .32s cubic-bezier(.32,.72,0,1);
+}
+.trade-side-row.is-slip .trade-side-rest{
+  opacity:0;pointer-events:none;transform:translateY(-5px);
+}
 .trade-side-tabs{display:flex;align-items:center;gap:14px;flex:1;background:transparent;border-radius:0;padding:0;}
 .trade-side-tabs button{
   flex:0 0 auto;border:none;background:transparent;padding:0;
@@ -1557,15 +1559,16 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
 }
 .trade-auto-btn:active{transform:scale(.97);}
 .trade-slip{
-  display:grid;grid-template-rows:0fr;margin:0 0 10px;
-  transition:grid-template-rows .32s cubic-bezier(.32,.72,0,1),margin .32s cubic-bezier(.32,.72,0,1);
-  pointer-events:none;
+  grid-area:1/1;min-width:0;z-index:0;
+  opacity:0;pointer-events:none;transform:translateY(6px);
+  transition:opacity .28s cubic-bezier(.23,1,.32,1), transform .32s cubic-bezier(.32,.72,0,1);
 }
-.trade-slip.is-open{grid-template-rows:1fr;margin-bottom:12px;pointer-events:auto;}
-.trade-slip-inner{overflow:hidden;min-height:0;}
+.trade-side-row.is-slip .trade-slip{
+  opacity:1;pointer-events:auto;transform:translateY(0);z-index:2;
+}
+.trade-slip-inner{min-height:0;}
 .trade-slip-row{
   display:flex;align-items:center;justify-content:space-between;gap:10px;
-  padding:2px 0 2px;
 }
 .trade-slip-lab{
   display:inline-flex;align-items:center;gap:6px;
@@ -1609,7 +1612,7 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
 }
 .trade-slip-ctrls > button:active{transform:scale(.97);}
 @media (prefers-reduced-motion:reduce){
-  .trade-slip{transition:none;}
+  .trade-side-rest,.trade-slip{transition:none;transform:none;}
 }
 .trade-field{
   background:var(--card);border:1px solid var(--line);border-radius:16px;
@@ -1622,15 +1625,18 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
   border-color:color-mix(in srgb, var(--ink) 22%, var(--line));
 }
 .trade-field-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;min-height:28px;}
-#tradePayWith .trade-field-top{margin-bottom:8px;}
+#tradePayWith .trade-field-top{margin-bottom:10px;}
 .trade-pay-row{
-  display:flex;align-items:flex-end;justify-content:space-between;gap:12px;
-  min-height:36px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
 }
 .trade-pay-row .trade-usd{flex:1;min-width:0;}
+.trade-pay-row .trade-usd input{line-height:1.28;}
+.trade-pay-row .trade-usd.has-ticker .quote-ticker{
+  letter-spacing:0;line-height:1.28;align-items:center;
+}
 .trade-pay-bal{
   font-size:13px;font-weight:600;color:var(--ink-faint);
-  flex-shrink:0;padding-bottom:4px;font-variant-numeric:tabular-nums;
+  flex-shrink:0;font-variant-numeric:tabular-nums;
   white-space:nowrap;line-height:1;
 }
 .trade-field-label{font-size:13px;font-weight:600;color:var(--ink-faint);flex-shrink:0;}
@@ -1682,7 +1688,13 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
 .trade-pay-menu button:hover,
 .trade-pay-menu button.is-on{background:var(--bg);}
 .trade-pay-menu .trade-pay-ic{width:22px;height:22px;}
-.trade-asset-chip img,.trade-pay-ic{
+.trade-token-av{
+  width:22px;height:22px;flex-shrink:0;overflow:hidden;display:block;
+}
+.trade-token-av img{
+  width:100%;height:100%;object-fit:cover;display:block;border-radius:0;
+}
+.trade-pay-ic{
   width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0;display:block;overflow:hidden;
 }
 .trade-pay-ic svg{width:22px;height:22px;display:block;}
@@ -1693,6 +1705,37 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
 }
 .trade-out:hover{color:var(--ink);}
 .trade-out-swap{font-size:14px;line-height:1;}
+.trade-usd.has-ticker{position:relative;}
+.trade-usd.has-ticker .quote-ticker{
+  position:absolute;left:0;top:0;right:0;bottom:0;
+  display:flex;align-items:baseline;pointer-events:none;
+  font-size:32px;font-weight:800;letter-spacing:-.04em;color:var(--ink);
+  font-variant-numeric:tabular-nums;line-height:1.05;
+}
+.trade-usd.has-ticker input{color:transparent;caret-color:var(--orange);}
+.trade-usd.has-ticker.is-edit input{color:var(--ink);}
+.trade-usd.has-ticker.is-edit .quote-ticker{opacity:0;visibility:hidden;}
+.quote-ticker{
+  --qt-h:1.28em;
+  display:inline-flex;align-items:baseline;white-space:pre;
+  font-variant-numeric:tabular-nums;line-height:var(--qt-h);
+}
+.qt-ch{
+  display:inline-block;height:var(--qt-h);line-height:var(--qt-h);overflow:hidden;
+  vertical-align:baseline;flex-shrink:0;
+}
+.qt-d{width:1ch;text-align:center;}
+.qt-s{width:auto;}
+.qt-reel{
+  display:block;line-height:var(--qt-h);
+  transform:translateY(calc(-1 * var(--qt-h)));
+  transition:transform .22s cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-reduced-motion:reduce){
+  .qt-reel{transition:none;}
+  .trade-usd.has-ticker input{color:var(--ink);}
+  .trade-usd.has-ticker .quote-ticker{display:none;}
+}
 #tradeBuyField.is-token .trade-usd-sign{display:none;}
 .trade-meta{margin:12px 2px 0;}
 .trade-meta-sum{
@@ -1728,16 +1771,24 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
 }
 .trade-meta-inner span{color:var(--ink-faint);}
 .trade-meta-inner b{color:var(--ink-soft);font-weight:600;text-align:right;font-variant-numeric:tabular-nums;}
-.trade-slip-val{display:inline-flex;align-items:center;gap:6px;}
+.trade-slip-val{display:inline-flex;align-items:center;gap:0;}
 .trade-slip-auto{
-  display:inline-flex;align-items:center;height:18px;padding:0 7px;border-radius:999px;
-  background:#7B6CF0;color:#fff;
-  font-size:10px;font-weight:800;letter-spacing:.02em;line-height:1;
+  display:inline-flex;align-items:center;height:18px;padding:0;margin:0;
+  max-width:0;overflow:hidden;opacity:0;transform:scale(.96);
+  border-radius:999px;background:#7B6CF0;color:#fff;
+  font-size:10px;font-weight:800;letter-spacing:.02em;line-height:1;white-space:nowrap;
+  pointer-events:none;flex-shrink:0;
+  transition:max-width .32s cubic-bezier(.32,.72,0,1), opacity .28s cubic-bezier(.23,1,.32,1),
+    transform .28s cubic-bezier(.23,1,.32,1), padding .32s cubic-bezier(.32,.72,0,1),
+    margin .32s cubic-bezier(.32,.72,0,1);
 }
 .trade-meta-inner .trade-slip-auto{color:#fff;}
-.trade-slip-auto[hidden]{display:none;}
+.trade-slip-auto.is-in{
+  max-width:48px;padding:0 7px;margin-right:6px;opacity:1;transform:scale(1);
+}
 @media (prefers-reduced-motion:reduce){
-  .trade-meta-chev,.trade-meta-body{transition:none;}
+  .trade-meta-chev,.trade-meta-body,.trade-slip-auto{transition:none;}
+  .trade-slip-auto{transform:none;}
 }
 .buy-btn,.trade-buy-btn{
   margin-top:14px;width:100%;background:#3DDC97;color:#111;border:none;border-radius:14px;
@@ -1826,7 +1877,7 @@ html.dark .comment-skel-line::after{background:linear-gradient(105deg,transparen
 }
 .comments-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--ink-faint);padding:40px 20px;text-align:center;}
 .comments-empty svg{opacity:.5;}
-.comment-item{display:flex;gap:10px;align-items:flex-start;transition:background .28s ease,border-radius .28s ease,padding .28s ease,margin .28s ease;}
+.comment-item{display:flex;gap:10px;align-items:flex-start;border-radius:14px;transition:background .22s cubic-bezier(.23,1,.32,1);}
 .comment-thread{display:flex;flex-direction:column;gap:0;}
 .comment-replies{display:flex;flex-direction:column;gap:14px;padding:12px 0 0 46px;}
 .comment-replies:empty{display:none;padding:0;}
@@ -2020,7 +2071,7 @@ html.dark .anon-toggle.active .anon-switch::after{background:#fff;}
 .ctx-menu button:hover svg{color:var(--ink);}
 .ctx-menu button.danger svg{color:currentColor;}
 .ctx-menu-sep{height:1px;margin:4px 8px;background:var(--line);}
-.comment-item.is-hidden-user{display:none!important;}
+.comment-item.is-hidden-user,.comment-item.is-hidden-post,.comment-thread.is-hidden-post{display:none!important;}
 
 /* full-screen comment-media overlay — skeleton → soft reveal (no distorting FLIP) */
 .cfx{position:fixed;top:0;left:0;bottom:0;right:0;background:rgba(8,7,6,.96);z-index:45;display:none;align-items:center;justify-content:center;padding:48px 40px;opacity:0;transition:opacity .28s cubic-bezier(.22,1,.36,1);}
@@ -2092,7 +2143,7 @@ html.dark .anon-toggle.active .anon-switch::after{background:#fff;}
 .cfx.is-in ~ .cfx-close.show{opacity:1;transform:scale(1);transition-delay:.18s;}
 .cfx-close:hover{background:rgba(255,255,255,.26);}
 body.cfx-on #drawer{z-index:50;}
-.comment-item.is-focused{background:rgba(255,102,34,.08);border-radius:18px;margin:0 -8px;padding:8px 10px;}
+.comment-item.is-focused{background:rgba(255,102,34,.08);}
 @media(max-width:860px){
   /* focused comment media opens as a full-screen lightbox ABOVE the comments sheet + scrim */
   .cfx{right:0;padding:16px;z-index:90;touch-action:none;}
@@ -2306,22 +2357,46 @@ body.cfx-on #drawer{z-index:50;}
   .sheet-handle{display:block;position:absolute;top:0;left:0;right:0;height:28px;z-index:3;pointer-events:auto;touch-action:none;cursor:grab;}
   .sheet-handle::before{content:'';position:absolute;top:9px;left:50%;transform:translateX(-50%);width:38px;height:5px;border-radius:99px;background:var(--ink-faint);opacity:.4;}
   /* share modal -> bottom sheet */
-  .modal-overlay{align-items:flex-end;justify-content:stretch;}
-  .modal{position:relative;width:100%!important;max-width:none;border-radius:20px 20px 0 0;transform:translateY(calc(100% + 24px));transition:transform .44s cubic-bezier(.32,.72,0,1);touch-action:none;will-change:transform;}
+  .modal-overlay{align-items:flex-end;justify-content:stretch;padding:0;}
+  .modal{position:relative;width:100%!important;max-width:none!important;margin:0;border-radius:20px 20px 0 0;transform:translateY(calc(100% + 24px));transition:transform .44s cubic-bezier(.32,.72,0,1);touch-action:none;will-change:transform;}
   .modal-overlay.show .modal{transform:translateY(0);}
   .modal.sheet-dragging{transition:none;}
-  .share-modal{width:100%;}
+  .share-modal,.auth-modal,.wallet-modal,.sig-modal,.funds-modal,.swap-modal{width:100%!important;max-width:none!important;}
   .share-head{padding-top:22px;}
   .share-body{padding-bottom:calc(env(safe-area-inset-bottom) + 18px);}
-  .auth-modal,.wallet-modal,.sig-modal,.funds-modal{width:100%;}
-  .auth-head,.wallet-head,.sig-head,.funds-head{padding-top:22px;}
-  .auth-body,.wallet-body,.sig-body,.funds-body{padding-bottom:calc(env(safe-area-inset-bottom) + 18px);}
+  .auth-head,.wallet-head,.sig-head,.funds-head,.swap-head{padding-top:22px;}
+  .auth-body,.wallet-body,.sig-body,.funds-body,.swap-body{padding-bottom:calc(env(safe-area-inset-bottom) + 18px);}
 }
 
 /* ---- auth / wallet / signature / top-up (Option 4) ---- */
-.auth-overlay,.wallet-overlay,.sig-overlay,.funds-overlay{z-index:72;}
+.auth-overlay,.wallet-overlay,.sig-overlay,.funds-overlay,.swap-overlay{z-index:72;}
 .auth-modal{width:360px;max-width:calc(100vw - 32px);}
 .wallet-modal{width:360px;max-width:calc(100vw - 32px);}
+@media (min-width:861px){
+  .wallet-overlay{
+    align-items:stretch;justify-content:flex-end;
+    background:rgba(42,36,28,.22);
+    backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+    transition:opacity .38s cubic-bezier(.22,1,.36,1);
+  }
+  .wallet-overlay .wallet-modal,
+  .wallet-overlay.show .wallet-modal{
+    width:400px;max-width:100%;height:100%;max-height:none;
+    border-radius:0;box-shadow:-16px 0 40px rgba(42,36,28,.12);
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  .wallet-overlay .wallet-modal{
+    transform:translateX(100%);
+    transition:transform .38s cubic-bezier(.22,1,.36,1);
+  }
+  .wallet-overlay.show .wallet-modal{transform:translateX(0);}
+  .wallet-overlay .wallet-head{flex-shrink:0;padding:16px 16px 0;}
+  .wallet-overlay .wallet-body{flex:1;min-height:0;max-height:none;}
+  .wallet-overlay .sheet-handle{display:none;}
+}
+@media (prefers-reduced-motion:reduce){
+  .wallet-overlay,.wallet-overlay .wallet-modal{transition:none;}
+}
 .sig-modal,.funds-modal{width:340px;max-width:calc(100vw - 32px);}
 .auth-modal.is-flow .auth-head h4{
   visibility:visible;font-size:16px;font-weight:700;color:var(--ink);text-align:center;
@@ -2433,7 +2508,7 @@ html.dark .auth-email-go{background:rgba(255,255,255,.08);}
   font-size:14px;font-weight:500;color:var(--ink);
 }
 .auth-wallet-search input::placeholder{color:var(--ink-faint);}
-.auth-wallet-list{display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;padding:1px 1px 4px;}
+.auth-wallet-list{display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;padding:4px 2px 6px;}
 .auth-wallet-empty{text-align:center;padding:28px 8px;font-size:13px;font-weight:600;color:var(--ink-faint);}
 .auth-wrow{
   display:flex;align-items:center;gap:12px;width:100%;text-align:left;
@@ -2445,12 +2520,13 @@ html.dark .auth-email-go{background:rgba(255,255,255,.08);}
 .auth-wrow:active{transform:scale(.985);}
 .auth-wicon{
   position:relative;width:36px;height:36px;border-radius:10px;flex-shrink:0;
-  display:grid;place-items:center;overflow:hidden;font-size:18px;color:#fff;
+  display:grid;place-items:center;overflow:visible;font-size:18px;color:#fff;
 }
 .auth-wicon svg{width:22px;height:22px;display:block;}
 .auth-wicon.is-detected::after{
   content:'';position:absolute;top:-2px;right:-2px;width:10px;height:10px;border-radius:50%;
   background:#22C55E;border:2px solid var(--card);box-shadow:0 0 0 1px rgba(34,197,94,.2);
+  pointer-events:none;z-index:1;
 }
 
 .wallet-balance-lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:4px;}
@@ -2463,20 +2539,50 @@ html.dark .auth-email-go{background:rgba(255,255,255,.08);}
 }
 .wallet-actions button:hover{background:var(--bg);}
 .wallet-actions button:active{transform:scale(.97);}
+.wallet-actions button:disabled,
+.wallet-actions button:disabled:hover,
+.wallet-actions button:disabled:active{
+  opacity:.4;cursor:not-allowed;transform:none;filter:none;background:var(--card);
+}
 .wallet-actions .wallet-add{background:var(--ink);color:var(--bg);border-color:transparent;}
 .wallet-actions .wallet-add:hover{filter:brightness(1.08);background:var(--ink);}
+.wallet-balance-hit{
+  display:block;width:100%;margin:0;padding:0;
+  border:none;background:none;cursor:pointer;text-align:left;color:inherit;
+}
+.wallet-balance-hit:active .wallet-balance{transform:scale(.985);}
 .wallet-sec{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin:14px 0 8px;}
 .kb-wrow{
   display:flex;align-items:center;gap:12px;width:100%;text-align:left;
-  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  background:color-mix(in srgb, var(--ink) 5.5%, var(--card));
+  border:1px solid var(--line);border-radius:14px;
   padding:11px 12px;margin-bottom:8px;cursor:pointer;color:var(--ink);
   transition:background .15s,border-color .15s,transform .12s;
 }
-.kb-wrow:hover{background:var(--bg);border-color:rgba(80,70,59,.22);}
+html.dark .kb-wrow{background:color-mix(in srgb, black 16%, var(--card));}
+.kb-wrow:hover{
+  background:color-mix(in srgb, var(--card) 42%, white);
+  border-color:color-mix(in srgb, var(--line) 55%, white);
+}
+html.dark .kb-wrow:hover{
+  background:color-mix(in srgb, var(--card) 88%, white);
+  border-color:color-mix(in srgb, var(--line) 70%, white);
+}
 .kb-wrow:active{transform:scale(.99);}
-.kb-wrow.is-active{background:var(--orange-dim);border-color:var(--orange);}
+.kb-wrow.is-active{
+  background:transparent;
+  border-color:var(--line);
+}
+.kb-wrow.is-active:hover{
+  background:color-mix(in srgb, white 38%, transparent);
+  border-color:color-mix(in srgb, var(--line) 55%, white);
+}
+html.dark .kb-wrow.is-active:hover{
+  background:color-mix(in srgb, white 7%, transparent);
+}
 .kb-wrow-av{width:34px;height:34px;border-radius:10px;flex-shrink:0;object-fit:cover;background:var(--line);}
 .kb-wrow-av.ic{display:grid;place-items:center;font-size:16px;background:var(--orange-dim);}
+.kb-wrow-av.ic svg{width:16px;height:16px;display:block;}
 .kb-wrow-meta{flex:1;min-width:0;}
 .kb-wrow-name{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;}
 .kb-wrow-addr{font-size:11px;font-weight:600;color:var(--ink-faint);margin-top:2px;font-variant-numeric:tabular-nums;}
@@ -2484,11 +2590,28 @@ html.dark .auth-email-go{background:rgba(255,255,255,.08);}
 .kb-wrow-bal{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;}
 .kb-wrow-hint{display:block;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin-top:2px;}
 .kb-wrow.is-add{background:transparent;border-style:solid;color:var(--ink-soft);}
-.kb-wrow.is-add:hover{border-color:var(--orange);color:var(--orange);background:var(--orange-dim);}
-.kb-wrow.is-add .kb-wrow-av{background:rgba(80,70,59,.08);color:var(--ink-faint);}
-html.dark .kb-wrow.is-add .kb-wrow-av{background:rgba(255,255,255,.08);}
+.kb-wrow.is-add:hover{
+  background:color-mix(in srgb, white 38%, transparent);
+  border-color:color-mix(in srgb, var(--line) 55%, white);
+  color:var(--ink);
+}
+html.dark .kb-wrow.is-add:hover{
+  background:color-mix(in srgb, white 7%, transparent);
+  border-color:color-mix(in srgb, var(--line) 70%, white);
+}
+.kb-wrow.is-add .kb-wrow-av,
+.kb-wrow.is-add .kb-wrow-av.ic{background:rgba(80,70,59,.08);color:var(--ink-faint);}
+html.dark .kb-wrow.is-add .kb-wrow-av,
+html.dark .kb-wrow.is-add .kb-wrow-av.ic{background:rgba(255,255,255,.08);}
 .kb-hold{display:flex;align-items:center;gap:12px;padding:8px 2px;}
-.kb-hold-av{width:30px;height:30px;border-radius:50%;object-fit:cover;background:var(--line);flex-shrink:0;}
+.kb-hold-av{width:30px;height:30px;border-radius:8px;object-fit:cover;background:var(--line);flex-shrink:0;}
+.kb-hold-av.ic{display:grid;place-items:center;padding:0;overflow:hidden;}
+.kb-hold-av.ic svg{width:100%;height:100%;display:block;}
+.wallet-tab-import{
+  border:none;background:none;padding:0;cursor:pointer;
+  font-size:12px;font-weight:700;color:var(--ink);letter-spacing:-.01em;
+}
+.wallet-tab-import:hover{opacity:.7;}
 .kb-hold-n{font-size:13px;font-weight:700;}
 .kb-hold-s{font-size:11px;color:var(--ink-faint);font-weight:600;margin-top:1px;}
 .kb-hold-v{margin-left:auto;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;}
@@ -2502,15 +2625,27 @@ html.dark .kb-wrow.is-add .kb-wrow-av{background:rgba(255,255,255,.08);}
   border-bottom:1px solid var(--line);
 }
 .wallet-id-av{width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--line);flex-shrink:0;}
-.wallet-id-meta{flex:1;min-width:0;}
-.wallet-id-name{font-size:16px;font-weight:800;letter-spacing:-.02em;color:var(--ink);}
+.wallet-id-meta{flex:1;min-width:0;display:flex;align-items:center;gap:8px;}
+.wallet-id-copy{flex:1;min-width:0;}
+.wallet-id-name{
+  display:flex;align-items:center;gap:8px;min-width:0;
+  font-size:16px;font-weight:800;letter-spacing:-.02em;color:var(--ink);
+}
 .wallet-id-addr{
-  display:inline-flex;align-items:center;gap:6px;margin-top:3px;padding:0;
-  border:none;background:none;cursor:pointer;color:var(--ink-faint);
+  display:block;margin-top:3px;padding:0;
+  color:var(--ink-faint);
   font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;
 }
-.wallet-id-addr:hover{color:var(--ink);}
-.wallet-id-addr svg{width:12px;height:12px;}
+.wallet-id-icon{
+  width:36px;height:36px;flex-shrink:0;border:none;border-radius:10px;
+  background:transparent;color:var(--ink-faint);cursor:pointer;
+  display:grid;place-items:center;
+  transition:background .15s,color .15s,transform .12s;
+}
+.wallet-id-icon:hover{background:var(--bg);color:var(--ink);}
+.wallet-id-icon:active{transform:scale(.94);}
+.wallet-id-icon.is-copied{color:var(--ink);}
+.wallet-id-icon svg{width:18px;height:18px;}
 .wallet-signout{
   width:40px;height:40px;flex-shrink:0;border:none;border-radius:10px;
   background:transparent;color:var(--red);cursor:pointer;
@@ -2522,20 +2657,30 @@ html.dark .kb-wrow.is-add .kb-wrow-av{background:rgba(255,255,255,.08);}
 .wallet-signout svg{width:20px;height:20px;}
 .wallet-delta{font-size:12px;font-weight:700;color:var(--green);margin:-8px 0 14px;}
 .wallet-tabs{
-  display:flex;gap:2px;margin:16px 0 12px;padding:4px;
-  border:1px solid var(--line);border-radius:12px;background:var(--bg);
-  overflow-x:auto;
+  display:flex;flex-direction:row;align-items:stretch;gap:0;
+  margin:16px -4px 12px;padding:0;
+  border:none;border-bottom:1px solid var(--line);background:none;
+  overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;overscroll-behavior-x:contain;
 }
+.wallet-tabs::-webkit-scrollbar{display:none;}
 .wallet-tabs button{
-  flex:1;border:none;background:transparent;color:var(--ink-faint);
-  font-size:11px;font-weight:700;padding:8px 6px;border-radius:9px;cursor:pointer;
-  white-space:nowrap;transition:background .15s,color .15s;
+  display:flex;flex-direction:row;align-items:center;justify-content:center;gap:6px;
+  flex:1 0 auto;min-width:0;width:auto;border:none;background:none;color:var(--ink-faint);
+  font-size:12px;font-weight:600;letter-spacing:-.02em;line-height:1;
+  padding:10px 8px 12px;border-radius:0;cursor:pointer;
+  white-space:nowrap;transition:color .15s,box-shadow .15s;
+  box-shadow:inset 0 -2px 0 transparent;
 }
-.wallet-tabs button.is-on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.06);}
+.wallet-tabs button svg{width:14px;height:14px;display:block;flex-shrink:0;}
+.wallet-tabs button:hover{color:var(--ink);}
+.wallet-tabs button.is-on{background:none;color:var(--ink);font-weight:700;box-shadow:inset 0 -2px 0 var(--ink);}
+.wallet-tabs button:active{transform:scale(.98);}
 .wallet-tab-h{
   display:flex;align-items:center;justify-content:space-between;
   font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:8px;
 }
+.wallet-set{display:flex;flex-direction:column;gap:8px;margin:4px 0 12px;}
 .wallet-empty{padding:18px 4px;font-size:13px;font-weight:600;color:var(--ink-faint);}
 .wallet-act{display:flex;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line);}
 .wallet-act:last-child{border-bottom:none;}
@@ -2660,20 +2805,36 @@ html.dark .flow-method .ic{background:rgba(255,102,34,.18);}
 .flow-pickers{display:flex;gap:8px;margin-bottom:10px;}
 .flow-pickers .flow-select-wrap{flex:1;min-width:0;margin:0;}
 .flow-select-wrap{position:relative;display:block;margin-bottom:12px;}
-.flow-select-wrap::after{
-  content:"";position:absolute;right:14px;top:50%;width:0;height:0;margin-top:-2px;
-  border-left:4px solid transparent;border-right:4px solid transparent;
-  border-top:5px solid var(--ink-faint);pointer-events:none;
-}
-select.flow-select{
-  display:block;width:100%;
-  border:1px solid var(--line);border-radius:14px;padding:12px 32px 12px 14px;
+.flow-select{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+  border:1px solid var(--line);border-radius:14px;padding:12px 14px;
   background:var(--card);color:var(--ink);font-size:14px;font-weight:700;
-  cursor:pointer;appearance:none;-webkit-appearance:none;
+  cursor:pointer;appearance:none;-webkit-appearance:none;text-align:left;
   transition:background .15s,border-color .15s;
 }
-select.flow-select:hover{background:color-mix(in srgb, var(--card) 55%, white);border-color:color-mix(in srgb, var(--line) 45%, white);}
-select.flow-select:focus{outline:none;border-color:color-mix(in srgb, var(--ink) 22%, var(--line));}
+.flow-select:hover{background:color-mix(in srgb, var(--card) 55%, white);border-color:color-mix(in srgb, var(--line) 45%, white);}
+.flow-select[aria-expanded="true"]{border-color:color-mix(in srgb, var(--ink) 22%, var(--line));}
+.flow-select-chev{
+  width:0;height:0;flex-shrink:0;margin-top:1px;
+  border-left:4px solid transparent;border-right:4px solid transparent;
+  border-top:5px solid var(--ink-faint);
+}
+.flow-select-menu{
+  position:fixed;z-index:80;min-width:168px;padding:6px;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);
+  transform:scale(.94) translateY(-4px);transform-origin:top left;
+  opacity:0;pointer-events:none;transition:transform .14s,opacity .14s;
+}
+.flow-select-menu.show{opacity:1;transform:scale(1) translateY(0);pointer-events:auto;}
+.flow-select-menu button{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+  text-align:left;background:none;border:none;padding:9px 12px;border-radius:8px;
+  font-size:13px;font-weight:500;color:var(--ink);cursor:pointer;
+}
+.flow-select-menu button:hover{background:var(--line);}
+.flow-select-menu button.is-on{font-weight:700;}
+.flow-select-check{width:16px;height:16px;flex-shrink:0;opacity:0;color:var(--ink);}
+.flow-select-menu button.is-on .flow-select-check{opacity:1;}
 .flow-copy{font-size:13px;color:var(--ink-soft);line-height:1.45;margin:0 2px 14px;text-align:left;}
 .flow-addr-lab{
   display:flex;align-items:center;gap:6px;
@@ -2734,8 +2895,22 @@ select.flow-select:focus{outline:none;border-color:color-mix(in srgb, var(--ink)
 .flow-warn ul{margin:0;padding-left:18px;}
 .flow-big{text-align:center;padding:12px 8px 4px;}
 .flow-big .lbl{font-size:12px;font-weight:600;color:var(--ink-faint);margin-bottom:6px;}
-.flow-big .amt{font-size:40px;font-weight:800;letter-spacing:-.04em;color:var(--ink);}
+.flow-big .amt{font-size:40px;font-weight:800;letter-spacing:-.04em;color:var(--ink);line-height:1.05;}
+.flow-big label.amt{
+  display:flex;align-items:baseline;justify-content:center;gap:1px;
+  cursor:text;margin:0 auto;
+}
+.flow-big .amt-sign{flex-shrink:0;}
+.flow-big label.amt input{
+  border:none;background:transparent;outline:none;
+  font:inherit;font-size:inherit;font-weight:inherit;letter-spacing:inherit;color:inherit;
+  font-variant-numeric:tabular-nums;padding:0;min-width:1ch;caret-color:var(--orange);
+  field-sizing:content;appearance:none;-webkit-appearance:none;
+}
 .flow-big .sub{font-size:13px;font-weight:600;color:var(--ink-soft);margin-top:4px;}
+.flow-big.is-over .amt,
+.flow-big.is-over .amt input{color:var(--red);caret-color:var(--red);}
+.flow-big .sub.is-err{color:var(--red);}
 .flow-quiet{
   display:block;width:100%;margin-top:8px;border:none;background:none;
   color:var(--ink-faint);font-size:12px;font-weight:600;cursor:pointer;padding:8px;
@@ -2786,6 +2961,121 @@ html.dark .flow-status-ok circle{fill:rgba(31,164,99,.22);}
 .modal.is-confirming .auth-back{
   visibility:hidden;pointer-events:none;
 }
+.modal.is-confirming .sheet-handle{pointer-events:none;}
+
+.swap-modal{width:380px;max-width:calc(100vw - 32px);}
+@media (max-width:860px){
+  .modal-overlay{align-items:flex-end;justify-content:stretch;padding:0;}
+  .modal,
+  .share-modal,
+  .auth-modal,
+  .wallet-modal,
+  .sig-modal,
+  .funds-modal,
+  .swap-modal{
+    width:100%!important;max-width:none!important;margin:0;
+    border-radius:20px 20px 0 0;
+  }
+}
+.swap-head{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:14px 16px 0;
+}
+.swap-head h4{margin:0;flex:1;font-size:16px;font-weight:700;color:var(--ink);text-align:left;}
+.swap-body{padding:14px 16px 18px;}
+.swap-legs{
+  border:1px solid var(--line);border-radius:16px;background:var(--card);
+  padding:14px 14px 8px;margin-bottom:14px;
+}
+.swap-leg{min-width:0;}
+.swap-leg > span{
+  display:block;font-size:12px;font-weight:600;color:var(--ink-faint);margin-bottom:4px;
+}
+.swap-leg-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.swap-leg-row b{
+  font-size:22px;font-weight:800;letter-spacing:-.03em;color:var(--ink);
+  font-variant-numeric:tabular-nums;line-height:1.15;min-width:0;word-break:break-all;
+}
+.swap-asset{
+  display:inline-flex;align-items:center;gap:6px;flex-shrink:0;
+  font-size:14px;font-weight:700;color:var(--ink);
+}
+.swap-asset img{width:22px;height:22px;display:block;object-fit:cover;}
+.swap-asset svg{width:22px;height:22px;border-radius:50%;display:block;}
+.swap-asset .trade-pay-ic{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;overflow:hidden;}
+.swap-asset .trade-pay-ic svg{width:22px;height:22px;}
+.swap-leg em{
+  display:block;margin-top:2px;font-style:normal;font-size:12px;font-weight:600;
+  color:var(--ink-faint);font-variant-numeric:tabular-nums;
+}
+.swap-arrow{
+  display:grid;place-items:center;height:28px;margin:2px 0 6px;
+  color:var(--ink-soft);font-size:16px;line-height:1;
+}
+.swap-meta{margin-top:12px;padding-top:10px;border-top:1px solid var(--line);}
+.swap-meta div{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:5px 0;font-size:13px;font-weight:600;
+}
+.swap-meta span{color:var(--ink-faint);}
+.swap-meta b{color:var(--ink-soft);font-weight:600;font-variant-numeric:tabular-nums;display:inline-flex;align-items:center;}
+.swap-meta .trade-slip-auto{color:#fff;}
+.swap-wait{text-align:center;padding:8px 8px 16px;}
+.swap-wait h3{
+  margin:0;font-size:16px;font-weight:800;letter-spacing:-.02em;color:var(--ink);
+}
+.swap-wait p{margin:6px 0 0;font-size:13px;font-weight:600;color:var(--ink-soft);line-height:1.45;}
+.swap-done{text-align:center;padding:8px 4px 0;}
+.swap-done h3{
+  margin:0;font-size:22px;font-weight:800;letter-spacing:-.03em;color:var(--ink);
+}
+.swap-done p{margin:6px 0 0;font-size:14px;font-weight:600;color:var(--ink-soft);}
+.swap-hero{
+  position:relative;width:96px;height:96px;margin:22px auto 20px;
+}
+.swap-hero img,
+.swap-hero .sig-mark{
+  width:96px;height:96px;border-radius:50%;object-fit:cover;display:block;
+  background:var(--line);box-shadow:0 8px 24px rgba(40,30,20,.12);
+}
+.swap-hero .sig-mark{font-size:36px;}
+.swap-hero-ok{
+  position:absolute;right:-2px;bottom:-2px;width:28px;height:28px;border-radius:50%;
+  background:var(--green);color:#fff;display:grid;place-items:center;
+  font-size:14px;font-weight:800;box-shadow:0 0 0 3px var(--card);
+}
+.swap-cta{
+  display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  border:none;border-radius:14px;padding:15px;margin-top:4px;
+  background:#3DDC97;color:#111;font-size:16px;font-weight:800;cursor:pointer;
+  appearance:none;-webkit-appearance:none;
+  transition:transform .12s,filter .15s,opacity .15s,background .15s,color .15s;
+}
+.swap-cta:hover{filter:brightness(1.03);}
+.swap-cta:active{transform:scale(.985);}
+.swap-modal.is-sell .swap-cta:not(.is-done):not(.is-wait){background:var(--red);color:#fff;}
+.swap-cta.is-wait{opacity:.55;cursor:default;transform:none;filter:none;}
+.swap-cta.is-done{
+  background:var(--orange);color:#fff;opacity:1;
+  box-shadow:0 4px 14px rgba(255,102,34,.35);
+}
+.swap-cta .spin{
+  width:16px;height:16px;border:2px solid rgba(17,17,17,.28);border-top-color:currentColor;
+  border-radius:50%;animation:kb-spin .8s linear infinite;
+}
+.swap-explore{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;width:100%;
+  margin-top:12px;padding:8px;background:none;border:none;cursor:pointer;
+  font-size:13px;font-weight:700;color:var(--ink-soft);text-decoration:none;
+  transition:color .15s;
+}
+.swap-explore:hover{color:var(--ink);}
+.swap-explore svg{width:13px;height:13px;flex-shrink:0;}
+@media (prefers-reduced-motion:reduce){
+  .swap-cta .spin{animation:none;}
+}
 
 .kb-toast{
   position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(10px);
@@ -2806,6 +3096,7 @@ html.dark .flow-status-ok circle{fill:rgba(31,164,99,.22);}
   .flow-status-spin{animation:none;}
   .flow-status.is-done .flow-status-ok{transition:none;transform:none;}
   .flow-status.is-done .flow-status-ok path{animation:none;stroke-dashoffset:0;}
+  .flow-select-menu{transition:none;transform:none;}
 }
 
 .more-menu{
@@ -3284,12 +3575,23 @@ html.dark .kb-hover-card{box-shadow:0 20px 50px rgba(0,0,0,.55), 0 2px 8px rgba(
 
 .token-hover-card{width:440px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:12px;}
 .thc-head{display:flex;align-items:flex-start;gap:10px;}
+.thc-identity{
+  display:flex;align-items:center;gap:10px;flex:1;min-width:0;
+  text-decoration:none;color:inherit;cursor:pointer;
+  border-radius:10px;
+}
 .thc-token-av{width:40px;height:40px;flex-shrink:0;overflow:hidden;background:var(--line);}
 .thc-token-av img{width:100%;height:100%;object-fit:cover;display:block;}
 .thc-token-meta{flex:1;min-width:0;}
 .thc-ticker-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
-.thc-ticker{font-size:13px;font-weight:800;}
+.thc-ticker{font-size:13px;font-weight:800;transition:color .15s;}
+.thc-identity:hover .thc-ticker{color:var(--coffee-hover);}
 .thc-name{font-size:16px;font-weight:800;letter-spacing:-.01em;margin-top:2px;line-height:1.2;}
+.thc-go{
+  width:14px;height:14px;flex-shrink:0;color:var(--ink-faint);
+  transition:color .15s,transform .15s;
+}
+.thc-identity:hover .thc-go{color:var(--ink);transform:translateX(2px);}
 .thc-mcap{text-align:right;flex-shrink:0;}
 .thc-mcap-label{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--ink-faint);}
 .thc-mcap-label svg{width:12px;height:12px;}
@@ -3428,7 +3730,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       <button class="icon-btn" id="themeBtn" title="Toggle theme"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
       <button class="btn-launch" type="button" id="launchBtn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.67796 10.8918L1.86133 12.7084M4.88905 12.1029L3.67796 13.314M2.46687 7.86404C2.46687 7.86404 4.87571 8.69425 5.98113 9.79967C7.08652 10.9051 7.91678 13.314 7.91678 13.314L10.339 11.4973V9.68068C12.8948 8.40274 14.2875 6.28543 13.9681 1.81274C9.49538 1.49326 7.37803 2.886 6.10015 5.44182H4.28351L2.46687 7.86404ZM11.5501 5.44184C11.5501 6.1107 11.0078 6.65295 10.339 6.65295C9.67008 6.65295 9.12787 6.1107 9.12787 5.44184C9.12787 4.77297 9.67008 4.23075 10.339 4.23075C11.0078 4.23075 11.5501 4.77297 11.5501 5.44184Z" stroke="currentColor" stroke-linecap="square"/></svg><span>Launch Token</span></button>
       <button class="btn-signin" type="button" id="signInBtn">Sign in</button>
-      <button class="btn-wallet" type="button" id="walletBtn" title="Balance" aria-label="Open wallet" hidden>
+      <button class="btn-wallet" type="button" id="walletBtn" title="Balance" aria-label="Open account" hidden>
         <span class="btn-wallet-ic" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none"><ellipse cx="8.5" cy="14.2" rx="4.2" ry="3.4" fill="#F4F7FA"/><ellipse cx="14.2" cy="13.4" rx="5.2" ry="4.4" fill="#fff"/><ellipse cx="11.6" cy="10.4" rx="3.6" ry="3.1" fill="#E6EEF5"/></svg>
         </span>
@@ -3479,8 +3781,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     <div class="drawer-inner token-drawer-inner" id="tokenDrawerInner">
       <div class="token-drawer-chrome" id="tokenDrawerChrome">
         <div class="token-drawer-head" id="tokenDrawerHead">
-          <div class="token-drawer-identity">
-            <img id="drawerAvatar" class="token-drawer-av circle" src="" alt="">
+          <a class="token-drawer-identity" id="tokenDrawerIdentity" href="/token?t=SAUCE" aria-label="View $SAUCE">
+            <img id="drawerAvatar" class="token-drawer-av squircle" src="" alt="">
             <div class="token-drawer-titles">
               <div class="token-drawer-ticker-row">
                 <span class="token-drawer-ticker" id="drawerTicker">$SAUCE</span>
@@ -3488,10 +3790,10 @@ html.dark .qhc-id{color:#6BA3FF;}
               </div>
               <div class="token-drawer-name" id="drawerName">Hot Sauce</div>
             </div>
-          </div>
+            <svg class="token-drawer-go" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
           <div class="token-drawer-head-actions">
-            <button type="button" class="token-view-btn" id="tokenViewBtn">View Token</button>
-            <button type="button" class="drawer-close" id="drawerClose" aria-label="Close">✕</button>
+            <button type="button" class="share-close" id="drawerClose" aria-label="Close">✕</button>
           </div>
         </div>
 
@@ -3536,7 +3838,8 @@ html.dark .qhc-id{color:#6BA3FF;}
           </div>
         </div>
         <div class="token-panel token-panel-trade" id="tokenPanelTrade" data-panel="trade">
-          <div class="trade-side-row">
+          <div class="trade-side-row" id="tradeSideRow">
+            <div class="trade-side-rest">
             <div class="trade-side-tabs" id="tradeSideTabs">
               <button type="button" class="active" data-side="buy">Buy</button>
               <button type="button" data-side="sell">Sell</button>
@@ -3545,8 +3848,8 @@ html.dark .qhc-id{color:#6BA3FF;}
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" stroke="currentColor" stroke-width="1.7"/><path d="M19.4 13.1a1.4 1.4 0 0 0 .3 1.5l.1.1a1.7 1.7 0 1 1-2.4 2.4l-.1-.1a1.4 1.4 0 0 0-1.5-.3 1.4 1.4 0 0 0-.9 1.3V18a1.7 1.7 0 1 1-3.4 0v-.1a1.4 1.4 0 0 0-.9-1.3 1.4 1.4 0 0 0-1.5.3l-.1.1a1.7 1.7 0 1 1-2.4-2.4l.1-.1a1.4 1.4 0 0 0 .3-1.5 1.4 1.4 0 0 0-1.3-.9H6a1.7 1.7 0 1 1 0-3.4h.1a1.4 1.4 0 0 0 1.3-.9 1.4 1.4 0 0 0-.3-1.5l-.1-.1a1.7 1.7 0 1 1 2.4-2.4l.1.1a1.4 1.4 0 0 0 1.5.3h.1a1.4 1.4 0 0 0 .9-1.3V6a1.7 1.7 0 1 1 3.4 0v.1a1.4 1.4 0 0 0 .9 1.3 1.4 1.4 0 0 0 1.5-.3l.1-.1a1.7 1.7 0 1 1 2.4 2.4l-.1.1a1.4 1.4 0 0 0-.3 1.5v.1a1.4 1.4 0 0 0 1.3.9H18a1.7 1.7 0 1 1 0 3.4h-.1a1.4 1.4 0 0 0-1.3.9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
               <span id="tradeAutoLbl">AUTO</span>
             </button>
-          </div>
-          <div class="trade-slip" id="tradeSlip" aria-hidden="true">
+            </div>
+            <div class="trade-slip" id="tradeSlip" aria-hidden="true">
             <div class="trade-slip-inner">
               <div class="trade-slip-row">
                 <div class="trade-slip-lab">
@@ -3568,6 +3871,7 @@ html.dark .qhc-id{color:#6BA3FF;}
                 </div>
               </div>
             </div>
+            </div>
           </div>
           <div class="trade-field" id="tradeBuyField">
             <div class="trade-field-top">
@@ -3579,11 +3883,11 @@ html.dark .qhc-id{color:#6BA3FF;}
                 <span class="trade-usd-sign" id="tradeUsdSign">$</span>
                 <input id="tradePayInput" value="25" inputmode="decimal" autocomplete="off" aria-label="Amount in USD">
               </label>
-              <span class="trade-asset-chip" id="tradeGetAsset"><img src="" alt="" id="tradeGetAssetImg"><span id="tradeGetAssetLabel">TOKEN</span></span>
+              <span class="trade-asset-chip" id="tradeGetAsset"><span class="trade-token-av squircle"><img src="" alt="" id="tradeGetAssetImg"></span><span id="tradeGetAssetLabel">TOKEN</span></span>
             </div>
             <button type="button" class="trade-out" id="tradeOut" aria-label="Swap USD and token">
               <span class="trade-out-swap" aria-hidden="true">⇅</span>
-              <span id="tradeOutVal">653.0K TOKEN</span>
+              <span class="quote-ticker" id="tradeOutVal">653.0K TOKEN</span>
             </button>
           </div>
           <div class="trade-field" id="tradePayWith">
@@ -3598,8 +3902,9 @@ html.dark .qhc-id{color:#6BA3FF;}
               </div>
             </div>
             <div class="trade-pay-row">
-              <label class="trade-usd">
+              <label class="trade-usd has-ticker" id="tradePayAssetWrap">
                 <input id="tradePayAssetInput" value="0" inputmode="decimal" autocomplete="off" aria-label="Amount in ETH">
+                <span class="quote-ticker" id="tradePayAssetTicker" aria-hidden="true">0</span>
               </label>
               <span class="trade-pay-bal" id="tradePayBal">0 ETH</span>
             </div>
@@ -3617,7 +3922,7 @@ html.dark .qhc-id{color:#6BA3FF;}
                 <div>
                   <span>Max slippage</span>
                   <b class="trade-slip-val">
-                    <span class="trade-slip-auto" id="tradeSlipAuto">Auto</span>
+                    <span class="trade-slip-auto is-in" id="tradeSlipAuto">Auto</span>
                     <span id="tradeSlipMeta">1%</span>
                   </b>
                 </div>
@@ -3812,7 +4117,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       <button type="button" class="auth-back" id="walletBack" aria-label="Back">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <h4 id="walletTitle">Wallet</h4>
+      <h4 id="walletTitle">Account</h4>
       <button type="button" class="share-close" id="walletClose" aria-label="Close">✕</button>
     </div>
     <div class="wallet-body" id="walletBody"></div>
@@ -3848,6 +4153,17 @@ html.dark .qhc-id{color:#6BA3FF;}
       <button type="button" class="share-close" id="fundsClose" aria-label="Close">✕</button>
     </div>
     <div class="funds-body" id="fundsBody"></div>
+  </div>
+</div>
+
+<div class="modal-overlay swap-overlay" id="swapOverlay" aria-hidden="true">
+  <div class="modal swap-modal" role="dialog" aria-labelledby="swapTitle" aria-modal="true">
+    <div class="sheet-handle"></div>
+    <div class="swap-head">
+      <h4 id="swapTitle">Confirm purchase</h4>
+      <button type="button" class="share-close" id="swapClose" aria-label="Close">✕</button>
+    </div>
+    <div class="swap-body" id="swapBody"></div>
   </div>
 </div>
 
@@ -3947,7 +4263,7 @@ html.dark .qhc-id{color:#6BA3FF;}
 
   /* ---- Option 4: one login, one paying wallet ---- */
   const WALLET_CATALOG = {
-    emb: { id:'emb', name:'Kumbaya', kind:'embedded', addr:'0x5661…FC42' },
+    emb: { id:'emb', name:'Balance', kind:'embedded', addr:'0x5661…FC42' },
   };
   function fakeWalletAddr(id){
     let h = 2166136261;
@@ -4019,9 +4335,11 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   const session = {
     auth: null,
+    authKey: null,
     wallets: [],
     pending: null,
     pendingNeed: 0,
+    pendingSpend: null,
     authPanel: 'main',
     fundsNeed: 0,
     flow: null,
@@ -4038,17 +4356,89 @@ html.dark .qhc-id{color:#6BA3FF;}
     slipCustom: '0',
     slipOpen: false,
     metaOpen: false,
+    swap: null,
+    swapTimer: 0,
+    anonName: null,
   };
   function mintWallet(id, extra){
     const src = WALLET_CATALOG[id] || WALLET_CATALOG.mm;
-    return Object.assign({ bal: 0, active: false }, src, extra || {});
+    return Object.assign({ bal: 0, active: false, imported: [] }, src, extra || {});
   }
   function isAuthed(){ return !!session.auth; }
   function activeWallet(){ return session.wallets.find(w => w.active) || session.wallets[0] || null; }
-  function needsSig(){ const a = activeWallet(); return !!(a && a.kind === 'eoa'); }
-  function totalBal(){ return session.wallets.reduce((n,w)=> n + (w.bal || 0), 0); }
+  function cashWallet(){
+    if(session.auth === 'social'){
+      return session.wallets.find(w => w.kind === 'embedded') || null;
+    }
+    return activeWallet();
+  }
+  function loginWallet(){
+    if(session.auth === 'eoa'){
+      return session.wallets.find(w => w.id === session.authKey) || activeWallet();
+    }
+    return session.wallets.find(w => w.kind === 'embedded') || null;
+  }
+  const ANON_ADJECTIVES = ['Brisk','Calm','Clean','Cosmic','Gentle','Happy','Keen','Lucky','Nimble','Noble','Quiet','Rapid','Sunny','Swift','Total','Vivid','Wild','Zesty'];
+  const ANON_ANIMALS = ['Badger','Crane','Dove','Fox','Heron','Ibex','Koala','Lynx','Moth','Newt','Otter','Panda','Puma','Robin','Seal','Stoat','Toad','Whale','Wolf','Yak'];
+  function mintAnonName(seed){
+    let h = 2166136261;
+    const s = String(seed || Math.random());
+    for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    h = h >>> 0;
+    const a = ANON_ADJECTIVES[h % ANON_ADJECTIVES.length];
+    let b = ANON_ADJECTIVES[(h >>> 8) % ANON_ADJECTIVES.length];
+    if(b === a) b = ANON_ADJECTIVES[(h + 3) % ANON_ADJECTIVES.length];
+    const c = ANON_ANIMALS[(h >>> 16) % ANON_ANIMALS.length];
+    return a + b + c;
+  }
+  function socialName(){
+    if(!session.anonName) session.anonName = mintAnonName((session.authKey || 'social') + ':' + Date.now());
+    return session.anonName;
+  }
+  function authIdentity(){
+    if(session.auth === 'eoa'){
+      const w = loginWallet();
+      return {
+        name: 'anon',
+        addr: w ? w.addr : '',
+        avatar: userAvatar(w ? w.addr : 'anon'),
+        quietAddr: false,
+      };
+    }
+    const w = loginWallet();
+    const name = socialName();
+    return {
+      name,
+      addr: w ? w.addr : '',
+      avatar: userAvatar(name),
+      quietAddr: true,
+    };
+  }
+  function needsSig(){ const a = cashWallet(); return !!(a && a.kind === 'eoa'); }
+  function totalBal(){
+    const c = cashWallet();
+    if(session.auth === 'social') return Math.max(0, c ? (c.bal || 0) : 0);
+    return session.wallets.reduce((n,w)=> n + Math.max(0, w.bal || 0), 0);
+  }
   function money(n){ return (Math.round((n || 0) * 100) / 100).toFixed(2); }
   function usdLabel(n){ return '$' + money(n); }
+  const CASH_MAX = 50000;
+  function parseAmt(str){ return parseFloat(String(str || '').replace(/[^0-9.]/g,'')) || 0; }
+  function fmtAmtInput(n){
+    if(!n) return '';
+    return Number.isInteger(n) ? String(n) : money(n);
+  }
+  function sizeAmtInput(el){
+    if(!el) return;
+    const len = Math.max(1, String(el.value || '0').length);
+    el.style.width = len + 'ch';
+  }
+  function cashAmtOk(n){ return n > 0 && n <= CASH_MAX; }
+  function cashAmtOver(n){ return n > CASH_MAX; }
+  function cashAmtSub(method, n){
+    if(cashAmtOver(n)) return `Maximum is ${usdLabel(CASH_MAX)}`;
+    return 'via ' + method;
+  }
 
   const signInBtn = document.getElementById('signInBtn');
   const walletBtn = document.getElementById('walletBtn');
@@ -4057,6 +4447,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   const walletOverlay = document.getElementById('walletOverlay');
   const sigOverlay = document.getElementById('sigOverlay');
   const fundsOverlay = document.getElementById('fundsOverlay');
+  const swapOverlay = document.getElementById('swapOverlay');
   const kbToast = document.getElementById('kbToast');
   let toastTimer = 0;
 
@@ -4069,7 +4460,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   function overlayOpen(el){
     if(!el) return;
-    const family = [authOverlay, walletOverlay, sigOverlay, fundsOverlay];
+    const family = [authOverlay, walletOverlay, sigOverlay, fundsOverlay, swapOverlay];
     if(family.includes(el)){
       family.forEach(o => { if(o && o !== el) overlayClose(o); });
     }
@@ -4080,14 +4471,16 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(!el) return;
     el.classList.remove('show');
     el.setAttribute('aria-hidden', 'true');
+    if(typeof closeFlowSelect === 'function') closeFlowSelect();
   }
   function anyAuthOverlayOpen(){
-    return [authOverlay, walletOverlay, sigOverlay, fundsOverlay].some(el => el?.classList.contains('show'));
+    return [authOverlay, walletOverlay, sigOverlay, fundsOverlay, swapOverlay].some(el => el?.classList.contains('show'));
   }
   function morphSheet(modal, mutate){
     if(!modal){ mutate(); return; }
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if(reduce){ mutate(); return; }
+    const sideDrawer = modal.classList.contains('wallet-modal') && window.innerWidth > 860;
+    if(reduce || sideDrawer){ mutate(); return; }
     const from = modal.getBoundingClientRect().height;
     modal.style.transition = 'none';
     mutate();
@@ -4127,6 +4520,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.pending = null;
     session.pendingNeed = 0;
     session.pendingFunds = null;
+    session.pendingSpend = null;
     closeLogin();
   }
 
@@ -4139,6 +4533,102 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
 
   const TOKEN_PER_USD = 26120;
+  const quoteLive = { price: 0, price0: 0 };
+  function tokenPerUsd(){
+    if(quoteLive.price > 0 && quoteLive.price0 > 0){
+      return TOKEN_PER_USD * (quoteLive.price0 / quoteLive.price);
+    }
+    return TOKEN_PER_USD;
+  }
+  function prefersReduceMotion(){
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+  function quoteTickerNum(s){
+    const n = parseFloat(String(s).replace(/[^0-9.\-]/g, ''));
+    return Number.isFinite(n) ? n : 0;
+  }
+  function makeQuoteChar(ch){
+    const wrap = document.createElement('span');
+    if(/\d/.test(ch)){
+      wrap.className = 'qt-ch qt-d';
+      wrap.setAttribute('aria-hidden', 'true');
+      const reel = document.createElement('span');
+      reel.className = 'qt-reel';
+      reel.innerHTML = '9<br>0<br>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>0';
+      wrap.appendChild(reel);
+      setQuoteReel(reel, +ch, false, 0);
+    } else {
+      wrap.className = 'qt-ch qt-s';
+      wrap.setAttribute('aria-hidden', 'true');
+      wrap.textContent = ch === ' ' ? '\u00a0' : ch;
+    }
+    return wrap;
+  }
+  function setQuoteReel(reel, digit, animate, dir){
+    if(!reel) return;
+    const d = digit | 0;
+    let idx = d + 1;
+    const cur = +(reel.dataset.d || 0);
+    if(animate && dir > 0 && cur === 9 && d === 0) idx = 11;
+    if(animate && dir < 0 && cur === 0 && d === 9) idx = 0;
+    reel.dataset.d = String(d);
+    const apply = ()=>{ reel.style.transform = 'translateY(calc(' + (-idx) + ' * var(--qt-h)))'; };
+    if(!animate){
+      reel.style.transition = 'none';
+      apply();
+      void reel.offsetHeight;
+      reel.style.transition = '';
+      return;
+    }
+    apply();
+    if(idx === 11 || idx === 0){
+      const snap = (e)=>{
+        if(e && e.propertyName && e.propertyName !== 'transform') return;
+        reel.style.transition = 'none';
+        reel.style.transform = 'translateY(calc(' + (-(d + 1)) + ' * var(--qt-h)))';
+        void reel.offsetHeight;
+        reel.style.transition = '';
+        reel.removeEventListener('transitionend', snap);
+      };
+      reel.addEventListener('transitionend', snap);
+    }
+  }
+  function setQuoteTicker(el, text, opts){
+    if(!el) return;
+    const next = String(text);
+    const prev = el.dataset.qt;
+    if(prev === next) return;
+    const animate = !!(opts && opts.animate) && prev != null && !prefersReduceMotion();
+    const dir = animate ? (quoteTickerNum(next) > quoteTickerNum(prev) ? 1 : quoteTickerNum(next) < quoteTickerNum(prev) ? -1 : 0) : 0;
+    el.dataset.qt = next;
+    el.setAttribute('aria-label', next);
+    if(prefersReduceMotion()){
+      el.textContent = next;
+      return;
+    }
+    const chars = Array.from(next);
+    let slots = el.querySelectorAll(':scope > .qt-ch');
+    if(!animate || slots.length !== chars.length){
+      el.textContent = '';
+      chars.forEach(ch => el.appendChild(makeQuoteChar(ch)));
+      return;
+    }
+    chars.forEach((ch, i)=>{
+      const node = slots[i];
+      const isD = /\d/.test(ch);
+      const wasD = node.classList.contains('qt-d');
+      if(isD !== wasD){
+        node.replaceWith(makeQuoteChar(ch));
+        return;
+      }
+      if(!isD){
+        const s = ch === ' ' ? '\u00a0' : ch;
+        if(node.textContent !== s) node.textContent = s;
+        return;
+      }
+      setQuoteReel(node.querySelector('.qt-reel'), +ch, true, dir);
+    });
+  }
   const AUTO_SLIP_PCT = 1;
   const PROTOCOL_FEE_PCT = 1.3;
   function fmtSlipPct(n){
@@ -4174,19 +4664,30 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.metaOpen = !!open;
     paintTradeMeta();
   }
+  function paintSlipAutoTag(){
+    const autoTag = document.getElementById('tradeSlipAuto');
+    if(!autoTag) return;
+    autoTag.removeAttribute('hidden');
+    const on = session.slipMode === 'auto';
+    autoTag.classList.toggle('is-in', on);
+    autoTag.setAttribute('aria-hidden', on ? 'false' : 'true');
+  }
   function paintSlippage(){
+    const slot = document.getElementById('tradeSideRow');
     const row = document.getElementById('tradeSlip');
+    const rest = slot?.querySelector('.trade-side-rest');
     const autoBtn = document.getElementById('tradeAutoBtn');
     const lbl = document.getElementById('tradeAutoLbl');
     const wrap = document.getElementById('tradeSlipCustomWrap');
     const input = document.getElementById('tradeSlipCustom');
     const meta = document.getElementById('tradeSlipMeta');
-    const autoTag = document.getElementById('tradeSlipAuto');
-    row?.classList.toggle('is-open', !!session.slipOpen);
-    if(row) row.setAttribute('aria-hidden', session.slipOpen ? 'false' : 'true');
-    autoBtn?.classList.toggle('is-open', !!session.slipOpen);
+    const open = !!session.slipOpen;
+    slot?.classList.toggle('is-slip', open);
+    rest?.setAttribute('aria-hidden', open ? 'true' : 'false');
+    if(row) row.setAttribute('aria-hidden', open ? 'false' : 'true');
+    autoBtn?.classList.toggle('is-open', open);
     autoBtn?.classList.toggle('is-custom', session.slipMode !== 'auto');
-    autoBtn?.setAttribute('aria-expanded', session.slipOpen ? 'true' : 'false');
+    autoBtn?.setAttribute('aria-expanded', open ? 'true' : 'false');
     if(lbl) lbl.textContent = slipChipLabel();
     wrap?.classList.toggle('is-on', session.slipMode === 'custom');
     if(input && document.activeElement !== input){
@@ -4196,7 +4697,16 @@ html.dark .qhc-id{color:#6BA3FF;}
       btn.classList.toggle('is-on', btn.dataset.slip === session.slipMode);
     });
     if(meta) meta.textContent = slipMetaLabel();
-    if(autoTag) autoTag.hidden = session.slipMode !== 'auto';
+    paintSlipAutoTag();
+  }
+  function closeSlippage(){
+    if(!session.slipOpen) return;
+    const input = document.getElementById('tradeSlipCustom');
+    if(session.slipMode === 'custom' && input){
+      session.slipCustom = input.value === '' ? '0' : input.value;
+    }
+    setSlipOpen(false);
+    if(input && document.activeElement === input) input.blur();
   }
   function setSlipOpen(open){
     session.slipOpen = !!open;
@@ -4209,7 +4719,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     syncTradeQuote();
   }
   function formatTokenOut(usd){
-    const raw = Math.max(0, Number(usd) || 0) * TOKEN_PER_USD;
+    const raw = Math.max(0, Number(usd) || 0) * tokenPerUsd();
     if(raw >= 1e6){
       const n = raw / 1e6;
       return (n >= 10 ? n.toFixed(1) : n.toFixed(2)).replace(/\.0+$/,'').replace(/(\.\d)0$/,'$1') + 'M';
@@ -4217,14 +4727,25 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(raw >= 1e3) return (raw / 1e3).toFixed(1).replace(/\.0$/,'') + 'K';
     return String(Math.round(raw));
   }
+  function formatTokenExact(usd){
+    const raw = Math.max(0, Number(usd) || 0) * tokenPerUsd();
+    if(raw >= 1e6) return raw.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    if(raw >= 1) return raw.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    return String(+raw.toFixed(4));
+  }
+  function fiatTiny(n){
+    const x = Math.max(0, Number(n) || 0);
+    if(x > 0 && x < 0.01) return '<$0.01';
+    return usdLabel(x);
+  }
   function formatTokenInput(usd){
-    const raw = Math.max(0, Number(usd) || 0) * TOKEN_PER_USD;
+    const raw = Math.max(0, Number(usd) || 0) * tokenPerUsd();
     if(raw >= 1) return String(Math.round(raw));
     return String(+raw.toFixed(4));
   }
   function tradeUsdAmt(){
     const raw = parseFloat(String(document.getElementById('tradePayInput')?.value || '').replace(/,/g,'')) || 0;
-    return session.tradeUnit === 'token' ? raw / TOKEN_PER_USD : raw;
+    return session.tradeUnit === 'token' ? raw / tokenPerUsd() : raw;
   }
   function applyTradeUnit(){
     const field = document.getElementById('tradeBuyField');
@@ -4250,12 +4771,133 @@ html.dark .qhc-id{color:#6BA3FF;}
     const fromDom = document.getElementById('tradeGetAssetLabel')?.textContent;
     return String(fromDom || 'TOKEN').replace(/^\$/, '') || 'TOKEN';
   }
-  function holdingUsdFor(ticker){
-    const t = ticker.startsWith('$') ? ticker : '$' + ticker;
-    const h = session.holdings.find(x => x.ticker === t || x.ticker === ticker);
-    return h ? (h.usd || 0) : 0;
+  function holdingKey(t){ return String(t || '').replace(/^\$/, '').toUpperCase(); }
+  function formatAssetAmt(id, usd){
+    const asset = PAY_ASSETS[id];
+    if(!asset) return '0';
+    const n = Math.max(0, Number(usd) || 0) / (asset.usd || 1);
+    let amt = '0';
+    if(n > 0){
+      if(n >= 100) amt = n.toFixed(2);
+      else if(n >= 1) amt = String(+n.toFixed(4));
+      else amt = String(+n.toFixed(6));
+    }
+    return amt + ' ' + asset.tick;
   }
-  function syncTradeQuote(){
+  function holdRowHtml(h){
+    const av = h.ic
+      ? `<span class="kb-hold-av ic">${h.ic}</span>`
+      : `<img class="kb-hold-av" src="${h.img || ''}" alt="">`;
+    const amt = h.amount || '0';
+    return `<div class="kb-hold">
+      ${av}
+      <div><div class="kb-hold-n">${h.ticker}</div><div class="kb-hold-s">${amt}</div></div>
+      <span class="kb-hold-v">${usdLabel(h.usd || 0)}</span>
+    </div>`;
+  }
+  function visibleHoldings(){
+    const rows = [];
+    const seen = new Set();
+    const add = (h)=>{
+      const key = holdingKey(h && h.ticker);
+      if(!key || seen.has(key)) return;
+      seen.add(key);
+      rows.push(h);
+    };
+    const a = activeWallet();
+    if(a && a.kind === 'eoa'){
+      const usd = Math.max(0, a.bal || 0);
+      add({ ticker:'ETH', amount: formatAssetAmt('eth', usd), usd, ic: PAY_ETH_ICON, native:true });
+      (a.imported || []).forEach(h => add(h));
+    }
+    session.holdings.forEach(h => add(h));
+    return rows;
+  }
+  function listedTokenKeys(){
+    return new Set(visibleHoldings().map(h => holdingKey(h.ticker)));
+  }
+  function uniqueFeedTokens(){
+    const seen = new Set();
+    const out = [];
+    (typeof posts !== 'undefined' ? posts : []).forEach(p => {
+      const t = typeof parentTokenPost === 'function' ? parentTokenPost(p) : p;
+      const ticker = t && t.ticker;
+      if(!ticker) return;
+      const key = holdingKey(ticker);
+      if(seen.has(key)) return;
+      seen.add(key);
+      out.push({ ticker, img: tokenArtOf(t) });
+    });
+    return out;
+  }
+  function importableTokens(){
+    const have = listedTokenKeys();
+    const extras = [
+      { id:'weth', ticker:'WETH', ic: PAY_WETH_ICON },
+      { id:'usdm', ticker:'USDm', ic: PAY_USDM_ICON },
+    ].filter(x => !have.has(holdingKey(x.ticker)));
+    const feed = uniqueFeedTokens().filter(x => !have.has(holdingKey(x.ticker)));
+    return extras.concat(feed);
+  }
+  function importWalletToken(tok){
+    const a = activeWallet();
+    if(!a || a.kind !== 'eoa') return;
+    if(!a.imported) a.imported = [];
+    const key = holdingKey(tok.ticker);
+    if(listedTokenKeys().has(key)){
+      showToast('Already in your list.');
+      return;
+    }
+    const ticker = tok.ticker.charAt(0) === '$' || tok.ic ? tok.ticker : '$' + tok.ticker;
+    a.imported.push({
+      ticker,
+      amount: tok.ic ? formatAssetAmt(tok.id, 0) : '0',
+      usd: 0,
+      img: tok.img || '',
+      ic: tok.ic || '',
+    });
+    showToast(ticker.replace(/^\$/, '') + ' imported.');
+    haptic('like');
+  }
+  function holdingUsdFor(ticker){
+    const key = holdingKey(ticker);
+    const hit = visibleHoldings().find(x => holdingKey(x.ticker) === key);
+    return hit ? (hit.usd || 0) : 0;
+  }
+  const QUOTE_TICK_MS = 10000;
+  let quoteTickAt = 0;
+  let quoteTickTimer = 0;
+  function clearQuoteTick(){
+    clearTimeout(quoteTickTimer);
+    quoteTickTimer = 0;
+  }
+  function tradeQuoteOpen(){
+    const drawer = document.getElementById('drawer');
+    const el = document.getElementById('tokenPanelTrade');
+    return !!(drawer?.classList.contains('open') && el && !el.hidden);
+  }
+  function armQuoteTick(){
+    clearQuoteTick();
+    quoteTickTimer = setTimeout(()=>{
+      quoteTickTimer = 0;
+      if(tradeQuoteOpen()) syncTradeQuote({ live: true });
+    }, QUOTE_TICK_MS);
+  }
+  function syncTradeQuote(opts){
+    const live = !!(opts && opts.live);
+    const now = performance.now();
+    if(live && quoteTickAt && (now - quoteTickAt) < QUOTE_TICK_MS){
+      if(!quoteTickTimer){
+        quoteTickTimer = setTimeout(()=>{
+          quoteTickTimer = 0;
+          syncTradeQuote({ live: true });
+        }, QUOTE_TICK_MS - (now - quoteTickAt));
+      }
+      return;
+    }
+    quoteTickAt = now;
+    clearQuoteTick();
+    if(live || tradeQuoteOpen()) armQuoteTick();
     const amt = tradeUsdAmt();
     const ticker = tradeTicker();
     const isSell = document.getElementById('tradeBuyBtn')?.classList.contains('is-sell');
@@ -4263,7 +4905,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     const out = formatTokenOut(amt);
     const minOut = formatTokenOut(guarded);
     const outVal = document.getElementById('tradeOutVal');
-    if(outVal) outVal.textContent = session.tradeUnit === 'token' ? usdLabel(amt) : `${out} ${ticker}`;
+    const outText = session.tradeUnit === 'token' ? usdLabel(amt) : `${out} ${ticker}`;
+    setQuoteTicker(outVal, outText, { animate: true });
     const recv = document.getElementById('tradeRecv');
     const recvLbl = document.getElementById('tradeRecvLbl');
     const payAmt = document.getElementById('tradePayAmt');
@@ -4283,8 +4926,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(sumVal) sumVal.textContent = isSell ? usdLabel(Math.max(0, guarded - fee)) : usdLabel(amt + fee);
     const slipMeta = document.getElementById('tradeSlipMeta');
     if(slipMeta) slipMeta.textContent = slipMetaLabel();
-    const autoTag = document.getElementById('tradeSlipAuto');
-    if(autoTag) autoTag.hidden = session.slipMode !== 'auto';
+    paintSlipAutoTag();
     paintPayAssetField(isSell ? guarded : amt);
     const helpers = document.getElementById('tradeHelpers');
     if(helpers){
@@ -4324,7 +4966,7 @@ html.dark .qhc-id{color:#6BA3FF;}
 
   function tradeCtaState(){
     const isSell = document.getElementById('tradeBuyBtn')?.classList.contains('is-sell');
-    const a = activeWallet();
+    const a = cashWallet();
     const amt = tradeUsdAmt();
     if(!isAuthed()) return 'auth';
     if(!isSell && (!a || a.bal < amt)) return 'deposit';
@@ -4387,11 +5029,13 @@ html.dark .qhc-id{color:#6BA3FF;}
     const asset = payAssetOf();
     const spend = Math.max(0, Number(usd) || 0);
     if(input && document.activeElement !== input){
-      input.value = formatPayAssetAmt(spend);
+      const next = formatPayAssetAmt(spend);
+      input.value = next;
       input.setAttribute('aria-label', 'Amount in ' + asset.tick);
+      setQuoteTicker(document.getElementById('tradePayAssetTicker'), next, { animate: true });
     }
     if(bal){
-      const hold = isAuthed() ? (activeWallet()?.bal || 0) : 0;
+      const hold = isAuthed() ? (cashWallet()?.bal || 0) : 0;
       bal.textContent = formatPayAssetAmt(hold) + ' ' + asset.tick;
     }
   }
@@ -4599,8 +5243,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.pending = null;
     session.pendingNeed = 0;
     playAuthFeedback(kind, key, ()=>{
+      session.authKey = key || (kind === 'eoa' ? 'mm' : 'Google');
       if(kind === 'social'){
         session.auth = 'social';
+        session.anonName = mintAnonName((session.authKey || 'social') + ':' + Date.now());
         session.wallets = [mintWallet('emb', { bal: 0, active: true })];
       } else {
         session.auth = 'eoa';
@@ -4612,11 +5258,6 @@ html.dark .qhc-id{color:#6BA3FF;}
   function afterAuth(pending, need){
     paintAuthChrome();
     if(typeof haptic === 'function') haptic('like');
-    const short = totalBal() < 1 || (need > 0 && totalBal() < need);
-    if(short){
-      openTopUp(0, pending);
-      return;
-    }
     closeLogin();
     if(pending) setTimeout(()=>{ try{ pending(); }catch(_){} }, 280);
   }
@@ -4629,9 +5270,10 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
 
   function spendFromActive(amt){
-    const a = activeWallet();
-    if(!a) return false;
-    a.bal = Math.round((a.bal - amt) * 100) / 100;
+    const a = cashWallet();
+    if(!a || amt > (a.bal || 0)) return false;
+    a.bal = Math.round((Math.max(0, a.bal) - amt) * 100) / 100;
+    if(a.bal < 0) a.bal = 0;
     paintAuthChrome();
     if(walletOverlay?.classList.contains('show') && session.walletView === 'list') renderWalletBody();
     return true;
@@ -4639,21 +5281,44 @@ html.dark .qhc-id{color:#6BA3FF;}
 
   function requireSpend(amt, then, label){
     requireAuth(()=>{
-      const a = activeWallet();
+      const a = cashWallet();
       if(!a) return;
       if(a.bal < amt){
-        if(totalBal() >= amt){
+        if(session.auth !== 'social' && totalBal() >= amt){
           showToast('Active wallet is short. Switch wallet or top it up.');
+          session.pendingSpend = ()=> requireSpend(amt, then, label);
           openWalletModal();
           return;
         }
+        session.pendingSpend = null;
         openTopUp(0, ()=> requireSpend(amt, then, label));
         return;
       }
+      session.pendingSpend = null;
       const fire = ()=>{ spendFromActive(amt); then(); };
       if(needsSig()) requestSignature(label || `Confirm ${usdLabel(amt)}`, fire);
       else fire();
     }, amt);
+  }
+  function resumeTrade(side, autoConfirm){
+    paintTradeCta();
+    const st = tradeCtaState();
+    if(st === 'auth'){
+      requireAuth(()=> resumeTrade(side, autoConfirm));
+      return;
+    }
+    if(st === 'deposit'){
+      openTopUp(0, ()=> resumeTrade(side, autoConfirm));
+      return;
+    }
+    if(autoConfirm){
+      if(!session.swap || session.swap.side !== side || session.swap.step !== 'confirm'){
+        openSwapConfirm(side);
+      }
+      if(session.swap && session.swap.step === 'confirm') confirmSwap();
+      return;
+    }
+    openSwapConfirm(side);
   }
 
   function requestSignature(label, then, opts){
@@ -4689,7 +5354,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.activity = session.activity.slice(0, 12);
   }
   function walletTopBack(){
-    if(session.walletView === 'connect'){
+    if(session.walletView === 'connect' || session.walletView === 'import'){
       session.walletView = 'list';
       renderWalletBody();
       return;
@@ -4703,9 +5368,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(title){
       title.textContent = session.walletView === 'flow' ? flowTitle()
         : session.walletView === 'connect' ? 'Connect wallet'
-        : 'Wallet';
+        : session.walletView === 'import' ? 'Import token'
+        : 'Account';
     }
-    const showBack = session.walletView === 'connect' || (session.walletView === 'flow' && flowCanBack());
+    const showBack = session.walletView === 'connect' || session.walletView === 'import' || (session.walletView === 'flow' && flowCanBack());
     document.getElementById('walletBack')?.classList.toggle('show', showBack);
     if(session.walletView === 'connect'){
       const has = new Set(session.wallets.map(w => w.id));
@@ -4726,32 +5392,76 @@ html.dark .qhc-id{color:#6BA3FF;}
       body.querySelector('#connectWalletSearch')?.addEventListener('input', (e)=> paint(e.target.value));
       return;
     }
+    if(session.walletView === 'import'){
+      const rowsOf = (q)=>{
+        const needle = String(q || '').trim().toLowerCase();
+        const rows = importableTokens().filter(t => !needle || String(t.ticker).toLowerCase().includes(needle));
+        if(!rows.length) return `<div class="wallet-empty">${needle ? 'No tokens match.' : 'Every token is already in your list.'}</div>`;
+        return rows.map(t => `
+          <button type="button" class="kb-wrow" data-import="${holdingKey(t.ticker)}">
+            ${t.ic ? `<span class="kb-wrow-av ic">${t.ic}</span>` : `<img class="kb-wrow-av" src="${t.img || ''}" alt="">`}
+            <span class="kb-wrow-meta">
+              <span class="kb-wrow-name">${t.ticker}</span>
+              <span class="kb-wrow-addr">${t.ic ? 'Wallet token' : 'From the feed'}</span>
+            </span>
+          </button>`).join('');
+      };
+      body.innerHTML = `
+        <p class="auth-sub">Tokens already in this wallet show up here. Import one to track it.</p>
+        <div class="auth-wallet-search">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <input type="search" id="importTokenSearch" placeholder="Search tokens" autocomplete="off">
+        </div>
+        <div class="auth-wallet-list" id="importTokenList">${rowsOf('')}</div>`;
+      const list = body.querySelector('#importTokenList');
+      const bind = ()=>{
+        list?.querySelectorAll('[data-import]').forEach(btn=>{
+          btn.addEventListener('click', ()=>{
+            const tok = importableTokens().find(x => holdingKey(x.ticker) === btn.dataset.import);
+            if(!tok) return;
+            importWalletToken(tok);
+            session.walletView = 'list';
+            session.walletTab = 'tokens';
+            renderWalletBody();
+          });
+        });
+      };
+      bind();
+      body.querySelector('#importTokenSearch')?.addEventListener('input', (e)=>{
+        if(list) list.innerHTML = rowsOf(e.target.value);
+        bind();
+      });
+      return;
+    }
     if(session.walletView === 'flow'){
       paintFlowInto(body);
       return;
     }
-    const a = activeWallet();
+    const ident = authIdentity();
+    const canWithdraw = totalBal() > 0;
+    if(session.walletView === 'settings') session.walletView = 'list';
     const tab = session.walletTab || 'tokens';
     const copySvg = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
-    const rows = session.wallets.map(w => `
+    const copyDoneSvg = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const cash = session.wallets.find(w => w.kind === 'embedded');
+    const linked = session.wallets.filter(w => w.kind !== 'embedded');
+    if(cash){
+      linked.forEach(w => { w.bal = 0; });
+    }
+    const balBlock = `
+      <div class="wallet-balance-lbl">Balance</div>
+      <div class="wallet-balance">${usdLabel(totalBal())}</div>`;
+    const rows = linked.map(w => `
       <button type="button" class="kb-wrow ${w.active ? 'is-active' : ''}" data-switch="${w.id}">
         <img class="kb-wrow-av circle" src="${userAvatar(w.addr)}" alt="">
         <span class="kb-wrow-meta">
           <span class="kb-wrow-name">${w.name}</span>
           <span class="kb-wrow-addr">${w.addr}</span>
         </span>
-        <span class="kb-wrow-right">
-          <span class="kb-wrow-bal">${usdLabel(w.bal)}</span>
-          <span class="kb-wrow-hint">${w.kind === 'eoa' ? 'Signs' : 'Sponsored'}</span>
-        </span>
       </button>`).join('');
-    const holds = session.holdings.length
-      ? session.holdings.map(h => `
-        <div class="kb-hold">
-          <img class="kb-hold-av" src="${h.img || ''}" alt="">
-          <div><div class="kb-hold-n">${h.ticker}</div><div class="kb-hold-s">${h.amount}</div></div>
-          <span class="kb-hold-v">${usdLabel(h.usd)}</span>
-        </div>`).join('')
+    const listed = visibleHoldings();
+    const holds = listed.length
+      ? listed.map(h => holdRowHtml(h)).join('')
       : `<div class="wallet-empty">No token balances found.</div>`;
     const acts = session.activity.length
       ? session.activity.map(x => `
@@ -4761,49 +5471,76 @@ html.dark .qhc-id{color:#6BA3FF;}
         </div>`).join('')
       : `<div class="wallet-empty">No activity yet.</div>`;
     const tabBody = tab === 'tokens' ? `
-        <div class="wallet-tab-h"><span>Token balances</span></div>
+        <div class="wallet-tab-h">
+          <span>Token balances</span>
+          ${activeWallet()?.kind === 'eoa' ? '<button type="button" class="wallet-tab-import" id="walletImportBtn">Import</button>' : ''}
+        </div>
         ${holds}`
       : tab === 'activity' ? acts
       : tab === 'tips' ? `<div class="wallet-empty">Tips you send land here.</div>`
-      : tab === 'profile' ? `
-        <div class="kb-hold">
-          <img class="kb-hold-av" src="${userAvatar(a ? a.addr : 'you')}" alt="">
-          <div>
-            <div class="kb-hold-n">${session.auth === 'social' ? 'Kumbaya' : (a ? a.name : 'Wallet')}</div>
-            <div class="kb-hold-s">${a ? a.addr : ''}</div>
-          </div>
+      : tab === 'settings' ? `
+        <div class="wallet-set">
+          <button type="button" class="kb-wrow" id="walletSetNotif">
+            <span class="kb-wrow-av ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 4.5a5 5 0 0 1 5 5v2.2c0 .8.3 1.6.8 2.2l.7.8H5.5l.7-.8c.5-.6.8-1.4.8-2.2V9.5a5 5 0 0 1 5-5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 18.5a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+            <span class="kb-wrow-meta">
+              <span class="kb-wrow-name">Notifications</span>
+              <span class="kb-wrow-addr">Coming soon</span>
+            </span>
+          </button>
+          <button type="button" class="kb-wrow" id="walletSetTheme">
+            <span class="kb-wrow-av ic"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.5v1.8M12 18.7v1.8M3.5 12h1.8M18.7 12h1.8M5.6 5.6l1.3 1.3M17.1 17.1l1.3 1.3M5.6 18.4l1.3-1.3M17.1 6.9l1.3-1.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>
+            <span class="kb-wrow-meta">
+              <span class="kb-wrow-name">Appearance</span>
+              <span class="kb-wrow-addr">${document.documentElement.classList.contains('dark') ? 'Dark' : 'Light'}</span>
+            </span>
+          </button>
         </div>`
-      : `<div class="wallet-empty">${needsSig() ? 'This wallet signs buys, sells, and gifts.' : 'Embedded wallet. Actions stay sponsored.'}</div>`;
+      : `<div class="kb-hold">
+          <img class="kb-hold-av" src="${ident.avatar}" alt="">
+          <div>
+            <div class="kb-hold-n">${ident.name}</div>
+            <div class="kb-hold-s">${ident.quietAddr ? 'Signed in' : ident.addr}</div>
+          </div>
+        </div>`;
+    const copyBtn = ident.addr
+      ? `<button type="button" class="wallet-id-icon" id="walletCopyAddr" aria-label="Copy address" title="Copy address">${copySvg}</button>`
+      : '';
     body.innerHTML = `
       <div class="wallet-id">
-        <img class="wallet-id-av" src="${userAvatar(a ? a.addr : 'you')}" alt="">
+        <img class="wallet-id-av" src="${ident.avatar}" alt="">
         <div class="wallet-id-meta">
-          <div class="wallet-id-name">${session.auth === 'social' ? 'you' : (a ? a.addr : 'Wallet')}</div>
-          <button type="button" class="wallet-id-addr" id="walletCopyAddr">${a ? a.addr : ''} ${copySvg}</button>
+          <div class="wallet-id-copy">
+            <div class="wallet-id-name">${ident.name}</div>
+            ${ident.quietAddr ? '' : `<div class="wallet-id-addr">${ident.addr}</div>`}
+          </div>
+          ${copyBtn}
         </div>
         <button type="button" class="wallet-signout" id="signOutBtn" aria-label="Sign out">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 7H8a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M13 8.5 16.5 12 13 15.5M16.2 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
-      <div class="wallet-balance-lbl">Balance</div>
-      <div class="wallet-balance">${usdLabel(totalBal())}</div>
-      ${needsSig() ? `<div class="wallet-delta" style="color:var(--ink-faint);font-weight:600">Pays from ${a.name}. Actions ask for a signature.</div>` : `<div class="wallet-delta" style="color:var(--ink-faint);font-weight:600">Embedded wallet. Actions stay sponsored.</div>`}
+      ${cash ? `<button type="button" class="wallet-balance-hit" data-switch="${cash.id}">${balBlock}</button>` : balBlock}
       <div class="wallet-actions">
-        <button type="button" id="walletSendBtn">Withdraw</button>
+        <button type="button" id="walletSendBtn"${canWithdraw ? '' : ' disabled'} title="${canWithdraw ? 'Withdraw' : 'Nothing to withdraw'}">Withdraw</button>
         <button type="button" class="wallet-add" id="walletAddBtn">Deposit</button>
       </div>
-      <div class="wallet-sec">My wallets</div>
+      <div class="wallet-sec">Wallets</div>
       ${rows}
       <button type="button" class="kb-wrow is-add" id="connectWalletRow">
         <span class="kb-wrow-av ic">＋</span>
         <span class="kb-wrow-meta">
           <span class="kb-wrow-name">Connect wallet</span>
-          <span class="kb-wrow-addr">Use your own address</span>
         </span>
       </button>
-      <nav class="wallet-tabs" aria-label="Wallet">
-        ${[['tokens','Tokens'],['activity','Activity'],['tips','Tips'],['profile','Profile'],['settings','Settings']].map(([id,lab]) =>
-          `<button type="button" data-wtab="${id}" class="${tab===id?'is-on':''}">${lab}</button>`).join('')}
+      <nav class="wallet-tabs" aria-label="Account">
+        ${[
+          ['tokens','Tokens','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/></svg>'],
+          ['activity','Activity','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4.4l3 1.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
+          ['tips','Tips','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 11.2V7.6a1.4 1.4 0 0 1 2.8 0v3.4M10.8 10.6V6.6a1.4 1.4 0 0 1 2.8 0v4.2M13.6 10.6V7.8a1.4 1.4 0 0 1 2.8 0V13c0 2.8-1.8 4.8-4.6 4.8h-.8C8.4 17.8 6 15.8 6 12.6v-1.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
+          ['profile','Profile','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8.2" r="3.1" stroke="currentColor" stroke-width="1.8"/><path d="M5.6 19c.7-3.1 3.1-4.8 6.4-4.8s5.7 1.7 6.4 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'],
+          ['settings','Settings','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 13a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.5-1 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3 1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1.5 1 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8 1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>'],
+        ].map(([id,lab,ic]) =>
+          `<button type="button" data-wtab="${id}" class="${tab===id?'is-on':''}">${ic}<span>${lab}</span></button>`).join('')}
       </nav>
       ${tabBody}`;
     body.querySelectorAll('[data-switch]').forEach(btn=>{
@@ -4816,9 +5553,27 @@ html.dark .qhc-id{color:#6BA3FF;}
     body.querySelector('#walletAddBtn')?.addEventListener('click', ()=> openDeposit(0, null));
     body.querySelector('#walletSendBtn')?.addEventListener('click', ()=> openWithdraw());
     body.querySelector('#signOutBtn')?.addEventListener('click', signOut);
-    body.querySelector('#walletCopyAddr')?.addEventListener('click', ()=>{
-      try{ navigator.clipboard && navigator.clipboard.writeText(a ? a.addr : ''); }catch(_){}
-      showToast('Address copied.');
+    body.querySelector('#walletSetNotif')?.addEventListener('click', ()=> showToast('Notifications coming soon.'));
+    body.querySelector('#walletSetTheme')?.addEventListener('click', ()=>{
+      toggleTheme();
+      fillWalletBody();
+    });
+    body.querySelector('#walletImportBtn')?.addEventListener('click', ()=>{
+      session.walletView = 'import';
+      renderWalletBody();
+    });
+    body.querySelector('#walletCopyAddr')?.addEventListener('click', (e)=>{
+      const btn = e.currentTarget;
+      try{ navigator.clipboard && navigator.clipboard.writeText(ident.addr || ''); }catch(_){}
+      btn.classList.add('is-copied');
+      btn.innerHTML = copyDoneSvg;
+      btn.setAttribute('aria-label', 'Copied');
+      clearTimeout(btn._copyT);
+      btn._copyT = setTimeout(()=>{
+        btn.classList.remove('is-copied');
+        btn.innerHTML = copySvg;
+        btn.setAttribute('aria-label', 'Copy address');
+      }, 1100);
     });
     body.querySelectorAll('[data-wtab]').forEach(btn=>{
       btn.addEventListener('click', ()=>{
@@ -4845,6 +5600,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   function closeWalletModal(){
     clearFlowTimer();
     session.pendingFunds = null;
+    session.pendingSpend = null;
     session.walletView = 'list';
     overlayClose(walletOverlay);
   }
@@ -4853,9 +5609,16 @@ html.dark .qhc-id{color:#6BA3FF;}
     paintAuthChrome();
     renderWalletBody();
     const a = activeWallet();
-    showToast(a && a.kind === 'eoa'
-      ? 'Buys, sells, and gifts now ask for a signature.'
-      : 'Embedded wallet. Actions stay sponsored.');
+    if(session.auth === 'social'){
+      showToast(a && a.kind === 'eoa' ? `${a.name} selected.` : 'Paying from your balance.');
+    } else {
+      showToast(a && a.kind === 'eoa' ? `Paying from ${a.name}.` : 'Paying from your balance.');
+    }
+    const next = session.pendingSpend;
+    if(next){
+      session.pendingSpend = null;
+      setTimeout(()=>{ try{ next(); }catch(_){} }, 200);
+    }
   }
   function addConnectedWallet(id){
     if(session.wallets.some(w => w.id === id)){
@@ -4863,17 +5626,20 @@ html.dark .qhc-id{color:#6BA3FF;}
       renderWalletBody();
       return;
     }
-    session.wallets.push(mintWallet(id, { bal: 59.84, active: false }));
+    session.wallets.push(mintWallet(id, { bal: 0, active: false }));
     session.walletView = 'list';
     renderWalletBody();
     paintAuthChrome();
-    showToast('Wallet added. Tap the row to pay from it.');
+    showToast('Wallet added.');
   }
   function signOut(){
     session.auth = null;
+    session.authKey = null;
+    session.anonName = null;
     session.wallets = [];
     session.pending = null;
     session.pendingNeed = 0;
+    session.pendingSpend = null;
     session.flow = null;
     session.holdings = [];
     session.activity = [];
@@ -4888,6 +5654,7 @@ html.dark .qhc-id{color:#6BA3FF;}
 
   const CHAINS = [
     { id:'ethereum', name:'Ethereum' },
+    { id:'megaeth', name:'MegaETH' },
     { id:'base', name:'Base' },
     { id:'solana', name:'Solana' },
   ];
@@ -4899,6 +5666,11 @@ html.dark .qhc-id{color:#6BA3FF;}
       { id:'eth', tick:'ETH', ic: PAY_ETH_ICON },
       { id:'usdc', tick:'USDC', ic: FLOW_USDC_ICON },
       { id:'usdt', tick:'USDT', ic: FLOW_USDT_ICON },
+    ],
+    megaeth: [
+      { id:'eth', tick:'ETH', ic: PAY_ETH_ICON },
+      { id:'usdc', tick:'USDC', ic: FLOW_USDC_ICON },
+      { id:'usdm', tick:'USDm', ic: PAY_USDM_ICON },
     ],
     base: [
       { id:'eth', tick:'ETH', ic: PAY_ETH_ICON },
@@ -5027,12 +5799,14 @@ html.dark .qhc-id{color:#6BA3FF;}
     return s.slice(0,6) + '…' + s.slice(-4);
   }
   function flowSelectEl({ name, aria, value, options }){
+    const current = options.find(o => o.id === value) || options[0];
     return `
-      <label class="flow-select-wrap">
-        <select class="flow-select" data-flow-select="${name}" aria-label="${aria}">
-          ${options.map(o => `<option value="${o.id}" ${o.id===value?'selected':''}>${o.label}</option>`).join('')}
-        </select>
-      </label>`;
+      <div class="flow-select-wrap" data-flow-picker="${name}">
+        <button type="button" class="flow-select" data-flow-trigger="${name}" aria-haspopup="listbox" aria-expanded="false" aria-label="${aria}">
+          <span data-flow-label>${current ? current.label : ''}</span>
+          <span class="flow-select-chev" aria-hidden="true"></span>
+        </button>
+      </div>`;
   }
   function flowNetsMarkup(f){
     return flowSelectEl({
@@ -5061,10 +5835,9 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   function paintTokenSelect(){
     const f = session.flow;
-    const sel = flowBodyEl()?.querySelector('[data-flow-select="token"]');
-    if(!f || !sel) return;
-    const tok = tokenOf(f);
-    sel.innerHTML = tokensForNet(f.net).map(t => `<option value="${t.id}" ${t.id===tok.id?'selected':''}>${t.tick}</option>`).join('');
+    const lab = flowBodyEl()?.querySelector('[data-flow-picker="token"] [data-flow-label]');
+    if(!f || !lab) return;
+    lab.textContent = tokenOf(f).tick;
   }
   function pickFlowNet(id){
     const f = session.flow;
@@ -5072,8 +5845,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     f.net = id;
     const tokens = tokensForNet(id);
     if(!tokens.some(t => t.id === f.token)) f.token = tokens[0].id;
-    const netSel = flowBodyEl()?.querySelector('[data-flow-select="net"]');
-    if(netSel && netSel.value !== id) netSel.value = id;
+    const lab = flowBodyEl()?.querySelector('[data-flow-picker="net"] [data-flow-label]');
+    if(lab) lab.textContent = chainOf(id).name;
     paintTokenSelect();
     syncFlowCopy();
   }
@@ -5081,13 +5854,66 @@ html.dark .qhc-id{color:#6BA3FF;}
     const f = session.flow;
     if(!f) return;
     f.token = id;
-    const sel = flowBodyEl()?.querySelector('[data-flow-select="token"]');
-    if(sel && sel.value !== id) sel.value = id;
+    const lab = flowBodyEl()?.querySelector('[data-flow-picker="token"] [data-flow-label]');
+    if(lab) lab.textContent = tokenOf(f).tick;
     syncFlowCopy();
+  }
+  let flowSelectOpen = null;
+  function closeFlowSelect(){
+    document.getElementById('flowSelectMenu')?.classList.remove('show');
+    flowBodyEl()?.querySelectorAll('[data-flow-trigger]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+    flowSelectOpen = null;
+  }
+  function openFlowSelect(trigger){
+    const name = trigger.dataset.flowTrigger;
+    if(flowSelectOpen === name){ closeFlowSelect(); return; }
+    const f = session.flow;
+    if(!f || !name) return;
+    let menu = document.getElementById('flowSelectMenu');
+    if(!menu){
+      menu = document.createElement('div');
+      menu.id = 'flowSelectMenu';
+      menu.className = 'flow-select-menu';
+      menu.setAttribute('role', 'listbox');
+      document.body.appendChild(menu);
+    }
+    const options = name === 'net'
+      ? CHAINS.map(c => ({ id:c.id, label:c.name }))
+      : tokensForNet(f.net).map(t => ({ id:t.id, label:t.tick }));
+    const value = name === 'net' ? f.net : tokenOf(f).id;
+    menu.setAttribute('aria-label', trigger.getAttribute('aria-label') || '');
+    menu.innerHTML = options.map(o => `
+      <button type="button" role="option" data-flow-opt="${o.id}" class="${o.id===value?'is-on':''}" aria-selected="${o.id===value}">
+        <span>${o.label}</span>
+        <svg class="flow-select-check" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.2 8.2l3 3.2 6.6-6.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>`).join('');
+    menu.querySelectorAll('[data-flow-opt]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        const id = btn.dataset.flowOpt;
+        if(name === 'net') pickFlowNet(id);
+        else pickFlowToken(id);
+        closeFlowSelect();
+      });
+    });
+    flowBodyEl()?.querySelectorAll('[data-flow-trigger]').forEach(b => b.setAttribute('aria-expanded', String(b === trigger)));
+    flowSelectOpen = name;
+    const r = trigger.getBoundingClientRect();
+    menu.style.minWidth = Math.round(r.width) + 'px';
+    menu.classList.add('show');
+    const mw = menu.offsetWidth, mh = menu.offsetHeight;
+    let left = r.left;
+    let top = r.bottom + 6;
+    if(top + mh > window.innerHeight - 8) top = r.top - mh - 6;
+    left = Math.max(8, Math.min(left, window.innerWidth - mw - 8));
+    menu.style.left = Math.round(left) + 'px';
+    menu.style.top = Math.round(top) + 'px';
+    menu.style.transformOrigin = top < r.top ? 'bottom left' : 'top left';
   }
   function paintFlowInto(body){
     if(!body) return;
     if(typeof hideHoverCards === 'function') hideHoverCards(true);
+    closeFlowSelect();
     if(!session.flow) session.flow = defaultFlow('deposit', session.fundsNeed || 0);
     const f = session.flow;
     const chain = chainOf(f.net);
@@ -5096,17 +5922,17 @@ html.dark .qhc-id{color:#6BA3FF;}
       html = `
         <button type="button" class="flow-method" data-flow-go="crypto">
           <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M7 8h11M15 5l3 3-3 3M17 16H6M9 13l-3 3 3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-          <span><b>Transfer crypto</b><span>No limit · Instant</span></span>
+          <span><b>Transfer crypto</b><span>Instant</span></span>
           <span class="end"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         </button>
         <button type="button" class="flow-method" data-flow-method="Card">
           <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.2" y="6.2" width="17.6" height="11.6" rx="2.2" stroke="currentColor" stroke-width="1.7"/><path d="M3.2 10.2h17.6M7 15h4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
-          <span><b>Card</b><span>$50k limit · Instant</span></span>
+          <span><b>Card</b><span>Instant</span></span>
           <span class="end"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         </button>
         <button type="button" class="flow-method" data-flow-method="Apple Pay">
           <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.3 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-.1 2.9-2.3c1.1-1.5 1.5-2.9 1.5-3 0-.1-2.8-1.1-2.8-3.4ZM14.7 6.4c.6-.8 1.1-1.9.9-3-1 .1-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1.1.1 2.2-.6 2.9-1.4Z"/></svg></span>
-          <span><b>Apple Pay</b><span>$50k limit · Instant</span></span>
+          <span><b>Apple Pay</b><span>Instant</span></span>
           <span class="end"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
         </button>
         <div class="flow-kv"><dt>Account balance</dt><dd>${usdLabel(totalBal())}</dd></div>`;
@@ -5138,15 +5964,18 @@ html.dark .qhc-id{color:#6BA3FF;}
         </div>`;
     } else if(f.kind === 'deposit' && f.step === 'cash'){
       html = `
-        <div class="flow-big">
+        <div class="flow-big${cashAmtOver(f.amt)?' is-over':''}">
           <div class="lbl">Total</div>
-          <div class="amt">${usdLabel(f.amt)}</div>
-          <div class="sub">via ${f.method}</div>
+          <label class="amt">
+            <span class="amt-sign">$</span>
+            <input id="cashAmt" inputmode="decimal" autocomplete="off" value="${fmtAmtInput(f.amt)}" aria-label="Amount in USD" aria-invalid="${cashAmtOver(f.amt)?'true':'false'}" aria-describedby="cashAmtSub">
+          </label>
+          <div class="sub${cashAmtOver(f.amt)?' is-err':''}" id="cashAmtSub">${cashAmtSub(f.method, f.amt)}</div>
         </div>
         <div class="funds-presets">
           ${[25,50,100].map(v => `<button type="button" data-flow-preset="${v}" class="${v===f.amt?'is-on':''}">$${v}</button>`).join('')}
         </div>
-        <button type="button" class="flow-cta" data-flow-continue>Continue</button>`;
+        <button type="button" class="flow-cta" data-flow-continue ${cashAmtOk(f.amt)?'':'disabled'}>Continue</button>`;
     } else if(f.kind === 'withdraw' && f.step === 'amount'){
       const bal = totalBal();
       html = `
@@ -5210,8 +6039,12 @@ html.dark .qhc-id{color:#6BA3FF;}
     body.querySelectorAll('[data-flow-method]').forEach(btn=>{
       btn.addEventListener('click', ()=>{ f.method = btn.dataset.flowMethod; f.step = 'cash'; paintFlowSheet(); });
     });
-    body.querySelector('[data-flow-select="net"]')?.addEventListener('change', (e)=> pickFlowNet(e.target.value));
-    body.querySelector('[data-flow-select="token"]')?.addEventListener('change', (e)=> pickFlowToken(e.target.value));
+    body.querySelectorAll('[data-flow-trigger]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        openFlowSelect(btn);
+      });
+    });
     const flowAddrInfo = body.querySelector('#flowAddrInfo');
     if(flowAddrInfo){
       bindHoverCard(flowAddrInfo, 'info', null, 180);
@@ -5220,8 +6053,34 @@ html.dark .qhc-id{color:#6BA3FF;}
         showHoverCard('info', null, flowAddrInfo);
       });
     }
+    function syncCashAmtUi(){
+      const inp = body.querySelector('#cashAmt');
+      const cta = body.querySelector('[data-flow-continue]');
+      const wrap = body.querySelector('.flow-big');
+      const sub = body.querySelector('#cashAmtSub');
+      if(inp) sizeAmtInput(inp);
+      const over = cashAmtOver(f.amt);
+      wrap?.classList.toggle('is-over', over);
+      if(inp) inp.setAttribute('aria-invalid', over ? 'true' : 'false');
+      if(sub){
+        sub.textContent = cashAmtSub(f.method, f.amt);
+        sub.classList.toggle('is-err', over);
+      }
+      body.querySelectorAll('[data-flow-preset]').forEach(b => b.classList.toggle('is-on', +b.dataset.flowPreset === f.amt));
+      if(cta && f.kind === 'deposit' && f.step === 'cash') cta.disabled = !cashAmtOk(f.amt);
+    }
     body.querySelectorAll('[data-flow-preset]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{ f.amt = +btn.dataset.flowPreset; session.fundsAmt = f.amt; paintFlowSheet(); });
+      btn.addEventListener('click', ()=>{
+        f.amt = +btn.dataset.flowPreset;
+        session.fundsAmt = f.amt;
+        const inp = body.querySelector('#cashAmt');
+        if(inp){
+          inp.value = fmtAmtInput(f.amt);
+          syncCashAmtUi();
+          inp.focus();
+          inp.select();
+        } else paintFlowSheet();
+      });
     });
     body.querySelectorAll('[data-flow-pct]').forEach(btn=>{
       btn.addEventListener('click', ()=>{
@@ -5229,9 +6088,20 @@ html.dark .qhc-id{color:#6BA3FF;}
         paintFlowSheet();
       });
     });
+    const cashIn = body.querySelector('#cashAmt');
+    if(cashIn){
+      sizeAmtInput(cashIn);
+      cashIn.addEventListener('input', ()=>{
+        const n = parseAmt(cashIn.value);
+        f.amt = n;
+        session.fundsAmt = n;
+        syncCashAmtUi();
+      });
+      cashIn.addEventListener('focus', ()=> cashIn.select());
+    }
     const amtIn = body.querySelector('#wdAmt');
     amtIn?.addEventListener('input', ()=>{
-      const n = parseFloat(String(amtIn.value).replace(/[^0-9.]/g,'')) || 0;
+      const n = parseAmt(amtIn.value);
       f.amt = n;
       const cta = body.querySelector('[data-flow-continue]');
       if(cta) cta.disabled = !n || n > totalBal();
@@ -5254,8 +6124,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     });
     body.querySelector('[data-flow-sent]')?.addEventListener('click', ()=> startCryptoConfirm());
     body.querySelector('[data-flow-continue]')?.addEventListener('click', ()=>{
-      if(f.kind === 'deposit') creditFunds(f.amt, f.method);
-      else { f.step = 'addr'; paintFlowSheet(); }
+      if(f.kind === 'deposit'){
+        if(!cashAmtOk(f.amt)) return;
+        creditFunds(f.amt, f.method);
+      } else { f.step = 'addr'; paintFlowSheet(); }
     });
     body.querySelector('[data-flow-review]')?.addEventListener('click', ()=>{ f.step = 'review'; paintFlowSheet(); });
     body.querySelector('[data-flow-confirm]')?.addEventListener('click', confirmWithdraw);
@@ -5299,7 +6171,15 @@ html.dark .qhc-id{color:#6BA3FF;}
   function openDeposit(need, then){
     session.fundsNeed = 0;
     session.fundsAmt = 25;
-    session.pendingFunds = then || null;
+    if(then){
+      session.pendingFunds = then;
+      session.pendingSpend = null;
+    } else if(session.pendingSpend){
+      session.pendingFunds = session.pendingSpend;
+      session.pendingSpend = null;
+    } else {
+      session.pendingFunds = null;
+    }
     session.flow = defaultFlow('deposit', 0);
     const host = flowHost();
     if(host === 'auth'){ setAuthPanel('funds'); return; }
@@ -5310,12 +6190,16 @@ html.dark .qhc-id{color:#6BA3FF;}
     overlayOpen(fundsOverlay);
   }
   function openTopUp(need, then){ openDeposit(need, then); }
+  function wantsDepositDemo(){
+    try{
+      const q = new URLSearchParams(location.search);
+      if(q.has('deposit') || q.get('demo') === 'deposit') return true;
+      const h = (location.hash || '').replace(/^#/, '');
+      return h === 'deposit';
+    }catch(_){ return false; }
+  }
   function openWithdraw(){
-    if(totalBal() <= 0){
-      showToast('Deposit first, then withdraw.');
-      openDeposit(0, null);
-      return;
-    }
+    if(totalBal() <= 0) return;
     session.flow = defaultFlow('withdraw', 0);
     session.pendingFunds = null;
     if(!walletOverlay?.classList.contains('show')){
@@ -5338,10 +6222,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     } else overlayClose(fundsOverlay);
   }
   function creditFunds(amt, label, opts){
-    const a = activeWallet();
+    const a = cashWallet() || activeWallet();
     if(!a) return;
     clearFlowTimer();
-    a.bal = Math.round((a.bal + amt) * 100) / 100;
+    a.bal = Math.round((Math.max(0, a.bal || 0) + amt) * 100) / 100;
     logActivity('deposit', label ? `Deposit · ${label}` : 'Deposit', amt);
     finishFundsSheet();
     paintAuthChrome();
@@ -5376,6 +6260,163 @@ html.dark .qhc-id{color:#6BA3FF;}
       session.holdings.push({ ticker, amount: tokens, usd: amt, img: tokenArtOf(post) });
     }
     logActivity('buy', ticker, amt);
+    if(walletOverlay?.classList.contains('show') && session.walletView === 'list') fillWalletBody();
+  }
+
+  function mockSwapTx(){
+    const bytes = new Uint8Array(32);
+    if(window.crypto && crypto.getRandomValues) crypto.getRandomValues(bytes);
+    else bytes.forEach((_, i)=> { bytes[i] = Math.floor(Math.random() * 256); });
+    return '0x' + [...bytes].map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  function snapshotSwap(side){
+    const amt = tradeUsdAmt();
+    const post = (typeof tokenDrawerPost !== 'undefined' && tokenDrawerPost) || posts[typeof lastActiveIdx === 'number' ? lastActiveIdx : 0];
+    const ticker = String(post?.ticker || 'TOKEN').replace(/^\$/, '');
+    const asset = payAssetOf();
+    const fee = Math.max(0, amt * PROTOCOL_FEE_PCT / 100);
+    const recvUsd = side === 'sell' ? Math.max(0, amt - fee) : amt;
+    return {
+      step: 'confirm',
+      side,
+      amt,
+      ticker,
+      payTick: asset.tick,
+      payIc: asset.ic,
+      payAmt: formatPayAssetAmt(recvUsd),
+      fiat: fiatTiny(recvUsd),
+      tokenAmt: formatTokenExact(amt),
+      tokenShort: formatTokenOut(amt),
+      img: tokenArtOf(post) || '',
+      feeLbl: `Fee (${fmtSlipPct(PROTOCOL_FEE_PCT)})`,
+      feeAmt: fiatTiny(fee),
+      auto: session.slipMode === 'auto',
+      slip: slipMetaLabel(),
+      tx: '',
+    };
+  }
+  function swapLegsHtml(s){
+    const tokenChip = `<span class="swap-asset">${s.img ? `<span class="trade-token-av squircle"><img src="${s.img}" alt=""></span>` : ''}${s.ticker}</span>`;
+    const payChip = `<span class="swap-asset"><span class="trade-pay-ic" aria-hidden="true">${s.payIc}</span>${s.payTick}</span>`;
+    const auto = s.auto ? `<span class="trade-slip-auto is-in" aria-hidden="false">Auto</span>` : '';
+    const sell = s.side === 'sell'
+      ? `<div class="swap-leg"><span>Selling</span><div class="swap-leg-row"><b>${s.tokenAmt}</b>${tokenChip}</div></div>`
+      : `<div class="swap-leg"><span>Selling</span><div class="swap-leg-row"><b>${s.payAmt}</b>${payChip}</div><em>${s.fiat}</em></div>`;
+    const buy = s.side === 'sell'
+      ? `<div class="swap-leg"><span>Buying</span><div class="swap-leg-row"><b>${s.payAmt}</b>${payChip}</div><em>${s.fiat}</em></div>`
+      : `<div class="swap-leg"><span>Buying</span><div class="swap-leg-row"><b>${s.tokenAmt}</b>${tokenChip}</div></div>`;
+    return `<div class="swap-legs">
+      ${sell}
+      <div class="swap-arrow" aria-hidden="true">↓</div>
+      ${buy}
+      <div class="swap-meta">
+        <div><span>${s.feeLbl}</span><b>${s.feeAmt}</b></div>
+        <div><span>Max slippage</span><b>${auto}${s.slip}</b></div>
+      </div>
+    </div>`;
+  }
+  function paintSwapSheet(morph){
+    const modal = swapOverlay?.querySelector('.swap-modal');
+    const body = document.getElementById('swapBody');
+    const title = document.getElementById('swapTitle');
+    const s = session.swap;
+    if(!modal || !body || !s) return;
+    const run = ()=>{
+      const wait = s.step === 'wait';
+      const done = s.step === 'done';
+      modal.classList.toggle('is-sell', s.side === 'sell');
+      modal.classList.toggle('is-confirming', wait);
+      title.textContent = done ? 'Success' : (s.side === 'sell' ? 'Confirm sale' : 'Confirm purchase');
+      if(done){
+        const href = 'https://optimistic.etherscan.io/tx/' + (s.tx || mockSwapTx());
+        body.innerHTML = `
+          <div class="swap-done">
+            <h3>Swap successful</h3>
+            <p>${s.side === 'sell' ? (needsSig() ? 'Sold — funds are in your wallet.' : 'Sold — funds are in your account.') : 'Enjoy your new token'}</p>
+            <div class="swap-hero">
+              ${s.img ? `<img src="${s.img}" alt="">` : `<span class="sig-mark is-kb">K</span>`}
+              <span class="swap-hero-ok" aria-hidden="true">✓</span>
+            </div>
+            <button type="button" class="swap-cta is-done" data-swap="done">Done</button>
+            <a class="swap-explore" href="${href}" target="_blank" rel="noopener">Check on Block explorer
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 5h6v6M20 5l-9 9M10 5H6.5A2.5 2.5 0 0 0 4 7.5v10A2.5 2.5 0 0 0 6.5 20h10A2.5 2.5 0 0 0 19 17.5V14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>`;
+      } else if(wait){
+        const a = activeWallet();
+        const copy = needsSig()
+          ? `Confirm in ${a ? a.name : 'your wallet'}. One signature, one transaction.`
+          : 'Processing your transaction…';
+        body.innerHTML = `
+          <div class="swap-wait">
+            <div class="sig-ring" id="swapRing">${s.img ? `<img src="${s.img}" alt="">` : `<span class="sig-mark is-kb">K</span>`}</div>
+            <h3>Waiting for confirmation</h3>
+            <p>${copy}</p>
+          </div>
+          ${swapLegsHtml(s)}
+          <button type="button" class="swap-cta is-wait" disabled>Processing <span class="spin"></span></button>`;
+      } else {
+        body.innerHTML = `
+          ${swapLegsHtml(s)}
+          <button type="button" class="swap-cta" data-swap="go">${s.side === 'sell' ? 'Sell' : 'Buy'}</button>`;
+      }
+    };
+    if(morph) morphSheet(modal, run);
+    else run();
+  }
+  function closeSwap(){
+    if(session.swap?.step === 'wait') return;
+    clearTimeout(session.swapTimer);
+    session.swapTimer = 0;
+    session.swap = null;
+    overlayClose(swapOverlay);
+  }
+  function openSwapConfirm(side){
+    const amt = tradeUsdAmt();
+    if(amt <= 0){ showToast('Enter an amount.'); return; }
+    session.swap = snapshotSwap(side);
+    paintSwapSheet(false);
+    overlayOpen(swapOverlay);
+  }
+  function settleSwap(){
+    const s = session.swap;
+    if(!s || s.step !== 'wait') return;
+    const ok = spendFromActive(s.amt);
+    if(!ok){
+      session.swap.step = 'confirm';
+      paintSwapSheet(true);
+      showToast('Not enough balance.');
+      return;
+    }
+    if(s.side === 'sell'){
+      haptic('dislike');
+      showToast(`Sold ${s.ticker}.`);
+    } else {
+      recordBuy(s.amt);
+      haptic('like');
+      showToast(`Bought ${s.tokenShort} ${s.ticker}.`);
+    }
+    s.tx = mockSwapTx();
+    s.step = 'done';
+    paintSwapSheet(true);
+    paintTradeCta();
+  }
+  function confirmSwap(){
+    const s = session.swap;
+    if(!s || s.step !== 'confirm') return;
+    const a = cashWallet();
+    if(!a || a.bal < s.amt){
+      const side = s.side;
+      showToast('Not enough balance.');
+      closeSwap();
+      openTopUp(0, ()=> resumeTrade(side, true));
+      return;
+    }
+    s.step = 'wait';
+    paintSwapSheet(true);
+    haptic('selection');
+    clearTimeout(session.swapTimer);
+    session.swapTimer = setTimeout(settleSwap, needsSig() ? 1600 : 1000);
   }
 
   function closeAuthFromUser(){
@@ -5437,7 +6478,25 @@ html.dark .qhc-id{color:#6BA3FF;}
   document.getElementById('fundsBack')?.addEventListener('click', ()=> flowBack());
   document.getElementById('fundsClose')?.addEventListener('click', ()=>{ clearFlowTimer(); session.pendingFunds = null; session.flow = null; overlayClose(fundsOverlay); });
   fundsOverlay?.addEventListener('click', (e)=>{ if(e.target === fundsOverlay){ session.pendingFunds = null; session.flow = null; overlayClose(fundsOverlay); } });
+  document.addEventListener('click', (e)=>{
+    if(!flowSelectOpen) return;
+    if(e.target.closest?.('#flowSelectMenu, [data-flow-trigger]')) return;
+    closeFlowSelect();
+  });
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape' && flowSelectOpen) closeFlowSelect();
+  });
+  document.addEventListener('scroll', ()=>{ if(flowSelectOpen) closeFlowSelect(); }, true);
+  document.getElementById('swapClose')?.addEventListener('click', closeSwap);
+  swapOverlay?.addEventListener('click', (e)=>{
+    if(e.target === swapOverlay){ closeSwap(); return; }
+    const go = e.target.closest('[data-swap]');
+    if(!go) return;
+    if(go.dataset.swap === 'go') confirmSwap();
+    else     if(go.dataset.swap === 'done') closeSwap();
+  });
   paintAuthChrome();
+  if(wantsDepositDemo()) setTimeout(()=> openDeposit(0, null), 360);
   const posts = [
     { user:"sauce.eth", avatar:`${M}/SAUCE.webp`, desc:"the dare: drink the tabasco. one gallon, fridge-cold, no chaser.", ticker:"$SAUCE", cat:"Dare", role:"op", type:"image", w:1, h:1, src:`${M}/SAUCE.webp`, tips:2048, comments:412, likes:3801,
       commentList:[
@@ -6226,8 +7285,8 @@ html.dark .qhc-id{color:#6BA3FF;}
   function openTokenPage(post){
     location.href = tokenPageUrl(parentTokenPost(post) || post);
   }
-  function moreMenuHtml(post){
-    const viewBtn = isOpPost(post)
+  function moreMenuItemsHtml({viewToken=false}={}){
+    const viewBtn = viewToken
       ? `<button type="button" role="menuitem" data-act="viewtoken">${svgIcon('viewToken')}View token</button>`
       : `<button type="button" role="menuitem" data-act="viewthread">${svgIcon('viewThread')}View in thread</button>`;
     return `<button type="button" role="menuitem" data-act="reply"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 8H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M14 4h6v6M20 4l-9 9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Reply</button>
@@ -6237,8 +7296,11 @@ html.dark .qhc-id{color:#6BA3FF;}
               <button type="button" role="menuitem" data-act="copylink"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Copy link</button>
               <button type="button" role="menuitem" data-act="sharex"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>Share on X</button>
               <button type="button" role="menuitem" data-act="hidepost"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 4.5l18 15M10.1 10.3a2.5 2.5 0 0 0 3.5 3.5M9.9 5.6A10.3 10.3 0 0 1 12 5.3c5 0 8.8 3.4 10.2 6.7a1.2 1.2 0 0 1 0 1.1 12 12 0 0 1-3.1 3.9M6.4 6.7A12 12 0 0 0 1.8 13a1.2 1.2 0 0 0 0 1.1C3.2 17.4 7 20.8 12 20.8c1.5 0 2.9-.3 4.2-.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Hide post</button>
-              <div class="more-menu-sep" role="separator"></div>
+              <div class="more-menu-sep ctx-menu-sep" role="separator"></div>
               <button type="button" role="menuitem" class="danger" data-act="report"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 21V4h9l-1 3h6l-1.5 5H13l1 3H5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Report</button>`;
+  }
+  function moreMenuHtml(post){
+    return moreMenuItemsHtml({ viewToken: isOpPost(post) });
   }
   function postMediaNoun(post){
     const t = String(post?.type || post?.media?.type || '').toLowerCase();
@@ -7372,10 +8434,12 @@ html.dark .qhc-id{color:#6BA3FF;}
         if(act === 'tokenaddress'){
           const addr = mockTokenAddress(post);
           try{ navigator.clipboard?.writeText(addr); }catch(_){}
+          showToast('Address copied.');
           return;
         }
         if(act === 'copylink'){
           try{ navigator.clipboard?.writeText(location.href); }catch(_){}
+          showToast('Copied.');
           return;
         }
         if(act === 'sharex'){ openShare(post); return; }
@@ -8182,8 +9246,8 @@ html.dark .qhc-id{color:#6BA3FF;}
       haptic('settle');
       dismissFeedHint();
       noteNewPillSwipe();
-      // keep the open comments drawer in sync with the post now in view
-      if(state.commentsOpen && !state.focusedComment) loadCommentsForPost(posts[idx], idx);
+      // Keep the open token drawer on the token now in view
+      syncOpenTokenDrawer(idx);
       // New post — drop any prior 2× lock and restart Buy CTA cycle
       if(gSpeedLocked) unlockSpeed({hapticFeedback:false, animate:false});
       armBuyCtaCycle(idx);
@@ -9577,6 +10641,8 @@ html.dark .qhc-id{color:#6BA3FF;}
       points.push({ time: t, value: p });
     }
     price = points[points.length - 1].value;
+    quoteLive.price0 = price;
+    quoteLive.price = price;
 
     let display = points.map(pt => ({ time: pt.time, value: pt.value }));
     let yMin = Math.min(...display.map(d => d.value));
@@ -9805,6 +10871,8 @@ html.dark .qhc-id{color:#6BA3FF;}
         const cutoff = Date.now() - 2 * 3600 * 1000;
         while(points.length > 4 && points[0].time < cutoff) points.shift();
         price = next;
+        quoteLive.price = next;
+        if(typeof api.onQuote === 'function') api.onQuote(next);
       }
       const delay = 110 + Math.floor(rand() * 90);
       tickTimer = setTimeout(pushTick, delay);
@@ -9918,9 +10986,19 @@ html.dark .qhc-id{color:#6BA3FF;}
     document.getElementById('drawerName').textContent = tokenDisplayName(post);
     document.getElementById('drawerTicker').textContent = post.ticker;
     const cat = document.getElementById('drawerCat');
-    if(cat) cat.textContent = post.cat || 'Meme';
+    if(cat){
+      const label = post.cat || 'Meme';
+      cat.textContent = label;
+      cat.classList.toggle('meme', String(label).toLowerCase() !== 'dare');
+    }
     const tokenArt = tokenArtOf(post);
-    document.getElementById('drawerAvatar').src = tokenArt;
+    const av = document.getElementById('drawerAvatar');
+    if(av) av.src = tokenArt;
+    const ident = document.getElementById('tokenDrawerIdentity');
+    if(ident){
+      ident.href = tokenPageUrl(post);
+      ident.setAttribute('aria-label', 'View ' + (post.ticker || 'token'));
+    }
     const getLabel = document.getElementById('tradeGetAssetLabel');
     const getImg = document.getElementById('tradeGetAssetImg');
     if(getLabel) getLabel.textContent = String(post.ticker || '').replace(/^\$/, '') || 'TOKEN';
@@ -9932,6 +11010,21 @@ html.dark .qhc-id{color:#6BA3FF;}
     paintTradePresets();
     paintTradeCta();
   }
+  function syncOpenTokenDrawer(idx){
+    if(!drawer?.classList.contains('open')) return;
+    const viewed = posts[idx];
+    if(!viewed) return;
+    const token = parentTokenPost(viewed) || viewed;
+    const sameToken = tokenDrawerPost && tokenDrawerPost.ticker === token.ticker;
+    if(!sameToken){
+      fillTokenDrawerHeader(token);
+      startTokenLiveline(token);
+      paintTradeCta();
+    }
+    if(state.commentsOpen && !state.focusedComment){
+      loadCommentsForPost(viewed, idx);
+    }
+  }
   function startTokenLiveline(post){
     if(tokenLiveline){
       tokenLiveline._removeResize?.();
@@ -9942,6 +11035,9 @@ html.dark .qhc-id{color:#6BA3FF;}
       ticker: post.ticker,
       badgeEl: tokenChartBadge,
       mcapEl: document.getElementById('drawerMcap'),
+      onQuote(){
+        if(state.tradeOpen) syncTradeQuote({ live: true });
+      },
     });
     // restore window / mode UI
     const winBtn = document.querySelector('#tokenChartWindows button.active');
@@ -9997,6 +11093,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     setChartCollapse(0);
     hidePayPicker();
     stopTokenLiveline();
+    clearQuoteTick();
     clearCommentDropActive();
     clearCommentPendingMedia();
     closeCommentAnonPop();
@@ -10034,7 +11131,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       loadCommentsForPost(post, idx >= 0 ? idx : lastActiveIdx, {showSkeleton:false});
     }
   }
-  function openDrawer(post){ openTokenDrawer(post, 'trade'); }
+  function openDrawer(post){ openTokenDrawer(parentTokenPost(post) || post, 'trade'); }
 
 
   /* ---------------- hover info cards (desktop) ---------------- */
@@ -10193,11 +11290,14 @@ html.dark .qhc-id{color:#6BA3FF;}
     const buyerImgs = [0,1,2].map(i=>`<img class="blockie" src="${userAvatar(post.ticker + '-b' + i)}" alt="">`).join('');
     tokenHoverCard.innerHTML = `
       <div class="thc-head">
-        <div class="thc-token-av squircle"><img src="${tokenArtOf(post)}" alt=""></div>
-        <div class="thc-token-meta">
-          <div class="thc-ticker-row"><span class="thc-ticker">${post.ticker}</span><span class="pill ${catClass}">${post.cat || 'Meme'}</span></div>
-          <div class="thc-name">${stats.name}</div>
-        </div>
+        <a class="thc-identity" href="${tokenPageUrl(post)}" aria-label="View ${post.ticker}">
+          <div class="thc-token-av squircle"><img src="${tokenArtOf(post)}" alt=""></div>
+          <div class="thc-token-meta">
+            <div class="thc-ticker-row"><span class="thc-ticker">${post.ticker}</span><span class="pill ${catClass}">${post.cat || 'Meme'}</span></div>
+            <div class="thc-name">${stats.name}</div>
+          </div>
+          <svg class="thc-go" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
         <div class="thc-mcap">
           <div class="thc-mcap-label"><svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="14" r="3" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="10" r="3" stroke="currentColor" stroke-width="1.6"/><circle cx="15" cy="17" r="2.2" stroke="currentColor" stroke-width="1.6"/></svg>MCAP</div>
           <div class="thc-mcap-val">${stats.mcap}</div>
@@ -10458,6 +11558,14 @@ html.dark .qhc-id{color:#6BA3FF;}
     card.addEventListener('pointerenter', ()=>{ clearTimeout(hoverHideTimer); hoverHideTimer = 0; });
     card.addEventListener('pointerleave', ()=> hideHoverCards(false));
   });
+  tokenHoverCard?.addEventListener('click', (e)=>{
+    const ident = e.target.closest('.thc-identity');
+    if(!ident) return;
+    if(e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+    e.preventDefault();
+    hideHoverCards(true);
+    if(hoverPost) openTokenPage(hoverPost);
+  });
   scroller.addEventListener('scroll', ()=> hideHoverCards(true), {passive:true});
   document.getElementById('commentsList')?.addEventListener('scroll', ()=> hideHoverCards(true), {passive:true});
   document.querySelector('#tokenPanelComments .comments-body')?.addEventListener('scroll', ()=> hideHoverCards(true), {passive:true});
@@ -10567,6 +11675,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     const btn = e.target.closest('[data-slip]');
     if(!btn) return;
     setSlipMode(btn.dataset.slip);
+    setSlipOpen(false);
     haptic('selection');
   });
   const tradeSlipCustom = document.getElementById('tradeSlipCustom');
@@ -10582,6 +11691,25 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.slipMode = 'custom';
     paintSlippage();
     syncTradeQuote();
+  });
+  tradeSlipCustom?.addEventListener('keydown', (e)=>{
+    if(e.key !== 'Enter') return;
+    e.preventDefault();
+    closeSlippage();
+  });
+  document.getElementById('tradeSlip')?.addEventListener('focusout', (e)=>{
+    if(!session.slipOpen) return;
+    const next = e.relatedTarget;
+    if(!next) return;
+    if(e.currentTarget.contains(next)) return;
+    if(next.closest?.('#tradeAutoBtn') || next.closest?.('#infoHoverTip')) return;
+    closeSlippage();
+  });
+  document.addEventListener('pointerdown', (e)=>{
+    if(!session.slipOpen) return;
+    const t = e.target;
+    if(t.closest?.('#tradeSlip') || t.closest?.('#tradeAutoBtn') || t.closest?.('#infoHoverTip')) return;
+    closeSlippage();
   });
   const tradeSlipInfo = document.getElementById('tradeSlipInfo');
   if(tradeSlipInfo){
@@ -10602,6 +11730,14 @@ html.dark .qhc-id{color:#6BA3FF;}
       input.value = session.tradeUnit === 'token' ? formatTokenInput(usd) : String(+(usd.toFixed(2)));
     }
     paintTradeCta();
+  });
+  document.getElementById('tradePayAssetInput')?.addEventListener('focus', ()=>{
+    document.getElementById('tradePayAssetWrap')?.classList.add('is-edit');
+  });
+  document.getElementById('tradePayAssetInput')?.addEventListener('blur', ()=>{
+    document.getElementById('tradePayAssetWrap')?.classList.remove('is-edit');
+    const input = document.getElementById('tradePayAssetInput');
+    if(input) setQuoteTicker(document.getElementById('tradePayAssetTicker'), input.value, { animate: false });
   });
   document.getElementById('tradePayWith')?.addEventListener('click', (e)=>{
     if(e.target.closest('#tradePaySelect, #tradePayMenu, button')) return;
@@ -10656,39 +11792,16 @@ html.dark .qhc-id{color:#6BA3FF;}
   });
   document.getElementById('tradeBuyBtn')?.addEventListener('click', ()=>{
     const isSell = document.getElementById('tradeBuyBtn')?.classList.contains('is-sell');
-    const amt = tradeUsdAmt();
-    const post = tokenDrawerPost || posts[lastActiveIdx];
-    const ticker = post?.ticker || '';
     const state = tradeCtaState();
     if(state === 'auth'){
-      requireAuth(()=>{
-        paintTradeCta();
-        if(tradeCtaState() === 'deposit') openTopUp(0, ()=> paintTradeCta());
-      });
+      requireAuth(()=> resumeTrade(isSell ? 'sell' : 'buy', false));
       return;
     }
     if(state === 'deposit'){
-      openTopUp(0, ()=> paintTradeCta());
+      openTopUp(0, ()=> resumeTrade(isSell ? 'sell' : 'buy', false));
       return;
     }
-    if(isSell){
-      const fin = ()=>{
-        haptic('dislike');
-        showToast(needsSig() ? `Sold ${ticker} from ${activeWallet().name}.` : `Sold ${ticker}.`);
-        paintTradeCta();
-      };
-      if(needsSig()) requestSignature(`Sell ${usdLabel(amt)} ${ticker}`, fin);
-      else fin();
-      return;
-    }
-    requireSpend(amt, ()=>{
-      recordBuy(amt);
-      haptic('like');
-      showToast(needsSig()
-        ? `Bought ${ticker} from ${activeWallet().name}.`
-        : `Bought ${ticker}.`);
-      paintTradeCta();
-    }, `Buy ${usdLabel(amt)} ${ticker}`);
+    openSwapConfirm(isSell ? 'sell' : 'buy');
   });
 
   /* ---------------- comments drawer ---------------- */
@@ -10914,14 +12027,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   ctxMenu.id = 'commentCtxMenu';
   ctxMenu.setAttribute('role', 'menu');
   ctxMenu.setAttribute('aria-label', 'Comment options');
-  ctxMenu.innerHTML = `
-    <button type="button" role="menuitem" data-act="reply"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6v5a4 4 0 0 0 4 4h9.5M14 11l4.5 4L14 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Reply</button>
-    <div class="ctx-menu-sep" role="separator"></div>
-    <button type="button" role="menuitem" data-act="copylink"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Copy link</button>
-    <button type="button" role="menuitem" data-act="sharex"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>Share on X</button>
-    <div class="ctx-menu-sep" role="separator"></div>
-    <button type="button" role="menuitem" class="danger" data-act="report"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 21V4h9l-1 3h6l-1.5 5H13l1 3H5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Report</button>
-    <button type="button" role="menuitem" data-act="hideuser"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 4.5l18 15M10.1 10.3a2.5 2.5 0 0 0 3.5 3.5M9.9 5.6A10.3 10.3 0 0 1 12 5.3c5 0 8.8 3.4 10.2 6.7a1.2 1.2 0 0 1 0 1.1 12 12 0 0 1-3.1 3.9M6.4 6.7A12 12 0 0 0 1.8 13a1.2 1.2 0 0 0 0 1.1C3.2 17.4 7 20.8 12 20.8c1.5 0 2.9-.3 4.2-.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Hide user</button>`;
+  ctxMenu.innerHTML = moreMenuItemsHtml({ viewToken:false });
   document.body.appendChild(ctxMenu);
   let ctxTarget = null;
   function openCommentCtx(btn){
@@ -10957,17 +12063,35 @@ html.dark .qhc-id{color:#6BA3FF;}
       const row = ctxTarget;
       const comment = row?._comment;
       if(act === 'reply' && comment){ startReplyTo(comment); }
-      else if(act === 'copylink' && row){ try{ navigator.clipboard?.writeText(commentPermalink(row)); }catch(_){} }
+      else if(act === 'trade'){
+        const post = tokenDrawerPost || posts[lastActiveIdx];
+        openDrawer(parentTokenPost(post) || post);
+      }
+      else if(act === 'viewthread'){
+        const post = tokenDrawerPost || posts[lastActiveIdx];
+        const op = parentTokenPost(post) || post;
+        if(post && op && post !== op) openComments(op);
+        else rowScrollIntoView(row?.closest('.comment-thread') || row);
+      }
+      else if(act === 'tokenaddress'){
+        const post = tokenDrawerPost || posts[lastActiveIdx];
+        try{ navigator.clipboard?.writeText(mockTokenAddress(parentTokenPost(post) || post)); }catch(_){}
+        showToast('Address copied.');
+      }
+      else if(act === 'copylink' && row){
+        try{ navigator.clipboard?.writeText(commentPermalink(row)); }catch(_){}
+        showToast('Copied.');
+      }
       else if(act === 'sharex' && row){
         const text = encodeURIComponent((row.querySelector('.comment-text')?.textContent || 'comment').slice(0, 180));
         const url = encodeURIComponent(commentPermalink(row));
         window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'noopener');
       }
-      else if(act === 'hideuser' && row){
-        const user = row.dataset.user || '';
-        document.querySelectorAll('.comment-item').forEach(el=>{
-          if(!user || el.dataset.user === user) el.classList.add('is-hidden-user');
-        });
+      else if(act === 'hidepost' && row){
+        const thread = row.closest('.comment-thread');
+        const root = thread?.querySelector(':scope > .comment-item');
+        if(thread && root === row) thread.classList.add('is-hidden-post');
+        else row.classList.add('is-hidden-post');
       }
       /* report = stub */
       closeCommentCtx();
@@ -11793,16 +12917,22 @@ html.dark .qhc-id{color:#6BA3FF;}
     [authOverlay, closeAuthFromUser],
     [walletOverlay, closeWalletModal],
     [fundsOverlay, ()=>{ session.pendingFunds = null; overlayClose(fundsOverlay); }],
+    [swapOverlay, closeSwap],
   ].forEach(([el, closeFn])=>{
     const modal = el?.querySelector('.modal');
     if(!el || !modal || typeof enableSheetDrag !== 'function') return;
     enableSheetDrag(modal, modal.querySelector('.sheet-handle'), closeFn, el);
   });
+  {
+    const swapModal = swapOverlay?.querySelector('.modal');
+    const swapHead = swapOverlay?.querySelector('.swap-head');
+    if(swapModal && swapHead) enableSheetDrag(swapModal, swapHead, closeSwap, swapOverlay);
+  }
   document.getElementById('launchBtn')?.addEventListener('click', ()=>{
     requireAuth(()=>{
       const fin = ()=> showToast(needsSig()
         ? `Launch submitted. ${activeWallet().name} signed once.`
-        : 'Launch submitted from the embedded wallet.');
+        : 'Launch submitted.');
       if(needsSig()) requestSignature('Launch token', fin);
       else fin();
     });
@@ -11893,8 +13023,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     if(action === 'account' || action === 'tipjar'){
       haptic('selection');
-      if(isAuthed()) openWalletModal();
-      else openLogin();
+      requireAuth(()=> openWalletModal());
       return;
     }
     haptic('selection');
@@ -11930,11 +13059,17 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(moreSheet?.classList.contains('show')){ closeMoreSheet(); return; }
     if(navMorePop?.classList.contains('show')){ closeNavMorePop(); return; }
     if(shareOverlay?.classList.contains('show')){ closeShare(); return; }
+    if(swapOverlay?.classList.contains('show')){
+      if(session.swap?.step === 'wait') return;
+      closeSwap();
+      return;
+    }
     if(sigOverlay?.classList.contains('show')){ return; }
     if(authOverlay?.classList.contains('show') && session.authPanel === 'sig') return;
     if(fundsOverlay?.classList.contains('show')){ session.pendingFunds = null; overlayClose(fundsOverlay); return; }
     if(walletOverlay?.classList.contains('show')){ closeWalletModal(); return; }
     if(document.getElementById('tradePayMenu') && !document.getElementById('tradePayMenu').hidden){ hidePayPicker(); return; }
+    if(session.slipOpen){ closeSlippage(); return; }
     if(authOverlay?.classList.contains('show')){ closeAuthFromUser(); return; }
     if(state.tradeOpen || state.commentsOpen || drawer?.classList.contains('open')){
       closeTokenDrawer();
