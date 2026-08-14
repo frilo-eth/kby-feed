@@ -3257,9 +3257,9 @@ html.dark .flow-status-ok circle{fill:rgba(31,164,99,.22);}
   html:not(.dark) .brand-logo-dark{display:none;}
   html.dark .brand-logo-dark{display:block;}
   .topbar .search{order:2;}
-  .topbar .btn-launch{order:3;display:inline-flex;align-items:center;gap:6px;padding:9px 12px;font-size:12px;border-radius:10px;box-shadow:0 4px 12px rgba(255,102,34,.3);}
-  .topbar .btn-signin{order:4;padding:9px 12px;font-size:12px;}
-  .topbar .btn-wallet{order:4;padding:6px 12px 6px 7px;font-size:12px;width:auto;height:auto;border-radius:10px;background:var(--card);border:1px solid var(--line);overflow:visible;gap:7px;}
+  .topbar .btn-signin{order:3;padding:9px 12px;font-size:12px;}
+  .topbar .btn-wallet{order:3;padding:6px 12px 6px 7px;font-size:12px;width:auto;height:auto;border-radius:10px;background:var(--card);border:1px solid var(--line);overflow:visible;gap:7px;}
+  .topbar .btn-launch{order:4;display:inline-flex;align-items:center;gap:6px;padding:9px 12px;font-size:12px;border-radius:10px;box-shadow:0 4px 12px rgba(255,102,34,.3);}
   .btn-wallet-label{display:inline;}
   .btn-wallet-avatar{display:none;}
   .btn-wallet-ic{width:20px;height:20px;}
@@ -3728,7 +3728,6 @@ html.dark .qhc-id{color:#6BA3FF;}
       <div class="search" role="button" tabindex="0" aria-label="Search"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="search-text"><span class="st">Search for a token, wallet or contract</span></span></div>
       <div class="topbar-spacer"></div>
       <button class="icon-btn" id="themeBtn" title="Toggle theme"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-      <button class="btn-launch" type="button" id="launchBtn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.67796 10.8918L1.86133 12.7084M4.88905 12.1029L3.67796 13.314M2.46687 7.86404C2.46687 7.86404 4.87571 8.69425 5.98113 9.79967C7.08652 10.9051 7.91678 13.314 7.91678 13.314L10.339 11.4973V9.68068C12.8948 8.40274 14.2875 6.28543 13.9681 1.81274C9.49538 1.49326 7.37803 2.886 6.10015 5.44182H4.28351L2.46687 7.86404ZM11.5501 5.44184C11.5501 6.1107 11.0078 6.65295 10.339 6.65295C9.67008 6.65295 9.12787 6.1107 9.12787 5.44184C9.12787 4.77297 9.67008 4.23075 10.339 4.23075C11.0078 4.23075 11.5501 4.77297 11.5501 5.44184Z" stroke="currentColor" stroke-linecap="square"/></svg><span>Launch Token</span></button>
       <button class="btn-signin" type="button" id="signInBtn">Sign in</button>
       <button class="btn-wallet" type="button" id="walletBtn" title="Balance" aria-label="Open account" hidden>
         <span class="btn-wallet-ic" aria-hidden="true">
@@ -3736,6 +3735,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         </span>
         <span class="btn-wallet-label" id="walletLabel">$0.00</span>
       </button>
+      <button class="btn-launch" type="button" id="launchBtn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.67796 10.8918L1.86133 12.7084M4.88905 12.1029L3.67796 13.314M2.46687 7.86404C2.46687 7.86404 4.87571 8.69425 5.98113 9.79967C7.08652 10.9051 7.91678 13.314 7.91678 13.314L10.339 11.4973V9.68068C12.8948 8.40274 14.2875 6.28543 13.9681 1.81274C9.49538 1.49326 7.37803 2.886 6.10015 5.44182H4.28351L2.46687 7.86404ZM11.5501 5.44184C11.5501 6.1107 11.0078 6.65295 10.339 6.65295C9.67008 6.65295 9.12787 6.1107 9.12787 5.44184C9.12787 4.77297 9.67008 4.23075 10.339 4.23075C11.0078 4.23075 11.5501 4.77297 11.5501 5.44184Z" stroke="currentColor" stroke-linecap="square"/></svg><span>Launch Token</span></button>
     </div>
 
     <div class="feed-wrap" id="feedWrap">
