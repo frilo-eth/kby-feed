@@ -21,9 +21,9 @@ Porting / review: open the heading, not the whole README. Production: [https://k
 | [Auth (Option 4)](#auth) — social vs EOA | [README.md#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth) |
 | [Sheet morph](#sheet-morph) (`morphSheet` ~320ms) | [README.md#sheet-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sheet-morph) |
 | [Deposit](#deposit) (native chain/token selects + address tip) | [README.md#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit) |
-| [Withdraw](#withdraw) | [README.md#withdraw](https://github.com/frilo-eth/kby-feed/blob/main/README.md#withdraw) |
+| [Send](#send) | [README.md#send](https://github.com/frilo-eth/kby-feed/blob/main/README.md#send) |
 | [Trade drawer](#trade-drawer) (dollarized buy) | [README.md#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer) |
-| [Trade CTA](#trade-cta) (Sign in → Deposit → green Buy) | [README.md#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta) |
+| [Trade CTA](#trade-cta) (Sign in → Add funds → green Buy) | [README.md#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta) |
 | [Slippage](#slippage) | [README.md#slippage](https://github.com/frilo-eth/kby-feed/blob/main/README.md#slippage) |
 | [Pay with](#pay-with) (ETH / WETH / USDm chip) | [README.md#pay-with](https://github.com/frilo-eth/kby-feed/blob/main/README.md#pay-with) |
 | [Meta affordances](#meta-affordances) | [README.md#meta-affordances](https://github.com/frilo-eth/kby-feed/blob/main/README.md#meta-affordances) |
@@ -114,10 +114,10 @@ Use this as the checklist when reimplementing — these are the UX details that 
 
 | Feature | Behavior |
 |---------|----------|
-| [Option 4](#auth) | Social / email → embedded Kumbaya wallet, **sponsored** (no signature on gift/buy/sell). Crypto wallet (EOA) → that address is the account; gift/buy/sell/launch **sign** (`needsSig()`). No gates. Copy is **Deposit** / **Withdraw** |
+| [Option 4](#auth) | Social / email → embedded Kumbaya wallet, **sponsored** (no signature on gift/buy/sell). Crypto wallet (EOA) → that address is the account; gift/buy/sell/launch **sign** (`needsSig()`). No gates. Copy is **Add funds** / **Send** |
 | Sign-in sheet | Google + Apple/X/Farcaster/email + detected wallet row. Same `.modal` chrome as share (`--card`, Inter, `--bg` `#F2EEEA`) |
-| [Deposit](#deposit) | Card or crypto. Crypto: native `<select>` pair (chain + token). Copy: `Send USDC on Ethereum to this address.` No “need $X” on Fund your account. (i) on **Your deposit address** |
-| [Withdraw](#withdraw) | Amount → address → review. Empty balance routes to deposit first |
+| [Deposit](#deposit) | Card or crypto. UI copy is **Add funds**. Crypto: native `<select>` pair (chain + token). Copy: `Send USDC on Ethereum to this address.` No “need $X” in the title. (i) on **Your address** |
+| [Send](#send) | From / To / amount on one sheet. Linked wallets as recommended destinations + paste any address. Short From → **Add funds to send** |
 
 ### Trade drawer
 
@@ -127,7 +127,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Sell helpers | `25% / 50% / All` of holdings (dollarized spend) |
 | Unit swap | `#tradeOut` **⇅** toggles `session.tradeUnit` `'usd'` \| `'token'`. Rate `TOKEN_PER_USD = 26120`. Token mode hides `$` via `#tradeBuyField.is-token` |
 | [Pay with](#pay-with) | Compact dropdown on the chip (ETH / WETH / USDm) — not a modal, not an in-drawer swap. Chip fill is `--bg`. Menu `position:fixed` under the chip |
-| [CTA](#trade-cta) | Unsigned → **Sign in to buy**. Funded short → **Deposit to buy**. Ready → big green **Buy** (`#3DDC97`). Completing signup/deposit does **not** auto-trade — the green button is the buy |
+| [CTA](#trade-cta) | Unsigned → **Sign in to buy**. Funded short → **Add funds to buy**. Ready → big green **Buy** (`#3DDC97`). Completing signup/add funds does **not** auto-trade — the green button is the buy |
 | [Slippage](#slippage) | Gear chip unfolds AUTO / 0.5% / 0.3% / custom. Rest chrome is `--card` + hairline (not orange). **Auto** badge in You’ll pay is purple `#7B6CF0` + white |
 | Elevation | Sheet / drawer = `--card`. Controls at rest = `--card` + hairline. Hover = `color-mix` with white — never cream `--bg` wells (Pay-with chip is the exception; it matches the screenshot `--bg` fill) |
 
@@ -1282,7 +1282,7 @@ One login, one paying wallet. Prototype only — no real keys.
 | Google, Apple, X, Farcaster, email | `'social'` | minted **embedded** (`kind:'embedded'`, name Kumbaya) | **sponsored** — no signature sheet |
 | MetaMask / Phantom / … | `'eoa'` | that catalog row (`kind:'eoa'`) | **`needsSig()`** → signature sheet, then proceed |
 
-No product gates. Topbar: **Sign in** → after auth, wallet chip with `usdLabel(totalBal())`. Copy everywhere is **Deposit** / **Withdraw** (never Add funds / Send / Top up in the UI).
+No product gates. Topbar: **Sign in** → after auth, wallet chip with `usdLabel(totalBal())`. Copy is **Add funds** / **Send**.
 
 | Motion | Spec |
 |--------|------|
@@ -1302,16 +1302,16 @@ API: `completeLogin` · `requireAuth` · `requireSpend` · `requestSignature` ·
 
 **Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit)
 
-`openDeposit(need, then)` / `session.flow.kind === 'deposit'`. Hosts: auth tray (`setAuthPanel('funds')`), wallet tray, or `#fundsOverlay`.
+`openDeposit(need, then)` / `session.flow.kind === 'deposit'`. Hosts: auth tray (`setAuthPanel('funds')`), wallet tray, or `#fundsOverlay`. UI copy is **Add funds** (sheet title, account button, toasts, activity).
 
-**Do not show a need amount** on Fund your account (`Deposit $5.00.` leaked from tipping `requireSpend(5)`). `openTopUp(0, pending)` / `openDeposit(0, then)` always. Amount is chosen later (card presets / crypto Done credits `$25` in the prototype).
+**Do not show a need amount** in the title (`Add funds $5.00.` leaked from tipping `requireSpend(5)`). `openTopUp(0, pending)` / `openDeposit(0, then)` always. Amount is chosen later (card presets / crypto Done credits `$25` in the prototype).
 
 | Step | UI |
 |------|----|
 | `home` | Transfer crypto · Card · Apple Pay |
-| `crypto` | Native `<select>` pair + QR + **Your deposit address** + (i) + copy |
+| `crypto` | Native `<select>` pair + QR + **Your address** + (i) + copy |
 | `cash` | card placeholder + presets |
-| `confirm` | “Confirming deposit” → `Deposited $25.00` |
+| `confirm` | “Adding funds” → `Added $25.00` |
 
 **Chain / token:** two native `<select class="flow-select">` in `.flow-pickers` — not a custom overlay menu, not an expanding sheet.
 
@@ -1323,7 +1323,7 @@ API: `completeLogin` · `requireAuth` · `requireSpend` · `requestSignature` ·
 
 Copy: `Send ${tick} on ${chain} to this address.` (`flowDepositCopy`). Later this is a [LI.FI](https://li.fi/) bridge — do not promise “any token.”
 
-**Your deposit address** — label + `#flowAddrInfo` (i). Reuses `#infoHoverTip` (`data-tip-title` / `data-tip-body`). Body: *Send only the token and chain selected above. It converts to cash in your account. Other assets sent here won't be credited.* Hover 180ms + click. Portal z-index 120 sits above the auth overlay (72).
+**Your address** — label + `#flowAddrInfo` (i). Reuses `#infoHoverTip` (`data-tip-title` / `data-tip-body`). Body: *Send only the token and chain selected above. It converts to cash in your account. Other assets sent here won't be credited.* Hover 180ms + click. Portal z-index 120 sits above the auth overlay (72).
 
 Address row: clipboard SVG, regular weight, one line + ellipsis (`.flow-addr span`). Crypto **Done** → `startCryptoConfirm()` → `creditFunds`.
 
@@ -1337,21 +1337,46 @@ Address row: clipboard SVG, regular weight, one line + ellipsis (`.flow-addr spa
 
 ---
 
+<a id="send"></a>
 <a id="withdraw"></a>
 
-### 15. Withdraw
+### 15. Send
 
-**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#withdraw](https://github.com/frilo-eth/kby-feed/blob/main/README.md#withdraw)
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#send](https://github.com/frilo-eth/kby-feed/blob/main/README.md#send)
 
-`openWithdraw()`. Empty balance → toast **Deposit first, then withdraw.** and opens deposit.
+`openSend()`. On-chain withdraw is out of scope. Send moves USD from **From** to a destination. The sheet always opens.
 
-| Step | UI |
-|------|----|
-| `amount` | dollar field + presets; cap = `totalBal()` |
-| `addr` | paste destination |
-| `review` | confirm |
+One sheet in the **wallet** tray (`session.walletView = 'flow'`). Header **Send**. Back returns to the account list.
 
-Steps morph in the **wallet** tray (`session.walletView = 'flow'`). Same elevation / press rules as deposit. Back peels `review → addr → amount`.
+| Block | UI |
+|-------|----|
+| From | Defaults to `cashWallet()`. Identicon, address, **Active** if `w.active`, label (`socialName()` for embedded). Chevron expands other linked wallets in place. One wallet → no chevron |
+| To | “Enter or select destination” + **Paste**. Expand: input + recommended wallets except From. Paste accepts any address; a match snaps to that row |
+| Amount | Dollar field. **50%** / **MAX** of **From** `bal`. Available line under the field. Over-balance turns the number red |
+| CTA | Live prompt (not a second step) |
+
+| CTA condition | Label | Enabled |
+|---------------|-------|---------|
+| No / short To | Insert recipient address | no |
+| To === From | Pick a different destination | no |
+| From empty, or amount > From.bal | Add funds to send | yes → `openDeposit`, then resume Send |
+| No amount | Enter amount | no |
+| Ready | Send $X.XX | yes |
+| In flight | Sending + spin | no |
+
+Incomplete CTA is `.flow-cta.is-wait` (pale `--orange-dim`, `--orange` label). Ready uses ink `.flow-cta`.
+
+**Money:** debit From. Credit To only if it is the cash account (social embedded) or any wallet on an EOA login. A linked MetaMask on social is an address, not a second cash pot — send to it leaves the account and does **not** credit `w.bal` on that row. From EOA → `requestSignature(..., { wallet: from })`. Embedded is sponsored. Does **not** change `active`. `logActivity('send', …)`.
+
+| Motion | Spec |
+|--------|------|
+| Enter / leave Send | [`morphSheet`](#sheet-morph) `.32s` `(.32,.72,0,1)` |
+| From / To expand | `grid-template-rows: 0fr → 1fr` · `.24s` `cubic-bezier(0.2, 0, 0, 1)`. Exit `.16s`. In-place — do not `innerHTML` the sheet |
+| Chevron | rotate `.16s` |
+| Hover | `--card` mix white · `.15s` |
+| Press | `scale(.97)` · `.16s` |
+| CTA label | opacity `.16s` |
+| Reduced motion | expand/spin skipped; opacity only |
 
 ---
 
@@ -1368,7 +1393,7 @@ Same chrome as comments (desktop 360 / mobile sheet). Buy / Sell tabs. Amount is
 | Helpers | `$25` / `$100` / `$500` | `25%` / `50%` / `All` of holdings |
 | Label | Buy `$TICKER` | Sell `$TICKER` |
 | `#tradePayWith` label | Pay with | Receive |
-| [CTA](#trade-cta) | Buy · Sign in to buy · Deposit to buy | Sell · Sign in to sell |
+| [CTA](#trade-cta) | Buy · Sign in to buy · Add funds to buy | Sell · Sign in to sell |
 
 **Amount row:** `$` + `#tradePayInput` (32px / 800) + token chip `#tradeGetAsset` (aligned with the input, **not** the label row).
 
@@ -1390,12 +1415,12 @@ Same chrome as comments (desktop 360 / mobile sheet). Buy / Sell tabs. Amount is
 
 **Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta)
 
-`tradeCtaState()` → `'auth'` \| `'deposit'` \| `'go'`. The button is a **gate**, then a buy — completing signup or deposit must **not** auto-execute the trade (that spent the new $25 and jumped the chip back to Deposit to buy).
+`tradeCtaState()` → `'auth'` \| `'deposit'` \| `'go'`. The button is a **gate**, then a buy — completing signup or add funds must **not** auto-execute the trade (that spent the new $25 and jumped the chip back to Add funds to buy).
 
 | State | Label | Paint | Click |
 |-------|-------|-------|-------|
 | `'auth'` | Sign in to buy / sell | `.is-gated` ink | `requireAuth` → paint CTA; if still short, `openTopUp(0, paintTradeCta)` |
-| `'deposit'` | Deposit to buy | `.is-short` ink | `openTopUp(0, paintTradeCta)` — no pending buy |
+| `'deposit'` | Add funds to buy | `.is-short` ink | `openTopUp(0, paintTradeCta)` — no pending buy |
 | `'go'` | **Buy** / Sell | green `#3DDC97` / `--red` | `requireSpend` / sell |
 
 After deposit, `creditFunds` → `paintAuthChrome()` → `paintTradeCta()`. Ready = big green Buy. Gifts/tips still auto-resume via `requireSpend` pending.
@@ -1462,7 +1487,7 @@ First tagged snapshot of the single-file prototype (`feed.html` + `public/`).
 | Meta | Pinned left (flush) or float-on-media (padded inset + short desktop scrim) via `layoutMeta`; [username / token / ticker](#meta-affordances); [morphing pill](#dare-role-badge) |
 | Token vs yap | [OP vs Entry/Content](#token-vs-yap); [yap thread](#yap-thread); [`$SAUCE` Dare](#sauce-token); [token page stub](#token-page) (`token.html`) |
 | Comments | Anon/public, **threaded replies** (indent + View 5 / Hide), **`>>id` quotes** + hover card, attach + fly-in, CFX gallery; entries share lists with the OP |
-| Sheets | Trade, share (auto-close on X/copy), more (auto-close incl. theme), sheet-colored close targets, [auth / deposit / withdraw](#auth) with [`morphSheet`](#sheet-morph) |
+| Sheets | Trade, share (auto-close on X/copy), more (auto-close incl. theme), sheet-colored close targets, [auth / deposit / send](#auth) with [`morphSheet`](#sheet-morph) |
 | Trade | [Dollarized buy](#trade-drawer) · [CTA gate](#trade-cta) · [Slippage](#slippage) · [Pay with chip](#pay-with) · social sponsored / EOA signs |
 | System | Light/dark tokens, web-haptics + WebAudio, session keys for hint / sound / sidebar |
 

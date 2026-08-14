@@ -2793,14 +2793,125 @@ html.dark .flow-method .ic{background:rgba(255,102,34,.18);}
   border:none;border-radius:14px;padding:13px 16px;margin-top:12px;
   background:var(--ink);color:var(--bg);font-size:15px;font-weight:700;cursor:pointer;
   appearance:none;-webkit-appearance:none;
-  transition:transform .12s,filter .15s,opacity .15s;
+  transition:transform .16s,filter .15s,opacity .15s,background .16s,color .16s;
 }
 .flow-cta:hover{filter:brightness(1.06);}
-.flow-cta:active{transform:scale(.98);}
+.flow-cta:active{transform:scale(.97);}
 .flow-cta:disabled{opacity:.4;cursor:default;transform:none;filter:none;}
+.flow-cta.is-wait:disabled{
+  opacity:1;background:var(--orange-dim);color:var(--orange);filter:none;
+}
+.flow-cta.is-sending:disabled{opacity:1;filter:none;}
+.flow-cta-lab{transition:opacity .16s cubic-bezier(0.2, 0, 0, 1);}
 .flow-cta .spin{
   width:16px;height:16px;border:2px solid rgba(255,255,255,.35);border-top-color:currentColor;
   border-radius:50%;animation:kb-spin .8s linear infinite;
+}
+.flow-cta.is-wait .spin{border-color:rgba(255,102,34,.28);border-top-color:currentColor;}
+
+.send-field{margin-bottom:12px;}
+.send-lab{
+  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink-faint);margin:0 2px 6px;
+}
+.send-box{
+  border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden;
+  transition:border-color .15s,background .15s;
+}
+.send-box.is-open{border-color:color-mix(in srgb, var(--ink) 18%, var(--line));}
+.send-trigger{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  padding:11px 12px;border:none;background:transparent;cursor:pointer;color:var(--ink);
+  appearance:none;-webkit-appearance:none;
+  transition:background .15s,transform .16s;
+}
+.send-trigger:hover{background:color-mix(in srgb, var(--card) 62%, white);}
+.send-trigger:active{transform:scale(.97);}
+.send-trigger.is-static{cursor:default;}
+.send-trigger.is-static:hover{background:transparent;}
+.send-trigger.is-static:active{transform:none;}
+.send-to-head{
+  display:flex;align-items:center;gap:8px;padding:8px 8px 8px 12px;
+}
+.send-to-input{
+  flex:1;min-width:0;border:none;background:transparent;outline:none;
+  font-size:14px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;
+}
+.send-to-input::placeholder{color:var(--ink-faint);font-weight:600;}
+.send-paste{
+  display:inline-flex;align-items:center;gap:5px;flex-shrink:0;
+  border:none;background:transparent;color:var(--ink-soft);
+  font-size:12px;font-weight:700;cursor:pointer;padding:8px 10px;border-radius:10px;
+  appearance:none;-webkit-appearance:none;
+  transition:background .15s,color .15s,transform .16s;
+}
+.send-paste:hover{background:color-mix(in srgb, var(--card) 40%, white);color:var(--ink);}
+.send-paste:active{transform:scale(.97);}
+.send-paste svg{width:14px;height:14px;display:block;}
+.send-chev{
+  width:14px;height:14px;flex-shrink:0;color:var(--ink-faint);
+  transition:transform .16s cubic-bezier(0.2, 0, 0, 1);
+}
+.send-box.is-open .send-chev{transform:rotate(180deg);}
+.send-drop{
+  display:grid;grid-template-rows:0fr;
+  transition:grid-template-rows .24s cubic-bezier(0.2, 0, 0, 1);
+}
+.send-box.is-open .send-drop{grid-template-rows:1fr;}
+.send-box.is-closing .send-drop{
+  grid-template-rows:0fr;
+  transition-duration:.16s;
+}
+.send-drop-inner{overflow:hidden;min-height:0;}
+.send-or{
+  display:flex;align-items:center;gap:10px;margin:4px 12px 8px;
+  font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-faint);
+}
+.send-or::before,.send-or::after{content:'';flex:1;height:1px;background:var(--line);}
+.send-pick{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  padding:10px 12px;border:none;background:transparent;cursor:pointer;color:var(--ink);
+  appearance:none;-webkit-appearance:none;
+  transition:background .15s,transform .16s;
+}
+.send-pick:hover{background:color-mix(in srgb, var(--card) 62%, white);}
+.send-pick:active{transform:scale(.97);}
+.send-pick.is-on{background:color-mix(in srgb, var(--card) 78%, white);}
+.send-meta{flex:1;min-width:0;}
+.send-addr{display:block;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;}
+.send-sub{display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap;}
+.send-wname{font-size:12px;font-weight:600;color:var(--ink-soft);}
+.send-active{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:12px;font-weight:700;color:var(--green);
+}
+.send-active i{
+  width:6px;height:6px;border-radius:50%;background:var(--green);display:block;
+}
+.send-check{
+  width:20px;height:20px;flex-shrink:0;color:var(--green);margin-left:auto;
+}
+.send-check svg{width:20px;height:20px;display:block;}
+.send-amt{
+  border:1px solid var(--line);border-radius:14px;background:var(--card);padding:12px;
+}
+.send-amt-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
+.send-amt-top .send-lab{margin:0;}
+.send-amt-pct{display:flex;gap:6px;}
+.send-amt-pct button{
+  border:1px solid var(--line);border-radius:999px;padding:5px 10px;
+  background:transparent;color:var(--ink-soft);font-size:11px;font-weight:700;cursor:pointer;
+  appearance:none;-webkit-appearance:none;
+  transition:background .15s,border-color .15s,color .15s,transform .16s;
+}
+.send-amt-pct button:hover{background:color-mix(in srgb, var(--card) 55%, white);color:var(--ink);}
+.send-amt-pct button:active{transform:scale(.97);}
+.send-amt-pct button.is-on{background:var(--ink);color:var(--bg);border-color:transparent;}
+.send-amt .flow-input{padding:4px 0 6px;border:none;background:transparent;border-radius:0;font-size:28px;}
+.send-amt .flow-input:focus{background:transparent;border-color:transparent;}
+.send-amt .flow-input.is-over{color:var(--red);}
+.send-avail{
+  display:block;margin-top:4px;font-size:12px;font-weight:600;color:var(--ink-faint);
 }
 .flow-pickers{display:flex;gap:8px;margin-bottom:10px;}
 .flow-pickers .flow-select-wrap{flex:1;min-width:0;margin:0;}
@@ -3093,6 +3204,9 @@ html.dark .flow-status-ok circle{fill:rgba(31,164,99,.22);}
   .sig-ring::after{animation-duration:.01ms!important;}
   .sig-ring.is-done{animation:none;}
   .flow-cta .spin{animation:none;}
+  .flow-cta-lab{transition:none;}
+  .send-drop,.send-box.is-closing .send-drop{transition:none;}
+  .send-chev{transition:none;}
   .flow-status-spin{animation:none;}
   .flow-status.is-done .flow-status-ok{transition:none;transform:none;}
   .flow-status.is-done .flow-status-ok path{animation:none;stroke-dashoffset:0;}
@@ -4029,11 +4143,6 @@ html.dark .qhc-id{color:#6BA3FF;}
     <div class="auth-body">
       <div class="auth-panel" id="authPanelMain">
         <div class="auth-stack">
-          <form class="auth-email" id="authEmailForm">
-            <span class="auth-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5.5" width="17" height="13" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M4 7.5 12 13l8-5.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <input type="email" id="authEmailInput" placeholder="your@email.com" autocomplete="email" inputmode="email">
-            <button type="submit" class="auth-email-go" id="authEmailGo" disabled aria-label="Continue">→</button>
-          </form>
           <div class="auth-icon-row">
             <button type="button" class="auth-icon-btn" data-login="social" data-provider="Google" aria-label="Google">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.04 12.26c0-.81-.07-1.59-.21-2.34H12v4.43h6.19a5.29 5.29 0 0 1-2.3 3.47v2.88h3.72c2.18-2 3.43-4.96 3.43-8.44Z"/><path fill="#34A853" d="M12 24c3.11 0 5.72-1.03 7.63-2.8l-3.72-2.88c-1.03.7-2.36 1.11-3.91 1.11-3 0-5.55-2.03-6.46-4.76H1.7v2.97A12 12 0 0 0 12 24Z"/><path fill="#FBBC05" d="M5.54 14.67A7.2 7.2 0 0 1 5.16 12c0-.93.16-1.83.38-2.67V6.36H1.7A12 12 0 0 0 0 12c0 1.94.46 3.77 1.7 5.64l3.84-2.97Z"/><path fill="#EA4335" d="M12 4.75c1.69 0 3.21.58 4.41 1.72l3.31-3.31C17.72 1.19 15.11 0 12 0 7.31 0 3.26 2.69 1.7 6.36l3.84 2.97C6.45 6.6 9 4.75 12 4.75Z"/></svg>
@@ -4045,6 +4154,11 @@ html.dark .qhc-id{color:#6BA3FF;}
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14.5 3h2.1c.2 1.8 1.3 3.4 2.9 4.4V9.7c-1.2.12-2.4-.12-3.5-.68v5.66c0 3.2-2.6 5.82-5.82 5.82S4.36 17.88 4.36 14.68c0-3.19 2.6-5.81 5.82-5.81.3 0 .6.03.88.08v2.3a3.5 3.5 0 0 0-.88-.12 3.52 3.52 0 0 0-3.52 3.55 3.52 3.52 0 0 0 6.04 2.45V3Z"/></svg>
             </button>
           </div>
+          <form class="auth-email" id="authEmailForm">
+            <span class="auth-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5.5" width="17" height="13" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M4 7.5 12 13l8-5.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <input type="email" id="authEmailInput" placeholder="your@email.com" autocomplete="email" inputmode="email">
+            <button type="submit" class="auth-email-go" id="authEmailGo" disabled aria-label="Continue">→</button>
+          </form>
           <button type="button" class="auth-row" data-auth-panel="wallets">
             <span class="auth-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="6.5" width="17" height="12" rx="2.2" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 10h17M16.5 14.2h1.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
             Crypto wallet
@@ -4149,7 +4263,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       <button type="button" class="auth-back" id="fundsBack" aria-label="Back">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <h4 id="fundsTitle">Deposit</h4>
+      <h4 id="fundsTitle">Add funds</h4>
       <button type="button" class="share-close" id="fundsClose" aria-label="Close">✕</button>
     </div>
     <div class="funds-body" id="fundsBody"></div>
@@ -4413,6 +4527,10 @@ html.dark .qhc-id{color:#6BA3FF;}
       avatar: userAvatar(name),
       quietAddr: true,
     };
+  }
+  function sendWalletLabel(w){
+    if(w && w.kind === 'embedded') return socialName();
+    return w ? w.name : '';
   }
   function needsSig(){ const a = cashWallet(); return !!(a && a.kind === 'eoa'); }
   function totalBal(){
@@ -4982,7 +5100,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     buyBtn.classList.toggle('is-gated', state === 'auth');
     buyBtn.classList.toggle('is-short', state === 'deposit');
     if(state === 'auth') buyBtn.textContent = isSell ? 'Sign in to sell' : 'Sign in to buy';
-    else if(state === 'deposit') buyBtn.textContent = 'Deposit to buy';
+    else if(state === 'deposit') buyBtn.textContent = 'Add funds to buy';
     else buyBtn.textContent = isSell ? 'Sell' : 'Buy';
     const payLabel = document.getElementById('tradePayAssetLabel');
     const asset = PAY_ASSETS[session.payAsset] || PAY_ASSETS.eth;
@@ -5285,7 +5403,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       if(!a) return;
       if(a.bal < amt){
         if(session.auth !== 'social' && totalBal() >= amt){
-          showToast('Active wallet is short. Switch wallet or top it up.');
+          showToast('Active wallet is short. Switch wallet or add funds.');
           session.pendingSpend = ()=> requireSpend(amt, then, label);
           openWalletModal();
           return;
@@ -5322,7 +5440,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
 
   function requestSignature(label, then, opts){
-    const a = activeWallet();
+    const a = (opts && opts.wallet) || activeWallet();
     const host = flowHost();
     const copyText = opts && opts.login
       ? `Confirm in ${a ? a.name : 'your wallet'}.`
@@ -5438,7 +5556,6 @@ html.dark .qhc-id{color:#6BA3FF;}
       return;
     }
     const ident = authIdentity();
-    const canWithdraw = totalBal() > 0;
     if(session.walletView === 'settings') session.walletView = 'list';
     const tab = session.walletTab || 'tokens';
     const copySvg = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
@@ -5521,8 +5638,8 @@ html.dark .qhc-id{color:#6BA3FF;}
       </div>
       ${cash ? `<button type="button" class="wallet-balance-hit" data-switch="${cash.id}">${balBlock}</button>` : balBlock}
       <div class="wallet-actions">
-        <button type="button" id="walletSendBtn"${canWithdraw ? '' : ' disabled'} title="${canWithdraw ? 'Withdraw' : 'Nothing to withdraw'}">Withdraw</button>
-        <button type="button" class="wallet-add" id="walletAddBtn">Deposit</button>
+        <button type="button" id="walletSendBtn">Send</button>
+        <button type="button" class="wallet-add" id="walletAddBtn">Add funds</button>
       </div>
       <div class="wallet-sec">Wallets</div>
       ${rows}
@@ -5551,7 +5668,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       renderWalletBody();
     });
     body.querySelector('#walletAddBtn')?.addEventListener('click', ()=> openDeposit(0, null));
-    body.querySelector('#walletSendBtn')?.addEventListener('click', ()=> openWithdraw());
+    body.querySelector('#walletSendBtn')?.addEventListener('click', ()=> openSend());
     body.querySelector('#signOutBtn')?.addEventListener('click', signOut);
     body.querySelector('#walletSetNotif')?.addEventListener('click', ()=> showToast('Notifications coming soon.'));
     body.querySelector('#walletSetTheme')?.addEventListener('click', ()=>{
@@ -5694,46 +5811,110 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   function defaultFlow(kind, need){
     const needN = need || 0;
+    const from = cashWallet() || activeWallet();
     return {
       kind,
-      step: kind === 'withdraw' ? 'amount' : 'home',
+      step: kind === 'send' ? 'form' : 'home',
       tab: 'crypto',
-      amt: kind === 'withdraw'
-        ? Math.min(25, totalBal() || 0)
-        : (needN > 25 ? (needN > 50 ? 100 : 50) : 25),
+      amt: kind === 'send' ? 0 : (needN > 25 ? (needN > 50 ? 100 : 50) : 25),
       net: 'ethereum',
       token: 'eth',
       addr: '',
+      fromId: from ? from.id : '',
       understood: false,
       method: 'Card',
     };
   }
+  function sendFromWallet(){
+    const f = session.flow;
+    if(!f) return cashWallet() || activeWallet();
+    return session.wallets.find(w => w.id === f.fromId) || cashWallet() || activeWallet();
+  }
+  function normAddr(addr){
+    return String(addr || '').trim().toLowerCase();
+  }
+  function addrCompact(addr){
+    return normAddr(addr).replace(/[.…\s]/g, '');
+  }
+  function addrsMatch(a, b){
+    const na = normAddr(a), nb = normAddr(b);
+    if(!na || !nb) return false;
+    if(na === nb) return true;
+    const ca = addrCompact(a), cb = addrCompact(b);
+    if(ca === cb) return true;
+    const short = ca.length <= cb.length ? ca : cb;
+    const long = ca.length <= cb.length ? cb : ca;
+    if(short.length < 8) return false;
+    return long.startsWith(short.slice(0, 6)) && long.endsWith(short.slice(-4));
+  }
+  function findWalletByAddr(addr){
+    if(!addr) return null;
+    return session.wallets.find(w => addrsMatch(w.addr, addr)) || null;
+  }
+  function sendSameDest(){
+    const f = session.flow;
+    const from = sendFromWallet();
+    if(!f || !from || !f.addr) return false;
+    if(addrsMatch(from.addr, f.addr)) return true;
+    const to = findWalletByAddr(f.addr);
+    return !!(to && to.id === from.id);
+  }
+  function sendCtaState(){
+    const f = session.flow;
+    const from = sendFromWallet();
+    const bal = from ? (from.bal || 0) : 0;
+    if(!f || f.step === 'sending') return { kind:'sending', label:'Sending', enabled:false };
+    if(!f.addr || f.addr.length <= 8) return { kind:'to', label:'Insert recipient address', enabled:false };
+    if(sendSameDest()) return { kind:'same', label:'Pick a different destination', enabled:false };
+    if(bal <= 0 || (f.amt && f.amt > bal)) return { kind:'short', label:'Add funds to send', enabled:true };
+    if(!f.amt) return { kind:'amt', label:'Enter amount', enabled:false };
+    return { kind:'ready', label:'Send ' + usdLabel(f.amt), enabled:true };
+  }
+  const SEND_CHEV = `<svg class="send-chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const SEND_CHECK = `<span class="send-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><path d="M8 12.5l2.5 2.5 5.5-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+  const SEND_PASTE_IC = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
+  function sendWalletBits(w){
+    if(!w) return '';
+    return `
+      <img class="kb-wrow-av circle" src="${userAvatar(w.addr)}" alt="">
+      <span class="send-meta">
+        <span class="send-addr">${w.addr}</span>
+        <span class="send-sub">
+          ${w.active ? `<span class="send-active"><i></i>Active</span>` : ''}
+          <span class="send-wname">${sendWalletLabel(w)}</span>
+        </span>
+      </span>`;
+  }
+  function sendPickRow(w, selected){
+    return `<button type="button" class="send-pick ${selected ? 'is-on' : ''}" data-send-pick="${w.id}">${sendWalletBits(w)}${selected ? SEND_CHECK : ''}</button>`;
+  }
+  function sendToOptionsHtml(fromId){
+    const rows = session.wallets.filter(w => w.id !== fromId);
+    if(!rows.length) return '';
+    const f = session.flow;
+    return `<div class="send-or">or select a wallet</div>${rows.map(w => sendPickRow(w, !!(f && f.addr && addrsMatch(w.addr, f.addr)))).join('')}`;
+  }
   function flowTitle(){
     const f = session.flow;
-    if(!f) return 'Deposit';
+    if(!f) return 'Add funds';
     if(f.kind === 'deposit'){
-      if(f.step === 'crypto') return 'Deposit with crypto';
-      if(f.step === 'confirm') return 'Deposit';
-      if(f.step === 'home' && totalBal() < 1) return 'Fund your account';
-      return 'Deposit';
+      if(f.step === 'crypto') return 'Add funds with crypto';
+      return 'Add funds';
     }
-    if(f.step === 'addr') return 'Enter address';
-    if(f.step === 'review') return 'Review withdraw';
-    if(f.step === 'sending') return 'Withdraw';
-    return 'Withdraw to crypto wallet';
+    return 'Send';
   }
   function flowCanBack(){
     const f = session.flow;
     if(!f) return false;
-    if(['crypto','cash','addr','review'].includes(f.step)) return true;
-    if(f.kind === 'withdraw' && f.step === 'amount') return flowHost() === 'wallet';
+    if(['crypto','cash'].includes(f.step)) return true;
+    if(f.kind === 'send' && f.step === 'form') return flowHost() === 'wallet';
     if(f.kind === 'deposit' && f.step === 'home') return flowHost() === 'wallet';
     return false;
   }
   function flowBack(){
     const f = session.flow;
     if(!f) return;
-    if((f.kind === 'deposit' && f.step === 'home') || (f.kind === 'withdraw' && f.step === 'amount')){
+    if((f.kind === 'deposit' && f.step === 'home') || (f.kind === 'send' && f.step === 'form')){
       if(flowHost() === 'wallet'){
         session.walletView = 'list';
         renderWalletBody();
@@ -5741,8 +5922,6 @@ html.dark .qhc-id{color:#6BA3FF;}
       return;
     }
     if(f.step === 'crypto' || f.step === 'cash'){ f.step = 'home'; }
-    else if(f.step === 'addr') f.step = 'amount';
-    else if(f.step === 'review') f.step = 'addr';
     paintFlowSheet();
   }
   function paintFlowSheet(){
@@ -5916,7 +6095,6 @@ html.dark .qhc-id{color:#6BA3FF;}
     closeFlowSelect();
     if(!session.flow) session.flow = defaultFlow('deposit', session.fundsNeed || 0);
     const f = session.flow;
-    const chain = chainOf(f.net);
     let html = '';
     if(f.kind === 'deposit' && f.step === 'home'){
       html = `
@@ -5943,9 +6121,9 @@ html.dark .qhc-id{color:#6BA3FF;}
         <p class="flow-copy" data-flow-net-copy>${flowDepositCopy(f)}</p>
         <div class="flow-qr-wrap">${qrSvg(addr)}</div>
         <div class="flow-addr-lab">
-          Your deposit address
-          <button type="button" class="flow-info" id="flowAddrInfo" aria-label="How deposits work"
-            data-tip-title="Deposit address"
+          Your address
+          <button type="button" class="flow-info" id="flowAddrInfo" aria-label="How adding funds works"
+            data-tip-title="Your address"
             data-tip-body="Send only the token and chain selected above. It converts to cash in your account. Other assets sent here won't be credited.">
             <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.2V11.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="5.15" r=".85" fill="currentColor"/></svg>
           </button>
@@ -5959,7 +6137,7 @@ html.dark .qhc-id{color:#6BA3FF;}
             <svg class="flow-status-spin" viewBox="0 0 52 52"><circle cx="26" cy="26" r="20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" pathLength="100" stroke-dasharray="72 28"/></svg>
             <svg class="flow-status-ok" viewBox="0 0 52 52"><circle cx="26" cy="26" r="22"/><path d="M16.5 26.5l6.5 6.5 12.5-13"/></svg>
           </div>
-          <p class="flow-status-copy">Confirming deposit</p>
+          <p class="flow-status-copy">Adding funds</p>
           <p class="flow-status-sub">This usually takes a moment.</p>
         </div>`;
     } else if(f.kind === 'deposit' && f.step === 'cash'){
@@ -5976,51 +6154,50 @@ html.dark .qhc-id{color:#6BA3FF;}
           ${[25,50,100].map(v => `<button type="button" data-flow-preset="${v}" class="${v===f.amt?'is-on':''}">$${v}</button>`).join('')}
         </div>
         <button type="button" class="flow-cta" data-flow-continue ${cashAmtOk(f.amt)?'':'disabled'}>Continue</button>`;
-    } else if(f.kind === 'withdraw' && f.step === 'amount'){
-      const bal = totalBal();
+    } else if(f.kind === 'send'){
+      const from = sendFromWallet();
+      const many = session.wallets.length > 1;
+      const cta = sendCtaState();
+      const bal = from ? (from.bal || 0) : 0;
+      const over = f.amt > bal;
       html = `
-        <div class="flow-input-lbl">
-          <input class="flow-input" id="wdAmt" inputmode="decimal" value="${f.amt ? usdLabel(f.amt) : ''}" aria-label="Amount">
-          <em>Enter amount</em>
+        <div class="send-field">
+          <div class="send-lab">From</div>
+          <div class="send-box" data-send-box="from">
+            <button type="button" class="send-trigger ${many ? '' : 'is-static'}" data-send-toggle="from" ${many ? '' : 'tabindex="-1"'}>
+              ${from ? sendWalletBits(from) : '<span class="send-wname">No wallet</span>'}
+              ${many ? SEND_CHEV : ''}
+            </button>
+            <div class="send-drop"><div class="send-drop-inner" data-send-from-list>
+              ${session.wallets.map(w => sendPickRow(w, w.id === (from && from.id))).join('')}
+            </div></div>
+          </div>
         </div>
-        <div class="funds-presets">
-          ${[['10%',.1],['25%',.25],['50%',.5],['Max',1]].map(([lab,p]) => `<button type="button" data-flow-pct="${p}">${lab}</button>`).join('')}
+        <div class="send-field">
+          <div class="send-lab">To</div>
+          <div class="send-box" data-send-box="to">
+            <div class="send-to-head">
+              <input class="send-to-input" id="sendAddr" placeholder="Enter or select destination" value="${f.addr || ''}" spellcheck="false" autocomplete="off" aria-label="Destination">
+              <button type="button" class="send-paste" data-send-paste>${SEND_PASTE_IC} Paste</button>
+              ${many ? `<button type="button" class="send-paste" data-send-toggle="to" aria-label="Select wallet">${SEND_CHEV}</button>` : ''}
+            </div>
+            <div class="send-drop"><div class="send-drop-inner" data-send-to-list>
+              ${sendToOptionsHtml(from && from.id)}
+            </div></div>
+          </div>
         </div>
-        <div class="flow-kv"><dt>Available balance</dt><dd>${usdLabel(bal)}</dd></div>
-        <button type="button" class="flow-cta" data-flow-continue ${(!f.amt || f.amt>bal)?'disabled':''}>Continue</button>`;
-    } else if(f.kind === 'withdraw' && f.step === 'addr'){
-      const ok = f.understood && f.addr.length > 8;
-      html = `
-        ${flowNetsMarkup(f)}
-        <input class="flow-input addr" id="wdAddr" placeholder="Wallet address" value="${f.addr}" spellcheck="false">
-        <p class="flow-copy" data-flow-net-copy>You'll receive USDC on ${chain.name}.</p>
-        <div class="flow-warn">
-          <label><input type="checkbox" id="wdOk" ${f.understood?'checked':''}> I understand the following</label>
-          <ul>
-            <li>Only withdraw to an address you control.</li>
-            <li>Sending to an exchange or app account can permanently lose funds.</li>
-          </ul>
+        <div class="send-amt">
+          <div class="send-amt-top">
+            <div class="send-lab">Amount</div>
+            <div class="send-amt-pct">
+              <button type="button" data-send-pct="0.5">50%</button>
+              <button type="button" data-send-pct="1">MAX</button>
+            </div>
+          </div>
+          <input class="flow-input ${over ? 'is-over' : ''}" id="sendAmt" inputmode="decimal" value="${f.amt ? usdLabel(f.amt) : ''}" placeholder="$0.00" aria-label="Amount">
+          <span class="send-avail" data-send-avail>Available ${usdLabel(bal)}</span>
         </div>
-        <button type="button" class="flow-cta" data-flow-review ${ok?'':'disabled'}>Review</button>`;
-    } else if(f.kind === 'withdraw' && f.step === 'review'){
-      html = `
-        <div class="flow-big">
-          <div class="amt">${usdLabel(f.amt)}</div>
-          <div class="sub">${money(f.amt)} USDC</div>
-        </div>
-        <div class="flow-kv"><dt>To</dt><dd>${shortAddr(f.addr)}</dd></div>
-        <div class="flow-kv"><dt>Network</dt><dd>${chain.name}</dd></div>
-        <div class="flow-kv"><dt>Est. time</dt><dd>Instant</dd></div>
-        <div class="flow-kv"><dt>Total</dt><dd>${usdLabel(f.amt)}</dd></div>
-        <button type="button" class="flow-cta" data-flow-confirm>Confirm withdraw</button>`;
-    } else if(f.kind === 'withdraw' && f.step === 'sending'){
-      html = `
-        <div class="flow-big">
-          <div class="lbl">You're withdrawing</div>
-          <div class="amt">${usdLabel(f.amt)}</div>
-          <div class="sub">${money(f.amt)} USDC${needsSig() ? ` · Confirm in ${activeWallet()?.name || 'wallet'}` : ''}</div>
-        </div>
-        <button type="button" class="flow-cta" disabled>Withdrawing <span class="spin"></span></button>`;
+        <button type="button" class="flow-cta ${cta.enabled ? '' : 'is-wait'}" data-send-go ${cta.enabled ? '' : 'disabled'}><span class="flow-cta-lab">${cta.label}</span></button>`;
     }
     body.innerHTML = html;
     body.closest('.modal')?.classList.toggle('is-confirming', f.kind === 'deposit' && f.step === 'confirm');
@@ -6082,12 +6259,6 @@ html.dark .qhc-id{color:#6BA3FF;}
         } else paintFlowSheet();
       });
     });
-    body.querySelectorAll('[data-flow-pct]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        f.amt = Math.round(totalBal() * (+btn.dataset.flowPct) * 100) / 100;
-        paintFlowSheet();
-      });
-    });
     const cashIn = body.querySelector('#cashAmt');
     if(cashIn){
       sizeAmtInput(cashIn);
@@ -6099,24 +6270,6 @@ html.dark .qhc-id{color:#6BA3FF;}
       });
       cashIn.addEventListener('focus', ()=> cashIn.select());
     }
-    const amtIn = body.querySelector('#wdAmt');
-    amtIn?.addEventListener('input', ()=>{
-      const n = parseAmt(amtIn.value);
-      f.amt = n;
-      const cta = body.querySelector('[data-flow-continue]');
-      if(cta) cta.disabled = !n || n > totalBal();
-    });
-    const addrIn = body.querySelector('#wdAddr');
-    addrIn?.addEventListener('input', ()=>{
-      f.addr = addrIn.value.trim();
-      const cta = body.querySelector('[data-flow-review]');
-      if(cta) cta.disabled = !(f.understood && f.addr.length > 8);
-    });
-    body.querySelector('#wdOk')?.addEventListener('change', (e)=>{
-      f.understood = !!e.target.checked;
-      const cta = body.querySelector('[data-flow-review]');
-      if(cta) cta.disabled = !(f.understood && f.addr.length > 8);
-    });
     body.querySelector('[data-flow-copy]')?.addEventListener('click', ()=>{
       const addr = depositAddr();
       try{ navigator.clipboard && navigator.clipboard.writeText(addr); }catch(_){}
@@ -6127,10 +6280,185 @@ html.dark .qhc-id{color:#6BA3FF;}
       if(f.kind === 'deposit'){
         if(!cashAmtOk(f.amt)) return;
         creditFunds(f.amt, f.method);
-      } else { f.step = 'addr'; paintFlowSheet(); }
+      }
     });
-    body.querySelector('[data-flow-review]')?.addEventListener('click', ()=>{ f.step = 'review'; paintFlowSheet(); });
-    body.querySelector('[data-flow-confirm]')?.addEventListener('click', confirmWithdraw);
+    if(f.kind === 'send') bindSendForm(body);
+  }
+  function sendBoxOpen(box, open){
+    if(!box) return;
+    const drop = box.querySelector('.send-drop');
+    if(open){
+      box.classList.remove('is-closing');
+      box.classList.add('is-open');
+      return;
+    }
+    if(!box.classList.contains('is-open') && !box.classList.contains('is-closing')) return;
+    box.classList.remove('is-open');
+    box.classList.add('is-closing');
+    const done = ()=>{
+      box.classList.remove('is-closing');
+      drop?.removeEventListener('transitionend', onEnd);
+    };
+    const onEnd = (e)=>{ if(!e || e.propertyName === 'grid-template-rows') done(); };
+    drop?.addEventListener('transitionend', onEnd);
+    setTimeout(done, 220);
+  }
+  function paintSendCta(body){
+    const f = session.flow;
+    const btn = body?.querySelector('[data-send-go]');
+    if(!f || !btn) return;
+    const cta = sendCtaState();
+    const lab = btn.querySelector('.flow-cta-lab');
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    btn.classList.toggle('is-wait', !cta.enabled && cta.kind !== 'sending');
+    btn.classList.toggle('is-sending', cta.kind === 'sending');
+    btn.disabled = !cta.enabled;
+    if((lab ? lab.textContent : btn.textContent).trim() === cta.label && cta.kind !== 'sending') return;
+    if(cta.kind === 'sending'){
+      btn.innerHTML = `<span class="flow-cta-lab">${cta.label}</span> <span class="spin"></span>`;
+      return;
+    }
+    if(!lab){
+      btn.textContent = cta.label;
+      return;
+    }
+    if(reduce){
+      lab.textContent = cta.label;
+      const spin = btn.querySelector('.spin');
+      if(spin) spin.remove();
+      return;
+    }
+    lab.style.opacity = '0';
+    setTimeout(()=>{
+      lab.textContent = cta.label;
+      lab.style.opacity = '1';
+      const spin = btn.querySelector('.spin');
+      if(spin) spin.remove();
+    }, 80);
+  }
+  function refreshSendFrom(body){
+    const f = session.flow;
+    const from = sendFromWallet();
+    if(!f || !body || !from) return;
+    const trigger = body.querySelector('[data-send-toggle="from"]');
+    if(trigger){
+      const many = session.wallets.length > 1;
+      trigger.innerHTML = sendWalletBits(from) + (many ? SEND_CHEV : '');
+    }
+    const fromList = body.querySelector('[data-send-from-list]');
+    if(fromList){
+      fromList.innerHTML = session.wallets.map(w => sendPickRow(w, w.id === from.id)).join('');
+      fromList.querySelectorAll('[data-send-pick]').forEach(btn=>{
+        btn.addEventListener('click', ()=> pickSendFrom(body, btn.dataset.sendPick));
+      });
+    }
+    const toList = body.querySelector('[data-send-to-list]');
+    if(toList){
+      toList.innerHTML = sendToOptionsHtml(from.id);
+      toList.querySelectorAll('[data-send-pick]').forEach(btn=>{
+        btn.addEventListener('click', ()=> pickSendTo(body, btn.dataset.sendPick));
+      });
+    }
+    const avail = body.querySelector('[data-send-avail]');
+    if(avail) avail.textContent = 'Available ' + usdLabel(from.bal || 0);
+    const amtIn = body.querySelector('#sendAmt');
+    if(amtIn) amtIn.classList.toggle('is-over', !!(f.amt && f.amt > (from.bal || 0)));
+    paintSendCta(body);
+  }
+  function pickSendFrom(body, id){
+    const f = session.flow;
+    if(!f) return;
+    f.fromId = id;
+    sendBoxOpen(body.querySelector('[data-send-box="from"]'), false);
+    refreshSendFrom(body);
+  }
+  function pickSendTo(body, id){
+    const f = session.flow;
+    const w = session.wallets.find(x => x.id === id);
+    if(!f || !w) return;
+    f.addr = w.addr;
+    const input = body.querySelector('#sendAddr');
+    if(input) input.value = w.addr;
+    sendBoxOpen(body.querySelector('[data-send-box="to"]'), false);
+    refreshSendFrom(body);
+  }
+  function setSendAddr(body, addr){
+    const f = session.flow;
+    if(!f) return;
+    f.addr = String(addr || '').trim();
+    const hit = findWalletByAddr(f.addr);
+    if(hit) f.addr = hit.addr;
+    const input = body.querySelector('#sendAddr');
+    if(input && hit && input.value !== hit.addr) input.value = hit.addr;
+    refreshSendFrom(body);
+  }
+  function bindSendForm(body){
+    const f = session.flow;
+    if(!f || !body) return;
+    const fromBox = body.querySelector('[data-send-box="from"]');
+    const toBox = body.querySelector('[data-send-box="to"]');
+    body.querySelectorAll('[data-send-toggle]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        e.preventDefault();
+        const which = btn.dataset.sendToggle;
+        if(which === 'from' && session.wallets.length < 2) return;
+        const box = which === 'from' ? fromBox : toBox;
+        const other = which === 'from' ? toBox : fromBox;
+        const open = !box?.classList.contains('is-open');
+        sendBoxOpen(other, false);
+        sendBoxOpen(box, open);
+        if(which === 'to' && open) body.querySelector('#sendAddr')?.focus();
+      });
+    });
+    body.querySelector('#sendAddr')?.addEventListener('focus', ()=>{
+      sendBoxOpen(fromBox, false);
+      if(session.wallets.length > 1) sendBoxOpen(toBox, true);
+    });
+    body.querySelector('#sendAddr')?.addEventListener('input', (e)=>{
+      f.addr = e.target.value.trim();
+      paintSendCta(body);
+    });
+    body.querySelector('#sendAddr')?.addEventListener('blur', ()=> setSendAddr(body, f.addr));
+    body.querySelector('[data-send-paste]')?.addEventListener('click', async ()=>{
+      let text = '';
+      try{ text = await navigator.clipboard.readText(); }catch(_){}
+      if(!text) return;
+      const input = body.querySelector('#sendAddr');
+      if(input) input.value = text.trim();
+      setSendAddr(body, text);
+      sendBoxOpen(toBox, true);
+    });
+    body.querySelector('[data-send-from-list]')?.querySelectorAll('[data-send-pick]').forEach(btn=>{
+      btn.addEventListener('click', ()=> pickSendFrom(body, btn.dataset.sendPick));
+    });
+    body.querySelector('[data-send-to-list]')?.querySelectorAll('[data-send-pick]').forEach(btn=>{
+      btn.addEventListener('click', ()=> pickSendTo(body, btn.dataset.sendPick));
+    });
+    const amtIn = body.querySelector('#sendAmt');
+    amtIn?.addEventListener('input', ()=>{
+      f.amt = parseAmt(amtIn.value);
+      const from = sendFromWallet();
+      amtIn.classList.toggle('is-over', !!(f.amt && from && f.amt > (from.bal || 0)));
+      body.querySelectorAll('[data-send-pct]').forEach(b => b.classList.remove('is-on'));
+      paintSendCta(body);
+    });
+    body.querySelectorAll('[data-send-pct]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const from = sendFromWallet();
+        const bal = from ? (from.bal || 0) : 0;
+        f.amt = Math.round(bal * (+btn.dataset.sendPct) * 100) / 100;
+        if(amtIn){
+          amtIn.value = f.amt ? usdLabel(f.amt) : '';
+          amtIn.classList.toggle('is-over', f.amt > bal);
+        }
+        body.querySelectorAll('[data-send-pct]').forEach(b => b.classList.toggle('is-on', b === btn));
+        paintSendCta(body);
+      });
+    });
+    body.querySelector('[data-send-go]')?.addEventListener('click', ()=>{
+      if(sendCtaState().kind === 'short') openAddFundsFromSend();
+      else confirmSend();
+    });
   }
   function flowBodyEl(){
     const host = flowHost();
@@ -6163,7 +6491,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         setTimeout(()=>{ el.textContent = text; el.style.opacity = '1'; }, reduce ? 0 : 160);
       };
       status?.classList.add('is-done');
-      fade(copy, `Deposited ${usdLabel(f.amt)}`);
+      fade(copy, `Added ${usdLabel(f.amt)}`);
       fade(sub, "You're ready to go.");
       session.flowTimer = setTimeout(()=> creditFunds(f.amt, chainOf(f.net).name, { silent:true }), holdMs);
     }, spinMs);
@@ -6185,7 +6513,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(host === 'auth'){ setAuthPanel('funds'); return; }
     if(host === 'wallet'){ session.walletView = 'flow'; renderWalletBody(); return; }
     const title = document.getElementById('fundsTitle');
-    if(title) title.textContent = 'Deposit';
+    if(title) title.textContent = 'Add funds';
     paintFlowInto(document.getElementById('fundsBody'));
     overlayOpen(fundsOverlay);
   }
@@ -6198,9 +6526,8 @@ html.dark .qhc-id{color:#6BA3FF;}
       return h === 'deposit';
     }catch(_){ return false; }
   }
-  function openWithdraw(){
-    if(totalBal() <= 0) return;
-    session.flow = defaultFlow('withdraw', 0);
+  function openSend(){
+    session.flow = defaultFlow('send', 0);
     session.pendingFunds = null;
     if(!walletOverlay?.classList.contains('show')){
       session.walletView = 'flow';
@@ -6212,6 +6539,35 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.walletView = 'flow';
     renderWalletBody();
   }
+  function resumeSend(draft){
+    session.flow = draft && draft.kind === 'send' ? Object.assign(defaultFlow('send', 0), draft, { step:'form' }) : defaultFlow('send', 0);
+    session.pendingFunds = null;
+    session.walletView = 'flow';
+    lastWalletView = 'flow';
+    if(!walletOverlay?.classList.contains('show')){
+      fillWalletBody();
+      overlayOpen(walletOverlay);
+      return;
+    }
+    renderWalletBody();
+  }
+  function openAddFundsFromSend(){
+    const f = session.flow;
+    const draft = f && f.kind === 'send' ? {
+      kind: 'send',
+      step: 'form',
+      amt: f.amt,
+      addr: f.addr,
+      fromId: f.fromId,
+      tab: f.tab,
+      net: f.net,
+      token: f.token,
+      understood: f.understood,
+      method: f.method,
+    } : defaultFlow('send', 0);
+    openDeposit(0, ()=> resumeSend(draft));
+  }
+  function openWithdraw(){ openSend(); }
   function finishFundsSheet(){
     session.flow = null;
     const host = flowHost();
@@ -6226,26 +6582,62 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(!a) return;
     clearFlowTimer();
     a.bal = Math.round((Math.max(0, a.bal || 0) + amt) * 100) / 100;
-    logActivity('deposit', label ? `Deposit · ${label}` : 'Deposit', amt);
+    logActivity('deposit', label ? `Add funds · ${label}` : 'Add funds', amt);
     finishFundsSheet();
     paintAuthChrome();
-    if(!(opts && opts.silent)) showToast(`Deposited ${usdLabel(amt)}${label ? ' via '+label : ''}.`);
+    if(!(opts && opts.silent)) showToast(`Added ${usdLabel(amt)}${label ? ' via '+label : ''}.`);
     const next = session.pendingFunds;
     session.pendingFunds = null;
     session.fundsNeed = 0;
     if(next) setTimeout(()=>{ try{ next(); }catch(_){} }, 280);
   }
-  function confirmWithdraw(){
+  function applySend(from, toWallet, amt){
+    const n = Math.round((amt || 0) * 100) / 100;
+    if(!from || n <= 0) return;
+    from.bal = Math.max(0, Math.round(((from.bal || 0) - n) * 100) / 100);
+    if(toWallet && toWallet.id !== from.id){
+      const cash = cashWallet();
+      const credit = session.auth === 'eoa' || (cash && toWallet.id === cash.id);
+      if(credit) toWallet.bal = Math.round(((toWallet.bal || 0) + n) * 100) / 100;
+    }
+    paintAuthChrome();
+  }
+  function finishSend(toast){
+    session.flow = null;
+    session.walletView = 'list';
+    const host = flowHost();
+    if(host === 'wallet'){
+      renderWalletBody();
+    } else {
+      fillWalletBody();
+      overlayOpen(walletOverlay);
+    }
+    if(toast) showToast(toast);
+  }
+  function confirmSend(){
     const f = session.flow;
-    if(!f) return;
+    if(!f || sendCtaState().kind !== 'ready') return;
+    const from = sendFromWallet();
+    const toWallet = findWalletByAddr(f.addr);
+    const amt = f.amt;
+    if(!from || amt > (from.bal || 0)) return;
+    const body = flowBodyEl();
     f.step = 'sending';
-    paintFlowSheet();
-    setTimeout(()=>{
-      spendFromActive(f.amt);
-      logActivity('withdraw', `Withdraw · ${chainOf(f.net).name}`, f.amt);
-      finishFundsSheet();
-      showToast(`Withdrew ${usdLabel(f.amt)}.`);
-    }, needsSig() ? 1600 : 1000);
+    body?.querySelectorAll('input,button').forEach(el=>{
+      if(el.dataset.sendGo === undefined) el.disabled = true;
+    });
+    paintSendCta(body);
+    const go = ()=>{
+      applySend(from, toWallet, amt);
+      logActivity('send', toWallet ? `Send · ${sendWalletLabel(toWallet)}` : `Send · ${shortAddr(f.addr)}`, amt);
+      finishSend(toWallet ? `Sent ${usdLabel(amt)} to ${sendWalletLabel(toWallet)}.` : `Sent ${usdLabel(amt)}.`);
+    };
+    if(from.kind === 'eoa'){
+      requestSignature(`Send ${usdLabel(amt)}`, go, { wallet: from });
+      return;
+    }
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setTimeout(go, reduce ? 0 : 720);
   }
 
   function recordBuy(amt){
@@ -6385,7 +6777,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(!ok){
       session.swap.step = 'confirm';
       paintSwapSheet(true);
-      showToast('Not enough balance.');
+      showToast('Not enough funds.');
       return;
     }
     if(s.side === 'sell'){
@@ -6407,7 +6799,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     const a = cashWallet();
     if(!a || a.bal < s.amt){
       const side = s.side;
-      showToast('Not enough balance.');
+      showToast('Not enough funds.');
       closeSwap();
       openTopUp(0, ()=> resumeTrade(side, true));
       return;

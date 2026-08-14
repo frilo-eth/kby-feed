@@ -3,14 +3,14 @@
 ## Unreleased
 
 ### Trade drawer
-- CTA is a gate: **Sign in to buy** → **Deposit to buy** → green **Buy**. Signup/deposit does not auto-trade. README [#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta)
+- CTA is a gate: **Sign in to buy** → **Add funds to buy** → green **Buy**. Signup/add funds does not auto-trade. README [#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta)
 - Slippage chip unfolds AUTO / 0.5% / 0.3% / custom. Rest chrome stays `--card` (not orange). **Auto** badge is purple `#7B6CF0` + white. README [#slippage](https://github.com/frilo-eth/kby-feed/blob/main/README.md#slippage)
 - You’ll pay accordion (no top hairline). Fee 1.3%. Chart scrolls inside the drawer
 - Pay with: ETH amount + `0 ETH` balance when unsigned. README [#pay-with](https://github.com/frilo-eth/kby-feed/blob/main/README.md#pay-with)
 
 ### Deposit
 - Native `<select>` pair for chain + token (Ethereum/Base/Solana). Copy: `Send USDC on Ethereum to this address.` README [#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit)
-- No need amount on Fund your account. (i) on **Your deposit address** explains the mechanic
+- UI copy is **Add funds**. No need amount in the title. (i) on **Your address** explains the mechanic
 
 ### Token vs yap
 - `.token-tag` (`$SAUCE`) → `/token?t=SAUCE` (same as View token). Buy / plus still trade. README [#token-page](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-page)
@@ -20,7 +20,7 @@
 ### Auth, funds, trade
 - Option 4: social/email → embedded sponsored wallet; EOA wallet → signatures on gift/buy/sell. README [#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth)
 - One tray at a time; in-tray steps use `morphSheet` (~320ms Vaul). README [#sheet-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sheet-morph)
-- Withdraw: amount → address → review. README [#withdraw](https://github.com/frilo-eth/kby-feed/blob/main/README.md#withdraw)
+- Send: From / To / amount on one sheet. Linked wallets as destinations + paste any address. README [#send](https://github.com/frilo-eth/kby-feed/blob/main/README.md#send)
 - Trade: dollarized buy helpers; sell `%` of holdings; ⇅ USD↔token (`TOKEN_PER_USD`). README [#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer)
 
 ### `$SAUCE` catalog
