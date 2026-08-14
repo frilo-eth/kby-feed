@@ -18,10 +18,10 @@ Porting / review: open the heading, not the whole README. Production: [https://k
 | [Morphing pill](#dare-role-badge) (Dare/Meme → OP / Entry / Content) | [README.md#dare-role-badge](https://github.com/frilo-eth/kby-feed/blob/main/README.md#dare-role-badge) · [#morphing-pill](https://github.com/frilo-eth/kby-feed/blob/main/README.md#morphing-pill) |
 | [Info tip](#info-hover-tip) (Image vs Video copy) | [README.md#info-hover-tip](https://github.com/frilo-eth/kby-feed/blob/main/README.md#info-hover-tip) |
 | [Token page](#token-page) (`/token` — ticker + View token) | [README.md#token-page](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-page) |
-| [Auth (Option 4)](#auth) — social vs EOA | [README.md#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth) |
+| [Auth (Option 4)](#auth) — social vs EOA, one wallet | [README.md#auth](https://github.com/frilo-eth/kby-feed/blob/withdraw-feature/README.md#auth) |
 | [Sheet morph](#sheet-morph) (`morphSheet` ~320ms) | [README.md#sheet-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sheet-morph) |
 | [Deposit](#deposit) (native chain/token selects + address tip) | [README.md#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit) |
-| [Withdraw](#withdraw) | [README.md#withdraw](https://github.com/frilo-eth/kby-feed/blob/main/README.md#withdraw) |
+| [Withdraw](#withdraw) | [README.md#withdraw](https://github.com/frilo-eth/kby-feed/blob/withdraw-feature/README.md#withdraw) |
 | [Trade drawer](#trade-drawer) (dollarized buy) | [README.md#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer) |
 | [Trade CTA](#trade-cta) (Sign in → Deposit → green Buy) | [README.md#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta) |
 | [Slippage](#slippage) | [README.md#slippage](https://github.com/frilo-eth/kby-feed/blob/main/README.md#slippage) |
@@ -114,10 +114,10 @@ Use this as the checklist when reimplementing — these are the UX details that 
 
 | Feature | Behavior |
 |---------|----------|
-| [Option 4](#auth) | Social / email → embedded Kumbaya wallet, **sponsored** (no signature on gift/buy/sell). Crypto wallet (EOA) → that address is the account; gift/buy/sell/launch **sign** (`needsSig()`). No gates. Copy is **Deposit** / **Withdraw** |
+| [Option 4](#auth) | Social / email → embedded Kumbaya wallet, **sponsored** (no signature on gift/buy/sell). Crypto wallet (EOA) → that address is the account; gift/buy/sell/launch **sign** (`needsSig()`). **One wallet per account** — no linked-EOA list. Copy is **Deposit** / **Withdraw** |
 | Sign-in sheet | Google + Apple/X/Farcaster/email + detected wallet row. Same `.modal` chrome as share (`--card`, Inter, `--bg` `#F2EEEA`) |
 | [Deposit](#deposit) | Card or crypto. Crypto: native `<select>` pair (chain + token). Copy: `Send USDC on Ethereum to this address.` No “need $X” on Fund your account. (i) on **Your deposit address** |
-| [Withdraw](#withdraw) | Amount → address → review. Empty balance routes to deposit first |
+| [Withdraw](#withdraw) | Amount → address + network → review. Empty balance routes to deposit first. No Send / no extra wallets |
 
 ### Trade drawer
 
@@ -1273,9 +1273,9 @@ Mobile enter of `.modal` itself is still `transform: translateY(100%+24px) → 0
 
 ### 13. Auth (Option 4)
 
-**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth)
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/withdraw-feature/README.md#auth](https://github.com/frilo-eth/kby-feed/blob/withdraw-feature/README.md#auth)
 
-One login, one paying wallet. Prototype only — no real keys.
+One login, one paying wallet. Prototype only — no real keys. **No extra EOAs** — Deposit covers funding; Withdraw is how cash leaves. The account sheet has no wallet list and no Connect wallet row.
 
 | Path | `session.auth` | Wallet | Gift / buy / sell / launch |
 |------|----------------|--------|----------------------------|
@@ -1341,17 +1341,18 @@ Address row: clipboard SVG, regular weight, one line + ellipsis (`.flow-addr spa
 
 ### 15. Withdraw
 
-**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#withdraw](https://github.com/frilo-eth/kby-feed/blob/main/README.md#withdraw)
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/withdraw-feature/README.md#withdraw](https://github.com/frilo-eth/kby-feed/blob/withdraw-feature/README.md#withdraw)
 
 `openWithdraw()`. Empty balance → toast **Deposit first, then withdraw.** and opens deposit.
 
 | Step | UI |
 |------|----|
-| `amount` | dollar field + presets; cap = `totalBal()` |
-| `addr` | paste destination |
-| `review` | confirm |
+| `amount` | dollar field + 10% / 25% / 50% / Max; cap = `totalBal()` |
+| `addr` | paste destination + network (ETH / Base / Solana) + “I understand” |
+| `review` | To / Network / Confirm |
+| `sending` | sheet stays put; EOA signs, embedded is sponsored |
 
-Steps morph in the **wallet** tray (`session.walletView = 'flow'`). Same elevation / press rules as deposit. Back peels `review → addr → amount`.
+Steps morph in the **wallet** tray (`session.walletView = 'flow'`). Same elevation / press rules as deposit. Back peels `review → addr → amount`. Demo: `?withdraw` / `#withdraw`.
 
 ---
 

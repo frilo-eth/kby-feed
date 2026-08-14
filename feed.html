@@ -2546,12 +2546,6 @@ html.dark .auth-email-go{background:rgba(255,255,255,.08);}
 }
 .wallet-actions .wallet-add{background:var(--ink);color:var(--bg);border-color:transparent;}
 .wallet-actions .wallet-add:hover{filter:brightness(1.08);background:var(--ink);}
-.wallet-balance-hit{
-  display:block;width:100%;margin:0;padding:0;
-  border:none;background:none;cursor:pointer;text-align:left;color:inherit;
-}
-.wallet-balance-hit:active .wallet-balance{transform:scale(.985);}
-.wallet-sec{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);margin:14px 0 8px;}
 .kb-wrow{
   display:flex;align-items:center;gap:12px;width:100%;text-align:left;
   background:color-mix(in srgb, var(--ink) 5.5%, var(--card));
@@ -4417,8 +4411,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   function needsSig(){ const a = cashWallet(); return !!(a && a.kind === 'eoa'); }
   function totalBal(){
     const c = cashWallet();
-    if(session.auth === 'social') return Math.max(0, c ? (c.bal || 0) : 0);
-    return session.wallets.reduce((n,w)=> n + Math.max(0, w.bal || 0), 0);
+    return Math.max(0, c ? (c.bal || 0) : 0);
   }
   function money(n){ return (Math.round((n || 0) * 100) / 100).toFixed(2); }
   function usdLabel(n){ return '$' + money(n); }
@@ -5284,12 +5277,6 @@ html.dark .qhc-id{color:#6BA3FF;}
       const a = cashWallet();
       if(!a) return;
       if(a.bal < amt){
-        if(session.auth !== 'social' && totalBal() >= amt){
-          showToast('Active wallet is short. Switch wallet or top it up.');
-          session.pendingSpend = ()=> requireSpend(amt, then, label);
-          openWalletModal();
-          return;
-        }
         session.pendingSpend = null;
         openTopUp(0, ()=> requireSpend(amt, then, label));
         return;
@@ -5354,7 +5341,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.activity = session.activity.slice(0, 12);
   }
   function walletTopBack(){
-    if(session.walletView === 'connect' || session.walletView === 'import'){
+    if(session.walletView === 'import'){
       session.walletView = 'list';
       renderWalletBody();
       return;
@@ -5367,31 +5354,11 @@ html.dark .qhc-id{color:#6BA3FF;}
     const title = document.getElementById('walletTitle');
     if(title){
       title.textContent = session.walletView === 'flow' ? flowTitle()
-        : session.walletView === 'connect' ? 'Connect wallet'
         : session.walletView === 'import' ? 'Import token'
         : 'Account';
     }
-    const showBack = session.walletView === 'connect' || session.walletView === 'import' || (session.walletView === 'flow' && flowCanBack());
+    const showBack = session.walletView === 'import' || (session.walletView === 'flow' && flowCanBack());
     document.getElementById('walletBack')?.classList.toggle('show', showBack);
-    if(session.walletView === 'connect'){
-      const has = new Set(session.wallets.map(w => w.id));
-      body.innerHTML = `
-        <p class="auth-sub">Adds an address to this account. Your login stays the same.</p>
-        <div class="auth-wallet-search">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          <input type="search" id="connectWalletSearch" placeholder="Search through 586 wallets" autocomplete="off">
-        </div>
-        <div class="auth-wallet-list" id="connectWalletList"></div>`;
-      const paint = (q)=>{
-        const list = document.getElementById('connectWalletList');
-        if(!list) return;
-        list.innerHTML = walletPickerRows(q, has);
-        bindWalletPicker(list, (id)=> addConnectedWallet(id));
-      };
-      paint('');
-      body.querySelector('#connectWalletSearch')?.addEventListener('input', (e)=> paint(e.target.value));
-      return;
-    }
     if(session.walletView === 'import'){
       const rowsOf = (q)=>{
         const needle = String(q || '').trim().toLowerCase();
@@ -5438,27 +5405,10 @@ html.dark .qhc-id{color:#6BA3FF;}
       return;
     }
     const ident = authIdentity();
-    const canWithdraw = totalBal() > 0;
     if(session.walletView === 'settings') session.walletView = 'list';
     const tab = session.walletTab || 'tokens';
     const copySvg = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
     const copyDoneSvg = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-    const cash = session.wallets.find(w => w.kind === 'embedded');
-    const linked = session.wallets.filter(w => w.kind !== 'embedded');
-    if(cash){
-      linked.forEach(w => { w.bal = 0; });
-    }
-    const balBlock = `
-      <div class="wallet-balance-lbl">Balance</div>
-      <div class="wallet-balance">${usdLabel(totalBal())}</div>`;
-    const rows = linked.map(w => `
-      <button type="button" class="kb-wrow ${w.active ? 'is-active' : ''}" data-switch="${w.id}">
-        <img class="kb-wrow-av circle" src="${userAvatar(w.addr)}" alt="">
-        <span class="kb-wrow-meta">
-          <span class="kb-wrow-name">${w.name}</span>
-          <span class="kb-wrow-addr">${w.addr}</span>
-        </span>
-      </button>`).join('');
     const listed = visibleHoldings();
     const holds = listed.length
       ? listed.map(h => holdRowHtml(h)).join('')
@@ -5519,19 +5469,12 @@ html.dark .qhc-id{color:#6BA3FF;}
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 7H8a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M13 8.5 16.5 12 13 15.5M16.2 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
-      ${cash ? `<button type="button" class="wallet-balance-hit" data-switch="${cash.id}">${balBlock}</button>` : balBlock}
+      <div class="wallet-balance-lbl">Balance</div>
+      <div class="wallet-balance">${usdLabel(totalBal())}</div>
       <div class="wallet-actions">
-        <button type="button" id="walletSendBtn"${canWithdraw ? '' : ' disabled'} title="${canWithdraw ? 'Withdraw' : 'Nothing to withdraw'}">Withdraw</button>
+        <button type="button" id="walletSendBtn">Withdraw</button>
         <button type="button" class="wallet-add" id="walletAddBtn">Deposit</button>
       </div>
-      <div class="wallet-sec">Wallets</div>
-      ${rows}
-      <button type="button" class="kb-wrow is-add" id="connectWalletRow">
-        <span class="kb-wrow-av ic">＋</span>
-        <span class="kb-wrow-meta">
-          <span class="kb-wrow-name">Connect wallet</span>
-        </span>
-      </button>
       <nav class="wallet-tabs" aria-label="Account">
         ${[
           ['tokens','Tokens','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/></svg>'],
@@ -5543,13 +5486,6 @@ html.dark .qhc-id{color:#6BA3FF;}
           `<button type="button" data-wtab="${id}" class="${tab===id?'is-on':''}">${ic}<span>${lab}</span></button>`).join('')}
       </nav>
       ${tabBody}`;
-    body.querySelectorAll('[data-switch]').forEach(btn=>{
-      btn.addEventListener('click', ()=> switchActiveWallet(btn.dataset.switch));
-    });
-    body.querySelector('#connectWalletRow')?.addEventListener('click', ()=>{
-      session.walletView = 'connect';
-      renderWalletBody();
-    });
     body.querySelector('#walletAddBtn')?.addEventListener('click', ()=> openDeposit(0, null));
     body.querySelector('#walletSendBtn')?.addEventListener('click', ()=> openWithdraw());
     body.querySelector('#signOutBtn')?.addEventListener('click', signOut);
@@ -5603,34 +5539,6 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.pendingSpend = null;
     session.walletView = 'list';
     overlayClose(walletOverlay);
-  }
-  function switchActiveWallet(id){
-    session.wallets.forEach(w => { w.active = w.id === id; });
-    paintAuthChrome();
-    renderWalletBody();
-    const a = activeWallet();
-    if(session.auth === 'social'){
-      showToast(a && a.kind === 'eoa' ? `${a.name} selected.` : 'Paying from your balance.');
-    } else {
-      showToast(a && a.kind === 'eoa' ? `Paying from ${a.name}.` : 'Paying from your balance.');
-    }
-    const next = session.pendingSpend;
-    if(next){
-      session.pendingSpend = null;
-      setTimeout(()=>{ try{ next(); }catch(_){} }, 200);
-    }
-  }
-  function addConnectedWallet(id){
-    if(session.wallets.some(w => w.id === id)){
-      session.walletView = 'list';
-      renderWalletBody();
-      return;
-    }
-    session.wallets.push(mintWallet(id, { bal: 0, active: false }));
-    session.walletView = 'list';
-    renderWalletBody();
-    paintAuthChrome();
-    showToast('Wallet added.');
   }
   function signOut(){
     session.auth = null;
@@ -6198,8 +6106,20 @@ html.dark .qhc-id{color:#6BA3FF;}
       return h === 'deposit';
     }catch(_){ return false; }
   }
+  function wantsWithdrawDemo(){
+    try{
+      const q = new URLSearchParams(location.search);
+      if(q.has('withdraw') || q.get('demo') === 'withdraw') return true;
+      const h = (location.hash || '').replace(/^#/, '');
+      return h === 'withdraw';
+    }catch(_){ return false; }
+  }
   function openWithdraw(){
-    if(totalBal() <= 0) return;
+    if(totalBal() <= 0){
+      showToast('Deposit first, then withdraw.');
+      openDeposit(0, null);
+      return;
+    }
     session.flow = defaultFlow('withdraw', 0);
     session.pendingFunds = null;
     if(!walletOverlay?.classList.contains('show')){
@@ -6496,7 +6416,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     else     if(go.dataset.swap === 'done') closeSwap();
   });
   paintAuthChrome();
-  if(wantsDepositDemo()) setTimeout(()=> openDeposit(0, null), 360);
+  if(wantsWithdrawDemo()) setTimeout(()=> requireAuth(()=> openWithdraw()), 360);
+  else if(wantsDepositDemo()) setTimeout(()=> openDeposit(0, null), 360);
   const posts = [
     { user:"sauce.eth", avatar:`${M}/SAUCE.webp`, desc:"the dare: drink the tabasco. one gallon, fridge-cold, no chaser.", ticker:"$SAUCE", cat:"Dare", role:"op", type:"image", w:1, h:1, src:`${M}/SAUCE.webp`, tips:2048, comments:412, likes:3801,
       commentList:[

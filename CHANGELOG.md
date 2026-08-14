@@ -18,9 +18,9 @@
 - Entries wire into the OP comment thread (`wireYapsIntoOpThreads`). Nathan’s kitchen yap + p3dr0u thread live on `sauce.eth`. README [#yap-thread](https://github.com/frilo-eth/kby-feed/blob/main/README.md#yap-thread)
 
 ### Auth, funds, trade
-- Option 4: social/email → embedded sponsored wallet; EOA wallet → signatures on gift/buy/sell. README [#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth)
+- Option 4: social/email → embedded sponsored wallet; EOA wallet → signatures on gift/buy/sell. **One wallet per account** — no linked-EOA list / Connect wallet row. README [#auth](https://github.com/frilo-eth/kby-feed/blob/withdraw-feature/README.md#auth)
 - One tray at a time; in-tray steps use `morphSheet` (~320ms Vaul). README [#sheet-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sheet-morph)
-- Withdraw: amount → address → review. README [#withdraw](https://github.com/frilo-eth/kby-feed/blob/main/README.md#withdraw)
+- Withdraw: amount → address + network → review. Empty → Deposit first. README [#withdraw](https://github.com/frilo-eth/kby-feed/blob/withdraw-feature/README.md#withdraw)
 - Trade: dollarized buy helpers; sell `%` of holdings; ⇅ USD↔token (`TOKEN_PER_USD`). README [#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer)
 
 ### `$SAUCE` catalog
