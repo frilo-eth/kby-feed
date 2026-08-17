@@ -1,6 +1,6 @@
 # Kumbaya Feed
 
-**Version 0.1.0** — TikTok-style doomscroll feed prototype with spring physics, haptics, comments, trade drawer, and mobile-first overlays.
+**Version 0.1.1** — TikTok-style doomscroll feed prototype with spring physics, haptics, comments, trade drawer, and mobile-first overlays.
 
 **Live:** [https://kby-feed.vercel.app](https://kby-feed.vercel.app)  
 **Repo:** [frilo-eth/kby-feed](https://github.com/frilo-eth/kby-feed)  
@@ -18,13 +18,13 @@ Porting / review: open the heading, not the whole README. Production: [https://k
 | [Morphing pill](#dare-role-badge) (Dare/Meme → OP / Entry / Content) | [README.md#dare-role-badge](https://github.com/frilo-eth/kby-feed/blob/main/README.md#dare-role-badge) · [#morphing-pill](https://github.com/frilo-eth/kby-feed/blob/main/README.md#morphing-pill) |
 | [Info tip](#info-hover-tip) (Image vs Video copy) | [README.md#info-hover-tip](https://github.com/frilo-eth/kby-feed/blob/main/README.md#info-hover-tip) |
 | [Token page](#token-page) (`/token` — ticker + View token) | [README.md#token-page](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-page) |
-| [Auth (Option 4)](#auth) — social vs EOA · `?sig` / `?error=` | [README.md#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth) |
+| [Auth (Option 4)](#auth) — social vs EOA · wallet popup / `?autosig` | [README.md#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth) |
 | [Sheet morph](#sheet-morph) (`morphSheet` ~320ms) | [README.md#sheet-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sheet-morph) |
 | [Deposit](#deposit) (Cash vs Crypto, unified QR) | [README.md#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit) |
 | [Send](#send) | [README.md#send](https://github.com/frilo-eth/kby-feed/blob/main/README.md#send) |
 | [Notifications](#notifications) | [README.md#notifications](https://github.com/frilo-eth/kby-feed/blob/main/README.md#notifications) |
 | [Signals](#signals) | [README.md#signals](https://github.com/frilo-eth/kby-feed/blob/main/README.md#signals) |
-| [Stakeholder flows](#stakeholder-flows) (`/flows`, `?flow=`, `?minimal`) | [README.md#stakeholder-flows](https://github.com/frilo-eth/kby-feed/blob/main/README.md#stakeholder-flows) |
+| [Stakeholder flows](#stakeholder-flows) (`/flows`, `?flow=`) | [README.md#stakeholder-flows](https://github.com/frilo-eth/kby-feed/blob/main/README.md#stakeholder-flows) |
 | [Icons](#icons) | [README.md#icons](https://github.com/frilo-eth/kby-feed/blob/main/README.md#icons) |
 | [Trade drawer](#trade-drawer) (dollarized buy) | [README.md#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer) |
 | [Trade CTA](#trade-cta) (Sign in → Top up → green Buy) | [README.md#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta) |
@@ -118,9 +118,9 @@ Use this as the checklist when reimplementing — these are the UX details that 
 
 | Feature | Behavior |
 |---------|----------|
-| [Option 4](#auth) | Social / email → embedded Kumbaya wallet, **sponsored** (no signature on gift/buy/sell). Crypto wallet (EOA) → that address is the account; gift/buy/sell/launch **sign** (`needsSig()`). Default auto-completes; `?sig` shows a fake wallet (**Cancel / Connect** to connect, **Cancel / Confirm** to sign). Comment, like, dislike, gift, buy, sell, and launch are `requireAuth`. **Share** is ungated. Header **Sign up / Log in**. Account **USD balance** / **Top up**. Send still **Add funds to send** |
-| Sign-in sheet | Default: email, Google / X / TikTok, Crypto wallet, Passkey, More options. Title **Login or sign up**. Alt: [`?minimal`](https://kby-feed.vercel.app/feed?minimal) (icons, email, More — wallet under More). Same `.modal` chrome as share (`--card`, Inter, `--bg` `#F2EEEA`) |
-| [Deposit](#deposit) | Hub is **Cash** or **Crypto**. Cash is a MoonPay stand-in. Transfer crypto opens the QR with icons. Connect wallet is wallet first, then EVM/Solana. Copy: `Send USDC on Ethereum to this address.` |
+| [Option 4](#auth) | Social / email → embedded Kumbaya wallet, **sponsored** (no signature on gift/buy/sell). Crypto wallet (EOA) → that address is the account; gift/buy/sell/launch **sign** (`needsSig()`) with a fake extension popup (**Connect** / **Confirm**). Skip with `?autosig`. Comment, like, dislike, gift, buy, sell, and launch are `requireAuth`. **Share** is ungated. Header **Sign up / Log in**. Account **USD balance** / **Top up**. Send still **Add funds to send** |
+| Sign-in sheet | Email, Google / X / TikTok, Crypto wallet, Passkey, More options (Apple / Discord / GitHub / Telegram). Title **Login or sign up**. Alt: [`?minimal`](https://kby-feed.vercel.app/feed?minimal) hides Passkey. Same `.modal` chrome as share (`--card`, Inter, `--bg` `#F2EEEA`) |
+| [Deposit](#deposit) | Hub is **Cash** or **Crypto**, with card vs network chips. Cash is a MoonPay stand-in. Transfer crypto is first on the crypto list, then MegaETH. Connect wallet is wallet first, then EVM/Solana. Copy: `Send USDC on Ethereum to this address.` |
 | [Send](#send) | From / To / amount on one sheet. Linked wallets as recommended destinations + paste any address. Short From → **Add funds to send** |
 | [Notifications](#notifications) | Ghost bell left of theme in the topbar (desktop). Mobile: More sheet. Same tray as Account — side drawer / bottom sheet. All / Unread, Mark as read |
 | [Signals](#signals) | Sitewide live activity. Same full-height tray as Notifications. Live stack is parked |
@@ -845,7 +845,7 @@ At the **settled first post**, drag down → rubber-band + `#pullSpin` dial. Cro
 | Disarm | back below ~82% threshold | lose armed | `pulldisarm` |
 | Cancel | release early | spring to 0 · dismiss chip | `pullcancel` |
 | Fire | release while armed | `.is-refreshing` · hold at `PULL_HOLD` · `.is-spinning` | `pullfire` |
-| Done | after `PULL_LOAD_MS` + spring home | shuffle posts · chip clear | `pullsettle` → sound **`refresh`** (A5→E6 ping) |
+| Done | after `PULL_LOAD_MS` + spring home | shuffle posts · chip clear | `pullsettle` → sound **`refresh`** (library notification chime) |
 
 Desktop alternate when not pulling: `#newPill` (“New posts”) — soft-dismiss after **2** settled swipes, re-arm ~3 min. Same theme tokens as the spin chip.
 
@@ -893,9 +893,9 @@ Source: CSS ~2228–2363 · JS ~5492–6080 · markup `#pullSpin` ~2541 · point
 
 Presets via [web-haptics](https://haptics.lochie.me/) + `navigator.vibrate` fallback:
 
-`light` · `selection` · `nudge` · `settle` · `dragtick` · `toggle` · `unmute` · `mute` · `open` · `comment` · `sent` · `share` · `tip` · `like` · `dislike` · `attach` · `lock` · `unlock` · `pullsettle`→`refresh`
+`light` · `selection` · `nudge` · `settle` · `dragtick` · `toggle` · `unmute` · `mute` · `open` · `comment` · `sent` · `share` · `tip` · `like` · `dislike` · `attach` · `lock` · `unlock` · `success` · `funds` · `pullsettle`→`refresh`
 
-Swipe settle/dragtick = haptic only. Pull-refresh done plays a dedicated `refresh` notification ping.
+Swipe settle/dragtick = haptic only. UI audio for funds, send/success, notifications, like/tip/share, and light taps comes from [procedural-sounds](https://procedural-sounds.vercel.app/) recipes (MIT; player vendored as `playRecipe`). Slot ticks, mute, and lock stay custom oscillators. Deposit credit plays `funds` — FM sine 660 + 990 Hz, light reverb, delayed second partial. Send / buy / sell success plays `success`. New unread notifications play `nudge` + `refresh`.
 
 ---
 
@@ -1323,28 +1323,28 @@ Do not invent rounded substitutes. If a mark is missing from Central (or the pro
 
 **Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#stakeholder-flows](https://github.com/frilo-eth/kby-feed/blob/main/README.md#stakeholder-flows)
 
-Click-through for design reviews: [https://kby-feed.vercel.app/flows](https://kby-feed.vercel.app/flows) · local [http://localhost:3000/flows](http://localhost:3000/flows). Each card opens `/feed?flow=…` on that state. Rewrite: `/flows` → `flows.html` (`vercel.json`, `dev-server.py`).
+Click-through for design reviews: [https://kby-feed.vercel.app/flows](https://kby-feed.vercel.app/flows) · local [http://localhost:3000/flows](http://localhost:3000/flows). Auth, Funds, Others. Each row shows the shortened path; **Local** / **Here** opens this host, **Prod** opens production. Rewrite: `/flows` → `flows.html` (`vercel.json`, `dev-server.py`).
 
 | Flow | URL |
 |------|-----|
 | Land and browse | [`/feed`](https://kby-feed.vercel.app/feed) |
 | First action (login + pending tip) | [`/feed?flow=first`](https://kby-feed.vercel.app/feed?flow=first) |
-| Login · web2-minimal | [`/feed?minimal`](https://kby-feed.vercel.app/feed?minimal) |
 | Login · More options / cancelled | [`?flow=more`](https://kby-feed.vercel.app/feed?flow=more) · [`?flow=login-error`](https://kby-feed.vercel.app/feed?flow=login-error) |
-| Wallet catalog | [`/feed?flow=wallets`](https://kby-feed.vercel.app/feed?flow=wallets) |
+| Wallet catalog | [`/feed?flow=wallets`](https://kby-feed.vercel.app/feed?flow=wallets) (pick MetaMask → Connect) |
 | Top up to continue | [`/feed?flow=topup`](https://kby-feed.vercel.app/feed?flow=topup) |
 | MoonPay waiting | [`/feed?flow=moonpay`](https://kby-feed.vercel.app/feed?flow=moonpay) |
 | Post-deposit success / abandoned | [`?flow=funded`](https://kby-feed.vercel.app/feed?flow=funded) · [`?flow=abandoned`](https://kby-feed.vercel.app/feed?flow=abandoned) |
 | Account USD + holdings / empty | [`?flow=account`](https://kby-feed.vercel.app/feed?flow=account) · [`?flow=account-empty`](https://kby-feed.vercel.app/feed?flow=account-empty) |
-| Wallet-login account | [`/feed?flow=wallet`](https://kby-feed.vercel.app/feed?flow=wallet) |
+| Wallet-login account | [`/feed?flow=wallet`](https://kby-feed.vercel.app/feed?flow=wallet) (Connect, then Account) |
 | Manage wallets (EOA + embedded) | [`/feed?flow=manage`](https://kby-feed.vercel.app/feed?flow=manage) |
 | Signature pending / rejected | [`/feed?sig`](https://kby-feed.vercel.app/feed?sig) · [`?flow=sig-reject`](https://kby-feed.vercel.app/feed?flow=sig-reject) |
 | Onboarding hint | [`/feed?flow=onboard`](https://kby-feed.vercel.app/feed?flow=onboard) |
 | Buy in USD | [`/feed?flow=buy`](https://kby-feed.vercel.app/feed?flow=buy) |
+| Buy (wallet) | [`/feed?flow=buy-wallet`](https://kby-feed.vercel.app/feed?flow=buy-wallet) |
 | Launch Token | [`/feed?flow=launch`](https://kby-feed.vercel.app/feed?flow=launch) |
 | Pull-to-refresh / notif badge | [`?refresh`](https://kby-feed.vercel.app/feed?refresh) · [`?notiff`](https://kby-feed.vercel.app/feed?notiff) |
 
-Copy in the prototype: header **Sign up / Log in**. Default modal title **Login or sign up**. Account **USD balance**, **Top up** / **Top up to continue.** Web2-stripped login: [`?minimal`](https://kby-feed.vercel.app/feed?minimal).
+Copy in the prototype: header **Sign up / Log in**. Default modal title **Login or sign up**. Account **USD balance**, **Top up** / **Top up to continue.**
 
 ---
 
@@ -1361,16 +1361,21 @@ One login, one paying wallet. Prototype only — no real keys.
 | Google, Apple, X, Farcaster, email | `'social'` | minted **embedded** (`kind:'embedded'`, name Kumbaya) | **sponsored** — no signature sheet |
 | MetaMask / Phantom / … | `'eoa'` | that catalog row (`kind:'eoa'`) | **`needsSig()`** → signature sheet, then proceed |
 
-Comment, like, and dislike use `requireAuth`, same family as gift/buy. Reading comments and **Share** are ungated. Topbar: **Sign up / Log in** → after auth, wallet chip with `usdLabel(totalBal())`. Account hero is **USD balance**; the CTA is **Top up**. Send still uses **Add funds to send**. Deposit hub titles stay **Fund your account** / **Add funds**.
+Comment, like, and dislike use `requireAuth`, same family as gift/buy. Reading comments and **Share** are ungated. Topbar: **Sign up / Log in** → after auth, wallet chip with `usdLabel(totalBal())`. Every login (social and wallet) gets an automatic animal display name (header + Manage) — not an email derived from that name. Account opens with a large blockie and that name; under it, a small method icon, **Google** / **X** / short address (EOA), and a copy control. Social email (`you@gmail.com`) is hover-only on the method label. Copy copies the **receive address** and opens the info tip: **Copied** / **Receive address** — “Make sure to send to MegaETH. We recommend Top up for automated transfers.” plus a **Top up** button (same `#infoHoverTip` chrome as the morphing pill). Add-wallet lives on **Manage**, not as a CTA on the drawer. Account hero is **USD balance**; the CTA is **Top up**. Send still uses **Add funds to send**. Deposit hub titles stay **Fund your account** / **Add funds**.
 
-Default login sheet: email, Google / X / TikTok, Crypto wallet, Passkey, More options. Title **Login or sign up**. Present the stripped web2 sheet with [`?minimal`](https://kby-feed.vercel.app/feed?minimal) (or `?flow=first&minimal`): icons, email, More options; wallet under More; title **Sign up / Log in**. Click-through index: [`/flows`](https://kby-feed.vercel.app/flows).
+Default login sheet: email, Google / X / TikTok, Crypto wallet, Passkey, More options. Title **Login or sign up**. Wallet lives on the main sheet only — not under More. Present the stripped sheet with [`?minimal`](https://kby-feed.vercel.app/feed?minimal) (or `?flow=first&minimal`): icons first, email, Crypto wallet, More options (Passkey hidden); title **Sign up / Log in**. Click-through index: [`/flows`](https://kby-feed.vercel.app/flows).
 
-Default EOA signatures **auto-complete**. Social stays **sponsored** (no wallet popup). Review-only: `?sig` (`#sig` / `demo=sig`) logs in as MetaMask with a fake extension window. Connect is **Cancel / Connect**; signatures are **Cancel / Confirm**. Later EOA Buy / Send / Launch in that tab stay manual. Sponsored paths never show it. Cancel **morphs the wait sheet** (Privy-style) to **Connection rejected** / **Signature rejected** + Try again — not a toast. Confirming `?sig` funds the wallet `$250` so later spend also hits a signature.
+Design PRD: social users should not see an address in the default account view. This prototype still shows a copyable receive row under the name so reviewers can send funds to the balance; the hero stays **USD balance**.
+
+EOA connect and spend always open a fake extension popup (`#walletExt`, top-right on desktop). Connect is **Cancel / Connect**; signatures are **Cancel / Confirm**. Social stays **sponsored** (no popup). Skip the popup with [`?autosig`](https://kby-feed.vercel.app/feed?autosig). Cancel **morphs the wait sheet** to **Connection rejected** / **Signature rejected** + Try again — not a toast. [`/feed?sig`](https://kby-feed.vercel.app/feed?sig) lands on wait + Connect and funds `$250` after confirm. [`/feed?flow=buy-wallet`](https://kby-feed.vercel.app/feed?flow=buy-wallet) opens the trade confirm + Confirm popup.
 
 | Demo URL | Lands on |
 |----------|----------|
-| [`/feed?sig`](https://kby-feed.vercel.app/feed?sig) | EOA login wait + fake MetaMask |
-| [`/feed?error=sig`](https://kby-feed.vercel.app/feed?error=sig) | Same, then cancel → wait sheet morphs to **Connection rejected** |
+| [`/feed?sig`](https://kby-feed.vercel.app/feed?sig) | EOA login wait + Connect popup |
+| [`/feed?flow=wallet`](https://kby-feed.vercel.app/feed?flow=wallet) | Connect, then Account |
+| [`/feed?flow=buy-wallet`](https://kby-feed.vercel.app/feed?flow=buy-wallet) | Trade confirm + Confirm popup |
+| [`/feed?error=sig`](https://kby-feed.vercel.app/feed?error=sig) / [`?flow=sig-reject`](https://kby-feed.vercel.app/feed?flow=sig-reject) | Popup, then cancel → **Connection rejected** |
+| [`/feed?autosig`](https://kby-feed.vercel.app/feed?autosig) | Skip hatch — EOA auto-completes |
 | [`/feed?error=funds`](https://kby-feed.vercel.app/feed?error=funds) | Trade confirm, empty cash → **Not enough funds.** |
 | [`/feed?error=short`](https://kby-feed.vercel.app/feed?error=short) | Send, amount > From.bal → **Add funds to send** |
 
@@ -1414,8 +1419,8 @@ Hub is two jobs. One back chevron + [`morphSheet`](#sheet-morph). No stacked bre
 
 | Step | UI |
 |------|----|
-| `home` | **Cash** · **Crypto** |
-| `methods` | Transfer on MegaETH (first) · Transfer crypto · Connect wallet · Connect exchange |
+| `home` | **Cash** (Mastercard / Visa / Apple Pay chips) · **Crypto** (Ethereum / Base / Solana chips) |
+| `methods` | Transfer crypto (first) · Transfer on MegaETH · Connect wallet · Connect exchange |
 | `mega` | Unified QR, `net` locked MegaETH. **Between my wallets** only if 2+ MegaETH (embedded) wallets |
 | `qr` | Transfer crypto: network + asset pills with icons, real QR (`qrcode-generator`, ECC H) + Mega/token center. **Info** accordion under the address |
 | `watch` | Watching for deposit (close allowed) → `confirm` |
@@ -1435,7 +1440,7 @@ Hub is two jobs. One back chevron + [`morphSheet`](#sheet-morph). No stacked bre
 
 **Between my wallets** (Mega only) shows if there are 2+ embedded MegaETH wallets. Linked ETH addresses with no Mega balance do not count. When shown: From a linked wallet → To the cash account. EOA From → `requestSignature`.
 
-**Connect wallet** is wallet first, then EVM or Solana. Token chips sit under the subtitle. It is a deposit pull, not Account → Connect wallet (link).
+**Connect wallet** is wallet first, then EVM or Solana. Token chips sit under the subtitle. It is a deposit pull. Linking an extra wallet from Account is **Manage → Add a wallet**, not a drawer CTA.
 
 | Chain | Tokens |
 |-------|--------|
@@ -1610,6 +1615,6 @@ First tagged snapshot of the single-file prototype (`feed.html` + `public/`).
 | Comments | Anon/public, **threaded replies** (indent + View 5 / Hide), **`>>id` quotes** + hover card, attach + fly-in, CFX gallery; entries share lists with the OP |
 | Sheets | Trade, share (auto-close on X/copy), more (auto-close incl. theme), sheet-colored close targets, [auth / deposit / send](#auth) with [`morphSheet`](#sheet-morph) |
 | Trade | [Dollarized buy](#trade-drawer) · [CTA gate](#trade-cta) · [Slippage](#slippage) · [Pay with chip](#pay-with) · social sponsored / EOA signs |
-| System | Light/dark tokens, web-haptics + WebAudio, session keys for hint / sound / sidebar |
+| System | Light/dark tokens, web-haptics + procedural-sounds recipes, session keys for hint / sound / sidebar |
 
 See `COMPONENT_UPDATE.txt` for the compact behaviour checklist and [CHANGELOG.md](CHANGELOG.md) for release notes.

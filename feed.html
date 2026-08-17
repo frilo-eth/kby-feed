@@ -2839,40 +2839,76 @@ html.dark .kb-wrow.is-add .kb-wrow-av.ic{background:rgba(255,255,255,.08);}
 }
 .wallet-out:hover{color:var(--ink);}
 .wallet-id{
-  display:flex;align-items:center;gap:12px;margin:2px 0 16px;padding-bottom:14px;
+  display:flex;align-items:flex-start;gap:12px;margin:2px 0 16px;padding-bottom:14px;
   border-bottom:1px solid var(--line);
 }
-.wallet-id-av{width:44px;height:44px;border-radius:50%;object-fit:cover;background:var(--line);flex-shrink:0;}
-.wallet-id-meta{flex:1;min-width:0;display:flex;align-items:center;gap:8px;}
-.wallet-id-copy{flex:1;min-width:0;}
-.wallet-id-name{
-  display:flex;align-items:center;gap:8px;min-width:0;
-  font-size:16px;font-weight:800;letter-spacing:-.02em;color:var(--ink);
+.wallet-id-av{
+  width:64px;height:64px;flex-shrink:0;border-radius:50%;object-fit:cover;
+  background:var(--line);cursor:default;
 }
-.wallet-id-addr{
-  display:block;margin-top:3px;padding:0;
-  color:var(--ink-faint);
-  font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;
+.wallet-id-av.blockie,
+.wallet-id-av.blockie:hover{cursor:default;opacity:1;filter:none;}
+.wallet-id-meta{flex:1;min-width:0;padding-top:2px;}
+.wallet-id-who{
+  display:block;font-size:20px;font-weight:800;letter-spacing:-.03em;line-height:1.15;
+  color:var(--ink);word-break:break-word;
 }
-.wallet-id-icon{
-  width:36px;height:36px;flex-shrink:0;border:none;border-radius:10px;
-  background:transparent;color:var(--ink-faint);cursor:pointer;
+.wallet-id-recv{
+  display:flex;align-items:center;gap:6px;margin-top:8px;min-width:0;
+}
+.wallet-id-method{
+  width:18px;height:18px;flex-shrink:0;display:grid;place-items:center;
+}
+.wallet-id-method .auth-wicon,
+.wallet-id-method .sig-mark{
+  width:18px;height:18px;border-radius:5px;font-size:9px;
+}
+.wallet-id-method .auth-wicon svg,
+.wallet-id-method .sig-mark svg{width:11px;height:11px;}
+.wallet-id-method .sig-mark.is-kb{font-size:9px;}
+.wallet-id-method .auth-wicon.is-detected::after{display:none;}
+.wallet-id-lab{
+  min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font-size:13px;font-weight:600;color:var(--ink-soft);
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em;
+}
+.wallet-id-lab.is-hint{cursor:default;}
+.wallet-id-copy{
+  position:relative;width:28px;height:28px;flex-shrink:0;margin:0;padding:0;
+  border:none;border-radius:8px;background:transparent;color:var(--ink-faint);cursor:pointer;
   display:grid;place-items:center;
-  transition:background .15s,color .15s,transform .12s;
 }
-.wallet-id-icon:hover{background:var(--bg);color:var(--ink);}
-.wallet-id-icon:active{transform:scale(.94);}
-.wallet-id-icon.is-copied{color:var(--ink);}
-.wallet-id-icon svg{width:18px;height:18px;}
+.wallet-id-copy:hover{background:color-mix(in srgb, var(--ink) 6%, transparent);color:var(--ink);}
+.wallet-id-copy:active{transform:scale(.94);}
+.wallet-id-copy.is-copied{color:var(--green);}
+.wallet-id-copy svg{width:16px;height:16px;display:block;}
+.wallet-id-name{
+  display:block;width:100%;min-width:0;min-height:44px;margin:0 0 12px;padding:0 4px;
+  border:none;border-radius:8px;background:transparent;outline:none;
+  font:inherit;font-size:16px;font-weight:800;letter-spacing:-.02em;color:var(--ink);
+  line-height:44px;
+}
+.wallet-id-name:hover{background:color-mix(in srgb, var(--ink) 4%, transparent);}
+.wallet-id-name:focus{
+  background:color-mix(in srgb, var(--ink) 6%, transparent);
+  box-shadow:inset 0 0 0 1px var(--line);
+}
+.wallet-quiet-add{
+  display:block;width:100%;margin:4px 0 0;padding:12px 4px;
+  border:none;background:none;color:var(--ink-faint);
+  font:inherit;font-size:13px;font-weight:600;text-align:left;cursor:pointer;
+  min-height:44px;border-radius:8px;
+}
+.wallet-quiet-add:hover{color:var(--ink);background:color-mix(in srgb, var(--ink) 4%, transparent);}
 .wallet-signout{
-  width:40px;height:40px;flex-shrink:0;border:none;border-radius:10px;
+  width:44px;height:44px;flex-shrink:0;border:none;border-radius:10px;
   background:transparent;color:var(--red);cursor:pointer;
   display:grid;place-items:center;
   transition:background .15s,transform .12s;
 }
 .wallet-signout:hover{background:rgba(229,69,63,.1);}
 .wallet-signout:active{transform:scale(.94);}
-.wallet-signout svg{width:20px;height:20px;}
+.wallet-signout svg{width:24px;height:24px;display:block;}
 .wallet-delta{font-size:12px;font-weight:700;color:var(--green);margin:-8px 0 14px;}
 .wallet-tabs{
   display:flex;flex-direction:row;align-items:stretch;gap:0;
@@ -2960,30 +2996,35 @@ html.dark .kb-wrow.is-add .kb-wrow-av.ic{background:rgba(255,255,255,.08);}
 }
 
 .wallet-ext{
-  position:fixed;inset:0;z-index:84;display:none;align-items:flex-start;justify-content:flex-end;
-  padding:18px 18px 0 0;pointer-events:none;
+  position:fixed;inset:0;z-index:88;display:none;align-items:flex-start;justify-content:flex-end;
+  padding:12px 12px 0 0;pointer-events:none;
 }
 .wallet-ext.show{display:flex;pointer-events:auto;}
 .wallet-ext-card{
-  width:360px;max-width:calc(100vw - 24px);
-  background:#1c1c1c;color:#f3f3f3;border-radius:16px;
-  box-shadow:0 24px 48px rgba(0,0,0,.42);
-  padding:16px 16px 14px;font-family:Inter,system-ui,sans-serif;
-  opacity:0;transform:translateY(-10px);
-  transition:opacity .2s ease,transform .2s cubic-bezier(.22,1,.36,1);
-  pointer-events:auto;
+  width:320px;max-width:calc(100vw - 24px);
+  background:#24272a;color:#f3f3f3;border-radius:8px;
+  box-shadow:0 8px 32px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06);
+  padding:0;font-family:Inter,system-ui,sans-serif;
+  opacity:0;transform:translateY(-8px);
+  transition:opacity .18s ease,transform .2s cubic-bezier(.22,1,.36,1);
+  pointer-events:auto;overflow:hidden;
 }
 .wallet-ext.show .wallet-ext-card{opacity:1;transform:none;}
-.wallet-ext-head{
-  display:flex;align-items:center;gap:10px;margin-bottom:12px;
+.wallet-ext-chrome{
+  display:flex;align-items:center;gap:8px;padding:10px 12px;
+  background:#1a1d20;border-bottom:1px solid rgba(255,255,255,.06);
+  font-size:12px;font-weight:700;letter-spacing:-.01em;color:#c8c8c8;
 }
-.wallet-ext-head .auth-wicon{width:28px;height:28px;border-radius:8px;font-size:14px;}
-.wallet-ext-head .auth-wicon.is-detected::after{display:none;}
-.wallet-ext-name{font-size:14px;font-weight:800;letter-spacing:-.02em;}
+.wallet-ext-chrome .auth-wicon{width:20px;height:20px;border-radius:6px;font-size:11px;}
+.wallet-ext-chrome .auth-wicon svg{width:12px;height:12px;}
+.wallet-ext-chrome .auth-wicon.is-detected::after{display:none;}
+.wallet-ext-chrome-lab{flex:1;min-width:0;}
+.wallet-ext-chrome-kind{font-size:10px;font-weight:600;color:#8a8a8a;display:block;margin-top:1px;}
+.wallet-ext-body{padding:14px 14px 14px;}
 .wallet-ext-origin{
   display:inline-flex;align-items:center;gap:6px;
   font-size:11px;font-weight:700;color:#9a9a9a;letter-spacing:.01em;
-  background:#2a2a2a;border-radius:999px;padding:4px 8px;margin-bottom:12px;
+  background:#2f3338;border-radius:999px;padding:4px 8px;margin-bottom:12px;
 }
 .wallet-ext-origin i{
   width:6px;height:6px;border-radius:50%;background:#22C55E;display:block;
@@ -2996,12 +3037,12 @@ html.dark .kb-wrow.is-add .kb-wrow-av.ic{background:rgba(255,255,255,.08);}
 }
 .wallet-ext-actions{display:flex;gap:8px;}
 .wallet-ext-no,.wallet-ext-yes{
-  flex:1;border-radius:999px;padding:12px 0;
+  flex:1;border-radius:999px;padding:11px 0;
   font-size:14px;font-weight:700;cursor:pointer;
   transition:filter .15s,transform .12s;
 }
-.wallet-ext-no{background:#2a2a2a;color:#fff;border:1px solid rgba(255,255,255,.16);}
-.wallet-ext-yes{background:#fff;color:#111;border:1px solid #fff;}
+.wallet-ext-no{background:#3a3f45;color:#fff;border:1px solid rgba(255,255,255,.1);}
+.wallet-ext-yes{background:#0376c9;color:#fff;border:1px solid #0376c9;}
 .wallet-ext-no:hover,.wallet-ext-yes:hover{filter:brightness(1.08);}
 .wallet-ext-no:active,.wallet-ext-yes:active{transform:scale(.97);}
 @media (max-width:860px){
@@ -3072,7 +3113,7 @@ html.dark .auth-detected{color:#4ade80;background:rgba(31,164,99,.18);}
 .flow-method:hover{background:color-mix(in srgb, var(--card) 55%, white);border-color:color-mix(in srgb, var(--line) 45%, white);}
 .flow-method:active{transform:scale(.985);}
 .flow-method .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--bg);flex-shrink:0;color:var(--ink);}
-.flow-method .ic svg{width:16px;height:16px;display:block;}
+.flow-method .ic svg{width:20px;height:20px;display:block;}
 .flow-method .end svg{width:14px;height:14px;display:block;}
 .flow-method-copy{min-width:0;flex:1;}
 .flow-method b{display:block;font-size:14px;font-weight:700;color:var(--ink);}
@@ -3085,6 +3126,12 @@ html.dark .auth-detected{color:#4ade80;background:rgba(31,164,99,.18);}
   background:var(--card);border:1px solid var(--line);
 }
 .flow-chips i svg,.flow-chips i img{width:18px;height:18px;display:block;}
+.flow-chips i.is-brand{
+  width:auto;height:18px;border-radius:5px;padding:0 3px;
+  background:#fff;
+}
+html.dark .flow-chips i.is-brand{background:#fff;}
+.flow-chips i.is-brand svg{width:22px;height:14px;}
 .flow-select.is-lock{cursor:default;opacity:.88;}
 .flow-select.is-lock:hover{background:var(--card);border-color:var(--line);}
 .flow-skel{
@@ -3482,6 +3529,7 @@ html.dark .auth-detected{color:#4ade80;background:rgba(31,164,99,.18);}
   border:1px solid var(--line);
 }
 .flow-pay-ic svg{width:20px;height:20px;display:block;}
+.flow-pay-ic.is-card svg{width:28px;height:16px;}
 .flow-pay-ic.is-letter{font-size:15px;font-weight:800;letter-spacing:-.04em;}
 .flow-pay-ic.is-paypal{color:#003087;}
 .flow-pay-copy{min-width:0;}
@@ -4276,6 +4324,17 @@ html.dark .qhc-id{color:#6BA3FF;}
 .kb-info-tip-body{
   font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.45;letter-spacing:-.01em;
 }
+.kb-info-tip-cta{
+  display:none;margin-top:2px;
+}
+.kb-info-tip.has-cta .kb-info-tip-cta{display:block;}
+.kb-info-tip-btn{
+  border:none;border-radius:10px;padding:8px 12px;
+  background:var(--ink);color:var(--bg);
+  font:inherit;font-size:13px;font-weight:700;letter-spacing:-.02em;cursor:pointer;
+}
+.kb-info-tip-btn:hover{filter:brightness(1.08);}
+.kb-info-tip-btn:active{transform:scale(.98);}
 
 /* Mobile/touch: hide rich hover cards, keep OP explain tip */
 @media (max-width:860px), (hover:none){
@@ -4652,7 +4711,7 @@ html.dark .qhc-id{color:#6BA3FF;}
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14.5 3h2.1c.2 1.8 1.3 3.4 2.9 4.4V9.7c-1.2.12-2.4-.12-3.5-.68v5.66c0 3.2-2.6 5.82-5.82 5.82S4.36 17.88 4.36 14.68c0-3.19 2.6-5.81 5.82-5.81.3 0 .6.03.88.08v2.3a3.5 3.5 0 0 0-.88-.12 3.52 3.52 0 0 0-3.52 3.55 3.52 3.52 0 0 0 6.04 2.45V3Z"/></svg>
             </button>
           </div>
-          <button type="button" class="auth-row auth-main-extra" data-auth-panel="wallets">
+          <button type="button" class="auth-row" data-auth-panel="wallets">
             <span class="auth-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="6.5" width="17" height="12" rx="2.2" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 10h17M16.5 14.2h1.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
             Crypto wallet
             <span class="auth-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
@@ -4696,11 +4755,6 @@ html.dark .qhc-id{color:#6BA3FF;}
       <div class="auth-panel" id="authPanelFunds" hidden></div>
       <div class="auth-panel" id="authPanelMore" hidden>
         <div class="auth-stack">
-          <button type="button" class="auth-row" data-auth-panel="wallets" data-wallets-from="more">
-            <span class="auth-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="6.5" width="17" height="12" rx="2.2" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 10h17M16.5 14.2h1.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
-            Crypto wallet
-            <span class="auth-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-          </button>
           <button type="button" class="auth-row" data-login="social" data-provider="Apple">
             <span class="auth-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.3 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-.1 2.9-2.3c1.1-1.5 1.5-2.9 1.5-3 0-.1-2.8-1.1-2.8-3.4ZM14.7 6.4c.6-.8 1.1-1.9.9-3-1 .1-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1.1.1 2.2-.6 2.9-1.4Z"/></svg></span>
             Apple
@@ -4812,16 +4866,21 @@ html.dark .qhc-id{color:#6BA3FF;}
 
 <div class="wallet-ext" id="walletExt" hidden aria-hidden="true">
   <div class="wallet-ext-card" role="dialog" aria-modal="true" aria-labelledby="walletExtTitle">
-    <div class="wallet-ext-head">
+    <div class="wallet-ext-chrome">
       <span id="walletExtMark"></span>
-      <span class="wallet-ext-name" id="walletExtName">MetaMask</span>
+      <span class="wallet-ext-chrome-lab">
+        <span class="wallet-ext-name" id="walletExtName">MetaMask</span>
+        <span class="wallet-ext-chrome-kind">Browser extension</span>
+      </span>
     </div>
-    <span class="wallet-ext-origin"><i aria-hidden="true"></i>kumbaya.xyz</span>
-    <h3 class="wallet-ext-title" id="walletExtTitle">Sign message</h3>
-    <p class="wallet-ext-copy" id="walletExtCopy"></p>
-    <div class="wallet-ext-actions">
-      <button type="button" class="wallet-ext-no" id="walletExtReject">Cancel</button>
-      <button type="button" class="wallet-ext-yes" id="walletExtConfirm">Confirm</button>
+    <div class="wallet-ext-body">
+      <span class="wallet-ext-origin"><i aria-hidden="true"></i>kumbaya.xyz</span>
+      <h3 class="wallet-ext-title" id="walletExtTitle">Sign message</h3>
+      <p class="wallet-ext-copy" id="walletExtCopy"></p>
+      <div class="wallet-ext-actions">
+        <button type="button" class="wallet-ext-no" id="walletExtReject">Cancel</button>
+        <button type="button" class="wallet-ext-yes" id="walletExtConfirm">Confirm</button>
+      </div>
     </div>
   </div>
 </div>
@@ -4881,6 +4940,9 @@ html.dark .qhc-id{color:#6BA3FF;}
   <div class="kb-hover-card kb-info-tip" id="infoHoverTip" role="tooltip" aria-label="Original Post">
     <div class="kb-info-tip-title">Original Post</div>
     <div class="kb-info-tip-body">Image posted by the token creator at launch.</div>
+    <div class="kb-info-tip-cta" id="infoTipCtaWrap">
+      <button type="button" class="kb-info-tip-btn" id="infoTipCta">Top up</button>
+    </div>
   </div>
 </div>
 
@@ -4948,7 +5010,7 @@ html.dark .qhc-id{color:#6BA3FF;}
 
   /* ---- Option 4: one login, one paying wallet ---- */
   const WALLET_CATALOG = {
-    emb: { id:'emb', name:'Balance', kind:'embedded', addr:'0x5661…FC42' },
+    emb: { id:'emb', name:'Kumbaya', kind:'embedded', addr:'0x5661…FC42' },
   };
   function fakeWalletAddr(id){
     let h = 2166136261;
@@ -5045,6 +5107,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     swap: null,
     swapTimer: 0,
     anonName: null,
+    displayName: null,
   };
   function mintWallet(id, extra){
     const src = WALLET_CATALOG[id] || WALLET_CATALOG.mm;
@@ -5077,28 +5140,63 @@ html.dark .qhc-id{color:#6BA3FF;}
     const c = ANON_ANIMALS[(h >>> 16) % ANON_ANIMALS.length];
     return a + b + c;
   }
+  function ensureDisplayName(){
+    if(session.displayName) return session.displayName;
+    const seed = (session.auth || 'user') + ':' + (session.authKey || 'x');
+    session.displayName = mintAnonName(seed);
+    session.anonName = session.displayName;
+    return session.displayName;
+  }
   function socialName(){
-    if(!session.anonName) session.anonName = mintAnonName((session.authKey || 'social') + ':' + Date.now());
-    return session.anonName;
+    return ensureDisplayName();
   }
   function authIdentity(){
-    if(session.auth === 'eoa'){
-      const w = loginWallet();
-      return {
-        name: 'anon',
-        addr: w ? w.addr : '',
-        avatar: userAvatar(w ? w.addr : 'anon'),
-        quietAddr: false,
-      };
-    }
     const w = loginWallet();
-    const name = socialName();
+    const name = ensureDisplayName();
+    const kind = session.auth === 'eoa' ? 'eoa' : 'social';
+    const key = session.authKey;
     return {
       name,
       addr: w ? w.addr : '',
       avatar: userAvatar(name),
-      quietAddr: true,
+      kind,
+      key,
+      method: authProviderName(kind, key),
     };
+  }
+  function myHandle(){
+    return isAuthed() ? authIdentity().name : MY_SEED;
+  }
+  function myAvatarUrl(){
+    return isAuthed() ? authIdentity().avatar : MY_AVATAR;
+  }
+  function commitDisplayName(raw){
+    const next = String(raw || '').replace(/\s+/g, ' ').trim().slice(0, 24);
+    if(!next) return ensureDisplayName();
+    session.displayName = next;
+    session.anonName = next;
+    return next;
+  }
+  function walletMethodIcon(ident){
+    if(ident.kind === 'eoa'){
+      return walletIconHtml(LOGIN_WALLETS.find(x => x.id === ident.key) || WALLET_CATALOG[ident.key] || { name: ident.method, bg:'#888', mark:'W' });
+    }
+    return authMarkHtml('social', ident.key);
+  }
+  function authIdLabel(ident){
+    if(ident.kind === 'eoa') return shortAddr(ident.addr);
+    if(ident.key === 'Twitter') return 'X';
+    if(ident.key === 'Email') return 'Email';
+    if(ident.key === 'Passkey') return 'Passkey';
+    return ident.method || 'Account';
+  }
+  function socialEmail(ident){
+    if(ident.kind !== 'social') return '';
+    if(session.email) return session.email;
+    if(ident.key === 'Google') return 'you@gmail.com';
+    if(ident.key === 'Email') return 'you@email.com';
+    if(ident.key === 'Apple') return 'you@icloud.com';
+    return '';
   }
   function sendWalletLabel(w){
     if(w && w.kind === 'embedded') return socialName();
@@ -5172,7 +5270,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     const m = h.match(/^error[-_]?([a-z]+)$/);
     return m ? m[1] : '';
   }
-  function wantsManualSig(){ return demoHas('sig') || demoError() === 'sig'; }
+  function wantsManualSig(){ return !demoHas('autosig'); }
   function wantsMinimalAuth(){ return demoHas('minimal'); }
   function authMainTitle(){ return wantsMinimalAuth() ? 'Sign up / Log in' : 'Login or sign up'; }
   function syncAuthVariant(){
@@ -5972,11 +6070,11 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(mark) mark.innerHTML = walletIconHtml(w);
     if(name) name.textContent = w.name;
     if(opts && opts.intent === 'login'){
-      if(title) title.textContent = 'Connect this website with ' + w.name;
-      if(copy) copy.textContent = 'www.kumbaya.xyz';
+      if(title) title.textContent = 'Connect this website';
+      if(copy) copy.textContent = w.name + ' wants to connect kumbaya.xyz.';
       if(yes) yes.textContent = 'Connect';
     } else {
-      if(title) title.textContent = (opts && opts.label) || 'Sign-in request';
+      if(title) title.textContent = (opts && opts.label) || 'Signature request';
       if(copy) copy.textContent = 'One signature, one transaction.';
       if(yes) yes.textContent = 'Confirm';
     }
@@ -6130,9 +6228,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.pendingNeed = 0;
     playAuthFeedback(kind, key, ()=>{
       session.authKey = key || (kind === 'eoa' ? 'mm' : 'Google');
+      session.displayName = mintAnonName((kind || 'user') + ':' + session.authKey);
+      session.anonName = session.displayName;
       if(kind === 'social'){
         session.auth = 'social';
-        session.anonName = mintAnonName((session.authKey || 'social') + ':' + Date.now());
         session.wallets = [mintWallet('emb', { bal: 0, active: true })];
       } else {
         session.auth = 'eoa';
@@ -6334,8 +6433,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     const ident = authIdentity();
     if(session.walletView === 'settings') session.walletView = 'list';
-    const tab = session.walletTab === 'settings' ? 'tokens' : (session.walletTab || 'tokens');
-    if(session.walletTab === 'settings') session.walletTab = 'tokens';
+    let tab = session.walletTab || 'tokens';
+    if(tab === 'settings') tab = 'tokens';
+    if(tab === 'profile') tab = 'manage';
+    session.walletTab = tab;
     const copySvg = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
     const copyDoneSvg = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
     const cash = session.wallets.find(w => w.kind === 'embedded');
@@ -6365,6 +6466,26 @@ html.dark .qhc-id{color:#6BA3FF;}
           <em>${x.amt ? usdLabel(x.amt) : ''}</em>
         </div>`).join('')
       : `<div class="wallet-empty">No activity yet.</div>`;
+    const nameVal = String(ident.name).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+    const idLabel = authIdLabel(ident);
+    const emailHint = socialEmail(ident);
+    const recvCopyTitle = 'Receive address';
+    const recvCopyBody = 'Make sure to send to MegaETH. We recommend Top up for automated transfers.';
+    const recvHtml = (ident.addr || ident.kind === 'social')
+      ? `<div class="wallet-id-recv">
+            <span class="wallet-id-method" aria-hidden="true">${walletMethodIcon(ident)}</span>
+            <span class="wallet-id-lab${emailHint ? ' is-hint' : ''}" id="walletIdLab">${idLabel}</span>
+            <button type="button" class="wallet-id-copy" id="walletCopyAddr" aria-label="Copy receive address" data-tip-title="${recvCopyTitle}" data-tip-body="${recvCopyBody}" data-tip-cta="Top up" data-tip-action="topup">
+              ${copySvg}
+            </button>
+          </div>`
+      : '';
+    const manageBody = `
+        <div class="wallet-sec">Name</div>
+        <input type="text" class="wallet-id-name" id="walletNameInput" value="${nameVal}" maxlength="24" spellcheck="false" autocomplete="off" aria-label="Display name">
+        <div class="wallet-sec">Wallets</div>
+        ${rows || '<div class="wallet-empty">No extra wallets yet.</div>'}
+        <button type="button" class="wallet-quiet-add" id="connectWalletRow">Add a wallet</button>`;
     const tabBody = tab === 'tokens' ? `
         <div class="wallet-tab-h">
           <span>Token balances</span>
@@ -6373,25 +6494,13 @@ html.dark .qhc-id{color:#6BA3FF;}
         ${holds}`
       : tab === 'activity' ? acts
       : tab === 'tips' ? `<div class="wallet-empty">Tips you send land here.</div>`
-      : `<div class="kb-hold">
-          <img class="kb-hold-av" src="${ident.avatar}" alt="">
-          <div>
-            <div class="kb-hold-n">${ident.name}</div>
-            <div class="kb-hold-s">${ident.quietAddr ? 'Signed in' : ident.addr}</div>
-          </div>
-        </div>`;
-    const copyBtn = ident.addr
-      ? `<button type="button" class="wallet-id-icon" id="walletCopyAddr" aria-label="Copy address" title="Copy address">${copySvg}</button>`
-      : '';
+      : manageBody;
     body.innerHTML = `
       <div class="wallet-id">
-        <img class="wallet-id-av" src="${ident.avatar}" alt="">
+        <img class="wallet-id-av circle blockie" src="${ident.avatar}" alt="">
         <div class="wallet-id-meta">
-          <div class="wallet-id-copy">
-            <div class="wallet-id-name">${ident.name}</div>
-            ${ident.quietAddr ? '' : `<div class="wallet-id-addr">${ident.addr}</div>`}
-          </div>
-          ${copyBtn}
+          <b class="wallet-id-who">${nameVal}</b>
+          ${recvHtml}
         </div>
         <button type="button" class="wallet-signout" id="signOutBtn" aria-label="Sign out">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 7H8a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M13 8.5 16.5 12 13 15.5M16.2 12H9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -6402,20 +6511,12 @@ html.dark .qhc-id{color:#6BA3FF;}
         <button type="button" id="walletSendBtn">Send</button>
         <button type="button" class="wallet-add" id="walletAddBtn">Top up</button>
       </div>
-      <div class="wallet-sec">Wallets</div>
-      ${rows}
-      <button type="button" class="kb-wrow is-add" id="connectWalletRow">
-        <span class="kb-wrow-av ic">＋</span>
-        <span class="kb-wrow-meta">
-          <span class="kb-wrow-name">Connect wallet</span>
-        </span>
-      </button>
       <nav class="wallet-tabs" aria-label="Account">
         ${[
           ['tokens','Tokens','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/></svg>'],
           ['activity','Activity','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4.4l3 1.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
           ['tips','Tips','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 11.2V7.6a1.4 1.4 0 0 1 2.8 0v3.4M10.8 10.6V6.6a1.4 1.4 0 0 1 2.8 0v4.2M13.6 10.6V7.8a1.4 1.4 0 0 1 2.8 0V13c0 2.8-1.8 4.8-4.6 4.8h-.8C8.4 17.8 6 15.8 6 12.6v-1.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
-          ['profile','Profile','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8.2" r="3.1" stroke="currentColor" stroke-width="1.8"/><path d="M5.6 19c.7-3.1 3.1-4.8 6.4-4.8s5.7 1.7 6.4 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'],
+          ['manage','Manage','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8.2" r="3.1" stroke="currentColor" stroke-width="1.8"/><path d="M5.6 19c.7-3.1 3.1-4.8 6.4-4.8s5.7 1.7 6.4 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'],
         ].map(([id,lab,ic]) =>
           `<button type="button" data-wtab="${id}" class="${tab===id?'is-on':''}">${ic}<span>${lab}</span></button>`).join('')}
       </nav>
@@ -6424,6 +6525,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       btn.addEventListener('click', ()=> switchActiveWallet(btn.dataset.switch));
     });
     body.querySelector('#connectWalletRow')?.addEventListener('click', ()=>{
+      session.walletTab = 'manage';
       session.walletView = 'connect';
       renderWalletBody();
     });
@@ -6434,19 +6536,41 @@ html.dark .qhc-id{color:#6BA3FF;}
       session.walletView = 'import';
       renderWalletBody();
     });
+    const nameInput = body.querySelector('#walletNameInput');
+    nameInput?.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter'){ e.preventDefault(); nameInput.blur(); }
+      if(e.key === 'Escape'){ nameInput.value = ident.name; nameInput.blur(); }
+    });
+    nameInput?.addEventListener('blur', ()=>{
+      const next = commitDisplayName(nameInput.value);
+      nameInput.value = next;
+      if(typeof syncCommentAvatar === 'function') syncCommentAvatar();
+    });
     body.querySelector('#walletCopyAddr')?.addEventListener('click', (e)=>{
       const btn = e.currentTarget;
       try{ navigator.clipboard && navigator.clipboard.writeText(ident.addr || ''); }catch(_){}
       btn.classList.add('is-copied');
       btn.innerHTML = copyDoneSvg;
-      btn.setAttribute('aria-label', 'Copied');
+      btn.setAttribute('aria-label', 'Copied receive address');
+      btn.dataset.tipTitle = 'Copied';
+      if(typeof showHoverCard === 'function') showHoverCard('info', null, btn);
       clearTimeout(btn._copyT);
       btn._copyT = setTimeout(()=>{
         btn.classList.remove('is-copied');
         btn.innerHTML = copySvg;
-        btn.setAttribute('aria-label', 'Copy address');
-      }, 1100);
+        btn.setAttribute('aria-label', 'Copy receive address');
+        btn.dataset.tipTitle = recvCopyTitle;
+        if(hoverAnchor === btn && typeof fillInfoTip === 'function') fillInfoTip(btn);
+      }, 1800);
     });
+    const copyBtn = body.querySelector('#walletCopyAddr');
+    if(copyBtn && typeof bindHoverCard === 'function') bindHoverCard(copyBtn, 'info', null, 160);
+    const idLab = body.querySelector('#walletIdLab');
+    if(idLab && emailHint && typeof bindHoverCard === 'function'){
+      idLab.dataset.tipTitle = idLabel;
+      idLab.dataset.tipBody = emailHint;
+      bindHoverCard(idLab, 'info', null, 160);
+    }
     body.querySelectorAll('[data-wtab]').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         if(session.walletTab === btn.dataset.wtab) return;
@@ -6474,6 +6598,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.pendingFunds = null;
     session.pendingSpend = null;
     session.walletView = 'list';
+    if(typeof hideHoverCards === 'function') hideHoverCards(true);
     overlayClose(walletOverlay);
   }
 
@@ -6514,6 +6639,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       if(n > 0 && n > prev){
         void badge.offsetWidth;
         badge.classList.add(wasOn ? 'is-bump' : 'is-pop');
+        if(typeof haptic === 'function') haptic('nudge', 'refresh');
       }
     }
     if(pill){ pill.textContent = String(n); pill.classList.toggle('show', n > 0); }
@@ -6540,7 +6666,6 @@ html.dark .qhc-id{color:#6BA3FF;}
       mark(ids[i]);
       i += 1;
       paintNotifChrome();
-      if(typeof haptic === 'function') haptic('selection');
       if(notifOverlay?.classList.contains('show')) renderNotifList();
       if(i < ids.length) setTimeout(step, 400);
     };
@@ -6665,11 +6790,13 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   function addConnectedWallet(id){
     if(session.wallets.some(w => w.id === id)){
+      session.walletTab = 'manage';
       session.walletView = 'list';
       renderWalletBody();
       return;
     }
     session.wallets.push(mintWallet(id, { bal: 0, active: false }));
+    session.walletTab = 'manage';
     session.walletView = 'list';
     renderWalletBody();
     paintAuthChrome();
@@ -6679,6 +6806,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.auth = null;
     session.authKey = null;
     session.anonName = null;
+    session.displayName = null;
     session.wallets = [];
     session.pending = null;
     session.pendingNeed = 0;
@@ -7160,12 +7288,16 @@ html.dark .qhc-id{color:#6BA3FF;}
     menu.style.transformOrigin = top < r.top ? 'bottom left' : 'top left';
   }
   const FLOW_CHEV = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const FLOW_MC_ICON = '<svg viewBox="0 0 32 20" aria-hidden="true"><rect width="32" height="20" rx="3" fill="#fff"/><circle cx="13" cy="10" r="7" fill="#EB001B"/><circle cx="19" cy="10" r="7" fill="#F79E1B"/><path fill="#FF5F00" d="M16 4.8a7 7 0 0 0 0 10.4 7 7 0 0 0 0-10.4z"/></svg>';
+  const FLOW_VISA_ICON = '<svg viewBox="0 0 32 20" aria-hidden="true"><rect width="32" height="20" rx="3" fill="#1A1F71"/><text x="16" y="14" text-anchor="middle" fill="#fff" font-size="9" font-weight="800" font-family="Inter,Arial,sans-serif" letter-spacing="1">VISA</text></svg>';
+  const FLOW_CASH_ICON = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8.00001 4.83333V4.12962M8.00001 11.1667V11.8704M9.66667 6C9.36247 5.57932 8.65121 5.18518 8.00001 5.18518C7.23847 5.18518 6.24075 5.51099 6.24075 6.43621C6.24075 8.43986 9.75927 7.5966 9.75927 9.51006C9.75927 10.4283 8.77354 10.8148 8.00001 10.8148C7.34881 10.8148 6.54493 10.4207 6.24075 10M14.3333 8C14.3333 11.4978 11.4978 14.3333 8.00001 14.3333C4.5022 14.3333 1.66667 11.4978 1.66667 8C1.66667 4.50219 4.5022 1.66666 8.00001 1.66666C11.4978 1.66666 14.3333 4.50219 14.3333 8Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>';
   const FLOW_CW = {
     evm: ['mm','rabby','trust','okx'],
     solana: ['ph','solflare','okx'],
   };
   const FLOW_PAY = [
     { id:'apple', name:'Apple Pay', instant:true },
+    { id:'card', name:'Card' },
     { id:'revolut', name:'Revolut Pay' },
     { id:'gpay', name:'Google Pay' },
     { id:'sepa', name:'SEPA' },
@@ -7175,6 +7307,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   ];
   const FLOW_PAY_IC = {
     apple: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.3 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-.1 2.9-2.3c1.1-1.5 1.5-2.9 1.5-3 0-.1-2.8-1.1-2.8-3.4ZM14.7 6.4c.6-.8 1.1-1.9.9-3-1 .1-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1.1.1 2.2-.6 2.9-1.4Z"/></svg>',
+    card: FLOW_MC_ICON,
     revolut: '',
     gpay: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.04 12.26c0-.81-.07-1.59-.21-2.34H12v4.43h6.19a5.29 5.29 0 0 1-2.3 3.47v2.88h3.72c2.18-2 3.43-4.96 3.43-8.44Z"/><path fill="#34A853" d="M12 24c3.11 0 5.72-1.03 7.63-2.8l-3.72-2.88c-1.03.7-2.36 1.11-3.91 1.11-3 0-5.55-2.03-6.46-4.76H1.7v2.97A12 12 0 0 0 12 24Z"/><path fill="#FBBC05" d="M5.54 14.67A7.2 7.2 0 0 1 5.16 12c0-.93.16-1.83.38-2.67V6.36H1.7A12 12 0 0 0 0 12c0 1.94.46 3.77 1.7 5.64l3.84-2.97Z"/><path fill="#EA4335" d="M12 4.75c1.69 0 3.21.58 4.41 1.72l3.31-3.31C17.72 1.19 15.11 0 12 0 7.31 0 3.26 2.69 1.7 6.36l3.84 2.97C6.45 6.6 9 4.75 12 4.75Z"/></svg>',
     sepa: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3" fill="#1A3D8F"/><path d="M7 9h10M7 12h10M7 15h10" stroke="#F6C945" stroke-width="1.7" stroke-linecap="round"/></svg>',
@@ -7196,7 +7329,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(letters[id]){
       return `<span class="flow-pay-ic is-letter ${letters[id][1]}" aria-hidden="true">${letters[id][0]}</span>`;
     }
-    return `<span class="flow-pay-ic" aria-hidden="true">${FLOW_PAY_IC[id] || FLOW_PAY_IC.apple}</span>`;
+    return `<span class="flow-pay-ic${id==='card'?' is-card':''}" aria-hidden="true">${FLOW_PAY_IC[id] || FLOW_PAY_IC.apple}</span>`;
   }
   function flowCashNoteHtml(){
     return `<button type="button" class="flow-note" data-flow-note aria-expanded="false" aria-controls="flowCashNoteBody">
@@ -7255,8 +7388,22 @@ html.dark .qhc-id{color:#6BA3FF;}
     { id:'bitget', name:'Bitget', bg:'#00F0FF', mark:'BG' },
   ];
   function flowChipIcons(ids){
-    const map = { eth: tokenLogoHtml({ id:'eth', ic: PAY_ETH_ICON }), weth: tokenLogoHtml({ id:'weth', ic: PAY_WETH_ICON }), usdm: tokenLogoHtml({ id:'usdm', ic: PAY_USDM_ICON }), usdc: tokenLogoHtml({ id:'usdc', ic: FLOW_USDC_ICON }), usdt: tokenLogoHtml({ id:'usdt', ic: FLOW_USDT_ICON }), sol: tokenLogoHtml({ id:'sol', ic: FLOW_SOL_ICON }), base: chainLogoHtml('base') };
-    return `<span class="flow-chips">${ids.map(id => `<i>${map[id] || ''}</i>`).join('')}</span>`;
+    const map = {
+      eth: tokenLogoHtml({ id:'eth', ic: PAY_ETH_ICON }),
+      weth: tokenLogoHtml({ id:'weth', ic: PAY_WETH_ICON }),
+      usdm: tokenLogoHtml({ id:'usdm', ic: PAY_USDM_ICON }),
+      usdc: tokenLogoHtml({ id:'usdc', ic: FLOW_USDC_ICON }),
+      usdt: tokenLogoHtml({ id:'usdt', ic: FLOW_USDT_ICON }),
+      sol: tokenLogoHtml({ id:'sol', ic: FLOW_SOL_ICON }),
+      base: chainLogoHtml('base'),
+      ethereum: chainLogoHtml('ethereum'),
+      megaeth: FLOW_MEGA_ICON,
+      mc: FLOW_MC_ICON,
+      visa: FLOW_VISA_ICON,
+      apple: FLOW_PAY_IC.apple,
+    };
+    const brand = { mc:1, visa:1, apple:1 };
+    return `<span class="flow-chips">${ids.map(id => `<i class="${brand[id]?'is-brand':''}">${map[id] || ''}</i>`).join('')}</span>`;
   }
   function flowMethodHtml(go, title, sub, ic, chipsHtml){
     return `<button type="button" class="flow-method" data-flow-go="${go}">
@@ -7460,13 +7607,13 @@ html.dark .qhc-id{color:#6BA3FF;}
     let html = '';
     if(f.kind === 'deposit' && f.step === 'home'){
       html = `
-        ${flowMethodHtml('cash', 'Cash', 'Card or Apple Pay', '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8.00001 4.83333V4.12962M8.00001 11.1667V11.8704M9.66667 6C9.36247 5.57932 8.65121 5.18518 8.00001 5.18518C7.23847 5.18518 6.24075 5.51099 6.24075 6.43621C6.24075 8.43986 9.75927 7.5966 9.75927 9.51006C9.75927 10.4283 8.77354 10.8148 8.00001 10.8148C7.34881 10.8148 6.54493 10.4207 6.24075 10M14.3333 8C14.3333 11.4978 11.4978 14.3333 8.00001 14.3333C4.5022 14.3333 1.66667 11.4978 1.66667 8C1.66667 4.50219 4.5022 1.66666 8.00001 1.66666C11.4978 1.66666 14.3333 4.50219 14.3333 8Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>')}
-        ${flowMethodHtml('methods', 'Crypto', 'From a chain, wallet, or exchange', '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M14.3333 8C14.3333 11.4978 11.4978 14.3333 8.00001 14.3333C4.5022 14.3333 1.66667 11.4978 1.66667 8C1.66667 4.50219 4.5022 1.66666 8.00001 1.66666C11.4978 1.66666 14.3333 4.50219 14.3333 8Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/><path d="M5.33464 7.99984L8.00131 5.33317L10.668 7.99984L8.00131 10.6665L5.33464 7.99984Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>')}
+        ${flowMethodHtml('cash', 'Cash', 'Card or Apple Pay', FLOW_CASH_ICON, flowChipIcons(['mc','visa','apple']))}
+        ${flowMethodHtml('methods', 'Crypto', 'From a chain, wallet, or exchange', FLOW_XFER_ICON, flowChipIcons(['ethereum','base','sol']))}
         <div class="flow-kv"><dt>Account balance</dt><dd>${usdLabel(totalBal())}</dd></div>`;
     } else if(f.kind === 'deposit' && f.step === 'methods'){
       html = `
-        ${flowMethodHtml('mega', 'Transfer on MegaETH', 'ETH, USDm, and more', FLOW_MEGA_ICON)}
         ${flowMethodHtml('xfer', 'Transfer crypto', 'Ethereum, Base, or Solana', FLOW_XFER_ICON)}
+        ${flowMethodHtml('mega', 'Transfer on MegaETH', 'ETH, USDm, and more', FLOW_MEGA_ICON)}
         ${flowMethodHtml('cw', 'Connect wallet', 'Move funds from an external wallet', FLOW_CW_ICON)}
         ${flowMethodHtml('ex', 'Connect exchange', 'Transfer from an exchange account', FLOW_EX_ICON)}
         <div class="flow-kv"><dt>Account balance</dt><dd>${usdLabel(totalBal())}</dd></div>`;
@@ -7981,13 +8128,16 @@ html.dark .qhc-id{color:#6BA3FF;}
   function seedDemoEoa(bal){
     session.auth = 'eoa';
     session.authKey = 'mm';
+    session.displayName = mintAnonName('eoa:mm');
+    session.anonName = session.displayName;
     session.wallets = [mintWallet('mm', { bal: bal || 0, active: true })];
     paintAuthChrome();
   }
   function seedDemoSocial(bal){
     session.auth = 'social';
     session.authKey = 'Google';
-    session.anonName = mintAnonName('demo-social');
+    session.displayName = mintAnonName('social:Google');
+    session.anonName = session.displayName;
     session.wallets = [mintWallet('emb', { bal: bal || 0, active: true })];
     paintAuthChrome();
   }
@@ -8024,7 +8174,6 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     if(flow === 'wallets'){
       openLogin();
-      if(wantsMinimalAuth()) session._walletsFrom = 'more';
       setTimeout(()=> setAuthPanel('wallets'), 280);
       return;
     }
@@ -8069,19 +8218,36 @@ html.dark .qhc-id{color:#6BA3FF;}
       return;
     }
     if(flow === 'wallet' || flow === 'eoa'){
-      seedDemoEoa(180);
-      openWalletModal();
+      session.pending = ()=>{
+        const a = cashWallet();
+        if(a) a.bal = 180;
+        paintAuthChrome();
+        openWalletModal();
+      };
+      openLogin();
+      completeLogin('eoa', 'mm');
       return;
     }
     if(flow === 'manage'){
       seedDemoEoa(180);
       session.wallets.push(mintWallet('emb', { bal: 12, active: false }));
+      session.walletTab = 'manage';
       openWalletModal();
       return;
     }
     if(flow === 'buy'){
       seedDemoSocial(80);
       if(typeof openDrawer === 'function') openDrawer(posts[0]);
+      return;
+    }
+    if(flow === 'buy-wallet' || flow === 'buy-eoa'){
+      seedDemoEoa(80);
+      seedDemoHoldings();
+      if(typeof openDrawer === 'function') openDrawer(posts[0]);
+      setTimeout(()=>{
+        openSwapConfirm('buy');
+        confirmSwap();
+      }, 280);
       return;
     }
     if(flow === 'launch'){
@@ -8111,7 +8277,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(err === 'sig' || flow === 'sig-reject'){
       openLogin();
       completeLogin('eoa', 'mm');
-      setTimeout(()=> rejectWalletExt(), 720);
+      setTimeout(()=> rejectWalletExt(), 1800);
       return;
     }
     if(err === 'checkout'){
@@ -8215,6 +8381,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     logActivity('deposit', label ? `Add funds · ${label}` : 'Add funds', amt);
     finishFundsSheet();
     paintAuthChrome();
+    if(typeof haptic === 'function') haptic('funds');
     if(!(opts && opts.silent)) showToast(`Added ${usdLabel(amt)}${label ? ' via '+label : ''}.`);
     const next = session.pendingFunds;
     session.pendingFunds = null;
@@ -8262,6 +8429,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       const toLabel = toWallet ? sendWalletLabel(toWallet) : shortAddr(f.addr);
       logActivity('send', `Send · ${toLabel}`, amt);
       const toast = `Sent ${usdLabel(amt)} to ${toLabel}.`;
+      if(typeof haptic === 'function') haptic('success');
       if(f.kind === 'deposit'){
         finishFundsSheet();
         paintAuthChrome();
@@ -8427,11 +8595,11 @@ html.dark .qhc-id{color:#6BA3FF;}
       return;
     }
     if(s.side === 'sell'){
-      haptic('dislike');
+      haptic('success');
       showToast(`Sold ${s.ticker}.`);
     } else {
       recordBuy(s.amt);
-      haptic('like');
+      haptic('success');
       showToast(`Bought ${s.tokenShort} ${s.ticker}.`);
     }
     s.tx = mockSwapTx();
@@ -8536,22 +8704,12 @@ html.dark .qhc-id{color:#6BA3FF;}
       return;
     }
     if(session.authPanel === 'funds' && flowCanBack()){ flowBack(); return; }
-    if(session.authPanel === 'wallets' && session._walletsFrom === 'more'){
-      session._walletsFrom = null;
-      setAuthPanel('more');
-      return;
-    }
     setAuthPanel('main');
   });
   authOverlay?.addEventListener('click', (e)=>{ if(e.target === authOverlay) closeAuthFromUser(); });
   authOverlay?.addEventListener('click', (e)=>{
     const panel = e.target.closest('[data-auth-panel]');
-    if(panel){
-      if(panel.dataset.authPanel === 'wallets' && panel.dataset.walletsFrom === 'more') session._walletsFrom = 'more';
-      else if(panel.dataset.authPanel !== 'wallets') session._walletsFrom = null;
-      setAuthPanel(panel.dataset.authPanel);
-      return;
-    }
+    if(panel){ setAuthPanel(panel.dataset.authPanel); return; }
     const login = e.target.closest('[data-login]');
     if(!login) return;
     completeLogin(login.dataset.login, login.dataset.wallet || login.dataset.provider);
@@ -8906,16 +9064,18 @@ html.dark .qhc-id{color:#6BA3FF;}
   /* ---------------- haptics + slot-machine audio (no ambient loop) ---------------- */
   let actx, masterGain, audioReady=false, lastDragSound=0;
   let webHaptics = null;
-  // Local npm package (vanilla API) — https://haptics.lochie.me
-  // React hook also available as web-haptics/react if/when the feed moves off this single file.
-  import('/node_modules/web-haptics/dist/index.mjs').then((mod)=>{
+  // https://haptics.lochie.me — local package, CDN fallback
+  function attachWebHaptics(mod){
     try{ webHaptics = new mod.WebHaptics(); }catch(_){}
-  }).catch(()=>{});
+  }
+  import('/node_modules/web-haptics/dist/index.mjs').then(attachWebHaptics).catch(()=>{
+    import('https://cdn.jsdelivr.net/npm/web-haptics@0.0.6/dist/index.mjs').then(attachWebHaptics).catch(()=>{});
+  });
   const WEB_HAPTIC_PRESETS = {
     light:'light', selection:'selection', nudge:'nudge', settle:'success',
     dragtick:'soft', toggle:'rigid', unmute:'nudge', mute:'rigid', open:'medium', comment:'success',
     sent:'success', tip:'success', like:'medium', dislike:'warning', share:'soft', attach:'success',
-    lock:'rigid', unlock:'nudge',
+    lock:'rigid', unlock:'nudge', success:'success', funds:'success',
     // Pull-to-refresh — custom patterns via web-haptics (https://haptics.lochie.me)
     pulltick:  [{ duration: 8, intensity: 0.22 }],
     pullmorph: [{ duration: 14, intensity: 0.4 }],
@@ -8944,6 +9104,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     dislike:   { vibrate: [26, 16, 22], taps: 1 },
     lock:      { vibrate: [12, 22, 16], taps: 1 },
     unlock:    { vibrate: [8, 20, 10, 28, 8], taps: 2, tapGap: 36 },
+    success:   { vibrate: [10, 28, 14, 36, 18], taps: 2, tapGap: 42 },
+    funds:     { vibrate: [12, 32, 16, 40, 20], taps: 3, tapGap: 48 },
     pulltick:  { vibrate: [4], taps: 0 },
     pullmorph: { vibrate: [8], taps: 1 },
     pullarm:   { vibrate: [14, 36, 18], taps: 2, tapGap: 44 },
@@ -8957,6 +9119,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     light:'light', selection:'light', nudge:'light', settle:false, attach:'settle', dragtick:false,
     toggle:'toggle', unmute:'unmute', mute:'mute', open:'open', comment:'comment', sent:'sent', share:'share',
     tip:'tip', like:'like', dislike:'dislike', lock:'lock', unlock:'unlock',
+    success:'sent', funds:'funds',
     pulltick:false, pullmorph:'light', pullarm:'light', pulldisarm:false,
     pullfire:'open', pullcancel:false, pullsettle:'refresh',
   };
@@ -8982,6 +9145,168 @@ html.dark .qhc-id{color:#6BA3FF;}
       nativeTaptic();
     }
   }
+  // Recipe player + library patches from procedural-sounds (MIT).
+  // Player is a standalone copy of their synth; recipes are hand-curated pool sounds.
+  // https://github.com/m1ckc3s/procedural-sounds — synth core adapted from @web-kits/audio (Raphael Salaja, MIT).
+  // Named playRecipe so it does not collide with playSound(kind).
+  function playRecipe(patch, ctx){
+    if(!patch || !ctx) return;
+    const sink = masterGain || ctx.destination;
+    const S = 0.0001;
+    const t0 = ctx.currentTime;
+    function noiseBuffer(seconds, color){
+      const len = Math.max(1, Math.floor(ctx.sampleRate * seconds));
+      const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      if(color === 'pink'){
+        let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+        for(let i=0;i<len;i++){
+          const w = Math.random()*2-1;
+          b0=0.99886*b0+w*0.0555179; b1=0.99332*b1+w*0.0750759; b2=0.969*b2+w*0.153852;
+          b3=0.8665*b3+w*0.3104856; b4=0.55*b4+w*0.5329522; b5=-0.7616*b5-w*0.016898;
+          d[i]=(b0+b1+b2+b3+b4+b5+b6+w*0.5362)*0.11; b6=w*0.115926;
+        }
+      }else if(color === 'brown'){
+        let last=0;
+        for(let i=0;i<len;i++){ const w=Math.random()*2-1; last=(last+0.02*w)/1.02; d[i]=last*3.5; }
+      }else{
+        for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+      }
+      return buf;
+    }
+    function reverb(o){
+      const decay=o.decay==null?0.5:o.decay, mix=o.mix==null?0.3:o.mix, damping=o.damping==null?0:o.damping;
+      const input=ctx.createGain(), output=ctx.createGain();
+      const dry=ctx.createGain(); dry.gain.value=1-mix; input.connect(dry); dry.connect(output);
+      const wet=ctx.createGain(); wet.gain.value=mix; input.connect(wet);
+      const wetOut=ctx.createGain(); wetOut.connect(output);
+      const len=Math.ceil(ctx.sampleRate*decay*(o.roomSize==null?1:o.roomSize));
+      const buf=ctx.createBuffer(2,len,ctx.sampleRate);
+      for(let ch=0;ch<2;ch++){
+        const d=buf.getChannelData(ch);
+        for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(len*0.28));
+        if(damping>0){ const c=Math.min(damping,0.99); let prev=0; for(let i=0;i<len;i++){ prev=d[i]*(1-c)+prev*c; d[i]=prev; } }
+      }
+      const conv=ctx.createConvolver(); conv.buffer=buf;
+      const pre=o.preDelay==null?0:o.preDelay;
+      if(pre>0){ const pd=ctx.createDelay(Math.max(pre+0.01,1)); pd.delayTime.value=pre; wet.connect(pd); pd.connect(conv); }
+      else wet.connect(conv);
+      conv.connect(wetOut);
+      return {input, output};
+    }
+    function shimmer(o){
+      const input=ctx.createGain(), output=ctx.createGain(); input.connect(output);
+      const delay=ctx.createDelay(1); delay.delayTime.value=o.delay;
+      const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=o.lowpass==null?4000:o.lowpass;
+      const fb=ctx.createGain(); fb.gain.value=o.feedback;
+      const wet=ctx.createGain(); wet.gain.value=o.wet;
+      input.connect(delay); delay.connect(lp); lp.connect(fb); fb.connect(delay); lp.connect(wet); wet.connect(output);
+      return {input, output};
+    }
+    for(const layer of (patch.layers || [patch])){
+      const t=t0+(layer.delay||0);
+      const gain=layer.gain==null?0.5:layer.gain;
+      const env=layer.envelope;
+      const a=env?env.attack||0:0, d=env?env.decay:0, sus=env?env.sustain||0:0, rel=env?env.release||0:0;
+      const dur=env?a+d+rel:0.5;
+      const g=ctx.createGain();
+      if(!env){ g.gain.setValueAtTime(gain,t); g.gain.setTargetAtTime(S,t,0.15); }
+      else if(env.curve==='ramp'){
+        const peak=Math.max(gain,S);
+        g.gain.setValueAtTime(S,t);
+        if(a>0) g.gain.exponentialRampToValueAtTime(peak,t+a); else g.gain.setValueAtTime(peak,t);
+        g.gain.exponentialRampToValueAtTime(S,t+a+d);
+      }else{
+        g.gain.setValueAtTime(S,t);
+        if(a>0) g.gain.linearRampToValueAtTime(gain,t+a); else g.gain.setValueAtTime(gain,t);
+        if(sus>0){ g.gain.setTargetAtTime(Math.max(sus*gain,S),t+a,d/3); if(rel>0) g.gain.setTargetAtTime(S,t+a+d,rel/3); }
+        else g.gain.setTargetAtTime(S,t+a,d/3);
+      }
+      let src;
+      const s=layer.source;
+      if(s.type==='noise'){ src=ctx.createBufferSource(); src.buffer=noiseBuffer(dur+0.1,s.color); }
+      else{
+        src=ctx.createOscillator(); src.type=s.type;
+        const f=s.frequency;
+        if(typeof f==='number') src.frequency.setValueAtTime(f,t);
+        else{ src.frequency.setValueAtTime(f.start,t); src.frequency.exponentialRampToValueAtTime(Math.max(f.end,1),t+Math.min(f.time==null?dur:f.time,dur)); }
+        if(s.detune) src.detune.value=s.detune;
+        if(s.fm){
+          const carrier=typeof f==='number'?f:f.start;
+          const mod=ctx.createOscillator(); mod.type='sine'; mod.frequency.value=carrier*s.fm.ratio;
+          const mg=ctx.createGain(); mg.gain.value=s.fm.depth;
+          mod.connect(mg); mg.connect(src.frequency); mod.start(t); mod.stop(t+dur+0.1);
+        }
+      }
+      src.start(t); src.stop(t+dur+0.1);
+      let node=src;
+      const filters=!layer.filter?[]:(Array.isArray(layer.filter)?layer.filter:[layer.filter]);
+      for(const f of filters){
+        const bq=ctx.createBiquadFilter(); bq.type=f.type;
+        bq.frequency.setValueAtTime(f.frequency,t);
+        bq.Q.value=f.Q==null?(f.resonance==null?1:f.resonance):f.Q;
+        if(f.envelope){
+          const peakAt=t+(f.envelope.attack||0);
+          bq.frequency.linearRampToValueAtTime(f.envelope.peak,peakAt);
+          bq.frequency.exponentialRampToValueAtTime(Math.max(f.frequency,1),peakAt+f.envelope.decay);
+        }
+        node.connect(bq); node=bq;
+      }
+      node.connect(g);
+      let out=g;
+      for(const fx of (layer.effects||[])){
+        const built=fx.type==='reverb'?reverb(fx):fx.type==='delay'?shimmer(fx):null;
+        if(!built) continue;
+        out.connect(built.input); out=built.output;
+      }
+      out.connect(sink);
+    }
+  }
+  const SOUND_RECIPES = {
+    funds:{layers:[
+      {source:{type:'sine',frequency:660,fm:{ratio:3,depth:300}},envelope:{attack:0,decay:0.5,sustain:0.03,release:0.2},effects:[{type:'reverb',decay:0.7,damping:0.4,mix:0.15}],gain:0.111},
+      {source:{type:'sine',frequency:990,fm:{ratio:3,depth:250}},envelope:{attack:0,decay:0.45,sustain:0.02,release:0.18},delay:0.12,effects:[{type:'reverb',decay:0.7,damping:0.4,mix:0.15}],gain:0.093}
+    ]},
+    sent:{layers:[
+      {source:{type:'triangle',frequency:444},envelope:{attack:0.003,decay:0.137,sustain:0,release:0},gain:0.124,filter:{type:'lowpass',frequency:1200}},
+      {source:{type:'triangle',frequency:560},envelope:{attack:0.003,decay:0.132,sustain:0,release:0},gain:0.125,delay:0.089,filter:{type:'lowpass',frequency:1399}},
+      {source:{type:'triangle',frequency:747},envelope:{attack:0.003,decay:0.164,sustain:0,release:0},gain:0.189,delay:0.163,filter:{type:'lowpass',frequency:1868}}
+    ]},
+    refresh:{layers:[
+      {source:{type:'sine',frequency:555},envelope:{attack:0.003,decay:0.09,sustain:0,release:0,curve:'ramp'},gain:0.161},
+      {source:{type:'sine',frequency:759},envelope:{attack:0.004,decay:0.134,sustain:0,release:0,curve:'ramp'},gain:0.15,delay:0.081},
+      {source:{type:'sine',frequency:1066},envelope:{attack:0.003,decay:0.256,sustain:0,release:0,curve:'ramp'},gain:0.167,delay:0.161}
+    ]},
+    like:{layers:[
+      {source:{type:'sine',frequency:651},envelope:{attack:0.003,decay:0.06,sustain:0,release:0,curve:'ramp'},gain:0.155},
+      {source:{type:'sine',frequency:728},envelope:{attack:0.003,decay:0.067,sustain:0,release:0,curve:'ramp'},gain:0.11,delay:0.138}
+    ]},
+    tip:{layers:[
+      {source:{type:'sine',frequency:494},envelope:{attack:0.004,decay:0.222,sustain:0,release:0,curve:'ramp'},gain:0.159},
+      {source:{type:'sine',frequency:988},envelope:{attack:0.004,decay:0.16,sustain:0,release:0,curve:'ramp'},gain:0.111,delay:0.133},
+      {source:{type:'sine',frequency:1480},envelope:{attack:0.004,decay:0.146,sustain:0,release:0,curve:'ramp'},gain:0.054,delay:0.28}
+    ]},
+    dislike:{layers:[
+      {source:{type:'triangle',frequency:371},envelope:{attack:0.004,decay:0.097,sustain:0,release:0,curve:'ramp'},gain:0.181},
+      {source:{type:'triangle',frequency:262},envelope:{attack:0.004,decay:0.135,sustain:0,release:0,curve:'ramp'},gain:0.167,delay:0.136}
+    ]},
+    comment:{layers:[
+      {source:{type:'sine',frequency:533},envelope:{attack:0.001,decay:0.027,sustain:0,release:0,curve:'ramp'},gain:0.153},
+      {source:{type:'sine',frequency:598},envelope:{attack:0.001,decay:0.056,sustain:0,release:0,curve:'ramp'},gain:0.114,delay:0.041}
+    ]},
+    share:{layers:[
+      {source:{type:'sine',frequency:714},envelope:{attack:0.007,decay:0.121,sustain:0,release:0,curve:'ramp'},gain:0.154},
+      {source:{type:'sine',frequency:1069},envelope:{attack:0.006,decay:0.176,sustain:0,release:0,curve:'ramp'},gain:0.116,delay:0.074}
+    ]},
+    light:{layers:[
+      {source:{type:'sine',frequency:998},envelope:{attack:0,decay:0.05,sustain:0,release:0},gain:0.1},
+      {source:{type:'sine',frequency:1817},envelope:{attack:0,decay:0.05,sustain:0,release:0},gain:0.05,delay:0.05}
+    ]},
+    open:{layers:[
+      {source:{type:'sine',frequency:533},envelope:{attack:0.001,decay:0.027,sustain:0,release:0,curve:'ramp'},gain:0.153},
+      {source:{type:'sine',frequency:598},envelope:{attack:0.001,decay:0.056,sustain:0,release:0,curve:'ramp'},gain:0.114,delay:0.041}
+    ]}
+  };
   function slotReelTick(ctx, step, vel){
     const t0 = ctx.currentTime;
     const pitch = 520 + (step % 5) * 38 + Math.min(Math.abs(vel||0) * 18, 120);
@@ -9023,102 +9348,12 @@ html.dark .qhc-id{color:#6BA3FF;}
     spark.connect(sg); sg.connect(masterGain);
     spark.start(ts); spark.stop(ts + 0.19);
   }
-  /** Soft “new content” ping — distinct from swipe land / drawer open */
-  function reactRefreshSound(ctx){
-    const t0 = ctx.currentTime;
-    // Two sine bells (A5 → E6), short decay — reads as a notification, not a reel settle
-    [[880, 0, 0.085], [1318.51, 0.1, 0.06]].forEach(([f, off, peak])=>{
-      const t = t0 + off;
-      const osc = ctx.createOscillator(); osc.type='sine'; osc.frequency.value = f;
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(peak, t + 0.014);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.32);
-      osc.connect(g); g.connect(masterGain);
-      osc.start(t); osc.stop(t + 0.34);
-    });
-  }
   function microClick(ctx, freq){
     const t0 = ctx.currentTime;
     const osc = ctx.createOscillator(); osc.type='sine'; osc.frequency.value = freq || 1200;
     const g = ctx.createGain();
     g.gain.setValueAtTime(0.03, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.02);
     osc.connect(g); g.connect(masterGain); osc.start(t0); osc.stop(t0 + 0.025);
-  }
-  function reactLikeSound(ctx){
-    const t0 = ctx.currentTime;
-    const osc = ctx.createOscillator(); osc.type='sine';
-    osc.frequency.setValueAtTime(420, t0);
-    osc.frequency.exponentialRampToValueAtTime(180, t0 + 0.07);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(0.13, t0 + 0.006);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.09);
-    osc.connect(g); g.connect(masterGain);
-    osc.start(t0); osc.stop(t0 + 0.1);
-    setTimeout(()=>microClick(ctx, 880), 32);
-  }
-  function reactDislikeSound(ctx){
-    const t0 = ctx.currentTime;
-    const osc = ctx.createOscillator(); osc.type='triangle';
-    osc.frequency.setValueAtTime(140, t0);
-    osc.frequency.exponentialRampToValueAtTime(70, t0 + 0.14);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.11, t0);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.15);
-    osc.connect(g); g.connect(masterGain);
-    osc.start(t0); osc.stop(t0 + 0.16);
-  }
-  function reactTipSound(ctx){
-    const t0 = ctx.currentTime;
-    [659.25, 880, 1174.66].forEach((f, i)=>{
-      const osc = ctx.createOscillator(); osc.type='sine'; osc.frequency.value = f;
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0.0001, t0 + i * 0.028);
-      g.gain.exponentialRampToValueAtTime(0.1 - i * 0.012, t0 + i * 0.028 + 0.005);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + i * 0.028 + 0.13);
-      osc.connect(g); g.connect(masterGain);
-      osc.start(t0 + i * 0.028); osc.stop(t0 + i * 0.028 + 0.14);
-    });
-  }
-  function reactCommentSound(ctx){
-    const t0 = ctx.currentTime;
-    [740, 988].forEach((f, i)=>{
-      const osc = ctx.createOscillator(); osc.type='sine'; osc.frequency.value = f;
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0.0001, t0 + i * 0.04);
-      g.gain.exponentialRampToValueAtTime(0.05, t0 + i * 0.04 + 0.004);
-      g.gain.exponentialRampToValueAtTime(0.0001, t0 + i * 0.04 + 0.05);
-      osc.connect(g); g.connect(masterGain);
-      osc.start(t0 + i * 0.04); osc.stop(t0 + i * 0.04 + 0.06);
-    });
-  }
-  // Soft ascending “posted” tick — present enough to reinforce send, quieter than tip/like
-  function reactSentSound(ctx){
-    const t0 = ctx.currentTime;
-    [660, 880, 1170].forEach((f, i)=>{
-      const t = t0 + i * 0.034;
-      const osc = ctx.createOscillator(); osc.type = 'sine'; osc.frequency.value = f;
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.07 - i * 0.014, t + 0.006);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
-      osc.connect(g); g.connect(masterGain);
-      osc.start(t); osc.stop(t + 0.1);
-    });
-    setTimeout(()=>microClick(ctx, 1240), 72);
-  }
-  function reactShareSound(ctx){
-    const t0 = ctx.currentTime;
-    const osc = ctx.createOscillator(); osc.type='sine';
-    osc.frequency.setValueAtTime(620, t0);
-    osc.frequency.exponentialRampToValueAtTime(1040, t0 + 0.06);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(0.06, t0 + 0.01);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.08);
-    osc.connect(g); g.connect(masterGain);
-    osc.start(t0); osc.stop(t0 + 0.085);
   }
   function reactToggleSound(ctx){
     microClick(ctx, feedSoundOn ? 980 : 640);
@@ -9152,7 +9387,6 @@ html.dark .qhc-id{color:#6BA3FF;}
     osc.start(t0); osc.stop(t0 + 0.13);
     setTimeout(()=>microClick(ctx, 420), 55);
   }
-  function reactOpenSound(ctx){ microClick(ctx, 760); }
   function reactLockSound(ctx){
     // mechanical latch — low thud + bright click
     const t0 = ctx.currentTime;
@@ -9191,6 +9425,8 @@ html.dark .qhc-id{color:#6BA3FF;}
   function playSound(kind, arg){
     unlockAudio();
     const ctx = actx; if(!ctx) return;
+    const recipe = SOUND_RECIPES[kind];
+    if(recipe){ playRecipe(recipe, ctx); return; }
     if(kind==='dragtick'){
       const now = performance.now();
       if(now - lastDragSound < 55) return;
@@ -9198,20 +9434,11 @@ html.dark .qhc-id{color:#6BA3FF;}
       slotReelTick(ctx, arg || 0, 0);
     }
     else if(kind==='settle') slotLand(ctx);
-    else if(kind==='refresh') reactRefreshSound(ctx);
-    else if(kind==='tip') reactTipSound(ctx);
-    else if(kind==='like') reactLikeSound(ctx);
-    else if(kind==='dislike') reactDislikeSound(ctx);
-    else if(kind==='comment') reactCommentSound(ctx);
-    else if(kind==='sent') reactSentSound(ctx);
-    else if(kind==='share') reactShareSound(ctx);
     else if(kind==='toggle') reactToggleSound(ctx);
     else if(kind==='unmute') reactUnmuteSound(ctx);
     else if(kind==='mute') reactMuteSound(ctx);
     else if(kind==='lock') reactLockSound(ctx);
     else if(kind==='unlock') reactUnlockSound(ctx);
-    else if(kind==='open') reactOpenSound(ctx);
-    else if(kind==='light') microClick(ctx);
   }
 
   const hapticSwitch = document.createElement('input');
@@ -10564,7 +10791,7 @@ html.dark .qhc-id{color:#6BA3FF;}
             tipBtn.classList.add('active','pulse'); setTimeout(()=>tipBtn.classList.remove('pulse'),450);
             let val=parseInt(tipBtn.dataset.tips,10)+5; tipBtn.dataset.tips=val; tipCountEl.textContent=usdLabel(val);
             spawnTipFloat(tipBtn); haptic('tip');
-            signalActivity('tip', { item, avatar: MY_AVATAR, amount: 5 });
+            signalActivity('tip', { item, avatar: myAvatarUrl(), amount: 5 });
           }, 'Gift $5.00');
         });
       }
@@ -10600,7 +10827,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         }
         refreshDislikeCount();
         haptic('like');
-        signalActivity('like', { item, avatar: MY_AVATAR });
+        signalActivity('like', { item, avatar: myAvatarUrl() });
         });
       });
       dislikeBtn.addEventListener('click',(e)=>{
@@ -10622,7 +10849,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         dislikeBtn.dataset.dislikes=(parseInt(dislikeBtn.dataset.dislikes||'0',10)+1);
         refreshDislikeCount();
         haptic('dislike');
-        signalActivity('dislike', { item, avatar: MY_AVATAR });
+        signalActivity('dislike', { item, avatar: myAvatarUrl() });
         });
       });
       refreshDislikeCount();
@@ -13524,11 +13751,20 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(!infoHoverTip || !anchor) return;
     const title = anchor.dataset.tipTitle || 'Original Post';
     const body = anchor.dataset.tipBody || 'Image posted by the token creator at launch.';
+    const cta = anchor.dataset.tipCta || '';
     const t = infoHoverTip.querySelector('.kb-info-tip-title');
     const b = infoHoverTip.querySelector('.kb-info-tip-body');
+    const wrap = document.getElementById('infoTipCtaWrap');
+    const btn = document.getElementById('infoTipCta');
     if(t) t.textContent = title;
     if(b) b.textContent = body;
+    infoHoverTip.classList.toggle('has-cta', !!cta);
     infoHoverTip.setAttribute('aria-label', title);
+    if(btn){
+      btn.textContent = cta || 'Top up';
+      btn.dataset.tipAction = anchor.dataset.tipAction || '';
+    }
+    if(wrap) wrap.hidden = !cta;
   }
   function measureMorphPill(el){
     if(!el) return;
@@ -13661,6 +13897,12 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(!card) return;
     card.addEventListener('pointerenter', ()=>{ clearTimeout(hoverHideTimer); hoverHideTimer = 0; });
     card.addEventListener('pointerleave', ()=> hideHoverCards(false));
+  });
+  document.getElementById('infoTipCta')?.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const action = e.currentTarget.dataset.tipAction;
+    hideHoverCards(true);
+    if(action === 'topup' && typeof openDeposit === 'function') openDeposit(0, null);
   });
   tokenHoverCard?.addEventListener('click', (e)=>{
     const ident = e.target.closest('.thc-identity');
@@ -14838,7 +15080,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   function syncCommentAvatar(){
     if(!commentInputAvatar) return;
     const anon = commentAnonToggle?.classList.contains('active');
-    commentInputAvatar.src = anon ? ANON_AVATAR : MY_AVATAR;
+    commentInputAvatar.src = anon ? ANON_AVATAR : myAvatarUrl();
     commentInputAvatar.classList.toggle('blockie', !anon);
   }
   function syncCommentSendReady(){
@@ -14897,7 +15139,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(isAnon && commentPendingMedia) clearCommentPendingMedia();
     const comment = {
       id: ++commentIdSeq,
-      user: isAnon ? 'anon' : MY_SEED,
+      user: isAnon ? 'anon' : myHandle(),
       isAnon,
       xHandle: isAnon ? false : undefined,
       time: 'now',
@@ -14939,7 +15181,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     syncCommentSendReady();
     closeCommentAnonPop();
     haptic('sent');
-    signalActivity('comment', { item, avatar: isAnon ? ANON_AVATAR : MY_AVATAR, text });
+    signalActivity('comment', { item, avatar: isAnon ? ANON_AVATAR : myAvatarUrl(), text });
   }
 
   commentIdentityBtn?.addEventListener('click',(e)=>{

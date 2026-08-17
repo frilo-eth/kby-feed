@@ -1,6 +1,18 @@
 # Changelog
 
-## Unreleased
+## 0.1.1 — 2026-08-17
+
+### Account identity
+- Large blockie + animal name for social and EOA. Under it: method icon, handle or short address, copy control. Copy is the receive address (Kumbaya for social, EOA for wallet). README [#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth)
+- Prototype exception to the design PRD: social still shows a copyable receive row so funds can be sent to the balance. Default view remains **USD balance**.
+
+### EOA wallet popups
+- Fake extension (`#walletExt`) is the **default** for MetaMask connect and for gift / buy / sell / send / launch. Social stays sponsored. Skip with [`?autosig`](https://kby-feed.vercel.app/feed?autosig). Cancel morphs the wait sheet to **Connection rejected** / **Signature rejected**. README [#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth)
+- `/flows`: **Signature**, **Signature rejected**, **Crypto wallets**, **Wallet login** (Connect then Account), **Buy (wallet)**
+
+### Sounds & `/flows`
+- UI cues from [procedural-sounds](https://procedural-sounds.vercel.app/) recipes (`playRecipe`). Slot ticks, mute, and lock stay custom.
+- `/flows` is Auth / Funds / Others. Shortened path plus **Local** / **Here** / **Prod**. No login-minimal, Signals, or token page.
 
 ### Trade drawer
 - CTA is a gate: **Sign in to buy** → **Top up to buy** → green **Buy**. Signup/top up does not auto-trade. README [#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta)
@@ -23,7 +35,7 @@
 - One tray at a time; in-tray steps use `morphSheet` (~320ms Vaul). README [#sheet-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sheet-morph)
 - Send: From / To / amount on one sheet. Linked wallets as destinations + paste any address. README [#send](https://github.com/frilo-eth/kby-feed/blob/main/README.md#send)
 - Trade: dollarized buy helpers; sell `%` of holdings; ⇅ USD↔token (`TOKEN_PER_USD`). README [#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer)
-- Stakeholder click-through: [`/flows`](https://kby-feed.vercel.app/flows) (`?flow=first`, `topup`, `account`, `wallet`, `onboard`, `buy`, `launch`, `?minimal`, …). README [#stakeholder-flows](https://github.com/frilo-eth/kby-feed/blob/main/README.md#stakeholder-flows)
+- Account identity is the animal display name. Social email is hover-only. Copy receive address uses the info tip (**Copied** / MegaETH + **Top up**), not a redundant nested tooltip.
 - Default login: email, Google / X / TikTok, Crypto wallet, Passkey, More options (**Login or sign up**). Stripped alt: [`?minimal`](https://kby-feed.vercel.app/feed?minimal)
 - Copy: header **Sign up / Log in**, Account **USD balance**, **Top up** / **Top up to continue** / **Top up to buy**
 - Custom glyphs: Tip Jar (More menu), Passkey (login). README [#icons](https://github.com/frilo-eth/kby-feed/blob/main/README.md#icons)
