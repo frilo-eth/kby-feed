@@ -18,15 +18,16 @@ Porting / review: open the heading, not the whole README. Production: [https://k
 | [Morphing pill](#dare-role-badge) (Dare/Meme → OP / Entry / Content) | [README.md#dare-role-badge](https://github.com/frilo-eth/kby-feed/blob/main/README.md#dare-role-badge) · [#morphing-pill](https://github.com/frilo-eth/kby-feed/blob/main/README.md#morphing-pill) |
 | [Info tip](#info-hover-tip) (Image vs Video copy) | [README.md#info-hover-tip](https://github.com/frilo-eth/kby-feed/blob/main/README.md#info-hover-tip) |
 | [Token page](#token-page) (`/token` — ticker + View token) | [README.md#token-page](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-page) |
-| [Auth (Option 4)](#auth) — social vs EOA | [README.md#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth) |
+| [Auth (Option 4)](#auth) — social vs EOA · `?sig` / `?error=` | [README.md#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth) |
 | [Sheet morph](#sheet-morph) (`morphSheet` ~320ms) | [README.md#sheet-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sheet-morph) |
 | [Deposit](#deposit) (Cash vs Crypto, unified QR) | [README.md#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit) |
 | [Send](#send) | [README.md#send](https://github.com/frilo-eth/kby-feed/blob/main/README.md#send) |
 | [Notifications](#notifications) | [README.md#notifications](https://github.com/frilo-eth/kby-feed/blob/main/README.md#notifications) |
 | [Signals](#signals) | [README.md#signals](https://github.com/frilo-eth/kby-feed/blob/main/README.md#signals) |
+| [Stakeholder flows](#stakeholder-flows) (`/flows`, `?flow=`, `?minimal`) | [README.md#stakeholder-flows](https://github.com/frilo-eth/kby-feed/blob/main/README.md#stakeholder-flows) |
 | [Icons](#icons) | [README.md#icons](https://github.com/frilo-eth/kby-feed/blob/main/README.md#icons) |
 | [Trade drawer](#trade-drawer) (dollarized buy) | [README.md#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer) |
-| [Trade CTA](#trade-cta) (Sign in → Add funds → green Buy) | [README.md#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta) |
+| [Trade CTA](#trade-cta) (Sign in → Top up → green Buy) | [README.md#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta) |
 | [Slippage](#slippage) | [README.md#slippage](https://github.com/frilo-eth/kby-feed/blob/main/README.md#slippage) |
 | [Pay with](#pay-with) (ETH / WETH / USDm chip) | [README.md#pay-with](https://github.com/frilo-eth/kby-feed/blob/main/README.md#pay-with) |
 | [Meta affordances](#meta-affordances) | [README.md#meta-affordances](https://github.com/frilo-eth/kby-feed/blob/main/README.md#meta-affordances) |
@@ -38,7 +39,7 @@ Porting / review: open the heading, not the whole README. Production: [https://k
 npm run dev
 ```
 
-Open [http://localhost:3000/feed](http://localhost:3000/feed). Token stub: [http://localhost:3000/token?t=SAUCE](http://localhost:3000/token?t=SAUCE). `/` also serves the feed.
+Open [http://localhost:3000/feed](http://localhost:3000/feed). Token stub: [http://localhost:3000/token?t=SAUCE](http://localhost:3000/token?t=SAUCE). Stakeholder index: [http://localhost:3000/flows](http://localhost:3000/flows). `/` also serves the feed.
 
 ## Controls
 
@@ -117,13 +118,13 @@ Use this as the checklist when reimplementing — these are the UX details that 
 
 | Feature | Behavior |
 |---------|----------|
-| [Option 4](#auth) | Social / email → embedded Kumbaya wallet, **sponsored** (no signature on gift/buy/sell). Crypto wallet (EOA) → that address is the account; gift/buy/sell/launch **sign** (`needsSig()`). Comment, like, dislike, gift, buy, sell, and launch are `requireAuth`. **Share** is ungated. Copy is **Add funds** / **Send** |
-| Sign-in sheet | Google + Apple/X/Farcaster/email + detected wallet row. Same `.modal` chrome as share (`--card`, Inter, `--bg` `#F2EEEA`) |
+| [Option 4](#auth) | Social / email → embedded Kumbaya wallet, **sponsored** (no signature on gift/buy/sell). Crypto wallet (EOA) → that address is the account; gift/buy/sell/launch **sign** (`needsSig()`). Default auto-completes; `?sig` shows a fake wallet (**Cancel / Connect** to connect, **Cancel / Confirm** to sign). Comment, like, dislike, gift, buy, sell, and launch are `requireAuth`. **Share** is ungated. Header **Sign up / Log in**. Account **USD balance** / **Top up**. Send still **Add funds to send** |
+| Sign-in sheet | Default: email, Google / X / TikTok, Crypto wallet, Passkey, More options. Title **Login or sign up**. Alt: [`?minimal`](https://kby-feed.vercel.app/feed?minimal) (icons, email, More — wallet under More). Same `.modal` chrome as share (`--card`, Inter, `--bg` `#F2EEEA`) |
 | [Deposit](#deposit) | Hub is **Cash** or **Crypto**. Cash is a MoonPay stand-in. Transfer crypto opens the QR with icons. Connect wallet is wallet first, then EVM/Solana. Copy: `Send USDC on Ethereum to this address.` |
 | [Send](#send) | From / To / amount on one sheet. Linked wallets as recommended destinations + paste any address. Short From → **Add funds to send** |
 | [Notifications](#notifications) | Ghost bell left of theme in the topbar (desktop). Mobile: More sheet. Same tray as Account — side drawer / bottom sheet. All / Unread, Mark as read |
 | [Signals](#signals) | Sitewide live activity. Same full-height tray as Notifications. Live stack is parked |
-| [Icons](#icons) | [Central Icons](https://www.npmjs.com/package/@central-icons-react/all) **sharp** (square join, outlined, radius 0, stroke 1.5, 16×16). Inline SVG + `currentColor`. Custom glyphs when handed (Pools) |
+| [Icons](#icons) | [Central Icons](https://www.npmjs.com/package/@central-icons-react/all) **sharp** (square join, outlined, radius 0, stroke 1.5, 16×16). Inline SVG + `currentColor`. Custom glyphs when handed (Pools, Tip Jar, Passkey) |
 
 ### Trade drawer
 
@@ -133,7 +134,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Sell helpers | `25% / 50% / All` of holdings (dollarized spend) |
 | Unit swap | `#tradeOut` **⇅** toggles `session.tradeUnit` `'usd'` \| `'token'`. Rate `TOKEN_PER_USD = 26120`. Token mode hides `$` via `#tradeBuyField.is-token` |
 | [Pay with](#pay-with) | Compact dropdown on the chip (ETH / WETH / USDm) — not a modal, not an in-drawer swap. Chip fill is `--bg`. Menu `position:fixed` under the chip |
-| [CTA](#trade-cta) | Unsigned → **Sign in to buy**. Funded short → **Add funds to buy**. Ready → big green **Buy** (`#3DDC97`). Completing signup/add funds does **not** auto-trade — the green button is the buy |
+| [CTA](#trade-cta) | Unsigned → **Sign in to buy**. Funded short → **Top up to buy**. Ready → big green **Buy** (`#3DDC97`). Completing signup/top up does **not** auto-trade — the green button is the buy |
 | [Slippage](#slippage) | Gear chip unfolds AUTO / 0.5% / 0.3% / custom. Rest chrome is `--card` + hairline (not orange). **Auto** badge in You’ll pay is purple `#7B6CF0` + white |
 | Elevation | Sheet / drawer = `--card`. Controls at rest = `--card` + hairline. Hover = `color-mix` with white — never cream `--bg` wells (Pay-with chip is the exception; it matches the screenshot `--bg` fill) |
 
@@ -1312,7 +1313,38 @@ API: `openSignals` · `closeSignals` · `pushSignal`. Center `showToast` pills a
 
 UI glyphs are **[Central Icons](https://iconists.co/central)** — the **sharp** set: square join, outlined, radius 0, stroke **1.5**, 16×16 ([`@central-icons-react/all`](https://www.npmjs.com/package/@central-icons-react/all)). This file inlines the SVG (no React package). Use `currentColor` so light/dark and active nav follow `--ink-soft` / `--ink` / `--orange`.
 
-Do not invent rounded substitutes. If a mark is missing from Central (or the product has a custom one), use the SVG that was handed — **Pools** is custom. Filled custom paths get `.ic-fill` so active nav does not paint an extra stroke.
+Do not invent rounded substitutes. If a mark is missing from Central (or the product has a custom one), use the SVG that was handed — **Pools**, **Tip Jar**, and **Passkey** are custom. Filled custom paths get `.ic-fill` so active nav does not paint an extra stroke.
+
+---
+
+<a id="stakeholder-flows"></a>
+
+### 12d. Stakeholder flow index
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#stakeholder-flows](https://github.com/frilo-eth/kby-feed/blob/main/README.md#stakeholder-flows)
+
+Click-through for design reviews: [https://kby-feed.vercel.app/flows](https://kby-feed.vercel.app/flows) · local [http://localhost:3000/flows](http://localhost:3000/flows). Each card opens `/feed?flow=…` on that state. Rewrite: `/flows` → `flows.html` (`vercel.json`, `dev-server.py`).
+
+| Flow | URL |
+|------|-----|
+| Land and browse | [`/feed`](https://kby-feed.vercel.app/feed) |
+| First action (login + pending tip) | [`/feed?flow=first`](https://kby-feed.vercel.app/feed?flow=first) |
+| Login · web2-minimal | [`/feed?minimal`](https://kby-feed.vercel.app/feed?minimal) |
+| Login · More options / cancelled | [`?flow=more`](https://kby-feed.vercel.app/feed?flow=more) · [`?flow=login-error`](https://kby-feed.vercel.app/feed?flow=login-error) |
+| Wallet catalog | [`/feed?flow=wallets`](https://kby-feed.vercel.app/feed?flow=wallets) |
+| Top up to continue | [`/feed?flow=topup`](https://kby-feed.vercel.app/feed?flow=topup) |
+| MoonPay waiting | [`/feed?flow=moonpay`](https://kby-feed.vercel.app/feed?flow=moonpay) |
+| Post-deposit success / abandoned | [`?flow=funded`](https://kby-feed.vercel.app/feed?flow=funded) · [`?flow=abandoned`](https://kby-feed.vercel.app/feed?flow=abandoned) |
+| Account USD + holdings / empty | [`?flow=account`](https://kby-feed.vercel.app/feed?flow=account) · [`?flow=account-empty`](https://kby-feed.vercel.app/feed?flow=account-empty) |
+| Wallet-login account | [`/feed?flow=wallet`](https://kby-feed.vercel.app/feed?flow=wallet) |
+| Manage wallets (EOA + embedded) | [`/feed?flow=manage`](https://kby-feed.vercel.app/feed?flow=manage) |
+| Signature pending / rejected | [`/feed?sig`](https://kby-feed.vercel.app/feed?sig) · [`?flow=sig-reject`](https://kby-feed.vercel.app/feed?flow=sig-reject) |
+| Onboarding hint | [`/feed?flow=onboard`](https://kby-feed.vercel.app/feed?flow=onboard) |
+| Buy in USD | [`/feed?flow=buy`](https://kby-feed.vercel.app/feed?flow=buy) |
+| Launch Token | [`/feed?flow=launch`](https://kby-feed.vercel.app/feed?flow=launch) |
+| Pull-to-refresh / notif badge | [`?refresh`](https://kby-feed.vercel.app/feed?refresh) · [`?notiff`](https://kby-feed.vercel.app/feed?notiff) |
+
+Copy in the prototype: header **Sign up / Log in**. Default modal title **Login or sign up**. Account **USD balance**, **Top up** / **Top up to continue.** Web2-stripped login: [`?minimal`](https://kby-feed.vercel.app/feed?minimal).
 
 ---
 
@@ -1329,7 +1361,20 @@ One login, one paying wallet. Prototype only — no real keys.
 | Google, Apple, X, Farcaster, email | `'social'` | minted **embedded** (`kind:'embedded'`, name Kumbaya) | **sponsored** — no signature sheet |
 | MetaMask / Phantom / … | `'eoa'` | that catalog row (`kind:'eoa'`) | **`needsSig()`** → signature sheet, then proceed |
 
-Comment, like, and dislike use `requireAuth`, same family as gift/buy. Reading comments and **Share** are ungated. Topbar: **Sign in** → after auth, wallet chip with `usdLabel(totalBal())`. Copy is **Add funds** / **Send**.
+Comment, like, and dislike use `requireAuth`, same family as gift/buy. Reading comments and **Share** are ungated. Topbar: **Sign up / Log in** → after auth, wallet chip with `usdLabel(totalBal())`. Account hero is **USD balance**; the CTA is **Top up**. Send still uses **Add funds to send**. Deposit hub titles stay **Fund your account** / **Add funds**.
+
+Default login sheet: email, Google / X / TikTok, Crypto wallet, Passkey, More options. Title **Login or sign up**. Present the stripped web2 sheet with [`?minimal`](https://kby-feed.vercel.app/feed?minimal) (or `?flow=first&minimal`): icons, email, More options; wallet under More; title **Sign up / Log in**. Click-through index: [`/flows`](https://kby-feed.vercel.app/flows).
+
+Default EOA signatures **auto-complete**. Social stays **sponsored** (no wallet popup). Review-only: `?sig` (`#sig` / `demo=sig`) logs in as MetaMask with a fake extension window. Connect is **Cancel / Connect**; signatures are **Cancel / Confirm**. Later EOA Buy / Send / Launch in that tab stay manual. Sponsored paths never show it. Cancel **morphs the wait sheet** (Privy-style) to **Connection rejected** / **Signature rejected** + Try again — not a toast. Confirming `?sig` funds the wallet `$250` so later spend also hits a signature.
+
+| Demo URL | Lands on |
+|----------|----------|
+| [`/feed?sig`](https://kby-feed.vercel.app/feed?sig) | EOA login wait + fake MetaMask |
+| [`/feed?error=sig`](https://kby-feed.vercel.app/feed?error=sig) | Same, then cancel → wait sheet morphs to **Connection rejected** |
+| [`/feed?error=funds`](https://kby-feed.vercel.app/feed?error=funds) | Trade confirm, empty cash → **Not enough funds.** |
+| [`/feed?error=short`](https://kby-feed.vercel.app/feed?error=short) | Send, amount > From.bal → **Add funds to send** |
+
+Hash aliases: `#sig`, `#error-sig`, `#error-funds`, `#error-short`. Deposit errors are under [Deposit](#deposit).
 
 | Motion | Spec |
 |--------|------|
@@ -1339,7 +1384,7 @@ Comment, like, and dislike use `requireAuth`, same family as gift/buy. Reading c
 | Hover on `--card` controls | `color-mix(in srgb, var(--card) 62%, white)` — not `--bg` |
 | Signed-in feedback | short “You’re signed in.” hold, then `afterAuth`. Does **not** auto-open funds |
 
-API: `completeLogin` · `requireAuth` · `requireSpend` · `requestSignature` · `paintAuthChrome`.
+API: `completeLogin` · `requireAuth` · `requireSpend` · `requestSignature` · `showWalletExt` · `paintAuthChrome`.
 
 ---
 
@@ -1349,7 +1394,19 @@ API: `completeLogin` · `requireAuth` · `requireSpend` · `requestSignature` ·
 
 **Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit)
 
-`openDeposit(need, then)` / `session.flow.kind === 'deposit'`. Hosts: auth tray (`setAuthPanel('funds')`), wallet tray, or `#fundsOverlay`. Hub title is **Fund your account** when `totalBal() < 1`, otherwise **Add funds**. Account button, toasts, and activity stay **Add funds**. Signup does **not** force this sheet — it is a showable feature on `?deposit` (`#deposit` / `demo=deposit` also). Hub body TBD.
+`openDeposit(need, then)` / `session.flow.kind === 'deposit'`. Hosts: auth tray (`setAuthPanel('funds')`), wallet tray, or `#fundsOverlay`. Hub title is **Fund your account** when `totalBal() < 1`, otherwise **Add funds**. Account button is **Top up**. Short-balance toast is **Top up to continue.** Signup does **not** force this sheet — it is a showable feature on `?deposit` (`#deposit` / `demo=deposit` also). Hub body TBD.
+
+Error demos (skip wait, fire the same cancel toast / inline UI):
+
+| URL | Lands on |
+|-----|----------|
+| [`/feed?error=checkout`](https://kby-feed.vercel.app/feed?error=checkout) | MoonPay wait → **Checkout declined.** |
+| [`/feed?error=connect`](https://kby-feed.vercel.app/feed?error=connect) | Connect-wallet wait → **Connection rejected.** |
+| [`/feed?error=exchange`](https://kby-feed.vercel.app/feed?error=exchange) | Coinbase wait → **Authorization cancelled.** |
+| [`/feed?error=empty`](https://kby-feed.vercel.app/feed?error=empty) | **No token balances found.** |
+| [`/feed?error=cash`](https://kby-feed.vercel.app/feed?error=cash) | Cash amount over max |
+
+`#error-checkout` (etc.) also. Signature / trade / send demos: [Auth](#auth).
 
 **Do not show a need amount** in the title (`Add funds $5.00.` leaked from tipping `requireSpend(5)`). `openTopUp(0, pending)` / `openDeposit(0, then)` always. Amount is chosen later (MoonPay stand-in / inbound credit `$25` in the prototype). Completing add funds must **not** auto-trade.
 
@@ -1457,7 +1514,7 @@ Same chrome as comments (desktop 360 / mobile sheet). Buy / Sell tabs. Amount is
 | Helpers | `$25` / `$100` / `$500` | `25%` / `50%` / `All` of holdings |
 | Label | Buy `$TICKER` | Sell `$TICKER` |
 | `#tradePayWith` label | Pay with | Receive |
-| [CTA](#trade-cta) | Buy · Sign in to buy · Add funds to buy | Sell · Sign in to sell |
+| [CTA](#trade-cta) | Buy · Sign in to buy · Top up to buy | Sell · Sign in to sell |
 
 **Amount row:** `$` + `#tradePayInput` (32px / 800) + token chip `#tradeGetAsset` (aligned with the input, **not** the label row).
 
@@ -1479,12 +1536,12 @@ Same chrome as comments (desktop 360 / mobile sheet). Buy / Sell tabs. Amount is
 
 **Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta)
 
-`tradeCtaState()` → `'auth'` \| `'deposit'` \| `'go'`. The button is a **gate**, then a buy — completing signup or add funds must **not** auto-execute the trade (that spent the new $25 and jumped the chip back to Add funds to buy).
+`tradeCtaState()` → `'auth'` \| `'deposit'` \| `'go'`. The button is a **gate**, then a buy — completing signup or top up must **not** auto-execute the trade (that spent the new $25 and jumped the chip back to Top up to buy).
 
 | State | Label | Paint | Click |
 |-------|-------|-------|-------|
 | `'auth'` | Sign in to buy / sell | `.is-gated` ink | `requireAuth` → paint CTA; if still short, `openTopUp(0, paintTradeCta)` |
-| `'deposit'` | Add funds to buy | `.is-short` ink | `openTopUp(0, paintTradeCta)` — no pending buy |
+| `'deposit'` | Top up to buy | `.is-short` ink | `openTopUp(0, paintTradeCta)` — no pending buy |
 | `'go'` | **Buy** / Sell | green `#3DDC97` / `--red` | `requireSpend` / sell |
 
 After deposit, `creditFunds` → `paintAuthChrome()` → `paintTradeCta()`. Ready = big green Buy. Gifts/tips still auto-resume via `requireSpend` pending.

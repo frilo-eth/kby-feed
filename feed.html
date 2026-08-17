@@ -171,9 +171,9 @@ html.dark .side-brand .mark-dark{display:block;}
   background:var(--card);color:var(--ink);border:1px solid var(--line);
   border-radius:10px;padding:7px 14px 7px 8px;font-weight:700;font-size:13px;
   cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:8px;
-  transition:background .15s,transform .15s;
+  transition:background .15s,border-color .15s,transform .15s;
 }
-.btn-wallet:hover{background:var(--bg);}
+.btn-wallet:hover{background:color-mix(in srgb, var(--card) 62%, white);border-color:color-mix(in srgb, var(--line) 45%, white);}
 .btn-wallet:active{transform:scale(.96);}
 .btn-wallet-ic{
   width:22px;height:22px;border-radius:50%;flex-shrink:0;
@@ -187,9 +187,9 @@ html.dark .side-brand .mark-dark{display:block;}
 .btn-signin{
   background:var(--card);color:var(--ink);border:1px solid var(--line);
   border-radius:10px;padding:9px 16px;font-weight:700;font-size:13px;
-  cursor:pointer;white-space:nowrap;transition:background .15s,transform .15s,box-shadow .15s;
+  cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s,transform .15s,box-shadow .15s;
 }
-.btn-signin:hover{background:var(--bg);}
+.btn-signin:hover{background:color-mix(in srgb, var(--card) 62%, white);border-color:color-mix(in srgb, var(--line) 45%, white);}
 .btn-signin:active{transform:scale(.96);}
 .topbar.is-authed .btn-signin{display:none;}
 .topbar:not(.is-authed) .btn-wallet{display:none;}
@@ -2922,6 +2922,9 @@ html.dark .kb-wrow.is-add .kb-wrow-av.ic{background:rgba(255,255,255,.08);}
 .sig-ring.is-done::after{display:none;}
 .sig-ring.is-done::before{border-color:var(--green);border-width:3px;}
 .sig-ring.is-done{animation:sig-pop .48s cubic-bezier(.22,1.4,.36,1) both;}
+.sig-ring.is-fail::after{display:none;}
+.sig-ring.is-fail::before{border-color:var(--red);border-width:3px;}
+.sig-ring.is-fail{animation:sig-pop .48s cubic-bezier(.22,1.4,.36,1) both;}
 @keyframes sig-pop{from{transform:scale(.92)}to{transform:scale(1)}}
 .sig-ring img{width:40px;height:40px;border-radius:12px;}
 .sig-mark{
@@ -2934,8 +2937,19 @@ html.dark .kb-wrow.is-add .kb-wrow-av.ic{background:rgba(255,255,255,.08);}
 .sig-ring #authSigMark{display:contents;}
 .sig-ring .auth-wicon{width:40px;height:40px;border-radius:12px;}
 .sig-check{display:none;position:absolute;inset:0;place-items:center;color:var(--green);font-size:28px;font-weight:800;}
+.sig-fail{display:none;position:absolute;inset:0;place-items:center;color:var(--red);font-size:28px;font-weight:800;line-height:1;}
 .sig-ring.is-done .sig-check{display:grid;}
+.sig-ring.is-fail .sig-fail{display:grid;}
 .auth-modal .sig-check{display:none !important;}
+.sig-retry{
+  display:none;width:100%;margin-top:18px;border:none;border-radius:14px;
+  padding:12px 0;background:var(--ink);color:var(--bg);
+  font-size:14px;font-weight:700;cursor:pointer;
+  transition:filter .15s,transform .12s;
+}
+.sig-retry.show{display:block;}
+.sig-retry:hover{filter:brightness(1.06);}
+.sig-retry:active{transform:scale(.97);}
 @keyframes kb-spin{to{transform:rotate(360deg);}}
 .sig-title{
   margin:0;font-size:16px;font-weight:800;letter-spacing:-.02em;color:var(--ink);
@@ -2943,6 +2957,62 @@ html.dark .kb-wrow.is-add .kb-wrow-av.ic{background:rgba(255,255,255,.08);}
 }
 .sig-copy{font-size:13px;font-weight:600;color:var(--ink-soft);line-height:1.45;margin:6px 0 0;
   transition:opacity .2s cubic-bezier(.22,1,.36,1);
+}
+
+.wallet-ext{
+  position:fixed;inset:0;z-index:84;display:none;align-items:flex-start;justify-content:flex-end;
+  padding:18px 18px 0 0;pointer-events:none;
+}
+.wallet-ext.show{display:flex;pointer-events:auto;}
+.wallet-ext-card{
+  width:360px;max-width:calc(100vw - 24px);
+  background:#1c1c1c;color:#f3f3f3;border-radius:16px;
+  box-shadow:0 24px 48px rgba(0,0,0,.42);
+  padding:16px 16px 14px;font-family:Inter,system-ui,sans-serif;
+  opacity:0;transform:translateY(-10px);
+  transition:opacity .2s ease,transform .2s cubic-bezier(.22,1,.36,1);
+  pointer-events:auto;
+}
+.wallet-ext.show .wallet-ext-card{opacity:1;transform:none;}
+.wallet-ext-head{
+  display:flex;align-items:center;gap:10px;margin-bottom:12px;
+}
+.wallet-ext-head .auth-wicon{width:28px;height:28px;border-radius:8px;font-size:14px;}
+.wallet-ext-head .auth-wicon.is-detected::after{display:none;}
+.wallet-ext-name{font-size:14px;font-weight:800;letter-spacing:-.02em;}
+.wallet-ext-origin{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:700;color:#9a9a9a;letter-spacing:.01em;
+  background:#2a2a2a;border-radius:999px;padding:4px 8px;margin-bottom:12px;
+}
+.wallet-ext-origin i{
+  width:6px;height:6px;border-radius:50%;background:#22C55E;display:block;
+}
+.wallet-ext-title{
+  margin:0;font-size:16px;font-weight:800;letter-spacing:-.03em;color:#fff;
+}
+.wallet-ext-copy{
+  margin:6px 0 16px;font-size:13px;font-weight:600;color:#b5b5b5;line-height:1.4;
+}
+.wallet-ext-actions{display:flex;gap:8px;}
+.wallet-ext-no,.wallet-ext-yes{
+  flex:1;border-radius:999px;padding:12px 0;
+  font-size:14px;font-weight:700;cursor:pointer;
+  transition:filter .15s,transform .12s;
+}
+.wallet-ext-no{background:#2a2a2a;color:#fff;border:1px solid rgba(255,255,255,.16);}
+.wallet-ext-yes{background:#fff;color:#111;border:1px solid #fff;}
+.wallet-ext-no:hover,.wallet-ext-yes:hover{filter:brightness(1.08);}
+.wallet-ext-no:active,.wallet-ext-yes:active{transform:scale(.97);}
+@media (max-width:860px){
+  .wallet-ext{
+    align-items:center;justify-content:center;padding:16px;
+    background:rgba(0,0,0,0);
+  }
+  .wallet-ext.show{background:rgba(0,0,0,.38);}
+}
+@media (prefers-reduced-motion:reduce){
+  .wallet-ext,.wallet-ext-card{transition:none;transform:none;}
 }
 
 .funds-amt{font-size:28px;font-weight:800;letter-spacing:-.04em;margin:4px 0 12px;}
@@ -2964,6 +3034,8 @@ html.dark .kb-wrow.is-add .kb-wrow-av.ic{background:rgba(255,255,255,.08);}
 .auth-google:hover{background:var(--ink);filter:brightness(1.08);border-color:transparent;color:var(--bg);}
 .auth-google .auth-ic{filter:none;}
 .auth-icon-row{display:flex;gap:8px;}
+.auth-modal.is-minimal .auth-icon-row{order:-1;}
+.auth-modal.is-minimal .auth-main-extra{display:none;}
 .auth-icon-btn{
   flex:1;height:52px;border:1px solid var(--line);border-radius:14px;background:var(--card);
   color:var(--ink);cursor:pointer;display:grid;place-items:center;
@@ -3609,7 +3681,7 @@ html.dark .flow-status-ok circle{fill:rgba(31,164,99,.22);}
 }
 @media (prefers-reduced-motion:reduce){
   .sig-ring::after{animation-duration:.01ms!important;}
-  .sig-ring.is-done{animation:none;}
+  .sig-ring.is-done,.sig-ring.is-fail{animation:none;}
   .flow-cta .spin{animation:none;}
   .flow-cta-lab{transition:none;}
   .send-drop,.send-box.is-closing .send-drop{transition:none;}
@@ -4241,7 +4313,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       <div class="nav-item" id="sideMoreBtn" title="More" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false"><svg class="ic-fill" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="10" width="4" height="4" fill="currentColor"/><rect x="10" y="10" width="4" height="4" fill="currentColor"/><rect x="17" y="10" width="4" height="4" fill="currentColor"/></svg><span class="label">More</span></div>
       <div class="nav-more-pop" id="navMorePop" role="menu" aria-label="More">
         <button type="button" role="menuitem" data-more="signals"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 8L9 7M14.3333 8C14.3333 4.50218 11.4978 1.66666 8 1.66666M12.3333 8C12.3333 5.60676 10.3933 3.66666 8 3.66666M1.66666 8C1.66666 11.4978 4.50218 14.3333 8 14.3333C9.66412 14.3333 11.1783 13.6915 12.3086 12.6419L3.35806 3.6914C2.30847 4.82167 1.66666 6.33588 1.66666 8Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>Signals</button>
-        <button type="button" role="menuitem" data-more="tipjar"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8.75 10.75C8.75 11.0261 8.52614 11.25 8.25 11.25C7.97386 11.25 7.75 11.0261 7.75 10.75C7.75 10.4739 7.97386 10.25 8.25 10.25C8.52614 10.25 8.75 10.4739 8.75 10.75Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/><path d="M14.004 5.75H10.004C9.93732 5.75 9.87088 5.75104 9.8047 5.75312C8.32457 3.97909 6.38818 3.75 5.75 3.75V7.4211C5.06066 8.06182 4.51621 8.85631 4.17124 9.75H1.75V14.25H4.17124C4.51621 15.1437 5.06066 15.9382 5.75 16.5789V20.25H10.25V18.25H13.75V20.25H18.25V16.5863C18.8686 16.0134 19.371 15.3168 19.7181 14.5359C20.0626 13.7609 20.254 12.9028 20.254 12C20.254 8.54822 17.4558 5.75 14.004 5.75Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/><path d="M8 10.75H8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/><path d="M22.8113 12C23.0858 12.3424 23.25 12.777 23.25 13.25C23.25 14.3546 22.3546 15.25 21.25 15.25C20.777 15.25 20.3424 15.0858 20 14.8113" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>Tip Jar</button>
+        <button type="button" role="menuitem" data-more="tipjar"><svg class="ic-fill" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M12.0877 3.91229H11.3377V4.034L11.3762 4.14946L12.0877 3.91229ZM12.769 5.95614H13.519V5.83443L13.4805 5.71897L12.769 5.95614ZM12.769 14.1316V14.8816H13.519V14.1316H12.769ZM3.23102 14.1316H2.48102V14.8816H3.23102V14.1316ZM3.23102 5.95614L2.51951 5.71897L2.48102 5.83444V5.95614H3.23102ZM3.9123 3.91229L4.62381 4.14946L4.6623 4.034V3.91229H3.9123ZM3.9123 1.86844V1.11844V1.86844ZM12.4284 2.61844H13.1784V1.11844H12.4284V1.86844V2.61844ZM3.47032 1.11844H2.72032V2.61844H3.47032V1.86844V1.11844ZM12.0877 1.86844H11.3377V3.91229H12.0877H12.8377V1.86844H12.0877ZM12.0877 3.91229L11.3762 4.14946L12.0575 6.19331L12.769 5.95614L13.4805 5.71897L12.7992 3.67512L12.0877 3.91229ZM12.769 5.95614H12.019V14.1316H12.769H13.519V5.95614H12.769ZM12.769 14.1316V13.3816H3.23102V14.1316V14.8816H12.769V14.1316ZM3.23102 14.1316H3.98102V5.95614H3.23102H2.48102V14.1316H3.23102ZM3.23102 5.95614L3.94253 6.19331L4.62381 4.14946L3.9123 3.91229L3.20079 3.67512L2.51951 5.71897L3.23102 5.95614ZM3.9123 3.91229H4.6623V1.86844H3.9123H3.1623V3.91229H3.9123ZM3.9123 1.86844V2.61844H12.0877V1.86844V1.11844H3.9123V1.86844ZM12.0877 1.86844V2.61844H12.4284V1.86844V1.11844H12.0877V1.86844ZM3.9123 1.86844V1.11844H3.47032V1.86844V2.61844H3.9123V1.86844ZM8.81017 7.6843L9.48884 7.36507C9.07815 6.49197 8.1895 5.88502 7.15758 5.88502V6.63502V7.38502C7.58684 7.38502 7.95887 7.63654 8.13149 8.00352L8.81017 7.6843ZM7.15758 6.63502V5.88502C5.7353 5.88502 4.5823 7.03801 4.5823 8.4603H5.3323H6.0823C6.0823 7.86644 6.56372 7.38502 7.15758 7.38502V6.63502ZM5.3323 8.4603H4.5823C4.5823 9.84351 5.67246 10.9716 7.04087 11.033L7.07446 10.2837L7.10806 9.53448C6.53748 9.50889 6.0823 9.03755 6.0823 8.4603H5.3323ZM10.6677 9.58355H9.91774C9.91774 10.1774 9.43633 10.6588 8.84246 10.6588V11.4088V12.1588C10.2648 12.1588 11.4177 11.0058 11.4177 9.58355H10.6677ZM8.84246 11.4088V10.6588C8.24858 10.6588 7.76718 10.1774 7.76718 9.58355H7.01718H6.26718C6.26718 11.0058 7.42016 12.1588 8.84246 12.1588V11.4088ZM7.01718 9.58355H7.76718C7.76718 8.98967 8.24858 8.50827 8.84246 8.50827V7.75827V7.00827C7.42016 7.00827 6.26718 8.16124 6.26718 9.58355H7.01718ZM8.84246 7.75827V8.50827C9.43633 8.50827 9.91774 8.98967 9.91774 9.58355H10.6677H11.4177C11.4177 8.16124 10.2648 7.00827 8.84246 7.00827V7.75827Z" fill="currentColor"/></svg>Tip Jar</button>
         <button type="button" role="menuitem" data-more="notifications"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.58581 9.4153C4.99017 5.62501 8.18819 2.75 12 2.75C15.8118 2.75 19.0098 5.62501 19.4142 9.4153L20.25 17.25H3.75L4.58581 9.4153Z" stroke="currentColor" stroke-width="1.5"/><path d="M16 17.25C16 19.4591 14.2091 21.25 12 21.25C9.79086 21.25 8 19.4591 8 17.25" stroke="currentColor" stroke-width="1.5"/></svg>Notifications</button>
         <button type="button" role="menuitem" data-more="profile"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.75 20.25V19.5C4.75 15.4959 7.99594 12.25 12 12.25C16.0041 12.25 19.25 15.4959 19.25 19.5V20.25H4.75Z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="7.75" r="4.5" stroke="currentColor" stroke-width="1.5"/></svg>Profile</button>
         <button type="button" role="menuitem" data-more="account"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.75 7.75V4.75H21.25V7.75M2.75 7.75H21.25M2.75 7.75V10.75M21.25 7.75V10.75M21.25 10.75V19.25H2.75V10.75M21.25 10.75H15.25V13.25H8.75V10.75H2.75" stroke="currentColor" stroke-width="1.5"/></svg>Account</button>
@@ -4262,7 +4334,7 @@ html.dark .qhc-id{color:#6BA3FF;}
           <span class="notif-badge" id="notifBadge"></span>
         </button>
         <button class="icon-btn" type="button" id="themeBtn" title="Toggle theme" aria-label="Toggle theme"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-        <button class="btn-signin" type="button" id="signInBtn">Sign in</button>
+        <button class="btn-signin" type="button" id="signInBtn">Sign up / Log in</button>
         <button class="btn-wallet" type="button" id="walletBtn" title="Balance" aria-label="Open account" hidden>
           <span class="btn-wallet-ic" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none"><ellipse cx="8.5" cy="14.2" rx="4.2" ry="3.4" fill="#F4F7FA"/><ellipse cx="14.2" cy="13.4" rx="5.2" ry="4.4" fill="#fff"/><ellipse cx="11.6" cy="10.4" rx="3.6" ry="3.1" fill="#E6EEF5"/></svg>
@@ -4540,7 +4612,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       <button type="button" data-more="profile"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.75 20.25V19.5C4.75 15.4959 7.99594 12.25 12 12.25C16.0041 12.25 19.25 15.4959 19.25 19.5V20.25H4.75Z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="7.75" r="4.5" stroke="currentColor" stroke-width="1.5"/></svg>Profile</button>
       <button type="button" data-more="signals"><svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 8L9 7M14.3333 8C14.3333 4.50218 11.4978 1.66666 8 1.66666M12.3333 8C12.3333 5.60676 10.3933 3.66666 8 3.66666M1.66666 8C1.66666 11.4978 4.50218 14.3333 8 14.3333C9.66412 14.3333 11.1783 13.6915 12.3086 12.6419L3.35806 3.6914C2.30847 4.82167 1.66666 6.33588 1.66666 8Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>Signals</button>
       <button type="button" data-more="notifications"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4.58581 9.4153C4.99017 5.62501 8.18819 2.75 12 2.75C15.8118 2.75 19.0098 5.62501 19.4142 9.4153L20.25 17.25H3.75L4.58581 9.4153Z" stroke="currentColor" stroke-width="1.5"/><path d="M16 17.25C16 19.4591 14.2091 21.25 12 21.25C9.79086 21.25 8 19.4591 8 17.25" stroke="currentColor" stroke-width="1.5"/></svg>Notifications</button>
-      <button type="button" data-more="tipjar"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8.75 10.75C8.75 11.0261 8.52614 11.25 8.25 11.25C7.97386 11.25 7.75 11.0261 7.75 10.75C7.75 10.4739 7.97386 10.25 8.25 10.25C8.52614 10.25 8.75 10.4739 8.75 10.75Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/><path d="M14.004 5.75H10.004C9.93732 5.75 9.87088 5.75104 9.8047 5.75312C8.32457 3.97909 6.38818 3.75 5.75 3.75V7.4211C5.06066 8.06182 4.51621 8.85631 4.17124 9.75H1.75V14.25H4.17124C4.51621 15.1437 5.06066 15.9382 5.75 16.5789V20.25H10.25V18.25H13.75V20.25H18.25V16.5863C18.8686 16.0134 19.371 15.3168 19.7181 14.5359C20.0626 13.7609 20.254 12.9028 20.254 12C20.254 8.54822 17.4558 5.75 14.004 5.75Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/><path d="M8 10.75H8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/><path d="M22.8113 12C23.0858 12.3424 23.25 12.777 23.25 13.25C23.25 14.3546 22.3546 15.25 21.25 15.25C20.777 15.25 20.3424 15.0858 20 14.8113" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/></svg>Tip Jar</button>
+      <button type="button" data-more="tipjar"><svg class="ic-fill" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M12.0877 3.91229H11.3377V4.034L11.3762 4.14946L12.0877 3.91229ZM12.769 5.95614H13.519V5.83443L13.4805 5.71897L12.769 5.95614ZM12.769 14.1316V14.8816H13.519V14.1316H12.769ZM3.23102 14.1316H2.48102V14.8816H3.23102V14.1316ZM3.23102 5.95614L2.51951 5.71897L2.48102 5.83444V5.95614H3.23102ZM3.9123 3.91229L4.62381 4.14946L4.6623 4.034V3.91229H3.9123ZM3.9123 1.86844V1.11844V1.86844ZM12.4284 2.61844H13.1784V1.11844H12.4284V1.86844V2.61844ZM3.47032 1.11844H2.72032V2.61844H3.47032V1.86844V1.11844ZM12.0877 1.86844H11.3377V3.91229H12.0877H12.8377V1.86844H12.0877ZM12.0877 3.91229L11.3762 4.14946L12.0575 6.19331L12.769 5.95614L13.4805 5.71897L12.7992 3.67512L12.0877 3.91229ZM12.769 5.95614H12.019V14.1316H12.769H13.519V5.95614H12.769ZM12.769 14.1316V13.3816H3.23102V14.1316V14.8816H12.769V14.1316ZM3.23102 14.1316H3.98102V5.95614H3.23102H2.48102V14.1316H3.23102ZM3.23102 5.95614L3.94253 6.19331L4.62381 4.14946L3.9123 3.91229L3.20079 3.67512L2.51951 5.71897L3.23102 5.95614ZM3.9123 3.91229H4.6623V1.86844H3.9123H3.1623V3.91229H3.9123ZM3.9123 1.86844V2.61844H12.0877V1.86844V1.11844H3.9123V1.86844ZM12.0877 1.86844V2.61844H12.4284V1.86844V1.11844H12.0877V1.86844ZM3.9123 1.86844V1.11844H3.47032V1.86844V2.61844H3.9123V1.86844ZM8.81017 7.6843L9.48884 7.36507C9.07815 6.49197 8.1895 5.88502 7.15758 5.88502V6.63502V7.38502C7.58684 7.38502 7.95887 7.63654 8.13149 8.00352L8.81017 7.6843ZM7.15758 6.63502V5.88502C5.7353 5.88502 4.5823 7.03801 4.5823 8.4603H5.3323H6.0823C6.0823 7.86644 6.56372 7.38502 7.15758 7.38502V6.63502ZM5.3323 8.4603H4.5823C4.5823 9.84351 5.67246 10.9716 7.04087 11.033L7.07446 10.2837L7.10806 9.53448C6.53748 9.50889 6.0823 9.03755 6.0823 8.4603H5.3323ZM10.6677 9.58355H9.91774C9.91774 10.1774 9.43633 10.6588 8.84246 10.6588V11.4088V12.1588C10.2648 12.1588 11.4177 11.0058 11.4177 9.58355H10.6677ZM8.84246 11.4088V10.6588C8.24858 10.6588 7.76718 10.1774 7.76718 9.58355H7.01718H6.26718C6.26718 11.0058 7.42016 12.1588 8.84246 12.1588V11.4088ZM7.01718 9.58355H7.76718C7.76718 8.98967 8.24858 8.50827 8.84246 8.50827V7.75827V7.00827C7.42016 7.00827 6.26718 8.16124 6.26718 9.58355H7.01718ZM8.84246 7.75827V8.50827C9.43633 8.50827 9.91774 8.98967 9.91774 9.58355H10.6677H11.4177C11.4177 8.16124 10.2648 7.00827 8.84246 7.00827V7.75827Z" fill="currentColor"/></svg>Tip Jar</button>
       <button type="button" data-more="account"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2.75 7.75V4.75H21.25V7.75M2.75 7.75H21.25M2.75 7.75V10.75M21.25 7.75V10.75M21.25 10.75V19.25H2.75V10.75M21.25 10.75H15.25V13.25H8.75V10.75H2.75" stroke="currentColor" stroke-width="1.5"/></svg>Account</button>
     </div>
   </div>
@@ -4564,6 +4636,11 @@ html.dark .qhc-id{color:#6BA3FF;}
     <div class="auth-body">
       <div class="auth-panel" id="authPanelMain">
         <div class="auth-stack">
+          <form class="auth-email" id="authEmailForm">
+            <span class="auth-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5.5" width="17" height="13" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M4 7.5 12 13l8-5.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <input type="email" id="authEmailInput" placeholder="your@email.com" autocomplete="email" inputmode="email">
+            <button type="submit" class="auth-email-go" id="authEmailGo" disabled aria-label="Continue">→</button>
+          </form>
           <div class="auth-icon-row">
             <button type="button" class="auth-icon-btn" data-login="social" data-provider="Google" aria-label="Google">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.04 12.26c0-.81-.07-1.59-.21-2.34H12v4.43h6.19a5.29 5.29 0 0 1-2.3 3.47v2.88h3.72c2.18-2 3.43-4.96 3.43-8.44Z"/><path fill="#34A853" d="M12 24c3.11 0 5.72-1.03 7.63-2.8l-3.72-2.88c-1.03.7-2.36 1.11-3.91 1.11-3 0-5.55-2.03-6.46-4.76H1.7v2.97A12 12 0 0 0 12 24Z"/><path fill="#FBBC05" d="M5.54 14.67A7.2 7.2 0 0 1 5.16 12c0-.93.16-1.83.38-2.67V6.36H1.7A12 12 0 0 0 0 12c0 1.94.46 3.77 1.7 5.64l3.84-2.97Z"/><path fill="#EA4335" d="M12 4.75c1.69 0 3.21.58 4.41 1.72l3.31-3.31C17.72 1.19 15.11 0 12 0 7.31 0 3.26 2.69 1.7 6.36l3.84 2.97C6.45 6.6 9 4.75 12 4.75Z"/></svg>
@@ -4575,15 +4652,14 @@ html.dark .qhc-id{color:#6BA3FF;}
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14.5 3h2.1c.2 1.8 1.3 3.4 2.9 4.4V9.7c-1.2.12-2.4-.12-3.5-.68v5.66c0 3.2-2.6 5.82-5.82 5.82S4.36 17.88 4.36 14.68c0-3.19 2.6-5.81 5.82-5.81.3 0 .6.03.88.08v2.3a3.5 3.5 0 0 0-.88-.12 3.52 3.52 0 0 0-3.52 3.55 3.52 3.52 0 0 0 6.04 2.45V3Z"/></svg>
             </button>
           </div>
-          <form class="auth-email" id="authEmailForm">
-            <span class="auth-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="5.5" width="17" height="13" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M4 7.5 12 13l8-5.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-            <input type="email" id="authEmailInput" placeholder="your@email.com" autocomplete="email" inputmode="email">
-            <button type="submit" class="auth-email-go" id="authEmailGo" disabled aria-label="Continue">→</button>
-          </form>
-          <button type="button" class="auth-row" data-auth-panel="wallets">
+          <button type="button" class="auth-row auth-main-extra" data-auth-panel="wallets">
             <span class="auth-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="6.5" width="17" height="12" rx="2.2" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 10h17M16.5 14.2h1.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
             Crypto wallet
             <span class="auth-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </button>
+          <button type="button" class="auth-row auth-main-extra" data-login="social" data-provider="Passkey">
+            <span class="auth-ic" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6.51659 13.6667H2.18326V13C2.18326 10.2386 4.42183 8 7.18326 8M7.18326 8C8.84011 8 10.1833 6.65685 10.1833 5C10.1833 3.34315 8.84011 2 7.18326 2C5.5264 2 4.18326 3.34315 4.18326 5C4.18326 6.65685 5.5264 8 7.18326 8ZM11.7497 8.36653C12.8911 8.36653 13.8167 9.2922 13.8167 10.4336C13.8166 11.5749 12.891 12.5 11.7497 12.5C11.5285 12.5 11.3159 12.4641 11.1162 12.3997L9.51659 14H8.18326V12.6667L9.78286 11.0664C9.71872 10.8669 9.68326 10.6544 9.68326 10.4336C9.68326 9.29227 10.6084 8.36667 11.7497 8.36653Z" stroke="currentColor" stroke-width="1.5"/></svg></span>
+            Passkey
           </button>
           <button type="button" class="auth-row" data-auth-panel="more">
             <span class="auth-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.2" stroke="currentColor" stroke-width="1.7"/><path d="M5.2 18.4c.8-2.6 3.2-4.4 6.8-4.4s6 1.8 6.8 4.4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
@@ -4610,14 +4686,21 @@ html.dark .qhc-id{color:#6BA3FF;}
           <div class="sig-ring" id="authSigRing">
             <span id="authSigMark"><span class="sig-mark is-kb">K</span></span>
             <img id="authSigRingImg" alt="" hidden>
+            <span class="sig-fail" aria-hidden="true">✕</span>
           </div>
           <h3 class="sig-title" id="authSigTitle">Signing you in.</h3>
           <p class="sig-copy" id="authSigCopy"></p>
+          <button type="button" class="sig-retry" id="authSigRetry">Try again</button>
         </div>
       </div>
       <div class="auth-panel" id="authPanelFunds" hidden></div>
       <div class="auth-panel" id="authPanelMore" hidden>
         <div class="auth-stack">
+          <button type="button" class="auth-row" data-auth-panel="wallets" data-wallets-from="more">
+            <span class="auth-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="6.5" width="17" height="12" rx="2.2" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 10h17M16.5 14.2h1.8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span>
+            Crypto wallet
+            <span class="auth-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          </button>
           <button type="button" class="auth-row" data-login="social" data-provider="Apple">
             <span class="auth-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.4 12.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.2-2.8.9-3.5.9s-1.8-.8-3-.8c-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.3 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-.1 2.9-2.3c1.1-1.5 1.5-2.9 1.5-3 0-.1-2.8-1.1-2.8-3.4ZM14.7 6.4c.6-.8 1.1-1.9.9-3-1 .1-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1.1.1 2.2-.6 2.9-1.4Z"/></svg></span>
             Apple
@@ -4718,9 +4801,27 @@ html.dark .qhc-id{color:#6BA3FF;}
         <div class="sig-ring" id="sigRing">
           <img id="sigRingImg" alt="">
           <span class="sig-check">✓</span>
+          <span class="sig-fail" aria-hidden="true">✕</span>
         </div>
         <p class="sig-copy" id="sigCopy">Confirm in your wallet.</p>
+        <button type="button" class="sig-retry" id="sigRetry">Try again</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<div class="wallet-ext" id="walletExt" hidden aria-hidden="true">
+  <div class="wallet-ext-card" role="dialog" aria-modal="true" aria-labelledby="walletExtTitle">
+    <div class="wallet-ext-head">
+      <span id="walletExtMark"></span>
+      <span class="wallet-ext-name" id="walletExtName">MetaMask</span>
+    </div>
+    <span class="wallet-ext-origin"><i aria-hidden="true"></i>kumbaya.xyz</span>
+    <h3 class="wallet-ext-title" id="walletExtTitle">Sign message</h3>
+    <p class="wallet-ext-copy" id="walletExtCopy"></p>
+    <div class="wallet-ext-actions">
+      <button type="button" class="wallet-ext-no" id="walletExtReject">Cancel</button>
+      <button type="button" class="wallet-ext-yes" id="walletExtConfirm">Confirm</button>
     </div>
   </div>
 </div>
@@ -5042,6 +5143,42 @@ html.dark .qhc-id{color:#6BA3FF;}
   const kbToast = document.getElementById('kbToast');
   let toastTimer = 0;
   const TRAY_FAMILY = [authOverlay, walletOverlay, notifOverlay, signalsOverlay, sigOverlay, fundsOverlay, swapOverlay];
+  function demoSearch(){
+    try{ return new URLSearchParams(location.search); }
+    catch(_){ return new URLSearchParams(); }
+  }
+  function demoHash(){
+    try{ return (location.hash || '').replace(/^#/, ''); }
+    catch(_){ return ''; }
+  }
+  function demoHas(name){
+    const q = demoSearch();
+    if(q.has(name) || q.get('demo') === name || q.get('flow') === name) return true;
+    return demoHash() === name;
+  }
+  function demoFlow(){
+    const q = demoSearch();
+    const flow = String(q.get('flow') || q.get('demo') || '').toLowerCase();
+    if(flow) return flow;
+    const h = demoHash();
+    if(h && !/^error/.test(h)) return h;
+    return '';
+  }
+  function demoError(){
+    const q = demoSearch();
+    const v = String(q.get('error') || '').toLowerCase();
+    if(v) return v;
+    const h = demoHash();
+    const m = h.match(/^error[-_]?([a-z]+)$/);
+    return m ? m[1] : '';
+  }
+  function wantsManualSig(){ return demoHas('sig') || demoError() === 'sig'; }
+  function wantsMinimalAuth(){ return demoHas('minimal'); }
+  function authMainTitle(){ return wantsMinimalAuth() ? 'Sign up / Log in' : 'Login or sign up'; }
+  function syncAuthVariant(){
+    const modal = authOverlay?.querySelector('.auth-modal');
+    modal?.classList.toggle('is-minimal', wantsMinimalAuth());
+  }
 
   function showToast(msg){
     if(!kbToast || !msg) return;
@@ -5060,6 +5197,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   function overlayClose(el){
     if(!el) return;
+    if(el === sigOverlay || el === authOverlay) hideWalletExt();
     el.classList.remove('show');
     el.setAttribute('aria-hidden', 'true');
     if(typeof closeFlowSelect === 'function') closeFlowSelect();
@@ -5574,7 +5712,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     buyBtn.classList.toggle('is-gated', state === 'auth');
     buyBtn.classList.toggle('is-short', state === 'deposit');
     if(state === 'auth') buyBtn.textContent = isSell ? 'Sign in to sell' : 'Sign in to buy';
-    else if(state === 'deposit') buyBtn.textContent = 'Add funds to buy';
+    else if(state === 'deposit') buyBtn.textContent = 'Top up to buy';
     else buyBtn.textContent = isSell ? 'Sell' : 'Buy';
     const payLabel = document.getElementById('tradePayAssetLabel');
     const asset = PAY_ASSETS[session.payAsset] || PAY_ASSETS.eth;
@@ -5692,7 +5830,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     modal?.classList.toggle('is-wallets', name === 'wallets');
     modal?.classList.toggle('is-flow', flow);
     modal?.classList.toggle('is-sig', name === 'sig');
-    if(name !== 'sig') modal?.classList.remove('is-sig-done');
+    if(name !== 'sig') modal?.classList.remove('is-sig-done', 'is-sig-fail');
     back?.classList.toggle('show', name === 'wallets' || name === 'more' || (name === 'sig' && session._sigShowBack) || (name === 'funds' && flowCanBack()));
     if(brand) brand.hidden = name !== 'main';
     if(foot) foot.hidden = flow;
@@ -5700,7 +5838,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       title.hidden = name === 'wallets';
       title.textContent = name === 'more' ? 'More options'
         : name === 'funds' ? flowTitle()
-        : 'Login or sign up';
+        : authMainTitle();
     }
     session.authPanel = name;
     if(name === 'wallets'){
@@ -5718,6 +5856,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     else applyAuthPanel(name);
   }
   function openLogin(){
+    syncAuthVariant();
     setAuthPanel('main', { instant:true });
     const email = document.getElementById('authEmailInput');
     const go = document.getElementById('authEmailGo');
@@ -5729,6 +5868,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     clearTimeout(session.sigTimer);
     session.sigTimer = 0;
     session._authThen = null;
+    hideWalletExt();
     clearFlowTimer();
     overlayClose(authOverlay);
     setAuthPanel('main', { instant:true });
@@ -5737,7 +5877,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   function authProviderName(kind, key){
     const social = {
       Twitter:'Twitter', Google:'Google', TikTok:'TikTok', Apple:'Apple',
-      Discord:'Discord', GitHub:'GitHub', Telegram:'Telegram', Email:'email',
+      Discord:'Discord', GitHub:'GitHub', Telegram:'Telegram', Email:'email', Passkey:'passkey',
     };
     if(kind === 'social') return social[key] || key || 'your account';
     const w = LOGIN_WALLETS.find(x => x.id === key) || WALLET_CATALOG[key];
@@ -5757,6 +5897,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       Discord: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.3 5.2A17 17 0 0 0 15 3.9l-.4.8a15.6 15.6 0 0 1 3.9 1.5 16.2 16.2 0 0 0-12.9 0A15.6 15.6 0 0 1 9.4 4.7L9 3.9a17 17 0 0 0-4.3 1.3C1.7 9.3.9 13.2 1.2 17.1A17.3 17.3 0 0 0 6.5 20l.8-1.3a11.3 11.3 0 0 1-1.8-.9l.4-.3c3.5 1.6 7.3 1.6 10.8 0l.4.3c-.6.4-1.2.7-1.8.9l.8 1.3a17.3 17.3 0 0 0 5.3-2.9c.4-4.5-.6-8.4-3.1-11.9ZM8.8 14.8c-1 0-1.9-1-1.9-2.2s.8-2.2 1.9-2.2 1.9 1 1.9 2.2-.8 2.2-1.9 2.2Zm6.4 0c-1.1 0-1.9-1-1.9-2.2s.8-2.2 1.9-2.2 1.9 1 1.9 2.2-.8 2.2-1.9 2.2Z"/></svg>',
       GitHub: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.26c0 4.52 2.87 8.35 6.84 9.71.5.1.68-.22.68-.49v-1.7c-2.78.62-3.37-1.37-3.37-1.37-.46-1.2-1.12-1.52-1.12-1.52-.92-.64.07-.63.07-.63 1.02.07 1.56 1.07 1.56 1.07.9 1.57 2.36 1.12 2.94.85.09-.67.35-1.12.63-1.37-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.7 0 0 .84-.27 2.75 1.05A9.3 9.3 0 0 1 12 6.84c.85 0 1.7.12 2.5.34 1.9-1.32 2.74-1.05 2.74-1.05.55 1.4.2 2.44.1 2.7.64.72 1.03 1.63 1.03 2.75 0 3.94-2.34 4.8-4.57 5.06.36.32.68.94.68 1.9v2.82c0 .27.18.6.69.49A10.03 10.03 0 0 0 22 12.26C22 6.58 17.52 2 12 2Z"/></svg>',
       Telegram: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.5 4.3 18.4 20c-.2 1-1.2 1.3-2 .8l-4.4-3.3-2.1 2.1c-.2.2-.5.4-.8.4l.3-4.6 8.4-7.6c.4-.3-.1-.5-.6-.2L6.4 13.2 2.2 11.8c-1-.3-1-1 .2-1.5L20.2 3.6c.8-.3 1.5.2 1.3.7Z"/></svg>',
+      Passkey: '<svg viewBox="0 0 16 16" fill="none"><path d="M6.51659 13.6667H2.18326V13C2.18326 10.2386 4.42183 8 7.18326 8M7.18326 8C8.84011 8 10.1833 6.65685 10.1833 5C10.1833 3.34315 8.84011 2 7.18326 2C5.5264 2 4.18326 3.34315 4.18326 5C4.18326 6.65685 5.5264 8 7.18326 8ZM11.7497 8.36653C12.8911 8.36653 13.8167 9.2922 13.8167 10.4336C13.8166 11.5749 12.891 12.5 11.7497 12.5C11.5285 12.5 11.3159 12.4641 11.1162 12.3997L9.51659 14H8.18326V12.6667L9.78286 11.0664C9.71872 10.8669 9.68326 10.6544 9.68326 10.4336C9.68326 9.29227 10.6084 8.36667 11.7497 8.36653Z" stroke="currentColor" stroke-width="1.5"/></svg>',
     };
     const dark = key !== 'Google';
     return `<span class="sig-mark ${dark?'is-dark':''}">${icons[key] || key.slice(0,1)}</span>`;
@@ -5795,7 +5936,141 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     if(mark && state.markHtml) mark.innerHTML = state.markHtml;
     ring?.classList.toggle('is-done', !!state.done);
+    ring?.classList.toggle('is-fail', !!state.fail);
     modal?.classList.toggle('is-sig-done', !!state.done);
+    modal?.classList.toggle('is-sig-fail', !!state.fail);
+    const retry = document.getElementById('authSigRetry');
+    if(retry) retry.classList.toggle('show', !!state.fail);
+  }
+  function catalogWallet(idOrWallet){
+    if(idOrWallet && typeof idOrWallet === 'object'){
+      return LOGIN_WALLETS.find(w => w.id === idOrWallet.id)
+        || { id: idOrWallet.id, name: idOrWallet.name || 'Wallet', bg: '#888', mark: (idOrWallet.name || 'W').slice(0,1), detected:false };
+    }
+    return LOGIN_WALLETS.find(w => w.id === (idOrWallet || 'mm')) || LOGIN_WALLETS[0];
+  }
+  function hideWalletExt(){
+    const el = document.getElementById('walletExt');
+    session._extConfirm = null;
+    session._extReject = null;
+    session._extKind = null;
+    if(!el) return;
+    el.classList.remove('show');
+    el.hidden = true;
+    el.setAttribute('aria-hidden', 'true');
+  }
+  function showWalletExt(opts){
+    const el = document.getElementById('walletExt');
+    if(!el){ opts && opts.onConfirm && opts.onConfirm(); return; }
+    const w = catalogWallet((opts && (opts.wallet || opts.walletId)) || 'mm');
+    const mark = document.getElementById('walletExtMark');
+    const name = document.getElementById('walletExtName');
+    const title = document.getElementById('walletExtTitle');
+    const copy = document.getElementById('walletExtCopy');
+    const yes = document.getElementById('walletExtConfirm');
+    const no = document.getElementById('walletExtReject');
+    if(mark) mark.innerHTML = walletIconHtml(w);
+    if(name) name.textContent = w.name;
+    if(opts && opts.intent === 'login'){
+      if(title) title.textContent = 'Connect this website with ' + w.name;
+      if(copy) copy.textContent = 'www.kumbaya.xyz';
+      if(yes) yes.textContent = 'Connect';
+    } else {
+      if(title) title.textContent = (opts && opts.label) || 'Sign-in request';
+      if(copy) copy.textContent = 'One signature, one transaction.';
+      if(yes) yes.textContent = 'Confirm';
+    }
+    if(no) no.textContent = 'Cancel';
+    session._extConfirm = opts && opts.onConfirm;
+    session._extReject = opts && opts.onReject;
+    session._extKind = (opts && opts.intent) || 'spend';
+    session._extLast = opts;
+    el.hidden = false;
+    el.setAttribute('aria-hidden', 'false');
+    requestAnimationFrame(()=> el.classList.add('show'));
+  }
+  function confirmWalletExt(){
+    const fn = session._extConfirm;
+    hideWalletExt();
+    if(typeof haptic === 'function') haptic('selection');
+    fn && fn();
+  }
+  function rejectWalletExt(){
+    const fn = session._extReject;
+    hideWalletExt();
+    if(typeof haptic === 'function') haptic('light');
+    fn && fn();
+  }
+  function failWalletPrompt(kind, extra){
+    const login = kind === 'login';
+    const heading = login ? 'Connection rejected' : 'Signature rejected';
+    const sub = 'You cancelled the request in your wallet.';
+    const markHtml = extra && extra.markHtml;
+    const inAuth = !!(extra && extra.inAuth) || login || flowHost() === 'auth' || session.authPanel === 'sig';
+    session._sigRetry = ()=>{
+      const last = session._extLast;
+      if(session.swap && session.swap.step === 'fail'){
+        session.swap.step = 'wait';
+        paintSwapSheet(true);
+      } else if(login || inAuth){
+        const modal = authOverlay?.querySelector('.auth-modal');
+        morphSheet(modal, ()=> paintSigPanel({
+          title: extra && extra.waitTitle || '',
+          heading: extra && extra.waitHeading || (login ? `Waiting for ${authProviderName('eoa', extra && extra.walletId)}` : extra && extra.label || 'Confirm'),
+          sub: extra && extra.waitSub || 'For the best experience, connect only one wallet at a time.',
+          markHtml,
+          instant: true,
+        }));
+      } else {
+        const modal = sigOverlay?.querySelector('.sig-modal');
+        morphSheet(modal, ()=>{
+          const ring = document.getElementById('sigRing');
+          const title = document.getElementById('sigTitle');
+          const copy = document.getElementById('sigCopy');
+          const retry = document.getElementById('sigRetry');
+          ring?.classList.remove('is-fail', 'is-done');
+          if(title) title.textContent = (extra && extra.label) || 'Confirm';
+          if(copy) copy.textContent = extra && extra.copyText || 'Confirm in your wallet. One signature, one transaction.';
+          retry?.classList.remove('show');
+        });
+      }
+      if(last) showWalletExt(last);
+    };
+    if(session.swap && session.swap.step === 'wait'){
+      session.swap.step = 'fail';
+      paintSwapSheet(true);
+      return;
+    }
+    if(inAuth){
+      const modal = authOverlay?.querySelector('.auth-modal');
+      morphSheet(modal, ()=> paintSigPanel({ title:'', heading, sub, fail:true, markHtml }));
+      return;
+    }
+    const modal = sigOverlay?.querySelector('.sig-modal');
+    morphSheet(modal, ()=>{
+      const title = document.getElementById('sigTitle');
+      const copy = document.getElementById('sigCopy');
+      const ring = document.getElementById('sigRing');
+      const retry = document.getElementById('sigRetry');
+      if(title) title.textContent = heading;
+      if(copy) copy.textContent = sub;
+      ring?.classList.remove('is-done');
+      ring?.classList.add('is-fail');
+      retry?.classList.add('show');
+    });
+  }
+  function retryWalletPrompt(){
+    const fn = session._sigRetry;
+    if(fn) fn();
+  }
+  function finishSigSuccess(ring, inAuth, then){
+    ring?.classList.add('is-done');
+    const hold = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 420;
+    session.sigTimer = setTimeout(()=>{
+      hideWalletExt();
+      if(!inAuth) overlayClose(sigOverlay);
+      then && then();
+    }, hold);
   }
   function playAuthFeedback(kind, key, then){
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -5819,14 +6094,33 @@ html.dark .qhc-id{color:#6BA3FF;}
     paintSigPanel(wait);
     setAuthPanel('sig');
     clearTimeout(session.sigTimer);
-    session.sigTimer = setTimeout(()=>{
+    const succeed = ()=>{
       paintSigPanel(success);
       session.sigTimer = setTimeout(()=>{
         const cb = session._authThen;
         session._authThen = null;
         cb && cb();
       }, holdMs);
-    }, waitMs);
+    };
+    if(kind === 'eoa' && wantsManualSig()){
+      showWalletExt({
+        walletId: key,
+        intent: 'login',
+        onConfirm: succeed,
+        onReject: ()=>{
+          session._authThen = null;
+          failWalletPrompt('login', {
+            markHtml,
+            walletId: key,
+            waitTitle: wait.title,
+            waitHeading: wait.heading,
+            waitSub: wait.sub,
+          });
+        },
+      });
+      return;
+    }
+    session.sigTimer = setTimeout(succeed, waitMs);
   }
 
   function completeLogin(kind, key){
@@ -5842,7 +6136,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         session.wallets = [mintWallet('emb', { bal: 0, active: true })];
       } else {
         session.auth = 'eoa';
-        session.wallets = [mintWallet(key || 'mm', { bal: 0, active: true })];
+        session.wallets = [mintWallet(key || 'mm', { bal: (demoHas('sig') && !demoError()) ? 250 : 0, active: true })];
       }
       afterAuth(pending, need);
     });
@@ -5883,6 +6177,7 @@ html.dark .qhc-id{color:#6BA3FF;}
           return;
         }
         session.pendingSpend = null;
+        showToast('Top up to continue.');
         openTopUp(0, ()=> requireSpend(amt, then, label));
         return;
       }
@@ -5926,18 +6221,24 @@ html.dark .qhc-id{color:#6BA3FF;}
     const img = document.getElementById(inAuth ? 'authSigRingImg' : 'sigRingImg');
     if(title) title.textContent = label;
     if(copy) copy.textContent = copyText;
-    if(ring) ring.classList.remove('is-done');
+    if(ring){ ring.classList.remove('is-done', 'is-fail'); }
     if(img) img.src = userAvatar(a ? a.addr : 'wallet');
+    document.getElementById(inAuth ? 'authSigRetry' : 'sigRetry')?.classList.remove('show');
     if(inAuth) setAuthPanel('sig');
     else overlayOpen(sigOverlay);
     clearTimeout(session.sigTimer);
-    session.sigTimer = setTimeout(()=>{
-      ring?.classList.add('is-done');
-      setTimeout(()=>{
-        if(!inAuth) overlayClose(sigOverlay);
-        then && then();
-      }, 420);
-    }, 1100);
+    const succeed = ()=> finishSigSuccess(ring, inAuth, then);
+    if(wantsManualSig()){
+      showWalletExt({
+        wallet: a,
+        intent: 'spend',
+        label,
+        onConfirm: succeed,
+        onReject: ()=> failWalletPrompt('spend', { inAuth, label, copyText }),
+      });
+      return;
+    }
+    session.sigTimer = setTimeout(succeed, 1100);
   }
 
   let lastWalletView = 'list';
@@ -6043,7 +6344,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       linked.forEach(w => { w.bal = 0; });
     }
     const balBlock = `
-      <div class="wallet-balance-lbl">Balance</div>
+      <div class="wallet-balance-lbl">USD balance</div>
       <div class="wallet-balance">${usdLabel(totalBal())}</div>`;
     const rows = linked.map(w => `
       <button type="button" class="kb-wrow ${w.active ? 'is-active' : ''}" data-switch="${w.id}">
@@ -6099,7 +6400,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       ${cash ? `<button type="button" class="wallet-balance-hit" data-switch="${cash.id}">${balBlock}</button>` : balBlock}
       <div class="wallet-actions">
         <button type="button" id="walletSendBtn">Send</button>
-        <button type="button" class="wallet-add" id="walletAddBtn">Add funds</button>
+        <button type="button" class="wallet-add" id="walletAddBtn">Top up</button>
       </div>
       <div class="wallet-sec">Wallets</div>
       ${rows}
@@ -6195,14 +6496,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     {id:8, day:'Yesterday', unread:false, user:'nath4an', avatar:`${M}/tabasco4.jpeg`, media:`${M}/tabasco.png`, thumb:'media', badge:'fire', action:'Fueled your content', ref:'$SAUCE', time:'1hr'},
   ];
   let notifTab = 'all';
-  const NOTIF_DEMO = (()=>{
-    try{
-      const q = new URLSearchParams(location.search);
-      if(q.has('notiff') || q.has('notif')) return true;
-      const h = (location.hash || '').replace(/^#/, '');
-      return h === 'notiff' || h === 'notif';
-    }catch(_){ return false; }
-  })();
+  const NOTIF_DEMO = demoHas('notiff') || demoHas('notif');
 
   function unreadNotifs(){ return notifs.filter(n => n.unread); }
   function paintNotifChrome(){
@@ -7683,13 +7977,184 @@ html.dark .qhc-id{color:#6BA3FF;}
     overlayOpen(fundsOverlay);
   }
   function openTopUp(need, then){ openDeposit(need, then); }
-  function wantsDepositDemo(){
-    try{
-      const q = new URLSearchParams(location.search);
-      if(q.has('deposit') || q.get('demo') === 'deposit') return true;
-      const h = (location.hash || '').replace(/^#/, '');
-      return h === 'deposit';
-    }catch(_){ return false; }
+  function wantsDepositDemo(){ return demoHas('deposit'); }
+  function seedDemoEoa(bal){
+    session.auth = 'eoa';
+    session.authKey = 'mm';
+    session.wallets = [mintWallet('mm', { bal: bal || 0, active: true })];
+    paintAuthChrome();
+  }
+  function seedDemoSocial(bal){
+    session.auth = 'social';
+    session.authKey = 'Google';
+    session.anonName = mintAnonName('demo-social');
+    session.wallets = [mintWallet('emb', { bal: bal || 0, active: true })];
+    paintAuthChrome();
+  }
+  function seedDemoHoldings(){
+    session.holdings = [
+      { ticker:'$SAUCE', amount:'12,480', usd:48, img:`${M}/SAUCE.webp` },
+      { ticker:'$THINCK', amount:'890', usd:6.4, img:`${M}/tabasco.png` }
+    ];
+  }
+  function demoOpenDeposit(step, extra){
+    openDeposit(0, extra && extra.then ? extra.then : null);
+    if(!session.flow) return;
+    if(extra) Object.assign(session.flow, extra);
+    if(step) session.flow.step = step;
+    if(typeof paintFlowSheet === 'function') paintFlowSheet();
+  }
+  function playDemoBoot(){
+    const flow = demoFlow();
+    const err = demoError();
+    if(flow === 'login' || flow === 'first' || flow === 'tip'){
+      session.pending = ()=> requireSpend(5, ()=> showToast('Tipped $5.00.'), 'Tip $5.00');
+      session.pendingNeed = 5;
+      openLogin();
+      return;
+    }
+    if(flow === 'minimal' || (demoHas('minimal') && !flow && !err)){
+      openLogin();
+      return;
+    }
+    if(flow === 'more'){
+      openLogin();
+      setTimeout(()=> setAuthPanel('more'), 280);
+      return;
+    }
+    if(flow === 'wallets'){
+      openLogin();
+      if(wantsMinimalAuth()) session._walletsFrom = 'more';
+      setTimeout(()=> setAuthPanel('wallets'), 280);
+      return;
+    }
+    if(flow === 'login-error' || err === 'login'){
+      openLogin();
+      showToast('Sign-in cancelled.');
+      return;
+    }
+    if(flow === 'topup' || flow === 'low'){
+      seedDemoSocial(0);
+      showToast('Top up to continue.');
+      demoOpenDeposit('cash', { amt:5, method:'MoonPay', payMethod:'apple' });
+      return;
+    }
+    if(flow === 'moonpay'){
+      seedDemoSocial(0);
+      demoOpenDeposit('cashWait', { amt:5, method:'MoonPay', payMethod:'apple', creditLabel:'MoonPay' });
+      return;
+    }
+    if(flow === 'funded'){
+      seedDemoSocial(25);
+      seedDemoHoldings();
+      openWalletModal();
+      showToast('Added $25.00');
+      return;
+    }
+    if(flow === 'abandoned'){
+      seedDemoSocial(0);
+      demoOpenDeposit('cashWait', { amt:5, method:'MoonPay', creditLabel:'MoonPay' });
+      setTimeout(()=> flowCancelWait(), 80);
+      return;
+    }
+    if(flow === 'account'){
+      seedDemoSocial(248);
+      seedDemoHoldings();
+      openWalletModal();
+      return;
+    }
+    if(flow === 'account-empty'){
+      seedDemoSocial(0);
+      openWalletModal();
+      return;
+    }
+    if(flow === 'wallet' || flow === 'eoa'){
+      seedDemoEoa(180);
+      openWalletModal();
+      return;
+    }
+    if(flow === 'manage'){
+      seedDemoEoa(180);
+      session.wallets.push(mintWallet('emb', { bal: 12, active: false }));
+      openWalletModal();
+      return;
+    }
+    if(flow === 'buy'){
+      seedDemoSocial(80);
+      if(typeof openDrawer === 'function') openDrawer(posts[0]);
+      return;
+    }
+    if(flow === 'launch'){
+      seedDemoSocial(80);
+      document.getElementById('launchBtn')?.click();
+      return;
+    }
+    if(flow === 'onboard' || flow === 'hint'){
+      try{ localStorage.removeItem('kb_feed_hint_v9'); }catch(_){}
+      feedHintDismissed = false;
+      if(typeof showHintOnce === 'function') showHintOnce();
+      return;
+    }
+    if(flow === 'signals'){
+      if(typeof openSignals === 'function') openSignals();
+      return;
+    }
+    if(flow === 'notifs' || flow === 'notiff' || flow === 'notif'){
+      if(typeof openNotifs === 'function') openNotifs();
+      return;
+    }
+    if(demoHas('sig') && !err){
+      openLogin();
+      completeLogin('eoa', 'mm');
+      return;
+    }
+    if(err === 'sig' || flow === 'sig-reject'){
+      openLogin();
+      completeLogin('eoa', 'mm');
+      setTimeout(()=> rejectWalletExt(), 720);
+      return;
+    }
+    if(err === 'checkout'){
+      demoOpenDeposit('cashWait', { method:'MoonPay', creditLabel:'MoonPay' });
+      flowCancelWait();
+      return;
+    }
+    if(err === 'connect'){
+      demoOpenDeposit('cwWait', { walletId:'mm' });
+      flowCancelWait();
+      return;
+    }
+    if(err === 'exchange'){
+      demoOpenDeposit('exWait', { exchange:'Coinbase', creditLabel:'Coinbase' });
+      flowCancelWait();
+      return;
+    }
+    if(err === 'empty'){
+      demoOpenDeposit('cwBalances', { walletId:'mm', listReady:true });
+      return;
+    }
+    if(err === 'cash'){
+      demoOpenDeposit('cash', { amt:50001 });
+      return;
+    }
+    if(err === 'funds'){
+      seedDemoEoa(0);
+      if(typeof openDrawer === 'function') openDrawer(posts[0]);
+      setTimeout(()=>{
+        openSwapConfirm('buy');
+        confirmSwap();
+      }, 80);
+      return;
+    }
+    if(err === 'short'){
+      seedDemoEoa(10);
+      openSend();
+      session.flow.addr = '0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb1';
+      session.flow.amt = 50;
+      paintFlowSheet();
+      return;
+    }
+    if(wantsDepositDemo() || flow === 'deposit') openDeposit(0, null);
   }
   function openSend(){
     session.flow = defaultFlow('send', 0);
@@ -7885,11 +8350,12 @@ html.dark .qhc-id{color:#6BA3FF;}
     const s = session.swap;
     if(!modal || !body || !s) return;
     const run = ()=>{
+      const fail = s.step === 'fail';
       const wait = s.step === 'wait';
       const done = s.step === 'done';
       modal.classList.toggle('is-sell', s.side === 'sell');
       modal.classList.toggle('is-confirming', wait);
-      title.textContent = done ? 'Success' : (s.side === 'sell' ? 'Confirm sale' : 'Confirm purchase');
+      title.textContent = done ? 'Success' : fail ? 'Signature rejected' : (s.side === 'sell' ? 'Confirm sale' : 'Confirm purchase');
       if(done){
         const href = 'https://optimistic.etherscan.io/tx/' + (s.tx || mockSwapTx());
         body.innerHTML = `
@@ -7918,6 +8384,15 @@ html.dark .qhc-id{color:#6BA3FF;}
           </div>
           ${swapLegsHtml(s)}
           <button type="button" class="swap-cta is-wait" disabled>Processing <span class="spin"></span></button>`;
+      } else if(fail){
+        body.innerHTML = `
+          <div class="swap-wait">
+            <div class="sig-ring is-fail" id="swapRing">${s.img ? `<img src="${s.img}" alt="">` : `<span class="sig-mark is-kb">K</span>`}<span class="sig-fail" aria-hidden="true">✕</span></div>
+            <h3>Signature rejected</h3>
+            <p>You cancelled the request in your wallet.</p>
+          </div>
+          ${swapLegsHtml(s)}
+          <button type="button" class="swap-cta" data-swap="retry">Try again</button>`;
       } else {
         body.innerHTML = `
           ${swapLegsHtml(s)}
@@ -7979,6 +8454,17 @@ html.dark .qhc-id{color:#6BA3FF;}
     paintSwapSheet(true);
     haptic('selection');
     clearTimeout(session.swapTimer);
+    if(needsSig() && wantsManualSig()){
+      const a = cashWallet() || activeWallet();
+      showWalletExt({
+        wallet: a,
+        intent: 'spend',
+        label: `Confirm ${usdLabel(s.amt)}`,
+        onConfirm: settleSwap,
+        onReject: ()=> failWalletPrompt('spend'),
+      });
+      return;
+    }
     session.swapTimer = setTimeout(settleSwap, needsSig() ? 1600 : 1000);
   }
 
@@ -7988,6 +8474,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       clearTimeout(session.sigTimer);
       session.sigTimer = 0;
       session._authThen = null;
+      hideWalletExt();
       setAuthPanel('main');
       return;
     }
@@ -8044,16 +8531,27 @@ html.dark .qhc-id{color:#6BA3FF;}
       clearTimeout(session.sigTimer);
       session.sigTimer = 0;
       session._authThen = null;
+      hideWalletExt();
       setAuthPanel('main');
       return;
     }
     if(session.authPanel === 'funds' && flowCanBack()){ flowBack(); return; }
+    if(session.authPanel === 'wallets' && session._walletsFrom === 'more'){
+      session._walletsFrom = null;
+      setAuthPanel('more');
+      return;
+    }
     setAuthPanel('main');
   });
   authOverlay?.addEventListener('click', (e)=>{ if(e.target === authOverlay) closeAuthFromUser(); });
   authOverlay?.addEventListener('click', (e)=>{
     const panel = e.target.closest('[data-auth-panel]');
-    if(panel){ setAuthPanel(panel.dataset.authPanel); return; }
+    if(panel){
+      if(panel.dataset.authPanel === 'wallets' && panel.dataset.walletsFrom === 'more') session._walletsFrom = 'more';
+      else if(panel.dataset.authPanel !== 'wallets') session._walletsFrom = null;
+      setAuthPanel(panel.dataset.authPanel);
+      return;
+    }
     const login = e.target.closest('[data-login]');
     if(!login) return;
     completeLogin(login.dataset.login, login.dataset.wallet || login.dataset.provider);
@@ -8094,10 +8592,18 @@ html.dark .qhc-id{color:#6BA3FF;}
     const go = e.target.closest('[data-swap]');
     if(!go) return;
     if(go.dataset.swap === 'go') confirmSwap();
-    else     if(go.dataset.swap === 'done') closeSwap();
+    else if(go.dataset.swap === 'done') closeSwap();
+    else if(go.dataset.swap === 'retry') retryWalletPrompt();
+  });
+  document.getElementById('authSigRetry')?.addEventListener('click', retryWalletPrompt);
+  document.getElementById('sigRetry')?.addEventListener('click', retryWalletPrompt);
+  document.getElementById('walletExtConfirm')?.addEventListener('click', (e)=>{ e.stopPropagation(); confirmWalletExt(); });
+  document.getElementById('walletExtReject')?.addEventListener('click', (e)=>{ e.stopPropagation(); rejectWalletExt(); });
+  document.getElementById('walletExt')?.addEventListener('click', (e)=>{
+    if(e.target === e.currentTarget) rejectWalletExt();
   });
   paintAuthChrome();
-  if(wantsDepositDemo()) setTimeout(()=> openDeposit(0, null), 360);
+  setTimeout(playDemoBoot, 360);
   const posts = [
     { user:"sauce.eth", avatar:`${M}/SAUCE.webp`, desc:"the dare: drink the tabasco. one gallon, fridge-cold, no chaser.", ticker:"$SAUCE", cat:"Dare", role:"op", type:"image", w:1, h:1, src:`${M}/SAUCE.webp`, tips:2048, comments:412, likes:3801,
       commentList:[
@@ -10931,14 +11437,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   const hasGsap = typeof gsap !== 'undefined';
   // Shareable deep-link: /feed.html?refresh — plays pull-to-refresh in place once.
   // Root /feed.html (no param) keeps natural behaviour unchanged.
-  const REFRESH_DEMO = (()=>{
-    try{
-      const q = new URLSearchParams(location.search);
-      if(q.has('refresh') || q.get('ptr') === '1' || q.get('demo') === 'refresh') return true;
-      const h = (location.hash || '').replace(/^#/, '');
-      return h === 'refresh' || h === 'ptr';
-    }catch(_){ return false; }
-  })();
+  const REFRESH_DEMO = demoHas('refresh') || demoSearch().get('ptr') === '1' || demoHash() === 'ptr';
   if(REFRESH_DEMO) document.documentElement.classList.add('kb-refresh-demo');
   function pullFingerFor(dist){
     const t = Math.min(0.92, Math.max(0, dist) / PULL_DAMP_MAX);
@@ -14726,6 +15225,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   // Escape peels the topmost overlay (inner → outer). Works from comment input too.
   window.addEventListener('keydown', (e)=>{
     if(e.key !== 'Escape') return;
+    if(document.getElementById('walletExt')?.classList.contains('show')){ rejectWalletExt(); return; }
     if(state.focusedComment){ closeCommentMedia(); return; }
     const hoverOpen = document.querySelector('#userHoverCard.show, #tokenHoverCard.show, #quoteHoverCard.show');
     if(hoverOpen){ hideHoverCards(true); return; }
@@ -14738,8 +15238,17 @@ html.dark .qhc-id{color:#6BA3FF;}
       closeSwap();
       return;
     }
-    if(sigOverlay?.classList.contains('show')){ return; }
-    if(authOverlay?.classList.contains('show') && session.authPanel === 'sig') return;
+    if(sigOverlay?.classList.contains('show')){
+      if(!document.getElementById('sigRing')?.classList.contains('is-fail')) return;
+      overlayClose(sigOverlay);
+      return;
+    }
+    if(authOverlay?.classList.contains('show') && session.authPanel === 'sig'){
+      if(authOverlay.querySelector('.auth-modal')?.classList.contains('is-sig-fail')){
+        closeAuthFromUser();
+      }
+      return;
+    }
     if(fundsOverlay?.classList.contains('show')){ session.pendingFunds = null; overlayClose(fundsOverlay); return; }
     if(notifOverlay?.classList.contains('show')){ closeNotifs(); return; }
     if(signalsOverlay?.classList.contains('show')){ closeSignals(); return; }

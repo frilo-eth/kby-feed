@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kumbaya — Stakeholder flows</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2EEEA;--card:#fff;--ink:#2A241C;--ink-soft:#6D6153;--ink-faint:#948A7B;
+  --orange:#FF6622;--line:rgba(80,70,59,.12);--green:#1FA463;--coffee:#A9906F;
+}
+html.dark{
+  --bg:#070403;--card:#211D18;--ink:#F4EFE7;--ink-soft:#B3A895;--ink-faint:#7A7062;
+  --line:rgba(255,255,255,.1);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:var(--bg);color:var(--ink);padding:32px 20px 80px;}
+.wrap{max-width:920px;margin:0 auto;}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.brand img{width:28px;height:28px;}
+h1{font-size:28px;letter-spacing:-.03em;margin:0 0 8px;}
+.lede{color:var(--ink-soft);font-size:15px;line-height:1.5;margin:0 0 28px;max-width:62ch;}
+h2{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin:36px 0 12px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;}
+a.card{
+  display:flex;flex-direction:column;gap:6px;padding:16px 16px 14px;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  color:inherit;text-decoration:none;min-height:118px;
+  transition:transform .15s,box-shadow .15s;
+}
+a.card:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(40,30,20,.08);}
+.kicker{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--orange);}
+.card b{font-size:15px;letter-spacing:-.02em;}
+.card p{margin:0;font-size:13px;color:var(--ink-soft);line-height:1.4;}
+.meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:8px;}
+.pill{font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 7px;border-radius:999px;border:1px solid var(--line);color:var(--ink-faint);}
+.pill.go{color:var(--green);border-color:rgba(31,164,99,.28);background:rgba(31,164,99,.08);}
+.pill.fig{color:var(--orange);border-color:rgba(255,102,34,.28);background:rgba(255,102,34,.08);}
+.note{font-size:13px;color:var(--ink-soft);line-height:1.5;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:12px;}
+code{font-size:12px;background:var(--bg);padding:1px 5px;border-radius:6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <img src="/public/logo-light.png" alt="">
+    <span style="font-weight:700">Kumbaya</span>
+  </div>
+  <h1>Stakeholder flow index</h1>
+  <p class="lede">Click a card. Each link opens the live prototype on that state — no signup, no setup. Use this as the click-through for the design brief, then tick the Figma list beside it.</p>
+  <p class="lede" style="margin-top:-16px">Design file: <a href="https://www.figma.com/design/4SHPRgvRdAUl5NxcP7YZXi?node-id=2-2" style="color:var(--orange)">Auth &amp; money — screens</a> · <a href="https://www.figma.com/board/KwnB3IqBI7VcF93QkJkQ7W" style="color:var(--orange)">Journey map</a> · <a href="https://www.notion.so/3bfea2563e6d8153ab34e2e0569064b5" style="color:var(--orange)">Notion brief</a></p>
+
+  <h2>1. Journeys</h2>
+  <div class="grid">
+    <a class="card" href="/feed">
+      <span class="kicker">01 Land and browse</span>
+      <b>UGC arrival</b>
+      <p>Straight onto the $SAUCE original post. No modal, no gate.</p>
+      <div class="meta"><span class="pill go">In prototype</span></div>
+    </a>
+    <a class="card" href="/feed?flow=first">
+      <span class="kicker">02 First action</span>
+      <b>Tip / Buy → Sign up / Log in</b>
+      <p>Login opens as if Tip was tapped. Email, Google, X, TikTok, Crypto wallet, Passkey, More options. After login the tip resumes.</p>
+      <div class="meta"><span class="pill go">In prototype</span></div>
+    </a>
+    <a class="card" href="/feed?minimal">
+      <span class="kicker">02 alt</span>
+      <b>Login · web2-minimal</b>
+      <p>Google, X, TikTok, email, More options. Wallet lives under More. Present this sheet without changing the default.</p>
+      <div class="meta"><span class="pill go">?minimal</span></div>
+    </a>
+    <a class="card" href="/feed?flow=more">
+      <span class="kicker">02b</span>
+      <b>Login · More options</b>
+      <p>Apple, Discord, GitHub, Telegram, and Crypto wallet.</p>
+      <div class="meta"><span class="pill go">In prototype</span></div>
+    </a>
+    <a class="card" href="/feed?flow=login-error">
+      <span class="kicker">02c</span>
+      <b>Login · cancelled / error</b>
+      <p>Sign-in cancelled toast on the login sheet.</p>
+      <div class="meta"><span class="pill go">In prototype</span></div>
+    </a>
+    <a class="card" href="/feed?flow=wallets">
+      <span class="kicker">05 Wallet login</span>
+      <b>Crypto wallet list</b>
+      <p>Wallet catalog from the login sheet. Signing is a later click.</p>
+      <div class="meta"><span class="pill go">In prototype</span></div>
+    </a>
+    <a class="card" href="/feed?flow=topup">
+      <span class="kicker">03 Low balance</span>
+      <b>Top up to continue</b>
+      <p>Signed in, $0. Toast + MoonPay stand-in pre-filled with $5 (Apple Pay).</p>
+      <div class="meta"><span class="pill go">In prototype</span></div>
+    </a>
+    <a class="card" href="/feed?flow=moonpay">
+      <span class="kicker">03b</span>
+      <b>MoonPay window open</b>
+      <p>Waiting on hosted checkout. Interior of MoonPay is out of scope.</p>
+      <div class="meta"><span class="pill go">In prototype</span></div>
+    </a>
+    <a class="card" href="/feed?flow=funded">
+      <span class="kicker">03c</span>
+      <b>Post-deposit · success</b>
+      <p>USD balance updated, holdings underneath, action can resume.</p>
+      <div class="meta"><span class="pill go">In prototype</span></div>
+    </a>
+    <a class="card" href="/feed?flow=abandoned">
+      <span class="kicker">03d</span>
+      <b>Post-deposit · abandoned</b>
+      <p>Checkout declined / cancelled.</p>
+      <div class="meta"><span class="pill go">In prototype</span></div>
+    </a>
+    <a class="card" href="/feed?flow=account">
+      <span class="kicker">04 Account</span>
+      <b>USD balance + holdings</b>
+      <p>Social user. One number. Tokens underneath. No ETH, no tickers in the hero.</p>
+      <div class="meta"><span class="pill go">In prototype</span></div>
+    </a>
+    <a class="card" href="/feed?flow=account-empty">
+      <span class="kicker">04b</span>
+      <b>Account · empty</b>
+      <p>$0.00 and no token balances.</p>
+      <div class="meta"><span class="pill go">In prototype</span></div>
+    </a>
+    <a class="card" href="/feed?flow=wallet">
+      <span class="kicker">05b</span>
+      <b>Wallet-login account</b>
+      <p>Address visible. This is what a wallet user sees instead of a quiet USD pot.</p>
+      <div class="meta"><span class="pill go">In prototype</span></div>
+    </a>
+    <a class="card" href="/feed?flow=manage">
+      <span class="kicker">05e Manage wallets</span>
+      <b>EOA + secondary embedded</b>
+      <p>Wallet-login user with a Kumbaya balance sitting under their connected wallet.</p>
+      <div class="meta"><span class="pill go">In prototype</span></div>
+    </a>
+    <a class="card" href="/feed?sig">
+      <span class="kicker">05c Signing</span>
+      <b>Pending signature</b>
+      <p>Our UI while the wallet popup is open. Confirm or reject in the stand-in.</p>
+      <div class="meta"><span class="pill go">In prototype</span></div>
+    </a>
+    <a class="card" href="/feed?flow=sig-reject">
+      <span class="kicker">05d</span>
+      <b>Signature rejected</b>
+      <p>Failed / rejected path.</p>
+      <div class="meta"><span class="pill go">In prototype</span></div>
+    </a>
+    <a class="card" href="/feed?flow=onboard">
+      <span class="kicker">06 Onboarding</span>
+      <b>First-visit swipe hint</b>
+      <p>Doom-scroll hand animation. Design can replace this with a fuller first-run.</p>
+      <div class="meta"><span class="pill go">In prototype</span><span class="pill fig">Figma: expand</span></div>
+    </a>
+    <a class="card" href="/feed?flow=buy">
+      <span class="kicker">07 Buy from USD</span>
+      <b>Trade drawer in dollars</b>
+      <p>Buy sized in USD. ETH / USDm under the hood (Pay with chip).</p>
+      <div class="meta"><span class="pill go">In prototype</span></div>
+    </a>
+    <a class="card" href="/feed?flow=launch">
+      <span class="kicker">08 Token creation</span>
+      <b>Launch Token</b>
+      <p>Current: auth + toast. The onchain/platform step modal is the Figma job — full rework is out of scope, this post-form sheet is in.</p>
+      <div class="meta"><span class="pill fig">Needs Figma</span></div>
+    </a>
+  </div>
+
+  <h2>2. Header and chrome</h2>
+  <div class="grid">
+    <a class="card" href="/feed"><span class="kicker">Header</span><b>Logged out</b><p>Sign up / Log in + Launch Token.</p><div class="meta"><span class="pill go">In prototype</span></div></a>
+    <a class="card" href="/feed?flow=account"><span class="kicker">Header</span><b>Logged in</b><p>USD chip replaces Sign up / Log in.</p><div class="meta"><span class="pill go">In prototype</span></div></a>
+    <a class="card" href="/token?t=SAUCE"><span class="kicker">Token page</span><b>/token?t=SAUCE</b><p>Ticker stub from View token.</p><div class="meta"><span class="pill go">In prototype</span></div></a>
+    <a class="card" href="/feed?refresh"><span class="kicker">Feed</span><b>Pull-to-refresh</b><p>Plays the refresh once.</p><div class="meta"><span class="pill go">In prototype</span></div></a>
+    <a class="card" href="/feed?notiff"><span class="kicker">Inbox</span><b>Notification badge pop</b><p>Unread demo on the bell.</p><div class="meta"><span class="pill go">In prototype</span></div></a>
+    <a class="card" href="/feed?flow=signals"><span class="kicker">Signals</span><b>Live activity tray</b><p>Same full-height drawer as notifications.</p><div class="meta"><span class="pill go">In prototype</span></div></a>
+  </div>
+
+  <h2>3. Figma checklist — screens and states</h2>
+  <p class="lede" style="margin-bottom:12px">Build these on the dedicated Figma page. Prototype links are for reference, not pixel source of truth.</p>
+  <div class="grid">
+    <a class="card" href="/feed"><b>Header logged out / in</b><p>Copy: Sign up / Log in. Logged-in chip is USD balance, not a ticker.</p></a>
+    <a class="card" href="/feed?flow=first"><b>Login modal</b><p>Default: email, Google / X / TikTok, Crypto wallet, Passkey, More options. Alt: <code>?minimal</code>.</p></a>
+    <a class="card" href="/feed?flow=buy"><b>Swap module</b><p>Logged out on the homepage card, Swap page, Pools page. USD input; ETH/USDm underneath.</p></a>
+    <a class="card" href="/feed?flow=topup"><b>Low-balance prompt</b><p>“Top up to continue.” MoonPay / Apple Pay / card. Amount pre-filled.</p></a>
+    <a class="card" href="/feed?flow=moonpay"><b>While MoonPay is open</b><p>Our chrome behind the hosted widget. Interior of the widget is out of scope.</p></a>
+    <a class="card" href="/feed?flow=funded"><b>Post-deposit resume</b><p>Success and abandoned.</p></a>
+    <a class="card" href="/feed?flow=account"><b>Account panel</b><p>USD balance, holdings underneath, empty state.</p></a>
+    <a class="card" href="/feed?flow=manage"><b>Manage wallets</b><p>Including a secondary embedded wallet for a wallet-login user. Social vs wallet hero (USD vs address).</p></a>
+    <a class="card" href="/feed?sig"><b>Signing states</b><p>Pending, rejected, failed. What sits on screen while the wallet popup is open.</p></a>
+    <a class="card" href="/feed?flow=launch"><b>Token creation deploy</b><p>Post-form modal: onchain + platform steps, web2 copy. Full creation-form rework is out of scope.</p></a>
+    <a class="card" href="/feed?flow=onboard"><b>Onboarding animation</b><p>Short doom-scroll first-run. Current hand hint is the placeholder.</p></a>
+    <a class="card" href="/feed"><b>Web2 language sweep</b><p>Any remaining ETH, gas, signature, EOA, ticker-as-balance copy.</p></a>
+  </div>
+
+  <h2>4. Copy deck (target vs now)</h2>
+  <div class="note">
+    <b>Use:</b> Sign up / Log in · USD balance · Top up<br>
+    <b>Now in the prototype:</b> Header <code>Sign up / Log in</code>. Default modal <code>Login or sign up</code> with email, Google / X / TikTok, Crypto wallet, Passkey, More options. Stripped sheet: <code>?minimal</code>. USD balance on Account. Top up on the short-balance path and Account CTA.
+    <b>Do not invent:</b> addresses, ETH, or tickers in the default Account hero for social users.
+  </div>
+
+  <h2>5. Out of scope</h2>
+  <div class="note">
+    Fiat off-ramp and bank withdrawals · Moss wallet · Native app · Token creation <i>form</i> rework (the deploy modal after the form is in) · Interior of Privy and MoonPay hosted screens (theme values only, if we change them).
+  </div>
+
+  <h2>6. Dependencies</h2>
+  <div class="note">
+    Q1 technical PRD: whether an external-wallet tip needs a signature per tip.<br>
+    Sponsored gas: if yes, no “insufficient funds for fees” state.<br>
+    USDm bonding curve: unfinished — affects how launchpad USD prices render.
+  </div>
+</div>
+</body>
+</html>

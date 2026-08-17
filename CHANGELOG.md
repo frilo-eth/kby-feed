@@ -3,7 +3,7 @@
 ## Unreleased
 
 ### Trade drawer
-- CTA is a gate: **Sign in to buy** → **Add funds to buy** → green **Buy**. Signup/add funds does not auto-trade. README [#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta)
+- CTA is a gate: **Sign in to buy** → **Top up to buy** → green **Buy**. Signup/top up does not auto-trade. README [#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta)
 - Slippage chip unfolds AUTO / 0.5% / 0.3% / custom. Rest chrome stays `--card` (not orange). **Auto** badge is purple `#7B6CF0` + white. README [#slippage](https://github.com/frilo-eth/kby-feed/blob/main/README.md#slippage)
 - You’ll pay accordion (no top hairline). Fee 1.3%. Chart scrolls inside the drawer
 - Pay with: ETH amount + `0 ETH` balance when unsigned. README [#pay-with](https://github.com/frilo-eth/kby-feed/blob/main/README.md#pay-with)
@@ -23,11 +23,15 @@
 - One tray at a time; in-tray steps use `morphSheet` (~320ms Vaul). README [#sheet-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sheet-morph)
 - Send: From / To / amount on one sheet. Linked wallets as destinations + paste any address. README [#send](https://github.com/frilo-eth/kby-feed/blob/main/README.md#send)
 - Trade: dollarized buy helpers; sell `%` of holdings; ⇅ USD↔token (`TOKEN_PER_USD`). README [#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer)
+- Stakeholder click-through: [`/flows`](https://kby-feed.vercel.app/flows) (`?flow=first`, `topup`, `account`, `wallet`, `onboard`, `buy`, `launch`, `?minimal`, …). README [#stakeholder-flows](https://github.com/frilo-eth/kby-feed/blob/main/README.md#stakeholder-flows)
+- Default login: email, Google / X / TikTok, Crypto wallet, Passkey, More options (**Login or sign up**). Stripped alt: [`?minimal`](https://kby-feed.vercel.app/feed?minimal)
+- Copy: header **Sign up / Log in**, Account **USD balance**, **Top up** / **Top up to continue** / **Top up to buy**
+- Custom glyphs: Tip Jar (More menu), Passkey (login). README [#icons](https://github.com/frilo-eth/kby-feed/blob/main/README.md#icons)
 - Notifications: inbox starts all read (no badge unsigned). Showcase badge pop on [`?notiff`](https://kby-feed.vercel.app/feed?notiff). README [#notifications](https://github.com/frilo-eth/kby-feed/blob/main/README.md#notifications)
 - Signals: same full-height tray as Notifications. Live toast stack is parked. README [#signals](https://github.com/frilo-eth/kby-feed/blob/main/README.md#signals)
 - Theme flip: 400ms lights on/off fade (no circular clip). CSS var interpolations stay frozen so the swap is not a muddy wash.
 - New posts pill (`#newPill`) is parked — it sat on the feed after ~3 min. Pull-to-refresh still works.
-- Icons: [Central Icons](https://www.npmjs.com/package/@central-icons-react/all) sharp (square, stroke 1.5, 16×16). Pools is a custom glyph. README [#icons](https://github.com/frilo-eth/kby-feed/blob/main/README.md#icons)
+- Icons: [Central Icons](https://www.npmjs.com/package/@central-icons-react/all) sharp (square, stroke 1.5, 16×16). Pools, Tip Jar, and Passkey are custom glyphs. README [#icons](https://github.com/frilo-eth/kby-feed/blob/main/README.md#icons)
 
 ### `$SAUCE` catalog
 - Default first card is the OP: `sauce.eth` / `public/SAUCE.webp`. `nath4an` / `tabasco4.jpeg` is the second card (Entry). README [#sauce-token](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sauce-token)
