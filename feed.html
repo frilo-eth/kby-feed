@@ -1494,6 +1494,73 @@ html.dark .sig-card{box-shadow:0 4px 10px rgba(0,0,0,.35);}
 .hint-lottie video{display:block;width:100%!important;height:100%!important;object-fit:contain;}
 .hint-label{font-size:14px;font-weight:700;color:#fff;background:rgba(255,255,255,.18);padding:10px 18px;border-radius:22px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);letter-spacing:.01em;box-shadow:0 4px 20px rgba(0,0,0,.2);}
 
+/* Floating onboarding checklist */
+.onboard-float{
+  position:fixed;left:20px;bottom:24px;z-index:36;width:min(380px,calc(100vw - 40px));
+  background:var(--card);border:1px solid var(--line);border-radius:20px;
+  box-shadow:0 16px 48px rgba(40,30,20,.14),0 2px 8px rgba(40,30,20,.06);
+  opacity:0;transform:translateY(12px) scale(.98);pointer-events:none;
+  transition:opacity .32s ease,transform .38s cubic-bezier(.22,1.2,.36,1);
+}
+.onboard-float.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
+.onboard-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 16px 10px;}
+.onboard-head h3{margin:0;font-size:15px;font-weight:800;letter-spacing:-.02em;color:var(--ink);flex:1;}
+.onboard-head-actions{display:flex;align-items:center;gap:4px;}
+.onboard-icon-btn{
+  width:32px;height:32px;border:none;border-radius:10px;background:transparent;color:var(--ink-soft);
+  display:grid;place-items:center;cursor:pointer;transition:background .15s,color .15s;
+}
+.onboard-icon-btn:hover{background:var(--bg);color:var(--ink);}
+.onboard-icon-btn svg{width:16px;height:16px;}
+.onboard-bar-wrap{padding:0 16px 12px;}
+.onboard-bar{height:8px;border-radius:999px;background:#E8E0D4;overflow:hidden;}
+.onboard-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#7FE8B4,#3DDC97);transition:width .45s cubic-bezier(.22,1,.36,1);}
+.onboard-next{padding:0 16px 14px;font-size:13px;font-weight:600;color:var(--ink-soft);display:flex;gap:6px;align-items:baseline;}
+.onboard-next b{font-weight:800;color:var(--ink);}
+.onboard-list{display:flex;flex-direction:column;gap:8px;padding:0 12px 12px;max-height:min(62vh,520px);overflow:auto;}
+.onboard-float.is-collapsed .onboard-list{display:none;}
+.onboard-row{
+  border:1px solid var(--line);border-radius:14px;background:var(--card);overflow:hidden;
+  transition:border-color .2s,box-shadow .2s;
+}
+.onboard-row.is-open{border-color:rgba(61,220,151,.35);box-shadow:0 4px 16px rgba(61,220,151,.08);}
+.onboard-row.is-done{border-color:rgba(61,220,151,.25);}
+.onboard-row-head{
+  display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border:none;background:transparent;
+  cursor:pointer;text-align:left;color:inherit;
+}
+.onboard-row-ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex-shrink:0;}
+.onboard-row-ic svg{width:18px;height:18px;}
+.onboard-row-ic.is-buy{background:#D4F7E6;color:#111;}
+.onboard-row-ic.is-post{background:#E8DEFF;color:#5B3FD4;}
+.onboard-row-ic.is-tip{background:#F5E6D0;color:#B45309;}
+.onboard-row-ic.is-share{background:#D6EBFF;color:#111;}
+.onboard-row-ic.is-launch{background:#FFE4D1;color:#FF6622;}
+.onboard-row-title{flex:1;font-size:14px;font-weight:800;letter-spacing:-.01em;color:var(--ink);}
+.onboard-row-mark{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;color:var(--ink-soft);}
+.onboard-row.is-done .onboard-row-mark{background:#3DDC97;color:#111;}
+.onboard-row.is-done .onboard-row-mark svg{width:12px;height:12px;}
+.onboard-row-chev{width:18px;height:18px;color:var(--ink-soft);transition:transform .25s ease;flex-shrink:0;}
+.onboard-row.is-open .onboard-row-chev{transform:rotate(180deg);}
+.onboard-row.is-done .onboard-row-chev{display:none;}
+.onboard-row-body{display:grid;grid-template-rows:0fr;transition:grid-template-rows .32s cubic-bezier(.22,1,.36,1);}
+.onboard-row.is-open .onboard-row-body{grid-template-rows:1fr;}
+.onboard-row-inner{overflow:hidden;min-height:0;}
+.onboard-row-copy{padding:0 12px 10px 58px;font-size:13px;font-weight:600;line-height:1.45;color:var(--ink-soft);}
+.onboard-vid-wrap{padding:0 12px 12px 58px;}
+.onboard-vid{
+  position:relative;width:100%;aspect-ratio:16/10;border-radius:12px;overflow:hidden;
+  background:var(--bg);border:1px solid var(--line);
+}
+.onboard-vid img,.onboard-vid video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;}
+.onboard-vid:not(.is-live) video{opacity:0;}
+.onboard-vid.is-live video{opacity:1;transition:opacity .28s ease;}
+@media (max-width:860px){
+  .onboard-float{left:12px;right:12px;width:auto;bottom:calc(var(--mobile-nav-h) + env(safe-area-inset-bottom) + 12px);}
+}
+@media (prefers-reduced-motion:reduce){
+  .onboard-float,.onboard-bar-fill,.onboard-row-body,.onboard-row-chev{transition:none;}
+}
 
 /* ---- unified token drawer ---- */
 .drawer{width:0;flex-shrink:0;overflow:hidden;border-left:1px solid var(--line);background:var(--card);transition:width .38s cubic-bezier(.22,1,.36,1);z-index:35;}
@@ -4881,6 +4948,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         <div class="hint-lottie" id="hintLottie" aria-hidden="true"></div>
         <div class="hint-label">Swipe up for more</div>
       </div>
+      <div class="onboard-float" id="onboardFloat" hidden aria-label="Start earning on Kumbaya"></div>
       <div class="chevron-nav">
         <button class="chev-btn" id="prevBtn" title="Previous (↑)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <button class="chev-btn" id="nextBtn" title="Next (↓)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -10244,6 +10312,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       try{ localStorage.removeItem('kb_feed_hint_v10'); }catch(_){}
       feedHintDismissed = false;
       if(typeof showHintOnce === 'function') showHintOnce();
+      if(flow === 'onboard' && typeof resetOnboard === 'function') resetOnboard();
       return;
     }
     if(flow === 'signals'){
@@ -10374,7 +10443,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     logActivity('deposit', label ? `Top up · ${label}` : 'Top up', amt);
     finishFundsSheet();
     paintAuthChrome();
-    if(typeof haptic === 'function') haptic('funds');
+    if(typeof haptic === 'function') celebrateSuccess('funds');
     if(!(opts && opts.silent)) showToast(`Added ${usdLabel(amt)}${label ? ' via '+label : ''}.`);
     const next = session.pendingFunds;
     session.pendingFunds = null;
@@ -10424,7 +10493,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       const toLabel = toWallet ? sendWalletLabel(toWallet) : shortAddr(f.addr);
       logActivity('send', `Send · ${toLabel}`, amt);
       const toast = `Sent ${usdLabel(amt)} to ${toLabel}.`;
-      if(typeof haptic === 'function') haptic('success');
+      if(typeof celebrateSuccess === 'function') celebrateSuccess('send');
       if(f.kind === 'deposit'){
         finishFundsSheet();
         paintAuthChrome();
@@ -10613,7 +10682,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(s.side === 'sell'){
       creditSale(s.amt, s.ticker);
       logActivity('sell', '$' + String(s.ticker || '').replace(/^\$/, ''), s.amt);
-      haptic('success');
+      celebrateSuccess('sell');
       showToast(`Sold ${s.ticker}.`);
     } else {
       const ok = spendTrade(s.amt);
@@ -11085,11 +11154,34 @@ html.dark .qhc-id{color:#6BA3FF;}
   import('/node_modules/web-haptics/dist/index.mjs').then(attachWebHaptics).catch(()=>{
     import('https://cdn.jsdelivr.net/npm/web-haptics@0.0.6/dist/index.mjs').then(attachWebHaptics).catch(()=>{});
   });
+  const RICH_SUCCESS_WEB = [
+    { duration: 20, intensity: 0.55 },
+    { delay: 22, duration: 30, intensity: 0.72 },
+    { delay: 28, duration: 38, intensity: 0.86 },
+    { delay: 32, duration: 46, intensity: 0.96 },
+    { delay: 36, duration: 54, intensity: 1 },
+    { delay: 40, duration: 50, intensity: 0.94 },
+    { delay: 46, duration: 44, intensity: 0.82 },
+    { delay: 52, duration: 36, intensity: 0.68 },
+  ];
+  const RICH_SUCCESS_VIBRATE = [10, 18, 14, 24, 18, 30, 22, 36, 26, 42, 30, 48, 34, 44, 38, 40, 42];
+  const RICH_SUCCESS_TAPS = { taps: 5, tapGap: 30 };
+  const TIP_RICH_WEB = [
+    { duration: 14, intensity: 0.48 },
+    { delay: 22, duration: 26, intensity: 0.66 },
+    { delay: 28, duration: 34, intensity: 0.82 },
+    { delay: 34, duration: 42, intensity: 0.94 },
+    { delay: 40, duration: 36, intensity: 0.72 },
+  ];
+  const TIP_RICH_VIBRATE = [9, 20, 13, 28, 17, 34, 22, 38, 26];
+  const TIP_RICH_TAPS = { taps: 3, tapGap: 34 };
+  const FIRST_TIP_KEY = 'kb_first_tip_v1';
+  const CELEBRATION_COLORS = ['#FF6622', '#3DDC97', '#FFD166', '#7B6CF0', '#FF8A5B', '#ffffff', '#FF4D8D'];
   const WEB_HAPTIC_PRESETS = {
     light:'light', selection:'selection', nudge:'nudge', settle:'success',
     dragtick:'soft', toggle:'rigid', unmute:'nudge', mute:'rigid', open:'medium', comment:'success',
-    sent:'success', tip:'success', like:'medium', dislike:'warning', share:'soft', attach:'success',
-    lock:'rigid', unlock:'nudge', success:'success', funds:'success', error:'error', copyAddr:'soft',
+    sent:RICH_SUCCESS_WEB, tip:TIP_RICH_WEB, tipSuccess:RICH_SUCCESS_WEB, like:'medium', dislike:'warning', share:'soft', attach:'success',
+    lock:'rigid', unlock:'nudge', success:RICH_SUCCESS_WEB, funds:RICH_SUCCESS_WEB, buySuccess:RICH_SUCCESS_WEB, error:'error', copyAddr:'soft',
     // Pull-to-refresh — custom patterns via web-haptics (https://haptics.lochie.me)
     pulltick:  [{ duration: 8, intensity: 0.22 }],
     pullmorph: [{ duration: 14, intensity: 0.4 }],
@@ -11099,16 +11191,6 @@ html.dark .qhc-id{color:#6BA3FF;}
     pullcancel:[{ duration: 16, intensity: 0.38 }],
     pullsettle:[{ duration: 40, intensity: 0.55 }, { delay: 55, duration: 55, intensity: 0.75 }],
     copyAddr:  [{ duration: 10, intensity: 0.24 }],
-    buySuccess:[
-      { duration: 20, intensity: 0.55 },
-      { delay: 22, duration: 30, intensity: 0.72 },
-      { delay: 28, duration: 38, intensity: 0.86 },
-      { delay: 32, duration: 46, intensity: 0.96 },
-      { delay: 36, duration: 54, intensity: 1 },
-      { delay: 40, duration: 50, intensity: 0.94 },
-      { delay: 46, duration: 44, intensity: 0.82 },
-      { delay: 52, duration: 36, intensity: 0.68 },
-    ],
   };
   const HAPTIC_PATTERNS = {
     light:     { vibrate: [7], taps: 1 },
@@ -11122,17 +11204,18 @@ html.dark .qhc-id{color:#6BA3FF;}
     mute:      { vibrate: [14, 22, 8], taps: 1 },
     open:      { vibrate: [8, 28, 9], taps: 1 },
     comment:   { vibrate: [9, 30, 9], taps: 2, tapGap: 38 },
-    sent:      { vibrate: [8, 26, 12, 34, 10], taps: 2, tapGap: 40 },
+    sent:      { vibrate: RICH_SUCCESS_VIBRATE, ...RICH_SUCCESS_TAPS },
     share:     { vibrate: [7, 32, 7], taps: 2, tapGap: 36 },
-    tip:       { vibrate: [9, 42, 11, 48, 16], taps: 3, tapGap: 52 },
+    tip:       { vibrate: TIP_RICH_VIBRATE, ...TIP_RICH_TAPS },
+    tipSuccess:{ vibrate: RICH_SUCCESS_VIBRATE, ...RICH_SUCCESS_TAPS },
     like:      { vibrate: [7, 28, 11], taps: 2, tapGap: 32 },
     dislike:   { vibrate: [26, 16, 22], taps: 1 },
     lock:      { vibrate: [12, 22, 16], taps: 1 },
     unlock:    { vibrate: [8, 20, 10, 28, 8], taps: 2, tapGap: 36 },
-    success:   { vibrate: [10, 28, 14, 36, 18], taps: 2, tapGap: 42 },
-    buySuccess:{ vibrate: [10, 18, 14, 24, 18, 30, 22, 36, 26, 42, 30, 48, 34, 44, 38, 40, 42], taps: 5, tapGap: 30 },
+    success:   { vibrate: RICH_SUCCESS_VIBRATE, ...RICH_SUCCESS_TAPS },
+    buySuccess:{ vibrate: RICH_SUCCESS_VIBRATE, ...RICH_SUCCESS_TAPS },
     copyAddr:  { vibrate: [5, 14, 6], taps: 1 },
-    funds:     { vibrate: [12, 32, 16, 40, 20], taps: 3, tapGap: 48 },
+    funds:     { vibrate: RICH_SUCCESS_VIBRATE, ...RICH_SUCCESS_TAPS },
     error:     { vibrate: [40, 40, 40, 40, 40], taps: 3, tapGap: 80 },
     pulltick:  { vibrate: [4], taps: 0 },
     pullmorph: { vibrate: [8], taps: 1 },
@@ -11146,7 +11229,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     // Swipe ticks are haptic-only — audio is reserved for intentional cues (react, mute, lock, …)
     light:'light', selection:'light', nudge:'light', settle:false, attach:'settle', dragtick:false,
     toggle:'toggle', unmute:'unmute', mute:'mute', open:'open', comment:'comment', sent:'sent', share:'share',
-    tip:'tip', like:'like', dislike:'dislike', lock:'lock', unlock:'unlock',
+    tip:'buySuccess', tipSuccess:'buySuccess', like:'like', dislike:'dislike', lock:'lock', unlock:'unlock',
     success:'sent', buySuccess:'buySuccess', funds:'funds', error:'dislike', copyAddr:'copyAddr',
     pulltick:false, pullmorph:'light', pullarm:'light', pulldisarm:false,
     pullfire:'open', pullcancel:false, pullsettle:'refresh',
@@ -11535,36 +11618,257 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     return confettiReady;
   }
-  function fireBuyConfetti(){
+  function confettiOriginFromEl(el, yBias){
+    if(!el) return { x: 0.5, y: 0.45 };
+    const r = el.getBoundingClientRect();
+    return {
+      x: (r.left + r.width / 2) / window.innerWidth,
+      y: (r.top + r.height * (yBias == null ? 0.5 : yBias)) / window.innerHeight,
+    };
+  }
+  function fireConfetti(opts){
     if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const scale = opts?.scale || 'full';
+    const profiles = {
+      full: { main: 150, follow: 70, cannons: 5, ms: 2400, velocity: 54, spread: 125, scalar: 1.22 },
+      tip:  { main: 120, follow: 55, cannons: 4, ms: 2100, velocity: 50, spread: 115, scalar: 1.14 },
+    };
+    const p = profiles[scale] || profiles.full;
     ensureConfetti().then((confetti)=>{
       if(!confetti) return;
-      const colors = ['#FF6622', '#3DDC97', '#FFD166', '#7B6CF0', '#FF8A5B', '#ffffff', '#FF4D8D'];
-      const modal = swapOverlay?.querySelector('.swap-modal');
-      let origin = { x: 0.5, y: 0.42 };
-      if(modal){
-        const r = modal.getBoundingClientRect();
-        origin = {
-          x: (r.left + r.width / 2) / window.innerWidth,
-          y: (r.top + r.height * 0.32) / window.innerHeight,
-        };
-      }
-      const opts = { colors, zIndex: 200, disableForReducedMotion: true };
-      confetti({ ...opts, particleCount: 150, spread: 125, startVelocity: 54, origin, ticks: 280, gravity: 0.82, scalar: 1.22, shapes: ['square', 'circle'] });
+      const origin = opts?.origin || { x: 0.5, y: 0.45 };
+      const confettiOpts = { colors: CELEBRATION_COLORS, zIndex: 200, disableForReducedMotion: true };
+      confetti({ ...confettiOpts, particleCount: p.main, spread: p.spread, startVelocity: p.velocity, origin, ticks: 280, gravity: 0.82, scalar: p.scalar, shapes: ['square', 'circle'] });
       setTimeout(()=>{
-        confetti({ ...opts, particleCount: 70, spread: 90, startVelocity: 40, origin: { x: origin.x, y: Math.max(0.18, origin.y - 0.06) }, ticks: 220, scalar: 1.1 });
+        confetti({ ...confettiOpts, particleCount: p.follow, spread: p.spread - 20, startVelocity: p.velocity - 12, origin: { x: origin.x, y: Math.max(0.16, origin.y - 0.06) }, ticks: 220, scalar: p.scalar - 0.08 });
       }, 160);
-      const end = Date.now() + 2400;
+      const end = Date.now() + p.ms;
       (function frame(){
-        confetti({ ...opts, particleCount: 5, angle: 58, spread: 68, origin: { x: 0, y: origin.y + 0.08 } });
-        confetti({ ...opts, particleCount: 5, angle: 122, spread: 68, origin: { x: 1, y: origin.y + 0.08 } });
+        confetti({ ...confettiOpts, particleCount: p.cannons, angle: 58, spread: 68, origin: { x: 0, y: origin.y + 0.08 } });
+        confetti({ ...confettiOpts, particleCount: p.cannons, angle: 122, spread: 68, origin: { x: 1, y: origin.y + 0.08 } });
         if(Date.now() < end) requestAnimationFrame(frame);
       })();
     }).catch(()=>{});
   }
+  function hasTippedBefore(){
+    try{ return localStorage.getItem(FIRST_TIP_KEY) === '1'; }catch(_){ return false; }
+  }
+  function markFirstTip(){
+    try{ localStorage.setItem(FIRST_TIP_KEY, '1'); }catch(_){}
+  }
+  function celebrateSuccess(kind, opts){
+    const presets = { buy:'buySuccess', sell:'success', send:'success', funds:'funds', sent:'sent', tip:'tip', firstTip:'tipSuccess' };
+    haptic(presets[kind] || 'success');
+    if(opts && opts.confetti){
+      fireConfetti({ origin: opts.origin, scale: opts.confettiScale || 'full' });
+    }
+  }
   function celebrateBuySuccess(){
-    haptic('buySuccess');
-    fireBuyConfetti();
+    const modal = swapOverlay?.querySelector('.swap-modal');
+    celebrateSuccess('buy', {
+      confetti: true,
+      origin: modal ? confettiOriginFromEl(modal, 0.32) : undefined,
+      confettiScale: 'full',
+    });
+    markOnboardStep('buy');
+  }
+  function celebrateTip(btn){
+    const first = !hasTippedBefore();
+    if(first) markFirstTip();
+    celebrateSuccess(first ? 'firstTip' : 'tip', {
+      confetti: first,
+      origin: confettiOriginFromEl(btn, 0.35),
+      confettiScale: 'tip',
+    });
+    markOnboardStep('tip');
+  }
+
+  const ONBOARD_DISMISS_KEY = 'kb_onboard_dismiss_v1';
+  const ONBOARD_STEPS_KEY = 'kb_onboard_steps_v1';
+  const ONBOARD_COLLAPSED_KEY = 'kb_onboard_collapsed_v1';
+  const ONBOARD_STEP_DEFS = [
+    { id:'buy', title:'Buy coins', copy:'Pick a token and buy in with USD — your first step into the feed economy.', video:'extra-media3.mp4', poster:'extra-media3-poster.jpg', nextLabel:'Buy coins' },
+    { id:'post', title:'Post content', copy:'Create content people like, and turn ideas into earnings.', video:'extra-media10.mp4', poster:'extra-media10-poster.jpg', nextLabel:'Post content' },
+    { id:'tip', title:'Tip content', copy:'Send a tip when something hits — creators earn instantly.', video:'extra-media17.mp4', poster:'extra-media17-poster.jpg', nextLabel:'Tip content' },
+    { id:'share', title:'Share on X', copy:'Spread the drop — share a post to X and grow the loop.', video:'extra-media19.mp4', poster:'extra-media19-poster.jpg', nextLabel:'Share on X' },
+    { id:'launch', title:'Launch a coin', copy:'Launch a Dare — the summit. Turn an idea into a tradable token.', video:'extra-media20.mp4', poster:'extra-media20-poster.jpg', nextLabel:'Launch a Dare' },
+  ];
+  const ONBOARD_ICONS = {
+    buy:'<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M12 9v6M9 12h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    post:'<svg viewBox="0 0 24 24" fill="none"><rect x="4" y="5" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 14l3-3 2 2 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    tip:'<svg viewBox="0 0 24 24" fill="none"><path d="M12 20s-6-4.2-6-9a4.5 4.5 0 0 1 8.2-2.6A4.5 4.5 0 0 1 18 11c0 4.8-6 9-6 9Z" stroke="currentColor" stroke-width="1.8"/><path d="M12 11v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10.5 9.5h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    share:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
+    launch:'<svg viewBox="0 0 24 24" fill="none"><path d="M5 14l2-6 6-2-2 6-6 2zm4-4l7 7-2 2-7-7 2-2z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+  };
+  const ONBOARD_CHECK = '<svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2l2.4 2.4 4.6-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const ONBOARD_CHEV = '<svg viewBox="0 0 16 16" fill="none"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const ONBOARD_EXPAND = '<svg viewBox="0 0 16 16" fill="none"><path d="M10 2.5 13.5 6 10 9.5M2.5 13.5 6 10 9.5 13.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  let onboardDone = {};
+  let onboardCollapsed = false;
+  let onboardDismissed = false;
+  let onboardOpenRow = null;
+  function loadOnboardState(){
+    try{ onboardDone = JSON.parse(localStorage.getItem(ONBOARD_STEPS_KEY) || '{}') || {}; }catch(_){ onboardDone = {}; }
+    try{ onboardDismissed = localStorage.getItem(ONBOARD_DISMISS_KEY) === '1'; }catch(_){}
+    try{ onboardCollapsed = localStorage.getItem(ONBOARD_COLLAPSED_KEY) === '1'; }catch(_){}
+  }
+  function saveOnboardDone(){
+    try{ localStorage.setItem(ONBOARD_STEPS_KEY, JSON.stringify(onboardDone)); }catch(_){}
+  }
+  function onboardProgress(){
+    const done = ONBOARD_STEP_DEFS.filter(s => onboardDone[s.id]).length;
+    return { done, total: ONBOARD_STEP_DEFS.length, pct: Math.round(done / ONBOARD_STEP_DEFS.length * 100) };
+  }
+  function nextOnboardStep(){
+    return ONBOARD_STEP_DEFS.find(s => !onboardDone[s.id]) || null;
+  }
+  function onboardVisible(){
+    if(onboardDismissed) return false;
+    return onboardProgress().done < ONBOARD_STEP_DEFS.length;
+  }
+  function releaseOnboardVideos(){
+    document.querySelectorAll('#onboardFloat video').forEach(v=>{
+      v.pause();
+      v.removeAttribute('src');
+      v.load();
+      v.closest('.onboard-vid')?.classList.remove('is-live');
+    });
+  }
+  function syncOnboardVideos(){
+    document.querySelectorAll('#onboardFloat .onboard-row.is-open video').forEach(v=>{
+      const wrap = v.closest('.onboard-vid');
+      if(v.getAttribute('src')){ v.play().catch(()=>{}); wrap?.classList.add('is-live'); return; }
+      const src = v.dataset.src;
+      if(!src) return;
+      v.src = src;
+      v.muted = true;
+      v.playsInline = true;
+      v.loop = true;
+      v.preload = 'auto';
+      const live = ()=>{ wrap?.classList.add('is-live'); v.play().catch(()=>{}); };
+      if(v.readyState >= 2) live();
+      else v.addEventListener('loadeddata', live, { once:true });
+      v.load();
+    });
+    document.querySelectorAll('#onboardFloat .onboard-row:not(.is-open) video').forEach(v=>{
+      v.pause();
+      v.closest('.onboard-vid')?.classList.remove('is-live');
+    });
+  }
+  function dismissOnboard(fromUser){
+    onboardDismissed = true;
+    try{ localStorage.setItem(ONBOARD_DISMISS_KEY, '1'); }catch(_){}
+    const el = document.getElementById('onboardFloat');
+    if(el){ el.hidden = true; el.classList.remove('show'); }
+    releaseOnboardVideos();
+    if(fromUser) haptic('selection');
+  }
+  function resetOnboard(){
+    onboardDismissed = false;
+    onboardDone = {};
+    onboardCollapsed = false;
+    onboardOpenRow = nextOnboardStep()?.id || ONBOARD_STEP_DEFS[0].id;
+    try{
+      localStorage.removeItem(ONBOARD_DISMISS_KEY);
+      localStorage.removeItem(ONBOARD_STEPS_KEY);
+      localStorage.removeItem(ONBOARD_COLLAPSED_KEY);
+    }catch(_){}
+    paintOnboard();
+  }
+  function markOnboardStep(id){
+    if(!id || onboardDone[id]) return;
+    onboardDone[id] = true;
+    saveOnboardDone();
+    if(id === 'launch'){
+      celebrateSuccess('buy', { confetti: true, confettiScale: 'full' });
+    }
+    paintOnboard();
+    if(onboardProgress().done >= ONBOARD_STEP_DEFS.length){
+      setTimeout(()=> dismissOnboard(false), 2600);
+    }
+  }
+  function bindOnboardEvents(){
+    const el = document.getElementById('onboardFloat');
+    if(!el || el._onboardBound) return;
+    el._onboardBound = true;
+    el.addEventListener('click', (e)=>{
+      if(e.target.closest('[data-onboard-dismiss]')){ dismissOnboard(true); return; }
+      if(e.target.closest('[data-onboard-toggle]')){
+        onboardCollapsed = !onboardCollapsed;
+        try{ localStorage.setItem(ONBOARD_COLLAPSED_KEY, onboardCollapsed ? '1' : '0'); }catch(_){}
+        paintOnboard();
+        haptic('selection');
+        return;
+      }
+      const head = e.target.closest('[data-onboard-row]');
+      if(!head) return;
+      const id = head.dataset.onboardRow;
+      if(onboardDone[id]) return;
+      onboardOpenRow = onboardOpenRow === id ? null : id;
+      paintOnboard();
+      haptic('selection');
+    });
+  }
+  function paintOnboard(){
+    const el = document.getElementById('onboardFloat');
+    if(!el) return;
+    if(!onboardVisible()){
+      el.hidden = true;
+      el.classList.remove('show');
+      releaseOnboardVideos();
+      return;
+    }
+    const { pct } = onboardProgress();
+    const next = nextOnboardStep();
+    if(!onboardOpenRow || onboardDone[onboardOpenRow]) onboardOpenRow = next?.id || null;
+    const nextLabel = next ? next.nextLabel : 'All done';
+    el.hidden = false;
+    el.classList.toggle('is-collapsed', onboardCollapsed);
+    const rows = ONBOARD_STEP_DEFS.map(step=>{
+      const done = !!onboardDone[step.id];
+      const open = !onboardCollapsed && onboardOpenRow === step.id && !done;
+      return `
+        <div class="onboard-row ${done ? 'is-done' : ''} ${open ? 'is-open' : ''}">
+          <button type="button" class="onboard-row-head" data-onboard-row="${step.id}" aria-expanded="${open}">
+            <span class="onboard-row-ic is-${step.id}">${ONBOARD_ICONS[step.id] || ''}</span>
+            <span class="onboard-row-title">${step.title}</span>
+            <span class="onboard-row-mark" aria-hidden="true">${done ? ONBOARD_CHECK : ''}</span>
+            ${done ? '' : `<span class="onboard-row-chev">${ONBOARD_CHEV}</span>`}
+          </button>
+          <div class="onboard-row-body">
+            <div class="onboard-row-inner">
+              <p class="onboard-row-copy">${step.copy}</p>
+              <div class="onboard-vid-wrap">
+                <div class="onboard-vid">
+                  <img src="${M}/${step.poster}" alt="" decoding="async">
+                  <video data-src="${M}/${step.video}" poster="${M}/${step.poster}" muted playsinline loop preload="none"></video>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+    el.innerHTML = `
+      <div class="onboard-head">
+        <h3>Start earning on Kumbaya</h3>
+        <div class="onboard-head-actions">
+          <button type="button" class="onboard-icon-btn" data-onboard-toggle aria-label="${onboardCollapsed ? 'Expand checklist' : 'Collapse checklist'}">${ONBOARD_EXPAND}</button>
+          <button type="button" class="onboard-icon-btn" data-onboard-dismiss aria-label="Dismiss getting started">✕</button>
+        </div>
+      </div>
+      <div class="onboard-bar-wrap"><div class="onboard-bar"><div class="onboard-bar-fill" style="width:${pct}%"></div></div></div>
+      <div class="onboard-next"><span>Next</span><b>${nextLabel}</b></div>
+      <div class="onboard-list">${rows}</div>`;
+    requestAnimationFrame(()=> el.classList.add('show'));
+    bindOnboardEvents();
+    syncOnboardVideos();
+  }
+  function initOnboardFromUrl(){
+    const q = demoSearch().get('onboard');
+    if(q === 'false'){ dismissOnboard(false); return; }
+    if(q === 'true'){ resetOnboard(); return; }
+    loadOnboardState();
+    paintOnboard();
   }
   const feedWrap = document.querySelector('.feed-wrap');
   if(feedWrap) feedWrap.addEventListener('pointerdown', unlockAudio, { capture: true, passive: true });
@@ -12875,7 +13179,7 @@ html.dark .qhc-id{color:#6BA3FF;}
           requireSpend(TIP_USD, ()=>{
             tipBtn.classList.add('active','pulse'); setTimeout(()=>tipBtn.classList.remove('pulse'),450);
             let val=parseInt(tipBtn.dataset.tips,10)+TIP_USD; tipBtn.dataset.tips=val; tipCountEl.textContent=usdLabel(val);
-            spawnTipFloat(tipBtn); haptic('tip');
+            spawnTipFloat(tipBtn); celebrateTip(tipBtn);
             signalActivity('tip', { item, avatar: myAvatarUrl(), amount: TIP_USD });
             logActivity('tip', 'Tip', TIP_USD);
           }, 'Tip ' + usdLabel(TIP_USD));
@@ -16419,7 +16723,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         syncCommentReactionUI(c);
         spawnTipFloat(originBtn || cfxCaption.querySelector('.cfx-react.tip') || findCommentRow(c)?.querySelector('.c-pill.tip'));
         pulse(originBtn || cfxCaption.querySelector('.cfx-react.tip'));
-        haptic('tip');
+        celebrateTip(originBtn || cfxCaption.querySelector('.cfx-react.tip') || findCommentRow(c)?.querySelector('.c-pill.tip'));
         logActivity('tip', 'Tip', TIP_USD);
       }, 'Tip ' + usdLabel(TIP_USD));
       return;
@@ -17211,8 +17515,11 @@ html.dark .qhc-id{color:#6BA3FF;}
     commentInputAvatar.classList.toggle('blockie', !anon);
   }
   function syncCommentSendReady(){
-    const ready = state.commentsOpen && !!(commentInput.value.trim() || (!commentAnonToggle?.classList.contains('active') && commentPendingMedia));
-    commentSendBtn?.classList.toggle('show', ready);
+    const input = document.getElementById('commentInput');
+    if(!input) return;
+    const anonOn = document.getElementById('commentAnonToggle')?.classList.contains('active');
+    const ready = state.commentsOpen && isAuthed() && !!(input.value.trim() || (!anonOn && commentPendingMedia));
+    document.getElementById('commentSendBtn')?.classList.toggle('show', ready);
   }
   function setCommentAnon(on){
     commentAnonToggle.classList.toggle('active', on);
@@ -17246,19 +17553,16 @@ html.dark .qhc-id{color:#6BA3FF;}
     const authed = isAuthed();
     if(!input) return;
     input.placeholder = authed ? 'Post content to earn' : 'Sign in to comment';
-    input.readOnly = !authed;
+    input.readOnly = false;
   }
   function sendComment(){
+    if(!state.commentsOpen) return;
+    const text = commentInput.value.trim();
+    if(!text && !commentPendingMedia) return;
     if(!isAuthed()){
-      requireAuth(()=>{
-        if(commentInput?.value.trim() || commentPendingMedia) sendComment();
-        else commentInput?.focus();
-      });
+      requireAuth(()=> sendComment());
       return;
     }
-    const text = commentInput.value.trim();
-    if(!state.commentsOpen) return;
-    if(!text && !commentPendingMedia) return;
     const post = posts[lastActiveIdx];
     if(!post) return;
     if(!post.commentList) post.commentList = [];
@@ -17307,7 +17611,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     clearCommentPendingMedia({ keepBlob:true, animate:false });
     syncCommentSendReady();
     closeCommentAnonPop();
-    haptic('sent');
+    celebrateSuccess('sent');
+    markOnboardStep('post');
     signalActivity('comment', { item, avatar: isAnon ? ANON_AVATAR : myAvatarUrl(), text });
   }
 
@@ -17330,11 +17635,6 @@ html.dark .qhc-id{color:#6BA3FF;}
   });
   document.addEventListener('click',(e)=>{
     if(!e.target.closest?.('#commentIdentity')) closeCommentAnonPop();
-  });
-  commentInput.addEventListener('pointerdown', (e)=>{
-    if(isAuthed()) return;
-    e.preventDefault();
-    requireAuth(()=> commentInput.focus());
   });
   commentInput.addEventListener('input', ()=>{
     syncCommentInputMirror();
@@ -17443,9 +17743,12 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   document.getElementById('launchBtn')?.addEventListener('click', ()=>{
     requireAuth(()=>{
-      const fin = ()=> showToast(needsSig()
-        ? `Launch submitted. ${activeWallet().name} signed once.`
-        : 'Launch submitted.');
+      const fin = ()=>{
+        markOnboardStep('launch');
+        showToast(needsSig()
+          ? `Launch submitted. ${activeWallet().name} signed once.`
+          : 'Launch submitted.');
+      };
       if(needsSig()) requestSignature('Launch token', fin);
       else fin();
     });
@@ -17456,6 +17759,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     const text = encodeURIComponent(`${title} ${tk} on Kumbaya`.trim());
     window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(location.href)}`, '_blank', 'noopener');
     haptic('share');
+    markOnboardStep('share');
   });
   document.getElementById('copyUrlBtn').addEventListener('click', ()=>{
     try{ navigator.clipboard && navigator.clipboard.writeText(location.href); }catch(_){}
@@ -17706,6 +18010,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
 
   render();
+  initOnboardFromUrl();
 })();
 </script>
 </body>

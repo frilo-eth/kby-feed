@@ -1,6 +1,6 @@
 # Kumbaya Feed
 
-**Version 0.1.2** — TikTok-style doomscroll feed prototype with spring physics, haptics, comments, trade drawer, and mobile-first overlays.
+**Version 0.1.3** — TikTok-style doomscroll feed prototype with spring physics, haptics, comments, trade drawer, and mobile-first overlays.
 
 **Live:** [https://kby-feed.vercel.app](https://kby-feed.vercel.app)  
 **Repo:** [frilo-eth/kby-feed](https://github.com/frilo-eth/kby-feed)  
@@ -28,7 +28,8 @@ Porting / review: open the heading, not the whole README. Production: [https://k
 | [Stakeholder flows](#stakeholder-flows) (`/flows`, `?flow=`) | [README.md#stakeholder-flows](https://github.com/frilo-eth/kby-feed/blob/main/README.md#stakeholder-flows) |
 | [Icons](#icons) | [README.md#icons](https://github.com/frilo-eth/kby-feed/blob/main/README.md#icons) |
 | [Trade drawer](#trade-drawer) (dollarized buy) | [README.md#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer) |
-| [Trade CTA](#trade-cta) (Sign up / Log in → Top up → green Buy) | [README.md#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta) |
+| [Trade CTA](#trade-cta) (Sign in → Top up → green Buy) | [README.md#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta) |
+| [Floating onboarding](#floating-onboarding) | [README.md#floating-onboarding](https://github.com/frilo-eth/kby-feed/blob/main/README.md#floating-onboarding) |
 | [Slippage](#slippage) | [README.md#slippage](https://github.com/frilo-eth/kby-feed/blob/main/README.md#slippage) |
 | [Pay with](#pay-with) (hidden on launchpad Buy) | [README.md#pay-with](https://github.com/frilo-eth/kby-feed/blob/main/README.md#pay-with) |
 | [Meta affordances](#meta-affordances) | [README.md#meta-affordances](https://github.com/frilo-eth/kby-feed/blob/main/README.md#meta-affordances) |
@@ -83,6 +84,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Meta float scrim | Desktop short veil (`clamp(132px, 28%, 176px)`); mobile taller |
 | Tablet chrome | Keep chevron gutter (`--feed-chevron-gutter: 88px`); glass rail only when overlaid on media |
 | First-visit hint | Hand Lottie + one auto-swipe; `kb_feed_hint_v10`; idle = `display:none` (no backdrop veil) |
+| Floating onboard | 5-step checklist bottom-left; collapse/expand; `kb_onboard_*`; `?onboard=` |
 | Topbar auto-hide | Mobile; overlays feed (no layout resize); after settle on next; page-step locked mid-swipe |
 | [Token page](#token-page) | `.token-tag` and OP `…` → **View token** both go to `/token?t=TICKER` (empty stub). Buy / plus still open the trade drawer. |
 
@@ -135,7 +137,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 | Sell helpers | `25% / 50% / All` of holdings (dollarized spend) |
 | Unit swap | `#tradeOut` **⇅** toggles `session.tradeUnit` `'usd'` \| `'token'`. Rate `TOKEN_PER_USD = 26120`. Token mode hides `$` via `#tradeBuyField.is-token` |
 | [Pay with](#pay-with) | Hidden on launchpad Buy (USD only). ETH / WETH / USDm still price the quote |
-| [CTA](#trade-cta) | Unsigned → **Sign up / Log in**. Funded short → **Top up to buy**. Ready → big green **Buy** (`#3DDC97`). Login resumes the drawer. Top up prefills the shortfall and completes the buy when MoonPay clears |
+| [CTA](#trade-cta) | Unsigned → **Sign in to buy** / **Sign in to sell**. $0 → **Enter amount**. Sell w/ no bag → **Nothing to sell**. Funded short → **Top up to buy**. Ready → big green **Buy** (`#3DDC97`). Login resumes the drawer. Top up prefills the shortfall and completes the buy when MoonPay clears |
 | [Slippage](#slippage) | Gear chip unfolds AUTO / 0.5% / 0.3% / custom. Rest chrome is `--card` + hairline (not orange). **Auto** badge in You’ll pay is purple `#7B6CF0` + white |
 | Elevation | Sheet / drawer = `--card`. Controls at rest = `--card` + hairline. Hover = `color-mix` with white — never cream `--bg` wells (Pay-with chip is the exception; it matches the screenshot `--bg` fill) |
 
@@ -687,6 +689,35 @@ web-haptics primary · `navigator.vibrate` fallback · `haptic(preset)`. Visual 
   backdrop-filter:blur(3px);
 }
 ```
+
+---
+
+<a id="floating-onboarding"></a>
+
+### 4b. Floating onboarding checklist
+
+**Share:** [README.md#floating-onboarding](https://github.com/frilo-eth/kby-feed/blob/main/README.md#floating-onboarding)
+
+Fixed card `#onboardFloat` (bottom-left; above mobile nav). Guides first-time earners through five actions — each row expands with short copy + a muted autoplay loop (poster → video, same lazy pattern as feed media).
+
+| Step | Completes when |
+|------|----------------|
+| Buy coins | First successful buy (`celebrateBuySuccess`) |
+| Post content | First comment sent |
+| Tip content | First tip (feed or comment) |
+| Share on X | Share sheet → **Post on X** |
+| Launch a coin | Launch token submitted — **summit** (full success haptics + confetti) |
+
+| UI | Behavior |
+|----|----------|
+| Progress bar | Green fill = `done / 5` |
+| Collapsed | Title + bar + **Next {step}** + expand/dismiss |
+| Expanded | Accordion rows; one open at a time |
+| Dismiss ✕ | Permanent — `kb_onboard_dismiss_v1` |
+| Reset | [`?onboard=true`](https://kby-feed.vercel.app/feed?onboard=true) or [`?flow=onboard`](https://kby-feed.vercel.app/feed?flow=onboard) |
+| Hide | [`?onboard=false`](https://kby-feed.vercel.app/feed?onboard=false) |
+
+**Sound / haptics:** procedural [`successZhxpj`](https://procedural-sounds.vercel.app/) recipe via inline `playRecipe()`; vibration via [WebHaptics](https://haptics.lochie.me/) custom sequences + `navigator.vibrate` fallback.
 
 ---
 
@@ -1346,7 +1377,8 @@ Click-through for design reviews: [https://kby-feed.vercel.app/flows](https://kb
 | Crypto wallets (Settings) | [`/feed?flow=manage`](https://kby-feed.vercel.app/feed?flow=manage) |
 | Profile tab | [`/feed?flow=profile`](https://kby-feed.vercel.app/feed?flow=profile) |
 | Signature pending / rejected | [`/feed?sig`](https://kby-feed.vercel.app/feed?sig) · [`?flow=sig-reject`](https://kby-feed.vercel.app/feed?flow=sig-reject) |
-| Onboarding hint | [`/feed?flow=onboard`](https://kby-feed.vercel.app/feed?flow=onboard) (auto-swipe) |
+| Onboarding hint | [`/feed?flow=onboard`](https://kby-feed.vercel.app/feed?flow=onboard) (swipe hint + reset checklist) |
+| Onboard checklist | [`/feed?onboard=true`](https://kby-feed.vercel.app/feed?onboard=true) · dismiss [`?onboard=false`](https://kby-feed.vercel.app/feed?onboard=false) |
 | Buy in USD | [`/feed?flow=buy`](https://kby-feed.vercel.app/feed?flow=buy) |
 | Buy (wallet) | [`/feed?flow=buy-wallet`](https://kby-feed.vercel.app/feed?flow=buy-wallet) |
 | Launch Token | [`/feed?flow=launch`](https://kby-feed.vercel.app/feed?flow=launch) |
@@ -1559,11 +1591,13 @@ Same chrome as comments (desktop 360 / mobile sheet). Buy / Sell tabs. Amount is
 
 **Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta)
 
-`tradeCtaState()` → `'auth'` \| `'deposit'` \| `'go'`. `'deposit'` is **buy only** — sell never prompts Top up. Fees come out of leftover cash on buy, or out of sale proceeds on sell, so the trade still fills. Login resumes the drawer on the confirm sheet. Top up prefills the USD shortfall and, when MoonPay clears, completes the buy (`resumeTrade(side, true)`). Tips still auto-resume via `requireSpend` pending.
+`tradeCtaState()` → `{ state, enabled }` where `state` is `'auth'` \| `'amt'` \| `'empty'` \| `'deposit'` \| `'go'`. `'deposit'` is **buy only** — sell never prompts Top up. Fees come out of leftover cash on buy, or out of sale proceeds on sell. Login resumes the drawer on the confirm sheet. Top up prefills the USD shortfall and, when MoonPay clears, completes the buy (`resumeTrade(side, true)`). Tips still auto-resume via `requireSpend` pending.
 
 | State | Label | Paint | Click |
 |-------|-------|-------|-------|
-| `'auth'` | Sign up / Log in | `.is-gated` ink | `requireAuth` → `resumeTrade(side, false)` |
+| `'auth'` | Sign in to buy / sell | `.is-gated` ink | `requireAuth` → `resumeTrade(side, false)` |
+| `'amt'` | Enter amount | `.is-wait` muted | focuses amount field |
+| `'empty'` | Nothing to sell | `.is-wait` muted | no-op |
 | `'deposit'` | Top up to buy | `.is-short` ink | `openTopUp(shortfall, () => resumeTrade(side, true))` |
 | `'go'` | **Buy** / Sell | green `#3DDC97` / `--red` | confirm sheet / sell |
 

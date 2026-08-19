@@ -230,7 +230,15 @@
 - Desktop: 360px. Mobile: bottom sheet
 - Comment input at bottom, send arrow
 - Comment rows: avatar + name + time + text
-- Placeholder: "Sign in to comment" (logged out) / "Post content to earn" (logged in)
+- Placeholder: "Sign in to comment" (logged out) / "Post content to earn" (logged in). Logged-out users can type freely; Enter with text opens sign-in, then posts.
+
+### 4.11 Floating onboarding (`#onboardFloat`)
+
+- Fixed bottom-left (above mobile nav); collapsible summary with progress bar + **Next** label
+- Five steps: Buy coins · Post content · Tip content · Share on X · Launch a coin
+- Expandable rows: short copy + autoplay muted loop video (poster → video, same pattern as feed media)
+- Checkmark on completion; dismiss hides permanently (`kb_onboard_dismiss_v1`, `kb_onboard_steps_v1`)
+- Query: `?onboard=true` reset · `?onboard=false` dismiss
 
 ---
 
@@ -245,6 +253,7 @@
 | Meta float | Token pill, OP badge, like/comment/share/tip actions |
 | New-posts pill | Themed, top-center, auto-dismiss after 2 swipes |
 | First-visit hint | Hand Lottie + auto-swipe, `kb_feed_hint_v10` |
+| Floating onboard | 5-step checklist, `kb_onboard_*` keys, `?onboard=` |
 | Trade drawer | Opens from Buy / token-tag |
 
 ### 5.2 Token Page (`/token?t=TICKER`)

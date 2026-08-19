@@ -2,16 +2,31 @@
 
 ## Unreleased
 
-### Account UI
+## 0.1.3 — 2026-08-19
+
+### Account UI & trade
 - Topbar auth CTA is **Sign in** (login modal keeps **Sign up / Log in**).
 - Trade drawer gated CTA is **Sign in to buy** / **Sign in to sell** (was **Sign up / Log in**).
 - Trade CTA semantic idle states: **Enter amount** ($0), **Nothing to sell** (zero holdings).
-- Comment compose placeholder is **Sign in to comment** when logged out.
-- Buy success uses a richer procedural sound + haptic (`buySuccess`) and confetti burst (respects reduced motion).
+- Comment compose: **Sign in to comment** placeholder; logged-out users type freely; Enter with text opens sign-in, then posts.
 - Logged-in wallet pill shows the same account blockie as the wallet header.
 - Login-method tooltip title is now **Logged in with {provider}** (Google, X, TikTok, MetaMask, etc.) instead of a bare "Logged in with".
 - Wallet identity login-method pill (`.wallet-id-method`) has slightly more horizontal padding.
 - Removed Agentation dev overlay (dependency + localhost CDN mount).
+
+### Success feedback
+- Buy success: richer procedural sound + haptic (`buySuccess`) and confetti (respects reduced motion).
+- Sell, send, top-up, and comment-sent share the rich success haptic pattern ([WebHaptics](https://haptics.lochie.me/) + native fallback).
+- Tips play the `successZhxpj` procedural sound ([procedural-sounds](https://procedural-sounds.vercel.app/) `buySuccess` recipe); first tip adds confetti.
+
+### Floating onboarding
+- Bottom-left checklist: **Buy → Post → Tip → Share on X → Launch a coin** with progress bar, expandable rows (copy + autoplay demo video), and per-step checkmarks.
+- Collapsed mode shows **Next** + progress; expand/collapse toggle; **✕** dismisses permanently (`kb_onboard_dismiss_v1`).
+- URL: `?onboard=true` resets/shows · `?onboard=false` dismisses · `?flow=onboard` resets checklist (+ swipe hint).
+- **Launch a coin** completion triggers full success sound, haptics, and confetti.
+
+### Fixes
+- Blank feed: comment compose auth no longer touches send-ready before comment refs init.
 
 ## 0.1.2 — 2026-08-18
 
