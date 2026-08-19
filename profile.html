@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Kumbaya — Profile</title>
+<script>
+(()=>{ try{
+  const t = localStorage.getItem('kb_theme');
+  if(t === 'dark') document.documentElement.classList.add('dark');
+}catch(_){} })();
+</script>
+<style>
+:root{
+  --bg:#F2EEEA;--ink:#2A241C;--ink-soft:#6D6153;--ink-faint:#948A7B;--orange:#FF6622;
+  color-scheme:light;
+}
+html.dark{
+  --bg:#070403;--ink:#F4EFE7;--ink-soft:#B3A895;--ink-faint:#7A7062;--orange:#FF7A3D;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:'Inter',ui-sans-serif,system-ui,-apple-system,sans-serif;}
+a{color:var(--orange);text-decoration:none;}
+a:hover{opacity:.8;}
+.back{position:fixed;top:20px;left:20px;font-size:14px;font-weight:600;}
+.stub{min-height:100dvh;display:grid;place-items:center;padding:48px 20px;}
+.handle{font-size:22px;font-weight:700;letter-spacing:.02em;}
+</style>
+</head>
+<body>
+  <a class="back" href="/feed">← Feed</a>
+  <div class="stub"><div class="handle" id="handle">@you</div></div>
+  <script>
+    const u = (new URLSearchParams(location.search).get('u') || 'you').replace(/^@/, '');
+    const handle = '@' + u;
+    document.getElementById('handle').textContent = handle;
+    document.title = 'Kumbaya — ' + handle;
+  </script>
+</body>
+</html>

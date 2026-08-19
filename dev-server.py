@@ -22,6 +22,8 @@ class Handler(SimpleHTTPRequestHandler):
             return str(ROOT / "feed.html")
         if clean in ("/token", "/token.html"):
             return str(ROOT / "token.html")
+        if clean in ("/profile", "/profile.html"):
+            return str(ROOT / "profile.html")
         if clean in ("/flows", "/flows.html"):
             return str(ROOT / "flows.html")
         return super().translate_path(path)

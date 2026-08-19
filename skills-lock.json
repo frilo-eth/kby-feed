@@ -1,0 +1,125 @@
+{
+  "version": 1,
+  "skills": {
+    "adopt": {
+      "source": "frilo-eth/frilo-os",
+      "sourceType": "github",
+      "skillPath": "skills/adopt/SKILL.md",
+      "computedHash": "47c812a8c5f4a9e5ca6c514f9a24ce25ce535978a49fa608c482ceb3a2d6d7dd"
+    },
+    "animation": {
+      "source": "frilo-eth/frilo-os",
+      "sourceType": "github",
+      "skillPath": "skills/animation/SKILL.md",
+      "computedHash": "37fcb611668e44194d2cc5d25b1f06d53f647e408184e436c5d226c1f36cef7b"
+    },
+    "animation-vocabulary": {
+      "source": "emilkowalski/skill",
+      "sourceType": "github",
+      "skillPath": "skills/animation-vocabulary/SKILL.md",
+      "computedHash": "39319fc9a33c15be08666b3685f58666f042ff36bb902b7814c0834a5ba99df4"
+    },
+    "apple-design": {
+      "source": "emilkowalski/skill",
+      "sourceType": "github",
+      "skillPath": "skills/apple-design/SKILL.md",
+      "computedHash": "8b94db67cb9edaad5f1501010804caa610131f1d2dfda0a27664b2e858deade3"
+    },
+    "design-foundations": {
+      "source": "frilo-eth/frilo-os",
+      "sourceType": "github",
+      "skillPath": "skills/design-foundations/SKILL.md",
+      "computedHash": "6401248d42588512d9ea5544f8d52cd9d7b7a611dbc1684fb5cf734bec010531"
+    },
+    "desktop-webapp": {
+      "source": "frilo-eth/frilo-os",
+      "sourceType": "github",
+      "skillPath": "skills/desktop-webapp/SKILL.md",
+      "computedHash": "f0369ad5f820c857339192afa1d940058e2492df5526345169f7258d5c48be4a"
+    },
+    "dialkit": {
+      "source": "frilo-eth/frilo-os",
+      "sourceType": "github",
+      "skillPath": "skills/dialkit/SKILL.md",
+      "computedHash": "d82ebd4b2473b6524a41bcb16227c78e8744e02554efdad59e17f13e3512e524"
+    },
+    "emil-design-eng": {
+      "source": "emilkowalski/skill",
+      "sourceType": "github",
+      "skillPath": "skills/emil-design-eng/SKILL.md",
+      "computedHash": "8bdf9e4e6de7a4969147bf4828a4ad2c5aacd9fba4b690b250a85e0467ca387d"
+    },
+    "find-animation-opportunities": {
+      "source": "emilkowalski/skill",
+      "sourceType": "github",
+      "skillPath": "skills/find-animation-opportunities/SKILL.md",
+      "computedHash": "15dc983ce2cd00489fcdc4a92e2752d47e1620f7619038b00eb84c2b97d50597"
+    },
+    "frilo-design-system": {
+      "source": "frilo-eth/frilo-os",
+      "sourceType": "github",
+      "skillPath": "skills/frilo-design-system/SKILL.md",
+      "computedHash": "97f345077bca5e9821a0781ebb2402ad777d54b00ff0ed49a5a0668761617f61"
+    },
+    "guideframe": {
+      "source": "frilo-eth/frilo-os",
+      "sourceType": "github",
+      "skillPath": "skills/guideframe/SKILL.md",
+      "computedHash": "1a0446f608fb2e809cd36d5a521be979bb7ff30571c5e9a537845b790229f784"
+    },
+    "improve-animations": {
+      "source": "emilkowalski/skill",
+      "sourceType": "github",
+      "skillPath": "skills/improve-animations/SKILL.md",
+      "computedHash": "32f23d860467841f5b07cef198fb53efc70f2adaaa6144cf1a3434d782aed246"
+    },
+    "mobile-experience": {
+      "source": "frilo-eth/frilo-os",
+      "sourceType": "github",
+      "skillPath": "skills/mobile-experience/SKILL.md",
+      "computedHash": "a5c508b637ed4a11419a7fd447a368c53b7f5e720edd42a74aaa587c9bea3e33"
+    },
+    "muload": {
+      "source": "frilo-eth/frilo-os",
+      "sourceType": "github",
+      "skillPath": "skills/muload/SKILL.md",
+      "computedHash": "f72f4381c952fda5477acef09c898cbfeba5b1ef08f6d15f3ae8a424bf6ef342"
+    },
+    "project-brief": {
+      "source": "frilo-eth/frilo-os",
+      "sourceType": "github",
+      "skillPath": "skills/project-brief/SKILL.md",
+      "computedHash": "91328c5b95e3e3de33921f5331d105953076d4be307e89e58c6c3b986f70765f"
+    },
+    "review-animations": {
+      "source": "emilkowalski/skill",
+      "sourceType": "github",
+      "skillPath": "skills/review-animations/SKILL.md",
+      "computedHash": "c92905bff59c3007d07c2638a2a83d5d71c901feef108cce1da0bf3c7cafd579"
+    },
+    "transition-patterns": {
+      "source": "frilo-eth/frilo-os",
+      "sourceType": "github",
+      "skillPath": "skills/transition-patterns/SKILL.md",
+      "computedHash": "fddaeb5a426c74d025e444fb70c04e674b26b0e09462f8dc90317a9eca6a6e02"
+    },
+    "ui-components": {
+      "source": "frilo-eth/frilo-os",
+      "sourceType": "github",
+      "skillPath": "skills/ui-components/SKILL.md",
+      "computedHash": "b8b4031922844aa699b242a186896336b43f5d6cb010eb8bb8b04491f811f905"
+    },
+    "ui-design-principles": {
+      "source": "frilo-eth/frilo-os",
+      "sourceType": "github",
+      "skillPath": "skills/ui-design-principles/SKILL.md",
+      "computedHash": "1f75ae07f371f3afaa291a6e0344d1aaf9a5c14f25fee07ca50a498e13a44582"
+    },
+    "untitled-ui": {
+      "source": "frilo-eth/frilo-os",
+      "sourceType": "github",
+      "skillPath": "skills/untitled-ui/SKILL.md",
+      "computedHash": "7dff82b075d84e225606b55fc8439ec42aaf7aa2f4662f2aec8cd219d43f3d2c"
+    }
+  }
+}

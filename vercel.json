@@ -7,6 +7,7 @@
     { "source": "/", "destination": "/feed.html" },
     { "source": "/feed", "destination": "/feed.html" },
     { "source": "/token", "destination": "/token.html" },
+    { "source": "/profile", "destination": "/profile.html" },
     { "source": "/flows", "destination": "/flows.html" }
   ]
 }

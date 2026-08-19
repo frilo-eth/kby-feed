@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.1.2 — 2026-08-18
+
+### PRD audit (onboarding, auth, deposits)
+- One entry verb: login modal, gated trade CTA, and comment placeholder are **Sign up / Log in**. Crypto wallet stays its own row on the main sheet (not under More options).
+- Launchpad Buy is USD-only for **social** (Pay with hidden). **Wallet login** shows the ETH / WETH / USDm selector; confirm is Selling that asset. Social confirm is **Paying $…** into the token, not Selling ETH.
+- Username is the generated animal handle on every path. Connected Google / Apple / email is a separate realistic persona (not `handle@gmail.com`). Wallet login does **not** mint a second Account — copy and USD-balance hover use the EOA you signed in with.
+- Tokens tab action is **Refresh** (re-ticks balances). There is no Import token sheet.
+- Linked crypto wallets keep their own balances and token bags. Send From a linked EOA does not MoonPay-top-up that wallet; **Top up to send** is for the Account cash pot only.
+- **Top up** is the deposit hub title. Shortfall opens MoonPay cash pre-filled. Checkout runs the pending tip or buy. Send short CTA is **Top up to send**.
+- MoonPay note still warns a Solana wallet may appear, and states **Your purchase lands in your USD balance**.
+- Embedded wallet catalog name is **Account** (social only). Wallet-login **Settings → Crypto wallets** lists the wallet you signed in with, not a generated extra.
+- Account tabs: **Tokens**, **Activity**, **Tips**, **Profile**, **Settings**. Points / leaderboard pills are gone.
+- **Disconnect** (red) sits in the account header. No Mainnet / Testnet switch.
+- Wallet management is under **Settings**, below Connected accounts and Passkey, as **Crypto wallets**. Receive address hover copies it (address morphs to a copy icon; no Top up on that tip). External wallets: Rename, Copy address, Remove (no pin).
+- **Profile**: 1:1 picture + Update pic (then drop), username (`letters / numbers / _ / -`), description, ghost **View my profile** → `/profile`.
+- First-visit hint (`kb_feed_hint_v10`) auto-swipes one post after ~1.6s. Token creation, Swap, and Pools unchanged.
+- Successful top-up no longer reopens the Cash / Crypto hub. Account Top up does not steal a leftover spend callback. Shortfall uses rounded cents so a $25 credit covers a $25 buy.
+- Sell confirms like buy: fees come out of proceeds (or leftover cash on buy). Tips land on **Tips**, not Activity. Settings gear is Central Icons sharp. MoonPay Solana note uses Tailwind amber-50 / amber-200 / amber-800.
+- Modal **Cancel** and swap **Check on Block explorer** are the same outlined secondary as **View my profile**: swap-cta size, transparent on the sheet (white/white, dark/dark) with `--line` border. Success title is **Buy successful** / **Sell successful**. Explorer is [mega.etherscan.io](https://mega.etherscan.io/).
+- Send **To** is an icon-only clipboard paste plus a wallet shortcut that fills `accountReceiveAddr()` (embedded Account on social; the signed-in EOA on wallet login). Copy on the USD balance row is the same address.
+- Hover **USD balance** is gone. The 36×36 copy control sits next to the USD balance label; the address is tooltip-only (**Your account address** + MegaETH explainer + the address). The 36×36 pencil sits immediately after the animal name. Under the name: login icon + email / @handle (social) or shortened EOA (wallet) — click copies with the same check / **Copied** feedback.
+- Settings is an unboxed list: subdued sentence-case **Login connections**, **Passkey**, **Crypto wallets**. Connected rows only. **Connect account** opens the same Sign up / Log in methods (email, Google / X / TikTok, More options) and the same wait / success flow. No Phone. **Connect wallet** discloses the wallet picker. Connect and Disconnect appear on hover (always on touch). The login you signed in with cannot be disconnected.
+- Cash top up minimum **$10**. Under-min morphs the Solana note to a red warning, shakes the sheet, and fires [web-haptics Error](https://haptics.lochie.me/). Default tip is **$1**.
+- Buy confirm is split: social sees the in-app summary; wallet login goes to the fake signature popup (not both).
+- After a successful MetaMask (or social) login, the overlay no longer reprints the login sheet while fading out.
+
 ## 0.1.1 — 2026-08-17
 
 ### Account identity
