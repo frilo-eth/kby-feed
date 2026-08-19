@@ -1609,14 +1609,6 @@ Hover on menu rows / selected: `--bg`. Icons are inline SVG (`PAY_ETH_ICON` / `P
 
 ---
 
-## Dev tooling
-
-| Tool | Notes |
-|------|-------|
-| **Agentation** | `devDependency` — localhost-only annotation overlay for agent feedback (CDN mount at end of `feed.html`). Not shipped as a production UX surface. |
-
----
-
 ## Breakpoint
 
 **860px** — mobile full-bleed feed, bottom nav, sheets; desktop sidebar + side drawers + kbd helper + new-pill + hover cards.

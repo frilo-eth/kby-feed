@@ -182,6 +182,8 @@ html.dark .side-brand .mark-dark{display:block;}
   box-shadow:inset 0 1px 0 rgba(255,255,255,.45);
 }
 .btn-wallet-ic svg{width:14px;height:14px;display:block;}
+.btn-wallet-ic .btn-wallet-avatar{width:22px;height:22px;border-radius:50%;display:block;object-fit:cover;}
+.btn-wallet-ic:has(.btn-wallet-avatar){background:transparent;box-shadow:none;}
 .btn-wallet-label{display:inline;font-variant-numeric:tabular-nums;letter-spacing:-.02em;}
 .btn-wallet-avatar{display:none;}
 .btn-signin{
@@ -4317,7 +4319,7 @@ html.dark .flow-status-ok circle{fill:rgba(31,164,99,.22);}
   .topbar .btn-wallet{order:3;padding:6px 12px 6px 7px;font-size:12px;width:auto;height:auto;border-radius:10px;background:var(--card);border:1px solid var(--line);overflow:visible;gap:7px;}
   .topbar .btn-launch{order:4;display:inline-flex;align-items:center;gap:6px;padding:9px 12px;font-size:12px;border-radius:10px;box-shadow:0 4px 12px rgba(255,102,34,.3);}
   .btn-wallet-label{display:inline;}
-  .btn-wallet-avatar{display:none;}
+  .btn-wallet-ic .btn-wallet-avatar{width:20px;height:20px;display:block;}
   .btn-wallet-ic{width:20px;height:20px;}
   .topbar-actions{order:3;gap:8px;}
   .topbar #themeBtn,.topbar #notifBtn{display:none;}
@@ -4848,7 +4850,7 @@ html.dark .qhc-id{color:#6BA3FF;}
           <span class="notif-badge" id="notifBadge"></span>
         </button>
         <button class="icon-btn" type="button" id="themeBtn" title="Toggle theme" aria-label="Toggle theme"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-        <button class="btn-signin" type="button" id="signInBtn">Sign up / Log in</button>
+        <button class="btn-signin" type="button" id="signInBtn">Sign in</button>
         <button class="btn-wallet" type="button" id="walletBtn" title="Balance" aria-label="Open account" hidden>
           <span class="btn-wallet-ic" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none"><ellipse cx="8.5" cy="14.2" rx="4.2" ry="3.4" fill="#F4F7FA"/><ellipse cx="14.2" cy="13.4" rx="5.2" ry="4.4" fill="#fff"/><ellipse cx="11.6" cy="10.4" rx="3.6" ry="3.1" fill="#E6EEF5"/></svg>
@@ -5967,6 +5969,16 @@ html.dark .qhc-id{color:#6BA3FF;}
     document.getElementById('topbar')?.classList.toggle('is-authed', authed);
     if(walletBtn) walletBtn.hidden = !authed;
     if(walletLabel) walletLabel.textContent = usdLabel(totalBal());
+    const walletIc = walletBtn?.querySelector('.btn-wallet-ic');
+    if(walletIc){
+      if(authed){
+        const av = profileAvatarSrc();
+        const blockieCls = session.profilePic ? '' : ' blockie';
+        walletIc.innerHTML = `<img class="btn-wallet-avatar circle${blockieCls}" src="${escHtml(av)}" alt="">`;
+      } else {
+        walletIc.innerHTML = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><ellipse cx="8.5" cy="14.2" rx="4.2" ry="3.4" fill="#F4F7FA"/><ellipse cx="14.2" cy="13.4" rx="5.2" ry="4.4" fill="#fff"/><ellipse cx="11.6" cy="10.4" rx="3.6" ry="3.1" fill="#E6EEF5"/></svg>`;
+      }
+    }
     paintTradeCta();
     if(typeof paintCommentComposeAuth === 'function') paintCommentComposeAuth();
   }
@@ -8063,7 +8075,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       ? (session.profileKind === 'video'
         ? `<video src="${escHtml(session.profilePic)}" muted autoplay loop playsinline></video>`
         : `<img src="${escHtml(session.profilePic)}" alt="">`)
-      : `<img src="${escHtml(profileSrc)}" alt="">`;
+      : `<img class="blockie" src="${escHtml(profileSrc)}" alt="">`;
     const picDropInner = session.profilePic
       ? picMedia
       : `<span>Drop your file here</span>`;
@@ -17615,24 +17627,6 @@ html.dark .qhc-id{color:#6BA3FF;}
 
   render();
 })();
-</script>
-<!-- Agentation: visual feedback for agents (localhost only). https://www.agentation.com/ -->
-<script type="module">
-  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-    try {
-      const [{ default: React }, { createRoot }, { Agentation }] = await Promise.all([
-        import('https://esm.sh/react@18.3.1'),
-        import('https://esm.sh/react-dom@18.3.1/client'),
-        import('https://esm.sh/agentation@3?deps=react@18.3.1,react-dom@18.3.1'),
-      ]);
-      const mount = document.createElement('div');
-      mount.id = 'agentation-mount';
-      document.body.appendChild(mount);
-      createRoot(mount).render(React.createElement(Agentation));
-    } catch (e) {
-      console.warn('Agentation load failed:', e);
-    }
-  }
 </script>
 </body>
 </html>

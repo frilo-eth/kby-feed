@@ -3,8 +3,11 @@
 ## Unreleased
 
 ### Account UI
+- Topbar auth CTA is **Sign in** (login modal and gated trade/comment surfaces keep **Sign up / Log in**).
+- Logged-in wallet pill shows the same account blockie as the wallet header.
 - Login-method tooltip title is now **Logged in with {provider}** (Google, X, TikTok, MetaMask, etc.) instead of a bare "Logged in with".
 - Wallet identity login-method pill (`.wallet-id-method`) has slightly more horizontal padding.
+- Removed Agentation dev overlay (dependency + localhost CDN mount).
 
 ## 0.1.2 — 2026-08-18
 
