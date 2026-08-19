@@ -19,12 +19,6 @@
 - Sell, send, top-up, and comment-sent share the rich success haptic pattern ([WebHaptics](https://haptics.lochie.me/) + native fallback).
 - Tips play the `successZhxpj` procedural sound ([procedural-sounds](https://procedural-sounds.vercel.app/) `buySuccess` recipe); first tip adds confetti.
 
-### Floating onboarding
-- Bottom-left checklist: **Buy → Post → Tip → Share on X → Launch a coin** with progress bar, expandable rows (copy + autoplay demo video), and per-step checkmarks.
-- Collapsed mode shows **Next** + progress; expand/collapse toggle; **✕** dismisses permanently (`kb_onboard_dismiss_v1`).
-- URL: `?onboard=true` resets/shows · `?onboard=false` dismisses · `?flow=onboard` resets checklist (+ swipe hint).
-- **Launch a coin** completion triggers full success sound, haptics, and confetti.
-
 ### Fixes
 - Blank feed: comment compose auth no longer touches send-ready before comment refs init.
 
