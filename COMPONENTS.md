@@ -32,8 +32,9 @@
 | **Primary** | `--green` bg, white text, 8px radius | Buy, Send |
 | **Danger** | `--red` bg or text | Disconnect, Sell |
 | **Outlined / Secondary** | Transparent bg, `--line` border | Cancel, View my profile, Check on Block explorer |
-| **Gated** | `--ink` text, no bg, `.is-gated` | Sign up / Log in (trade CTA) |
+| **Gated** | `--ink` text, no bg, `.is-gated` | Sign in to buy / Sign in to sell (trade CTA) |
 | **Short** | `--ink` text, `.is-short` | Top up to buy |
+| **Wait** | Muted, `.is-wait` | Enter amount, Nothing to sell (trade CTA) |
 | **Icon-only** | 36×36, no bg, icon centered | Copy address, Edit name, Paste, Theme toggle |
 | **Pill** | 20px radius, small text | Currency (USD/EUR/GBP), Network, Token chip |
 | **Full-row** | `.kb-setrow.is-static`, chevron right | Connect account, Connect wallet |
@@ -229,7 +230,7 @@
 - Desktop: 360px. Mobile: bottom sheet
 - Comment input at bottom, send arrow
 - Comment rows: avatar + name + time + text
-- Placeholder: "Sign up to comment"
+- Placeholder: "Sign in to comment" (logged out) / "Post content to earn" (logged in)
 
 ---
 
@@ -265,7 +266,7 @@
 
 | Flow | Steps |
 |------|-------|
-| **First visit → Buy** | Feed → tap Buy → "Sign up / Log in" → provider → wait → logged in → trade drawer (gated removed) → enter amount → "Top up to buy" → MoonPay → funded → confirm sheet → done |
+| **First visit → Buy** | Feed → tap Buy → Sign in to buy → provider → wait → logged in → trade drawer (gated removed) → enter amount → Top up to buy → MoonPay → funded → confirm sheet → done |
 | **Social login** | Sheet → email or social icon → wait → complete → auto-close overlay |
 | **Wallet login** | Sheet → "Crypto wallets" → pick wallet → extension popup (Connect → Sign) → complete |
 | **Tip** | Tap tip → `requireAuth` if needed → `requireSpend` if short → amount picker → confirm |

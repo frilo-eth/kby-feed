@@ -3,7 +3,11 @@
 ## Unreleased
 
 ### Account UI
-- Topbar auth CTA is **Sign in** (login modal and gated trade/comment surfaces keep **Sign up / Log in**).
+- Topbar auth CTA is **Sign in** (login modal keeps **Sign up / Log in**).
+- Trade drawer gated CTA is **Sign in to buy** / **Sign in to sell** (was **Sign up / Log in**).
+- Trade CTA semantic idle states: **Enter amount** ($0), **Nothing to sell** (zero holdings).
+- Comment compose placeholder is **Sign in to comment** when logged out.
+- Buy success uses a richer procedural sound + haptic (`buySuccess`) and confetti burst (respects reduced motion).
 - Logged-in wallet pill shows the same account blockie as the wallet header.
 - Login-method tooltip title is now **Logged in with {provider}** (Google, X, TikTok, MetaMask, etc.) instead of a bare "Logged in with".
 - Wallet identity login-method pill (`.wallet-id-method`) has slightly more horizontal padding.

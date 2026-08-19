@@ -1914,6 +1914,9 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
 .trade-buy-btn.is-sell{background:var(--red);color:#fff;}
 .trade-buy-btn.is-gated{background:var(--ink);color:var(--bg);}
 .trade-buy-btn.is-short{background:var(--ink);color:var(--bg);}
+.trade-buy-btn.is-wait{opacity:.55;cursor:default;transform:none;filter:none;}
+.trade-buy-btn.is-wait:hover{filter:none;}
+.trade-buy-btn.is-wait:active{transform:none;}
 .buy-btn:hover,.trade-buy-btn:hover{filter:brightness(1.03);}
 .buy-btn:active,.trade-buy-btn:active{transform:scale(.985);}
 
@@ -6431,22 +6434,31 @@ html.dark .qhc-id{color:#6BA3FF;}
 
   function tradeCtaState(){
     const isSell = document.getElementById('tradeBuyBtn')?.classList.contains('is-sell');
-    const a = cashWallet();
     const amt = tradeUsdAmt();
-    if(!isAuthed()) return 'auth';
-    if(!isSell && (!a || spendShortfall(amt) > 0)) return 'deposit';
-    return 'go';
+    if(!isAuthed()) return { state: 'auth', enabled: true };
+    if(isSell){
+      if(holdingUsdFor(tradeTicker()) <= 0) return { state: 'empty', enabled: false };
+      if(amt <= 0) return { state: 'amt', enabled: false };
+      return { state: 'go', enabled: true };
+    }
+    if(amt <= 0) return { state: 'amt', enabled: false };
+    const a = cashWallet();
+    if(!a || spendShortfall(amt) > 0) return { state: 'deposit', enabled: true };
+    return { state: 'go', enabled: true };
   }
   function paintTradeCta(){
     const buyBtn = document.getElementById('tradeBuyBtn');
     if(!buyBtn) return;
     syncTradePayField();
     const isSell = buyBtn.classList.contains('is-sell');
-    const state = tradeCtaState();
+    const { state, enabled } = tradeCtaState();
     buyBtn.classList.toggle('is-gated', state === 'auth');
     buyBtn.classList.toggle('is-short', state === 'deposit');
-    if(state === 'auth') buyBtn.textContent = 'Sign up / Log in';
+    buyBtn.classList.toggle('is-wait', !enabled && state !== 'auth' && state !== 'deposit');
+    if(state === 'auth') buyBtn.textContent = isSell ? 'Sign in to sell' : 'Sign in to buy';
     else if(state === 'deposit') buyBtn.textContent = 'Top up to buy';
+    else if(state === 'empty') buyBtn.textContent = 'Nothing to sell';
+    else if(state === 'amt') buyBtn.textContent = 'Enter amount';
     else buyBtn.textContent = isSell ? 'Sell' : 'Buy';
     const payLabel = document.getElementById('tradePayAssetLabel');
     const asset = PAY_ASSETS[session.payAsset] || PAY_ASSETS.eth;
@@ -7002,18 +7014,19 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   function resumeTrade(side, autoConfirm){
     paintTradeCta();
-    const st = tradeCtaState();
-    if(st === 'auth'){
+    const { state } = tradeCtaState();
+    if(state === 'auth'){
       requireAuth(()=> resumeTrade(side, autoConfirm));
       return;
     }
-    if(st === 'deposit'){
+    if(state === 'deposit'){
       const need = spendShortfall(tradeUsdAmt());
       if(need > 0){
         openTopUp(need, ()=> resumeTrade(side, true));
         return;
       }
     }
+    if(state === 'amt' || state === 'empty') return;
     openSwapConfirm(side);
   }
 
@@ -10611,7 +10624,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         return;
       }
       recordBuy(s.amt);
-      haptic('success');
+      celebrateBuySuccess();
       showToast(`Bought ${s.tokenShort} ${s.ticker}.`);
     }
     s.tx = mockSwapTx();
@@ -11086,6 +11099,16 @@ html.dark .qhc-id{color:#6BA3FF;}
     pullcancel:[{ duration: 16, intensity: 0.38 }],
     pullsettle:[{ duration: 40, intensity: 0.55 }, { delay: 55, duration: 55, intensity: 0.75 }],
     copyAddr:  [{ duration: 10, intensity: 0.24 }],
+    buySuccess:[
+      { duration: 20, intensity: 0.55 },
+      { delay: 22, duration: 30, intensity: 0.72 },
+      { delay: 28, duration: 38, intensity: 0.86 },
+      { delay: 32, duration: 46, intensity: 0.96 },
+      { delay: 36, duration: 54, intensity: 1 },
+      { delay: 40, duration: 50, intensity: 0.94 },
+      { delay: 46, duration: 44, intensity: 0.82 },
+      { delay: 52, duration: 36, intensity: 0.68 },
+    ],
   };
   const HAPTIC_PATTERNS = {
     light:     { vibrate: [7], taps: 1 },
@@ -11107,6 +11130,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     lock:      { vibrate: [12, 22, 16], taps: 1 },
     unlock:    { vibrate: [8, 20, 10, 28, 8], taps: 2, tapGap: 36 },
     success:   { vibrate: [10, 28, 14, 36, 18], taps: 2, tapGap: 42 },
+    buySuccess:{ vibrate: [10, 18, 14, 24, 18, 30, 22, 36, 26, 42, 30, 48, 34, 44, 38, 40, 42], taps: 5, tapGap: 30 },
     copyAddr:  { vibrate: [5, 14, 6], taps: 1 },
     funds:     { vibrate: [12, 32, 16, 40, 20], taps: 3, tapGap: 48 },
     error:     { vibrate: [40, 40, 40, 40, 40], taps: 3, tapGap: 80 },
@@ -11123,7 +11147,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     light:'light', selection:'light', nudge:'light', settle:false, attach:'settle', dragtick:false,
     toggle:'toggle', unmute:'unmute', mute:'mute', open:'open', comment:'comment', sent:'sent', share:'share',
     tip:'tip', like:'like', dislike:'dislike', lock:'lock', unlock:'unlock',
-    success:'sent', funds:'funds', error:'dislike', copyAddr:'copyAddr',
+    success:'sent', buySuccess:'buySuccess', funds:'funds', error:'dislike', copyAddr:'copyAddr',
     pulltick:false, pullmorph:'light', pullarm:'light', pulldisarm:false,
     pullfire:'open', pullcancel:false, pullsettle:'refresh',
   };
@@ -11314,6 +11338,13 @@ html.dark .qhc-id{color:#6BA3FF;}
       {source:{type:'sine',frequency:556.4143525139505},envelope:{attack:0.006,decay:0.09951142738561437,sustain:0,release:0.004,curve:'ramp'},gain:0.176,effects:[{type:'delay',delay:0.063,feedback:0.286,wet:0.103,lowpass:3742}]},
       {source:{type:'sine',frequency:701.0376225774419},envelope:{attack:0.004,decay:0.11255074962865588,sustain:0,release:0.004,curve:'ramp'},gain:0.164,delay:0.06389185797484542,effects:[{type:'delay',delay:0.063,feedback:0.286,wet:0.103,lowpass:3742}]},
       {source:{type:'sine',frequency:935.7726808012197},envelope:{attack:0.006,decay:0.19164009205588167,sustain:0,release:0.004,curve:'ramp'},gain:0.147,delay:0.12778371594969085,effects:[{type:'delay',delay:0.063,feedback:0.286,wet:0.103,lowpass:3742}]}
+    ]},
+    buySuccess:{layers:[
+      {source:{type:'sine',frequency:263.4036968717656},envelope:{attack:0.004,decay:0.06951115975279916,sustain:0.03,release:0.024494458004796108},gain:0.132,effects:[{type:'delay',delay:0.117,feedback:0.282,wet:0.116,lowpass:2815}]},
+      {source:{type:'triangle',frequency:394.65864711426985},envelope:{attack:0.004,decay:0.14054032240232858,sustain:0.03,release:0.07216735758456544},gain:0.104,delay:0.08923778687911745,effects:[{type:'delay',delay:0.117,feedback:0.282,wet:0.116,lowpass:2815}],filter:{type:'lowpass',frequency:2017.561584539315}},
+      {source:{type:'sine',frequency:394.65864711426985,detune:8},envelope:{attack:0.006,decay:0.14339698769518983,sustain:0.03,release:0.05270340030677575},gain:0.039,delay:0.08923778687911745,effects:[{type:'delay',delay:0.117,feedback:0.282,wet:0.116,lowpass:2815}]},
+      {source:{type:'sine',frequency:526.8065293369676},envelope:{attack:0.005,decay:0.28976836627196934,sustain:0.03,release:0.0780350393821972},gain:0.144,delay:0.1784755737582349,effects:[{type:'delay',delay:0.117,feedback:0.282,wet:0.116,lowpass:2815}]},
+      {source:{type:'sine',frequency:789.3181586351034},envelope:{attack:0.008,decay:0.15624069512277092,sustain:0.03,release:0.05515607299253277},gain:0.046,delay:0.1784755737582349,effects:[{type:'delay',delay:0.117,feedback:0.282,wet:0.116,lowpass:2815}]}
     ]}
   };
   function slotReelTick(ctx, step, vel){
@@ -11489,6 +11520,51 @@ html.dark .qhc-id{color:#6BA3FF;}
     const mappedSound = Object.prototype.hasOwnProperty.call(PRESET_SOUND, preset) ? PRESET_SOUND[preset] : 'light';
     const sound = soundKind === false ? null : (soundKind != null ? soundKind : mappedSound);
     if(sound) playSound(sound, soundArg);
+  }
+  let confettiReady = null;
+  function ensureConfetti(){
+    if(window.confetti) return Promise.resolve(window.confetti);
+    if(!confettiReady){
+      confettiReady = new Promise((resolve, reject)=>{
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js';
+        s.onload = ()=> resolve(window.confetti);
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+    return confettiReady;
+  }
+  function fireBuyConfetti(){
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    ensureConfetti().then((confetti)=>{
+      if(!confetti) return;
+      const colors = ['#FF6622', '#3DDC97', '#FFD166', '#7B6CF0', '#FF8A5B', '#ffffff', '#FF4D8D'];
+      const modal = swapOverlay?.querySelector('.swap-modal');
+      let origin = { x: 0.5, y: 0.42 };
+      if(modal){
+        const r = modal.getBoundingClientRect();
+        origin = {
+          x: (r.left + r.width / 2) / window.innerWidth,
+          y: (r.top + r.height * 0.32) / window.innerHeight,
+        };
+      }
+      const opts = { colors, zIndex: 200, disableForReducedMotion: true };
+      confetti({ ...opts, particleCount: 150, spread: 125, startVelocity: 54, origin, ticks: 280, gravity: 0.82, scalar: 1.22, shapes: ['square', 'circle'] });
+      setTimeout(()=>{
+        confetti({ ...opts, particleCount: 70, spread: 90, startVelocity: 40, origin: { x: origin.x, y: Math.max(0.18, origin.y - 0.06) }, ticks: 220, scalar: 1.1 });
+      }, 160);
+      const end = Date.now() + 2400;
+      (function frame(){
+        confetti({ ...opts, particleCount: 5, angle: 58, spread: 68, origin: { x: 0, y: origin.y + 0.08 } });
+        confetti({ ...opts, particleCount: 5, angle: 122, spread: 68, origin: { x: 1, y: origin.y + 0.08 } });
+        if(Date.now() < end) requestAnimationFrame(frame);
+      })();
+    }).catch(()=>{});
+  }
+  function celebrateBuySuccess(){
+    haptic('buySuccess');
+    fireBuyConfetti();
   }
   const feedWrap = document.querySelector('.feed-wrap');
   if(feedWrap) feedWrap.addEventListener('pointerdown', unlockAudio, { capture: true, passive: true });
@@ -16182,7 +16258,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   });
   document.getElementById('tradeBuyBtn')?.addEventListener('click', ()=>{
     const isSell = document.getElementById('tradeBuyBtn')?.classList.contains('is-sell');
-    const state = tradeCtaState();
+    const { state, enabled } = tradeCtaState();
     if(state === 'auth'){
       requireAuth(()=> resumeTrade(isSell ? 'sell' : 'buy', false));
       return;
@@ -16191,6 +16267,10 @@ html.dark .qhc-id{color:#6BA3FF;}
       const need = spendShortfall(tradeUsdAmt());
       if(need > 0) openTopUp(need, ()=> resumeTrade(isSell ? 'sell' : 'buy', true));
       else openSwapConfirm(isSell ? 'sell' : 'buy');
+      return;
+    }
+    if(!enabled){
+      if(state === 'amt') document.getElementById('tradePayInput')?.focus();
       return;
     }
     openSwapConfirm(isSell ? 'sell' : 'buy');
@@ -17165,7 +17245,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     const input = document.getElementById('commentInput');
     const authed = isAuthed();
     if(!input) return;
-    input.placeholder = authed ? 'Post content to earn' : 'Sign up / Log in';
+    input.placeholder = authed ? 'Post content to earn' : 'Sign in to comment';
     input.readOnly = !authed;
   }
   function sendComment(){
