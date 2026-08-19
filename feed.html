@@ -2735,6 +2735,7 @@ html.dark .auth-email-go{background:rgba(255,255,255,.08);}
   position:relative;width:36px;height:36px;border-radius:10px;flex-shrink:0;
   display:grid;place-items:center;overflow:visible;font-size:18px;color:#fff;
 }
+.auth-wicon.is-light{color:#2A241C;}
 .auth-wicon svg{width:22px;height:22px;display:block;}
 .auth-wicon.is-detected::after{
   content:'';position:absolute;top:-2px;right:-2px;width:10px;height:10px;border-radius:50%;
@@ -2747,7 +2748,7 @@ html.dark .auth-email-go{background:rgba(255,255,255,.08);}
   display:flex;align-items:center;gap:2px;
   margin-bottom:2px;min-height:36px;
 }
-.wallet-balance-lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);}
+.wallet-balance-lbl{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:none;color:var(--ink-faint);}
 .wallet-balance-lbl-swap .wallet-id-copy{margin-left:-2px;}
 .wallet-balance{font-size:32px;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;}
 .wallet-actions{display:flex;gap:8px;margin-bottom:16px;}
@@ -2774,7 +2775,7 @@ html.dark .auth-email-go{background:rgba(255,255,255,.08);}
 .wallet-set-list{display:flex;flex-direction:column;margin:0 -2px 4px;}
 .kb-setrow{
   display:flex;align-items:center;gap:12px;width:100%;
-  margin:0;padding:12px 2px;border:none;border-bottom:1px solid var(--line);
+  margin:0;padding:12px 2px;border:none;
   background:none;color:var(--ink);text-align:left;font:inherit;
   appearance:none;-webkit-appearance:none;cursor:default;
   transition:background .15s;
@@ -2786,6 +2787,29 @@ button.kb-setrow:active{transform:none;background:color-mix(in srgb, var(--ink) 
 .kb-setrow:last-child{border-bottom:none;}
 .kb-setrow .kb-wrow-hit{cursor:pointer;}
 .kb-setrow.is-static .kb-wrow-hit{cursor:default;}
+.wallet-set-list .kb-setrow{
+  margin:4px 0 2px;
+  padding:11px 10px;
+  border-radius:14px;
+}
+.wallet-set-list .kb-setrow:hover{
+  background:color-mix(in srgb, var(--ink) 5%, transparent);
+}
+.wallet-set-list .kb-setrow .kb-wrow-av.is-add,
+.wallet-set-list .kb-setrow .kb-wrow-av .auth-wicon{
+  border-radius:12px;
+  transition:background .18s ease, color .18s ease, transform .18s ease;
+}
+.wallet-set-list .kb-setrow:hover .kb-wrow-av.is-add{
+  background:color-mix(in srgb, var(--ink) 14%, var(--card));
+  color:var(--ink);
+}
+.wallet-set-list .kb-setrow .kb-set-act.is-connect{
+  border-radius:999px;
+}
+.wallet-set-list .kb-setrow:hover .kb-set-act.is-connect{
+  background:color-mix(in srgb, var(--ink) 8%, transparent);
+}
 .kb-set-act{
   flex-shrink:0;margin:0;padding:7px 12px;border-radius:10px;
   font:inherit;font-size:13px;font-weight:700;letter-spacing:-.01em;cursor:pointer;
@@ -2930,35 +2954,90 @@ html.dark .kb-wrow.is-add .kb-wrow-av.ic{background:rgba(255,255,255,.08);}
 .wallet-id-tools{
   display:flex;align-items:center;gap:6px;flex-shrink:0;max-width:100%;min-width:0;
 }
+.wallet-id-method-group{
+  display:inline-flex;align-items:center;gap:2px;max-width:100%;min-width:0;
+}
 .wallet-id-method{
-  display:flex;align-items:center;gap:6px;min-width:0;max-width:100%;
-  margin:0;padding:2px 4px 2px 0;border:none;border-radius:8px;
+  display:inline-flex;align-items:center;gap:4px;min-width:0;max-width:100%;
+  margin:0;padding:2px 4px 2px 6px;border:none;border-radius:12px;
   background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer;
   appearance:none;-webkit-appearance:none;
+  min-height:36px;
+  width:auto;
+  flex:0 0 auto;
 }
 button.wallet-id-method:hover{background:color-mix(in srgb, var(--ink) 4%, transparent);}
 button.wallet-id-method:active{transform:scale(.98);}
 .wallet-id-method.is-copied,
-.wallet-id-method.is-copied .wallet-id-method-lab{color:var(--green);}
-.wallet-id-method-copy{
-  flex-shrink:0;width:16px;height:16px;display:grid;place-items:center;color:var(--ink-faint);
-}
-.wallet-id-method-copy svg{width:14px;height:14px;display:block;}
-.wallet-id-method.is-copied .wallet-id-method-copy{color:var(--green);}
+.wallet-id-method.is-copied .wallet-id-method-lab{color:inherit;}
 .wallet-id-method-ic{
-  width:18px;height:18px;flex-shrink:0;display:grid;place-items:center;
+  width:18px;height:18px;flex-shrink:0;display:grid;place-items:center;position:relative;
 }
 .wallet-id-method-ic .auth-wicon{
   width:18px;height:18px;border-radius:5px;font-size:9px;
 }
 .wallet-id-method-ic .auth-wicon svg{width:12px;height:12px;}
+.wallet-id-method-ic .wallet-id-method-mega{
+  position:absolute;inset:0;display:grid;place-items:center;opacity:0;
+  transition:opacity .22s ease, transform .26s cubic-bezier(.22,1,.36,1);
+  transform:translateY(4px) scale(.96);color:var(--ink-soft);
+}
+.wallet-id-method-mega .auth-wicon{
+  width:18px;height:18px;border-radius:5px;background:#fff;color:var(--ink-soft);
+  box-shadow:0 0 0 1px var(--line);
+}
+.wallet-id-method-mega .auth-wicon svg{width:12px;height:12px;display:block;}
+.wallet-id-method.is-addr-icon .wallet-id-method-mega{opacity:1;transform:none;}
+.wallet-id-method.is-addr-icon .wallet-id-method-auth{opacity:0;transform:translateY(-4px) scale(.96);}
+.wallet-id-method-auth{
+  transition:opacity .22s ease, transform .26s cubic-bezier(.22,1,.36,1);
+}
 .wallet-id-method-ic .auth-wicon.is-light{
   box-shadow:0 0 0 1px var(--line);
 }
 .wallet-id-method-ic .auth-wicon.is-detected::after{display:none;}
-.wallet-id-method-lab{
-  min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+.wallet-id-method-lab-wrap{
+  position:relative;min-width:0;flex:0 1 auto;display:block;
+}
+.wallet-id-method-lab,
+.wallet-id-method-lab-alt{
+  display:block;width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
   font-size:12px;font-weight:600;color:var(--ink-soft);letter-spacing:-.01em;line-height:1.2;
+  transition:opacity .22s ease, transform .26s cubic-bezier(.22,1,.36,1);
+}
+.wallet-id-method-lab-alt{
+  position:absolute;left:0;top:0;right:0;
+  opacity:0;transform:translateY(5px);pointer-events:none;
+  font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-variant-numeric:tabular-nums;
+}
+.wallet-id-method.is-addr-lab .wallet-id-method-lab{opacity:0;transform:translateY(-5px);}
+.wallet-id-method.is-addr-lab .wallet-id-method-lab-alt{opacity:1;transform:none;}
+.wallet-id-method-tail{
+  width:22px;height:22px;flex-shrink:0;margin-left:-1px;display:grid;place-items:center;color:var(--ink-faint);
+}
+.wallet-id-method-tail .wallet-copy-morph-svg{width:15px;height:15px;display:block;}
+.wallet-id-method.is-copied .wallet-id-method-tail{color:color-mix(in srgb, var(--green) 68%, var(--ink-soft));}
+.wallet-id-method.is-social{
+  padding-right:6px;
+}
+.wallet-id-method-copy-icon{
+  position:relative;width:32px;height:32px;flex-shrink:0;border:none;border-radius:10px;background:transparent;color:var(--ink-faint);cursor:pointer;
+  display:grid;place-items:center;
+}
+.wallet-id-method-copy-icon:hover{background:color-mix(in srgb, var(--ink) 6%, transparent);color:var(--ink);}
+.wallet-id-method-copy-icon:active{transform:scale(.94);}
+.wallet-id-method-copy-icon .wallet-copy-morph-svg{width:16px;height:16px;display:block;}
+.wallet-id-method-copy-icon.is-copied{color:color-mix(in srgb, var(--green) 68%, var(--ink-soft));}
+.wallet-id-method.is-copied .wallet-id-method-tail .wallet-copy-morph-svg,
+.wallet-id-method-copy-icon.is-copied .wallet-copy-morph-svg{
+  animation:walletCopySuccessPop .26s cubic-bezier(.22,1,.28,1);
+  transform-origin:50% 50%;
+}
+@keyframes walletCopySuccessPop{
+  0%{transform:scale(1);}
+  50%{transform:scale(1.04);}
+  100%{transform:scale(1);}
 }
 .wallet-id-copy,.wallet-id-edit{
   position:relative;width:36px;height:36px;flex-shrink:0;margin:0;padding:0;
@@ -4641,7 +4720,7 @@ html.dark .qhc-id{color:#6BA3FF;}
 
 /* POX-style explain tip — title + body, no CTA (morphing pill, etc.) */
 .kb-info-tip{
-  width:min(268px,calc(100vw - 24px));padding:16px 18px;
+  width:fit-content;max-width:min(300px,calc(100vw - 24px));padding:16px 18px;
   display:flex;flex-direction:column;gap:8px;border-radius:14px;
 }
 .kb-info-tip-title{
@@ -4651,6 +4730,8 @@ html.dark .qhc-id{color:#6BA3FF;}
 .kb-info-tip-body{
   font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.45;letter-spacing:-.01em;
   font-variant-numeric:tabular-nums;
+  white-space:pre-line;
+  overflow-wrap:anywhere;
 }
 .kb-info-tip-cta{
   display:none;margin-top:2px;
@@ -5462,6 +5543,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     fundsAmt: 25,
     walletView: 'list',
     walletTab: 'tokens',
+    walletDepth: 'top',
     network: 'mainnet',
     bio: '',
     passkey: false,
@@ -5603,16 +5685,35 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   function authMethodHtml(ident){
     const label = authMethodLabel(ident);
-    const value = authMethodCopyValue(ident);
-    if(!label || !value) return '';
-    const eoa = ident.kind === 'eoa';
-    const title = eoa ? RECV_COPY_TITLE : 'Your login';
-    const body = eoa ? RECV_COPY_BODY : '';
-    const aria = eoa ? RECV_COPY_TITLE : 'Copy login';
-    return `<button type="button" class="wallet-id-method" id="walletCopyMethod" data-addr="${escHtml(value)}" data-tip-title="${escHtml(title)}" data-tip-body="${escHtml(body)}" data-tip-addr="${escHtml(value)}" aria-label="${escHtml(aria)}">
-      <span class="wallet-id-method-ic">${walletMethodIcon(ident)}</span>
-      <span class="wallet-id-method-lab">${escHtml(label)}</span>
-      <span class="wallet-id-method-copy" data-copy-ic aria-hidden="true">${COPY_ADDR_IC}</span>
+    const loginValue = authMethodCopyValue(ident);
+    const copyAddr = accountReceiveAddr();
+    if(!label || !loginValue || !copyAddr) return '';
+    const addrLabel = shortAddr(copyAddr);
+    if(ident.kind !== 'eoa'){
+      return `<div class="wallet-id-method-group">
+        <button type="button" class="wallet-id-method is-social" id="walletCopyMethod" data-auth-kind="${escHtml(ident.kind || '')}" data-login-value="${escHtml(loginValue)}" data-tip-title="Logged in with" data-tip-body="" data-tip-addr="" aria-label="Login method">
+          <span class="wallet-id-method-ic">
+            <span class="wallet-id-method-auth">${walletMethodIcon(ident)}</span>
+          </span>
+          <span class="wallet-id-method-lab-wrap">
+            <span class="wallet-id-method-lab">${escHtml(label)}</span>
+          </span>
+        </button>
+        <button type="button" class="wallet-id-method-copy-icon" id="walletCopyMethodIcon" data-addr="${escHtml(copyAddr)}" data-tip-title="${escHtml(RECV_COPY_TITLE)}" data-tip-body="${escHtml(RECV_COPY_BODY)}" data-tip-addr="" aria-label="Copy account address">
+          <svg class="wallet-copy-morph-svg" viewBox="0 0 16 16" fill="none"><path data-morph-path="0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path data-morph-path="1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path data-morph-path="2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path data-morph-path="3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+      </div>`;
+    }
+    return `<button type="button" class="wallet-id-method ${ident.kind === 'eoa' ? 'is-eoa' : ''}" id="walletCopyMethod" data-auth-kind="${escHtml(ident.kind || '')}" data-login-value="${escHtml(loginValue)}" data-addr="${escHtml(copyAddr)}" data-login-label="${escHtml(label)}" data-addr-label="${escHtml(addrLabel)}" data-tip-title="Logged in with" data-tip-body="" data-tip-addr="" aria-label="Copy account address">
+      <span class="wallet-id-method-ic">
+        <span class="wallet-id-method-auth">${walletMethodIcon(ident)}</span>
+        <span class="wallet-id-method-mega"><span class="auth-wicon is-light">${WALLET_MEGA_IC}</span></span>
+      </span>
+      <span class="wallet-id-method-lab-wrap">
+        <span class="wallet-id-method-lab">${escHtml(label)}</span>
+        <span class="wallet-id-method-lab-alt">${escHtml(addrLabel)}</span>
+      </span>
+      <span class="wallet-id-method-tail" aria-hidden="true"><svg class="wallet-copy-morph-svg" viewBox="0 0 16 16" fill="none"><path data-morph-path="0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path data-morph-path="1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path data-morph-path="2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path data-morph-path="3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
     </button>`;
   }
   const DEMO_PERSONAS = [
@@ -6526,7 +6627,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     Discord: { bg:'#5865F2' },
     GitHub: { bg:'#111' },
     Telegram: { bg:'#229ED9' },
-    Passkey: { bg:'#2A241C' },
+    Passkey: { bg:'#fff', light:true },
   };
   function socialMarkInner(key){
     if(key === 'Email' || !key) return 'K';
@@ -6925,7 +7026,9 @@ html.dark .qhc-id{color:#6BA3FF;}
   const COPY_SVG = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>`;
   const COPY_DONE_SVG = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7.2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const RECV_COPY_TITLE = 'Your account address';
-  const RECV_COPY_BODY = 'Make sure to send to MegaETH. We recommend Top up for automated transfers.';
+  const RECV_COPY_BODY = 'This is your balance address on the MegaETH network.';
+  const WALLET_EOA_COPY_TITLE = 'Signed in with MetaMask';
+  const WALLET_EOA_COPY_BODY = 'Your kumbaya balance only shows assets supported on MegaETH';
   const COPY_ADDR_IC = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.6667 5.66668H14.4167V4.91668H13.6667V5.66668ZM13.6667 13.6667V14.4167H14.4167V13.6667H13.6667ZM8.33332 12.9167H7.58332V14.4167H8.33332V13.6667V12.9167ZM11 2.33334H11.75V1.58334H11V2.33334ZM1.58332 7.1228V7.8728H3.08332V7.1228H2.33332H1.58332ZM9.58332 9.66668C9.58332 10.0809 9.91911 10.4167 10.3333 10.4167C10.7475 10.4167 11.0833 10.0809 11.0833 9.66668H10.3333H9.58332ZM11.0833 9.66001C11.0833 9.2458 10.7475 8.91001 10.3333 8.91001C9.91911 8.91001 9.58332 9.2458 9.58332 9.66001H10.3333H11.0833ZM2.82428 9.46359L2.44637 8.81576L2.82428 9.46359ZM5.1757 9.46359L5.55361 8.81576L5.1757 9.46359ZM11 5.66668V4.91668H3.99999V5.66668V6.41668H11V5.66668ZM3.99999 5.66668V4.91668C3.49373 4.91668 3.08332 4.50627 3.08332 4.00001H2.33332H1.58332C1.58332 5.3347 2.6653 6.41668 3.99999 6.41668V5.66668ZM11 5.66668V6.41668H13.6667V5.66668V4.91668H11V5.66668ZM13.6667 5.66668H12.9167V13.6667H13.6667H14.4167V5.66668H13.6667ZM13.6667 13.6667V12.9167H8.33332V13.6667V14.4167H13.6667V13.6667ZM11 5.66668H11.75V2.33334H11H10.25V5.66668H11ZM11 2.33334V1.58334H3.99999V2.33334V3.08334H11V2.33334ZM3.99999 2.33334V1.58334C2.6653 1.58334 1.58332 2.66532 1.58332 4.00001H2.33332H3.08332C3.08332 3.49375 3.49373 3.08334 3.99999 3.08334V2.33334ZM2.33332 7.1228H3.08332V4.00001H2.33332H1.58332V7.1228H2.33332ZM6.33332 11.4791H5.58332V11.5209H6.33332H7.08332V11.4791H6.33332ZM1.66666 11.5209H2.41666V11.4791H1.66666H0.916656V11.5209H1.66666ZM10.3333 9.66668H11.0833V9.66001H10.3333H9.58332V9.66668H10.3333ZM10.5 9.66668H9.74999C9.74999 9.34453 10.0112 9.08334 10.3333 9.08334V9.83334V10.5833C10.8396 10.5833 11.25 10.173 11.25 9.66668H10.5ZM10.3333 9.83334V9.08334C10.6555 9.08334 10.9167 9.34453 10.9167 9.66668H10.1667H9.41666C9.41666 10.173 9.82705 10.5833 10.3333 10.5833V9.83334ZM10.1667 9.66668H10.9167C10.9167 9.98883 10.6555 10.25 10.3333 10.25V9.50001V8.75001C9.82705 8.75001 9.41666 9.16039 9.41666 9.66668H10.1667ZM10.3333 9.50001V10.25C10.0112 10.25 9.74999 9.98883 9.74999 9.66668H10.5H11.25C11.25 9.16039 10.8396 8.75001 10.3333 8.75001V9.50001ZM1.66666 11.4791H2.41666C2.41666 10.9159 2.71576 10.3952 3.20218 10.1114L2.82428 9.46359L2.44637 8.81576C1.49912 9.36832 0.916656 10.3824 0.916656 11.4791H1.66666ZM2.82428 13.5364L3.20218 12.8885C2.71576 12.6048 2.41666 12.084 2.41666 11.5209H1.66666H0.916656C0.916656 12.6175 1.49912 13.6316 2.44637 14.1842L2.82428 13.5364ZM5.1757 13.5364L4.7978 12.8885C4.3048 13.1761 3.69518 13.1761 3.20218 12.8885L2.82428 13.5364L2.44637 14.1842C3.40641 14.7442 4.59357 14.7442 5.55361 14.1842L5.1757 13.5364ZM6.33332 11.5209H5.58332C5.58332 12.084 5.28422 12.6048 4.7978 12.8885L5.1757 13.5364L5.55361 14.1842C6.50085 13.6316 7.08332 12.6175 7.08332 11.5209H6.33332ZM5.1757 9.46359L4.79779 10.1114C5.28422 10.3952 5.58332 10.9159 5.58332 11.4791H6.33332H7.08332C7.08332 10.3824 6.50085 9.36832 5.55361 8.81576L5.1757 9.46359ZM5.1757 9.46359L5.55361 8.81576C4.59357 8.25572 3.40641 8.25572 2.44637 8.81576L2.82428 9.46359L3.20218 10.1114C3.69518 9.82383 4.3048 9.82383 4.79779 10.1114L5.1757 9.46359Z" fill="currentColor"/></svg>`;
   const SETTINGS_IC = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M6.22 1.75h3.56l.42 1.62c.46.14.88.36 1.26.64l1.58-.54 1.78 1.78-.54 1.58c.28.38.5.8.64 1.26l1.62.42v3.56l-1.62.42c-.14.46-.36.88-.64 1.26l.54 1.58-1.78 1.78-1.58-.54c-.38.28-.8.5-1.26.64l-.42 1.62H6.22l-.42-1.62a5.6 5.6 0 0 1-1.26-.64l-1.58.54-1.78-1.78.54-1.58A5.6 5.6 0 0 1 1.08 9.8L.46 9.38V5.82l1.62-.42c.14-.46.36-.88.64-1.26l-.54-1.58 1.78-1.78 1.58.54c.38-.28.8-.5 1.26-.64l.42-1.62Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="miter"/><circle cx="8" cy="8" r="2.15" stroke="currentColor" stroke-width="1.5"/></svg>`;
   const PEN_SVG = `<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2.5 13.5H5l8-8-2.5-2.5-8 8v2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="miter"/><path d="M9.2 4.3l2.5 2.5" stroke="currentColor" stroke-width="1.5"/></svg>`;
@@ -6939,6 +7042,32 @@ html.dark .qhc-id{color:#6BA3FF;}
     { x1: 13.5, y1: 2.5, x2: 13.5, y2: 10.5 },
     { x1: 2.5, y1: 5.5, x2: 2.5, y2: 13.5 },
   ];
+  const WALLET_COPY_MORPH_PATHS = {
+    balance: [
+      "M2.3333 7.1228V4A1.6667 1.6667 0 0 1 4 2.3333H11V5.6667H13.6667V13.6667H8.3333",
+      "M11 5.6667H4A1.6667 1.6667 0 0 1 2.3333 4",
+      "M2.4167 11.5A1.5833 1.5833 0 0 1 5.5833 11.5A1.5833 1.5833 0 0 1 2.4167 11.5",
+      "M9.9583 9.6667A0.375 0.375 0 0 1 10.7083 9.6667A0.375 0.375 0 0 1 9.9583 9.6667"
+    ],
+    copy: [
+      "M5.3737 9.8537V13.8537H14.0403V5.187H10.0403V9.8537H5.3737Z",
+      "M10.0403 9.8537H1.3737V1.187H10.0403V9.8537Z",
+      "M5.3737 11.5L5.3737 11.5",
+      "M10.0403 9.8537L10.0403 9.8537"
+    ],
+    check: [
+      "M8 1.6667C11.4978 1.6667 14.3333 4.5022 14.3333 8C14.3333 11.4978 11.4978 14.3333 8 14.3333C4.5022 14.3333 1.6667 11.4978 1.6667 8C1.6667 4.5022 4.5022 1.6667 8 1.6667Z",
+      "M10 6.3333L7 10L5.6667 8.6667",
+      "M8 14.3333L8 14.3333",
+      "M7 10L7 10"
+    ]
+  };
+  const WALLET_COPY_MORPH_OPACITY = {
+    balance: [1, 1, 1, 1],
+    copy: [1, 1, 0, 0],
+    check: [1, 1, 0, 0]
+  };
+  const WALLET_MORPH_DUR = { in: 320, out: 280, success: 340 };
   const ADDR_LINES_CHECK = [
     { x1: 3, y1: 8.2, x2: 6.4, y2: 12 },
     { x1: 6.4, y1: 12, x2: 13.2, y2: 4.5 },
@@ -6959,11 +7088,11 @@ html.dark .qhc-id{color:#6BA3FF;}
       ${addrMorphSvg(ADDR_LINES_TEXT)}
     </button>`;
   }
-  function copyAddrIconHtml(addr){
-    return `<button type="button" class="wallet-id-copy" id="walletCopyAddr" data-addr="${escHtml(addr)}" data-tip-title="${escHtml(RECV_COPY_TITLE)}" data-tip-body="${escHtml(RECV_COPY_BODY)}" data-tip-addr="${escHtml(addr)}" aria-label="${escHtml(RECV_COPY_TITLE)}">${COPY_ADDR_IC}</button>`;
-  }
   function copyAddrFineHover(){
     return window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+  }
+  function copyAddrSuccessFeedback(){
+    if(typeof haptic === 'function') haptic('copyAddr');
   }
   function armCopyAddrBtn(btn, addr){
     if(!btn || btn._kbCopyBound) return;
@@ -6973,7 +7102,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     const paintCopyIc = (copied)=>{
       const slot = btn.querySelector('[data-copy-ic]');
       if(slot) slot.innerHTML = copied ? COPY_DONE_SVG : COPY_ADDR_IC;
-      else btn.innerHTML = copied ? COPY_DONE_SVG : COPY_ADDR_IC;
+      else if(btn.dataset.copySwap !== undefined) btn.innerHTML = copied ? COPY_DONE_SVG : COPY_ADDR_IC;
     };
     btn.addEventListener('pointerenter', (e)=>{
       if(e.pointerType && e.pointerType !== 'mouse') return;
@@ -6992,6 +7121,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       e.stopPropagation();
       const value = addr || btn.dataset.addr || '';
       try{ navigator.clipboard && navigator.clipboard.writeText(value); }catch(_){}
+      copyAddrSuccessFeedback();
       btn.classList.add('is-copied');
       paintCopyIc(true);
       btn.dataset.tipTitle = 'Copied';
@@ -7035,6 +7165,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     const iconOnly = btn.classList.contains('kb-copy-morph');
     const rest = iconOnly ? ADDR_LINES_COPY : ADDR_LINES_TEXT;
     const onClass = swap ? 'is-addr' : 'is-copy';
+    if(iconOnly){
+      btn.classList.add(onClass);
+      if(svg) setAddrLines(svg, ADDR_LINES_COPY, false);
+    }
     const enter = ()=>{
       btn.classList.add(onClass);
       if(svg) setAddrLines(svg, ADDR_LINES_COPY, true);
@@ -7052,6 +7186,8 @@ html.dark .qhc-id{color:#6BA3FF;}
       e.preventDefault();
       e.stopPropagation();
       const value = addr || btn.dataset.addr || '';
+      const methodBtn = btn.closest('.wallet-id-method-group')?.querySelector('#walletCopyMethod');
+      if(methodBtn) methodBtn._kbTipLockUntil = Date.now() + 1900;
       try{ navigator.clipboard && navigator.clipboard.writeText(value); }catch(_){}
       btn.classList.add(onClass, 'is-copied');
       if(svg) setAddrLines(svg, iconOnly ? ADDR_LINES_CHECK : ADDR_LINES_COPY, true);
@@ -7069,6 +7205,335 @@ html.dark .qhc-id{color:#6BA3FF;}
         }
         if(typeof hoverAnchor !== 'undefined' && hoverAnchor === btn && typeof fillInfoTip === 'function') fillInfoTip(btn);
       }, 1600);
+    });
+  }
+  function sampleMorphPath(pathD, points){
+    const NS = "http://www.w3.org/2000/svg";
+    const host = document.createElementNS(NS, "svg");
+    host.setAttribute("width", "0");
+    host.setAttribute("height", "0");
+    host.style.position = "absolute";
+    host.style.pointerEvents = "none";
+    document.body.appendChild(host);
+    const p = document.createElementNS(NS, "path");
+    p.setAttribute("d", pathD);
+    host.appendChild(p);
+    const len = p.getTotalLength();
+    const out = [];
+    if(len === 0){
+      const q = p.getPointAtLength(0);
+      for(let i = 0; i < points; i += 1) out.push([q.x, q.y]);
+    } else {
+      for(let i = 0; i < points; i += 1){
+        const q = p.getPointAtLength((len * i) / (points - 1));
+        out.push([q.x, q.y]);
+      }
+    }
+    document.body.removeChild(host);
+    return out;
+  }
+  function morphCost(a, b){
+    let s = 0;
+    for(let i = 0; i < a.length; i += 1){
+      const dx = a[i][0] - b[i][0];
+      const dy = a[i][1] - b[i][1];
+      s += (dx * dx) + (dy * dy);
+    }
+    return s;
+  }
+  function morphPointsClosed(points){
+    const n = points.length;
+    if(n < 2) return false;
+    return Math.abs(points[0][0] - points[n - 1][0]) < 0.05
+      && Math.abs(points[0][1] - points[n - 1][1]) < 0.05;
+  }
+  function rotateMorphPoints(points, k){
+    return points.slice(k).concat(points.slice(0, k));
+  }
+  function alignMorphPoints(points, target){
+    let best = points;
+    let bestCost = morphCost(points, target);
+    const candidates = [points.slice().reverse()];
+    if(morphPointsClosed(points)){
+      for(let k = 1; k < points.length; k += 1){
+        const rotated = rotateMorphPoints(points, k);
+        candidates.push(rotated, rotated.slice().reverse());
+      }
+    }
+    candidates.forEach((candidate)=>{
+      const c = morphCost(candidate, target);
+      if(c < bestCost){
+        bestCost = c;
+        best = candidate;
+      }
+    });
+    return best;
+  }
+  function walletCopyMorphFrames(){
+    if(window.__kbWalletCopyMorphFramesV2) return window.__kbWalletCopyMorphFramesV2;
+    const N = 64;
+    const balance = WALLET_COPY_MORPH_PATHS.balance.map(d => sampleMorphPath(d, N));
+    const copy = WALLET_COPY_MORPH_PATHS.copy.map((d, i) => alignMorphPoints(sampleMorphPath(d, N), balance[i]));
+    const check = WALLET_COPY_MORPH_PATHS.check.map((d, i) => alignMorphPoints(sampleMorphPath(d, N), copy[i]));
+    const frames = { N, balance, copy, check };
+    window.__kbWalletCopyMorphFramesV2 = frames;
+    return frames;
+  }
+  function setWalletCopyMorphStroke(svg, transit){
+    if(!svg) return;
+    svg.querySelectorAll('[data-morph-path]').forEach(el=>{
+      el.setAttribute('stroke-linecap', transit ? 'round' : 'round');
+      el.setAttribute('stroke-linejoin', transit ? 'round' : 'round');
+    });
+  }
+  function snapWalletCopyMorphSvg(svg, state){
+    if(!svg) return;
+    const paths = WALLET_COPY_MORPH_PATHS[state];
+    const opacities = WALLET_COPY_MORPH_OPACITY[state];
+    if(!paths || !opacities) return;
+    const frames = walletCopyMorphFrames();
+    svg._morphCoords = frames[state].map(arr => arr.map(p => [p[0], p[1]]));
+    svg.querySelectorAll('[data-morph-path]').forEach((el, i)=>{
+      el.setAttribute('d', paths[i] || '');
+      el.setAttribute('opacity', String(opacities[i] ?? 1));
+    });
+    setWalletCopyMorphStroke(svg, false);
+  }
+  function paintWalletCopyMorph(svg, coords, opacities){
+    const paths = svg.querySelectorAll('[data-morph-path]');
+    paths.forEach((el, i)=>{
+      const pts = coords[i] || [];
+      let d = '';
+      for(let j = 0; j < pts.length; j += 1){
+        const cmd = j ? 'L' : 'M';
+        d += `${cmd}${pts[j][0].toFixed(2)} ${pts[j][1].toFixed(2)}`;
+      }
+      el.setAttribute('d', d);
+      el.setAttribute('opacity', String(opacities[i] ?? 1));
+    });
+  }
+  function setWalletCopyMorphState(svg, state, dur){
+    if(!svg) return;
+    if(svg._morphRaf){
+      cancelAnimationFrame(svg._morphRaf);
+      svg._morphRaf = 0;
+    }
+    const frames = walletCopyMorphFrames();
+    const target = frames[state];
+    const targetOp = WALLET_COPY_MORPH_OPACITY[state];
+    if(!target || !targetOp) return;
+    if(!dur){
+      snapWalletCopyMorphSvg(svg, state);
+      return;
+    }
+    tweenWalletCopyMorph(svg, state, dur);
+  }
+  function tweenWalletCopyMorph(svg, toState, duration){
+    const frames = walletCopyMorphFrames();
+    const target = frames[toState];
+    const targetOp = WALLET_COPY_MORPH_OPACITY[toState];
+    if(!target || !targetOp) return;
+    const paths = svg.querySelectorAll('[data-morph-path]');
+    if(!paths.length) return;
+    if(svg._morphRaf) cancelAnimationFrame(svg._morphRaf);
+    setWalletCopyMorphStroke(svg, true);
+    const from = [];
+    const fromOp = [];
+    paths.forEach((el, i)=>{
+      from[i] = (svg._morphCoords && svg._morphCoords[i])
+        ? svg._morphCoords[i].map(p => [p[0], p[1]])
+        : frames.balance[i].map(p => [p[0], p[1]]);
+      fromOp[i] = Number(el.getAttribute('opacity') || 1);
+    });
+    const ms = Math.max(150, Number(duration) || WALLET_MORPH_DUR.in);
+    const start = performance.now();
+    const ease = (t)=> t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const step = (now)=>{
+      const t = Math.min((now - start) / ms, 1);
+      const e = ease(t);
+      const cur = from.map((arr, i)=> arr.map((pt, j)=>[
+        pt[0] + (target[i][j][0] - pt[0]) * e,
+        pt[1] + (target[i][j][1] - pt[1]) * e
+      ]));
+      const curOp = fromOp.map((v, i)=> v + (targetOp[i] - v) * e);
+      svg._morphCoords = cur;
+      paintWalletCopyMorph(svg, cur, curOp);
+      if(t < 1) svg._morphRaf = requestAnimationFrame(step);
+      else {
+        svg._morphRaf = 0;
+        snapWalletCopyMorphSvg(svg, toState);
+      }
+    };
+    svg._morphRaf = requestAnimationFrame(step);
+  }
+  function armWalletMethodMorph(btn){
+    if(!btn || btn._kbMethodMorphBound) return;
+    btn._kbMethodMorphBound = true;
+    const svg = btn.querySelector('.wallet-copy-morph-svg');
+    const labWrap = btn.querySelector('.wallet-id-method-lab-wrap');
+    const mainLabel = btn.querySelector('.wallet-id-method-lab');
+    const altLabel = btn.querySelector('.wallet-id-method-lab-alt');
+    const finalAddrLabel = btn.dataset.addrLabel || (altLabel ? altLabel.textContent : '');
+    const isWalletAuth = btn.dataset.authKind === 'eoa';
+    const syncMethodWidth = ()=>{
+      if(!labWrap || !mainLabel) return;
+      labWrap.style.width = '';
+      const natural = Math.ceil(mainLabel.scrollWidth || 0);
+      const maxAllowed = isWalletAuth ? 112 : 156;
+      labWrap.style.width = `${Math.min(maxAllowed, natural)}px`;
+    };
+    const applyState = (isAddr, dur)=>{
+      btn.classList.toggle('is-addr-icon', !!isAddr && !isWalletAuth);
+      btn.classList.toggle('is-addr-lab', !!isAddr && !isWalletAuth);
+      btn.dataset.tipTitle = isAddr
+        ? (isWalletAuth ? WALLET_EOA_COPY_TITLE : RECV_COPY_TITLE)
+        : 'Logged in with';
+      btn.dataset.tipBody = isAddr
+        ? (isWalletAuth ? WALLET_EOA_COPY_BODY : RECV_COPY_BODY)
+        : '';
+      btn.dataset.tipAddr = '';
+      if(svg){
+        if(isWalletAuth) setWalletCopyMorphState(svg, isAddr ? 'check' : 'copy', dur);
+        else setWalletCopyMorphState(svg, isAddr ? 'copy' : 'balance', dur);
+      }
+      if(altLabel){
+        if(altLabel._cipherTimer){
+          clearInterval(altLabel._cipherTimer);
+          altLabel._cipherTimer = 0;
+        }
+        altLabel.textContent = finalAddrLabel;
+      }
+      syncMethodWidth();
+      if(typeof hoverAnchor !== 'undefined' && hoverAnchor === btn && typeof fillInfoTip === 'function') fillInfoTip(btn);
+    };
+    if(svg){
+      snapWalletCopyMorphSvg(svg, isWalletAuth ? 'copy' : 'balance');
+    }
+    syncMethodWidth();
+    applyState(false, 0);
+    btn.addEventListener('pointerenter', (e)=>{
+      if(e.pointerType && e.pointerType !== 'mouse') return;
+      if(!copyAddrFineHover()) return;
+      if(btn._kbCopyLock && Date.now() < btn._kbCopyLock) return;
+      if(!isWalletAuth) applyState(true, WALLET_MORPH_DUR.in);
+      scheduleShowHover('info', null, btn, 120);
+    });
+    btn.addEventListener('pointerleave', (e)=>{
+      if(e.pointerType && e.pointerType !== 'mouse') return;
+      if(!copyAddrFineHover()) return;
+      const rt = e.relatedTarget;
+      if(rt && infoHoverTip && infoHoverTip.contains(rt)) return;
+      if(btn._kbCopyLock && Date.now() < btn._kbCopyLock) return;
+      if(!btn.classList.contains('is-copied')) applyState(false, WALLET_MORPH_DUR.out);
+      clearTimeout(hoverShowTimer); hoverShowTimer = 0;
+      hideHoverCards(false);
+    });
+    btn.addEventListener('focus', ()=> applyState(true, WALLET_MORPH_DUR.in));
+    btn.addEventListener('blur', ()=>{
+      if(!btn.classList.contains('is-copied')) applyState(false, WALLET_MORPH_DUR.out);
+    });
+    btn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      clearTimeout(hoverShowTimer); hoverShowTimer = 0;
+      if(!isWalletAuth) applyState(true, 260);
+      const value = btn.dataset.addr || '';
+      try{ navigator.clipboard && navigator.clipboard.writeText(value); }catch(_){}
+      if(typeof copyAddrSuccessFeedback === 'function') copyAddrSuccessFeedback();
+      btn._kbCopyLock = Date.now() + 1200;
+      btn.classList.add('is-copied');
+      btn.dataset.tipTitle = 'Address copied';
+      btn.dataset.tipBody = '';
+      btn.dataset.tipAddr = '';
+      if(svg && isWalletAuth) setWalletCopyMorphState(svg, 'check', WALLET_MORPH_DUR.success);
+      if(typeof showHoverCard === 'function') showHoverCard('info', null, btn);
+      clearTimeout(btn._copyT);
+      btn._copyT = setTimeout(()=>{
+        btn.classList.remove('is-copied');
+        btn._kbCopyLock = 0;
+        const tipHovered = !!(infoHoverTip && infoHoverTip.matches(':hover'));
+        const stayAddr = copyAddrFineHover() && (btn.matches(':hover') || tipHovered);
+        const exitDur = stayAddr ? WALLET_MORPH_DUR.in : WALLET_MORPH_DUR.out;
+        if(!stayAddr && typeof hideHoverCards === 'function') hideHoverCards(true);
+        if(svg && isWalletAuth) setWalletCopyMorphState(svg, 'copy', exitDur);
+        applyState(stayAddr, exitDur);
+      }, 1200);
+    });
+  }
+  function armWalletMethodInfo(btn){
+    if(!btn || btn._kbMethodInfoBound) return;
+    btn._kbMethodInfoBound = true;
+    btn.addEventListener('pointerenter', (e)=>{
+      if(e.pointerType && e.pointerType !== 'mouse') return;
+      if(!copyAddrFineHover()) return;
+      if(btn._kbTipLockUntil && Date.now() < btn._kbTipLockUntil) return;
+      scheduleShowHover('info', null, btn, 120);
+    });
+    btn.addEventListener('pointerleave', (e)=>{
+      if(e.pointerType && e.pointerType !== 'mouse') return;
+      if(!copyAddrFineHover()) return;
+      const rt = e.relatedTarget;
+      if(rt && infoHoverTip && infoHoverTip.contains(rt)) return;
+      clearTimeout(hoverShowTimer); hoverShowTimer = 0;
+      hideHoverCards(false);
+    });
+    btn.addEventListener('focus', ()=>{
+      if(btn._kbTipLockUntil && Date.now() < btn._kbTipLockUntil) return;
+      scheduleShowHover('info', null, btn, 80);
+    });
+    btn.addEventListener('blur', ()=> hideHoverCards(false));
+  }
+  function armWalletCopyMethodIcon(btn){
+    if(!btn || btn._kbWalletCopyIconBound) return;
+    btn._kbWalletCopyIconBound = true;
+    const svg = btn.querySelector('.wallet-copy-morph-svg');
+    const methodBtn = btn.closest('.wallet-id-method-group')?.querySelector('#walletCopyMethod');
+    const paintState = (state, dur)=>{
+      if(svg) setWalletCopyMorphState(svg, state, dur);
+    };
+    if(svg) snapWalletCopyMorphSvg(svg, 'balance');
+    btn.addEventListener('pointerenter', (e)=>{
+      if(e.pointerType && e.pointerType !== 'mouse') return;
+      if(!copyAddrFineHover()) return;
+      if(btn._kbCopyLock && Date.now() < btn._kbCopyLock) return;
+      paintState('copy', WALLET_MORPH_DUR.in);
+      scheduleShowHover('info', null, btn, 120);
+    });
+    btn.addEventListener('pointerleave', (e)=>{
+      if(e.pointerType && e.pointerType !== 'mouse') return;
+      if(!copyAddrFineHover()) return;
+      const rt = e.relatedTarget;
+      if(rt && infoHoverTip && infoHoverTip.contains(rt)) return;
+      if(btn._kbCopyLock && Date.now() < btn._kbCopyLock) return;
+      if(!btn.classList.contains('is-copied')) paintState('balance', WALLET_MORPH_DUR.out);
+      clearTimeout(hoverShowTimer); hoverShowTimer = 0;
+      hideHoverCards(false);
+    });
+    btn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      clearTimeout(hoverShowTimer); hoverShowTimer = 0;
+      const value = btn.dataset.addr || '';
+      if(methodBtn) methodBtn._kbTipLockUntil = Date.now() + 1900;
+      try{ navigator.clipboard && navigator.clipboard.writeText(value); }catch(_){}
+      if(typeof copyAddrSuccessFeedback === 'function') copyAddrSuccessFeedback();
+      btn._kbCopyLock = Date.now() + 1200;
+      btn.classList.add('is-copied');
+      btn.dataset.tipTitle = 'Address copied';
+      btn.dataset.tipBody = '';
+      btn.dataset.tipAddr = '';
+      paintState('check', WALLET_MORPH_DUR.success);
+      if(typeof showHoverCard === 'function') showHoverCard('info', null, btn);
+      clearTimeout(btn._copyT);
+      btn._copyT = setTimeout(()=>{
+        btn.classList.remove('is-copied');
+        btn._kbCopyLock = 0;
+        btn.dataset.tipTitle = RECV_COPY_TITLE;
+        btn.dataset.tipBody = RECV_COPY_BODY;
+        paintState('balance', WALLET_MORPH_DUR.out);
+        if(typeof hideHoverCards === 'function') hideHoverCards(true);
+        if(typeof hoverAnchor !== 'undefined' && hoverAnchor === btn && typeof fillInfoTip === 'function') fillInfoTip(btn);
+      }, 1200);
     });
   }
   const ACCOUNT_LINKS = [
@@ -7234,7 +7699,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     return session.walletView === 'connect' || session.walletView === 'accounts' || session.walletView === 'accountsMore';
   }
   const WALLET_MORE_SVG = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="6" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18" cy="12" r="1.7"/></svg>`;
-  const WALLET_MEGA_IC = `<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path fill="currentColor" d="M5.87 5.6V4.85H5.12V5.6h.75Zm.72 0 .7-.27-.19-.48H6.59V5.6Zm1.4 3.62-.7.27.19.48h.51V9.22Zm1.49-3.62V4.85h-.5l-.19.47.69.28Zm.64 0h.75V4.85h-.75V5.6ZM8 9.22v.75h.51l.19-.47L8 9.22Zm-1.33.78a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm2.66 0a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5ZM5.87 9.64h.75V5.6h-.75v4.04Zm3.5-4.04h.75v4.04h-.75V5.6Zm.63 8.9A6.75 6.75 0 1 0 1.5 8h.75A6 6 0 1 1 8 14.5v.75Z"/></svg>`;
+  const WALLET_MEGA_IC = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip_wallet_mega)"><path d="M5.87354 5.60386V4.85386H5.12354V5.60386H5.87354ZM6.59146 5.60386L7.29086 5.33305L7.10531 4.85386H6.59146V5.60386ZM7.9928 9.22296L7.2934 9.49377L7.47895 9.97296H7.9928V9.22296ZM9.47945 5.60386V4.85386H8.97546L8.78504 5.32049L9.47945 5.60386ZM10.1253 5.60386H10.8753V4.85386H10.1253V5.60386ZM8.00257 9.22296V9.97296H8.50656L8.69698 9.50633L8.00257 9.22296ZM6.66843 9.99789C6.25422 9.99789 5.91843 10.3337 5.91843 10.7479C5.91843 11.1621 6.25422 11.4979 6.66843 11.4979V10.7479V9.99789ZM6.67509 11.4979C7.0893 11.4979 7.42509 11.1621 7.42509 10.7479C7.42509 10.3337 7.0893 9.99789 6.67509 9.99789V10.7479V11.4979ZM9.33232 9.99789C8.9181 9.99789 8.58232 10.3337 8.58232 10.7479C8.58232 11.1621 8.9181 11.4979 9.33232 11.4979V10.7479V9.99789ZM9.33898 11.4979C9.75319 11.4979 10.089 11.1621 10.089 10.7479C10.089 10.3337 9.75319 9.99789 9.33898 9.99789V10.7479V11.4979ZM5.87354 9.6373H6.62354V5.60386H5.87354H5.12354V9.6373H5.87354ZM5.87354 5.60386V6.35386H6.59146V5.60386V4.85386H5.87354V5.60386ZM6.59146 5.60386L5.89206 5.87467L7.2934 9.49377L7.9928 9.22296L8.6922 8.95215L7.29086 5.33305L6.59146 5.60386ZM9.47945 5.60386V6.35386H10.1253V5.60386V4.85386H9.47945V5.60386ZM10.1253 5.60386H9.37529V9.6373H10.1253H10.8753V5.60386H10.1253ZM7.9928 9.22296V9.97296H8.00257V9.22296V8.47296H7.9928V9.22296ZM8.00257 9.22296L8.69698 9.50633L10.1739 5.88723L9.47945 5.60386L8.78504 5.32049L7.30817 8.93959L8.00257 9.22296ZM14.5 8H13.75C13.75 11.1756 11.1756 13.75 8 13.75V14.5V15.25C12.0041 15.25 15.25 12.0041 15.25 8H14.5ZM8 14.5V13.75C4.82436 13.75 2.25 11.1756 2.25 8H1.5H0.75C0.75 12.0041 3.99594 15.25 8 15.25V14.5ZM1.5 8H2.25C2.25 4.82436 4.82436 2.25 8 2.25V1.5V0.75C3.99594 0.75 0.75 3.99594 0.75 8H1.5ZM8 1.5V2.25C11.1756 2.25 13.75 4.82436 13.75 8H14.5H15.25C15.25 3.99594 12.0041 0.75 8 0.75V1.5ZM6.66843 10.7479V11.4979H6.67509V10.7479V9.99789H6.66843V10.7479ZM6.83491 10.7479H7.58491C7.58491 10.2417 7.17452 9.83142 6.66843 9.83142V10.5814V11.3314C6.34622 11.3314 6.08491 11.0702 6.08491 10.7479H6.83491ZM6.66843 10.5814V9.83142C6.16233 9.83142 5.75195 10.2417 5.75195 10.7479H6.50195H7.25195C7.25195 11.0702 6.99064 11.3314 6.66843 11.3314V10.5814ZM6.50195 10.7479H5.75195C5.75195 11.2541 6.16233 11.6644 6.66843 11.6644V10.9144V10.1644C6.99064 10.1644 7.25195 10.4256 7.25195 10.7479H6.50195ZM6.66843 10.9144V11.6644C7.17453 11.6644 7.58491 11.2541 7.58491 10.7479H6.83491H6.08491C6.08491 10.4256 6.34622 10.1644 6.66843 10.1644V10.9144ZM9.33232 10.7479V11.4979H9.33898V10.7479V9.99789H9.33232V10.7479ZM9.49879 10.7479H10.2488C10.2488 10.2417 9.83849 9.83142 9.33232 9.83142V10.5814V11.3314C9.01007 11.3314 8.74879 11.0701 8.74879 10.7479H9.49879ZM9.33232 10.5814V9.83142C8.82614 9.83142 8.41584 10.2417 8.41584 10.7479H9.16584H9.91584C9.91584 11.0701 9.65457 11.3314 9.33232 11.3314V10.5814ZM9.16584 10.7479H8.41584C8.41584 11.2541 8.82614 11.6644 9.33232 11.6644V10.9144V10.1644C9.65457 10.1644 9.91584 10.4256 9.91584 10.7479H9.16584ZM9.33232 10.9144V11.6644C9.83849 11.6644 10.2488 11.2541 10.2488 10.7479H9.49879H8.74879C8.74879 10.4256 9.01007 10.1644 9.33232 10.1644V10.9144Z" fill="currentColor"/></g><defs><clipPath id="clip_wallet_mega"><rect width="16" height="16" fill="white"/></clipPath></defs></svg>`;
   let walletPopEl = null;
   function closeWalletPop(){
     const pop = walletPopEl || document.getElementById('kbWalletPop');
@@ -7365,6 +7830,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
 
   let lastWalletView = 'list';
+  let lastWalletDepth = 'top';
   function logActivity(kind, label, amt){
     session.activity.unshift({ kind, label, amt, t: Date.now() });
     session.activity = session.activity.slice(0, 12);
@@ -7392,6 +7858,13 @@ html.dark .qhc-id{color:#6BA3FF;}
       renderWalletBody();
       return;
     }
+    if(session.walletView === 'list' && session.walletDepth === 'deep'){
+      session.walletDepth = 'top';
+      session.walletTab = 'tokens';
+      const modal = walletOverlay?.querySelector('.wallet-modal');
+      morphSheet(modal, fillWalletBody);
+      return;
+    }
     flowBack();
   }
   function fillWalletBody(){
@@ -7399,6 +7872,14 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(!body) return;
     closeWalletPop();
     body.classList.toggle('is-fill', isWalletSheet());
+    const listedTab = (()=> {
+      let t = session.walletTab || 'tokens';
+      if(t === 'manage') t = 'settings';
+      if(!['tokens','activity','tips','profile','settings'].includes(t)) t = 'tokens';
+      return t;
+    })();
+    const isWalletDeep = session.walletView === 'list' && session.walletDepth === 'deep' && listedTab !== 'tokens';
+    const deepTitle = listedTab.charAt(0).toUpperCase() + listedTab.slice(1);
     const title = document.getElementById('walletTitle');
     if(title){
       title.textContent = session.walletView === 'flow' ? flowTitle()
@@ -7406,9 +7887,9 @@ html.dark .qhc-id{color:#6BA3FF;}
         : session.walletView === 'accountsMore' ? 'More options'
         : (session.walletView === 'accounts' || session.walletView === 'accountsWait')
           ? (connectedAccountIds().size ? 'Add account' : 'Connect account')
-        : 'Account';
+        : (isWalletDeep ? deepTitle : 'Account');
     }
-    const showBack = isWalletSheet() || session.walletView === 'accountsWait' || (session.walletView === 'flow' && flowCanBack());
+    const showBack = isWalletSheet() || session.walletView === 'accountsWait' || (session.walletView === 'flow' && flowCanBack()) || isWalletDeep;
     document.getElementById('walletBack')?.classList.toggle('show', showBack);
     const confirming = session.walletView === 'flow' && session.flow && session.flow.kind === 'deposit' && session.flow.step === 'confirm';
     body.closest('.modal')?.classList.toggle('is-confirming', confirming);
@@ -7465,15 +7946,12 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     const recvAddr = accountReceiveAddr();
     const ident = authIdentity();
-    let tab = session.walletTab || 'tokens';
-    if(tab === 'manage') tab = 'settings';
-    if(!['tokens','activity','tips','profile','settings'].includes(tab)) tab = 'tokens';
+    let tab = listedTab;
     session.walletTab = tab;
     const balBlock = `
-      <div class="wallet-balance-block">
+      <div class="wallet-balance-block" data-addr="${escHtml(recvAddr)}">
         <div class="wallet-balance-lbl-swap">
-          <div class="wallet-balance-lbl">USD balance</div>
-          ${copyAddrIconHtml(recvAddr)}
+          <div class="wallet-balance-lbl">USD Balance</div>
         </div>
         <div class="wallet-balance">${usdLabel(totalBal())}</div>
       </div>`;
@@ -7632,9 +8110,9 @@ html.dark .qhc-id{color:#6BA3FF;}
     const whoHtml = session.editName
       ? `<input type="text" class="wallet-id-who-input" id="walletWhoInput" value="${nameVal}" maxlength="24" spellcheck="false" autocomplete="off" aria-label="Username">`
       : `<b class="wallet-id-who">${nameVal}</b>`;
-    body.innerHTML = `
+    const walletTopSection = isWalletDeep ? '' : `
       <div class="wallet-id">
-        <button type="button" class="wallet-id-av-wrap" id="walletAvEdit" aria-label="Change profile picture">
+        <button type="button" class="wallet-id-av-wrap" id="walletAvEdit" aria-label="Edit profile" data-tip-title="Edit profile" data-tip-body="">
           <img class="wallet-id-av circle ${session.profilePic ? '' : 'blockie'}" src="${escHtml(profileSrc)}" alt="">
           <span class="wallet-id-av-edit">${PEN_SVG}</span>
         </button>
@@ -7643,7 +8121,6 @@ html.dark .qhc-id{color:#6BA3FF;}
           <div class="wallet-id-head">
             <div class="wallet-id-who-row">
               ${whoHtml}
-              <button type="button" class="wallet-id-edit" id="walletEditProfile" aria-label="Edit profile">${PEN_SVG}</button>
             </div>
             <button type="button" class="wallet-signout" id="signOutBtn" aria-label="Disconnect">
               <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 7V5.8A1.8 1.8 0 0 1 10.8 4h8.4A1.8 1.8 0 0 1 21 5.8v12.4a1.8 1.8 0 0 1-1.8 1.8h-8.4A1.8 1.8 0 0 1 9 18.2V17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3.5 12H15M11.5 8.2 15.3 12l-3.8 3.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -7658,7 +8135,8 @@ html.dark .qhc-id{color:#6BA3FF;}
       <div class="wallet-actions">
         <button type="button" id="walletSendBtn">Send</button>
         <button type="button" class="wallet-add" id="walletAddBtn">Top up</button>
-      </div>
+      </div>`;
+    const walletTabsNav = isWalletDeep ? '' : `
       <nav class="wallet-tabs" aria-label="Account">
         ${[
           ['tokens','Tokens','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/></svg>'],
@@ -7668,7 +8146,10 @@ html.dark .qhc-id{color:#6BA3FF;}
           ['settings','Settings', SETTINGS_IC],
         ].map(([id,lab,ic]) =>
           `<button type="button" data-wtab="${id}" class="${tab===id?'is-on':''}">${ic}<span>${lab}</span></button>`).join('')}
-      </nav>
+      </nav>`;
+    body.innerHTML = `
+      ${walletTopSection}
+      ${walletTabsNav}
       ${tabBody}`;
     body.querySelectorAll('[data-switch]').forEach(btn=>{
       btn.addEventListener('click', ()=> switchActiveWallet(btn.dataset.switch));
@@ -7726,20 +8207,15 @@ html.dark .qhc-id{color:#6BA3FF;}
       fillWalletBody();
       document.querySelectorAll('.kb-hold').forEach(el => el.classList.add('is-tick'));
     });
-    const copyAddr = body.querySelector('#walletCopyAddr');
-    if(copyAddr){
-      armCopyAddrBtn(copyAddr, recvAddr);
-    }
     const copyMethod = body.querySelector('#walletCopyMethod');
     if(copyMethod){
-      armCopyAddrBtn(copyMethod, copyMethod.dataset.addr);
+      if(copyMethod.dataset.authKind === 'eoa') armWalletMethodMorph(copyMethod);
+      else armWalletMethodInfo(copyMethod);
     }
-    body.querySelector('#walletEditProfile')?.addEventListener('click', ()=>{
-      if(session.walletTab === 'profile') return;
-      session.walletTab = 'profile';
-      closeWalletPop();
-      morphSheet(walletOverlay.querySelector('.wallet-modal'), fillWalletBody);
-    });
+    const copyMethodIcon = body.querySelector('#walletCopyMethodIcon');
+    if(copyMethodIcon){
+      armWalletCopyMethodIcon(copyMethodIcon);
+    }
     const whoInput = body.querySelector('#walletWhoInput');
     if(whoInput){
       whoInput.focus();
@@ -7805,11 +8281,31 @@ html.dark .qhc-id{color:#6BA3FF;}
     });
     picDrop?.addEventListener('click', ()=> picFile?.click());
     picFile?.addEventListener('change', ()=> takePic(picFile.files && picFile.files[0]));
-    body.querySelector('#walletAvEdit')?.addEventListener('click', ()=> body.querySelector('#walletAvFile')?.click());
-    body.querySelector('#walletAvFile')?.addEventListener('change', (e)=>{
-      const f = e.target && e.target.files && e.target.files[0];
-      takePic(f);
-    });
+    const walletAvEdit = body.querySelector('#walletAvEdit');
+    if(walletAvEdit){
+      walletAvEdit.addEventListener('pointerenter', (e)=>{
+        if(e.pointerType && e.pointerType !== 'mouse') return;
+        if(!copyAddrFineHover()) return;
+        scheduleShowHover('info', null, walletAvEdit, 120);
+      });
+      walletAvEdit.addEventListener('pointerleave', (e)=>{
+        if(e.pointerType && e.pointerType !== 'mouse') return;
+        if(!copyAddrFineHover()) return;
+        clearTimeout(hoverShowTimer); hoverShowTimer = 0;
+        hideHoverCards(false);
+      });
+      walletAvEdit.addEventListener('focus', ()=>{
+        if(typeof showHoverCard === 'function') showHoverCard('info', null, walletAvEdit);
+      });
+      walletAvEdit.addEventListener('blur', ()=> hideHoverCards(false));
+      walletAvEdit.addEventListener('click', ()=>{
+        if(session.walletTab === 'profile' && session.walletDepth === 'deep') return;
+        session.walletTab = 'profile';
+        session.walletDepth = 'deep';
+        closeWalletPop();
+        morphSheet(walletOverlay.querySelector('.wallet-modal'), fillWalletBody);
+      });
+    }
     ;['dragenter','dragover'].forEach(ev => picDrop?.addEventListener(ev, (e)=>{
       e.preventDefault();
       picDrop.classList.add('is-over');
@@ -7878,8 +8374,11 @@ html.dark .qhc-id{color:#6BA3FF;}
     });
     body.querySelectorAll('[data-wtab]').forEach(btn=>{
       btn.addEventListener('click', ()=>{
-        if(session.walletTab === btn.dataset.wtab) return;
+        const nextTab = btn.dataset.wtab;
+        const nextDepth = nextTab === 'tokens' ? 'top' : 'deep';
+        if(session.walletTab === nextTab && session.walletDepth === nextDepth) return;
         session.walletTab = btn.dataset.wtab;
+        session.walletDepth = nextDepth;
         closeWalletPop();
         morphSheet(walletOverlay.querySelector('.wallet-modal'), fillWalletBody);
       });
@@ -7888,14 +8387,17 @@ html.dark .qhc-id{color:#6BA3FF;}
   function renderWalletBody(){
     const modal = walletOverlay?.querySelector('.wallet-modal');
     const live = walletOverlay?.classList.contains('show');
-    const changed = lastWalletView !== session.walletView;
+    const changed = lastWalletView !== session.walletView || lastWalletDepth !== session.walletDepth;
     lastWalletView = session.walletView;
+    lastWalletDepth = session.walletDepth;
     if(live && changed) morphSheet(modal, fillWalletBody);
     else fillWalletBody();
   }
   function openWalletModal(){
     session.walletView = 'list';
+    session.walletDepth = session.walletTab === 'tokens' ? 'top' : 'deep';
     lastWalletView = 'list';
+    lastWalletDepth = session.walletDepth;
     fillWalletBody();
     overlayOpen(walletOverlay);
   }
@@ -7904,6 +8406,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.pendingFunds = null;
     session.pendingSpend = null;
     session.walletView = 'list';
+    session.walletDepth = 'top';
     closeWalletPop();
     if(typeof hideHoverCards === 'function') hideHoverCards(true);
     overlayClose(walletOverlay);
@@ -8484,7 +8987,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   function shortAddr(addr){
     const s = String(addr || '');
     if(s.length < 12) return s;
-    return s.slice(0,6) + '…' + s.slice(-4);
+    return s.slice(0,7) + '…' + s.slice(-5);
   }
   function flowSelectEl({ name, aria, value, options }){
     const current = options.find(o => o.id === value) || options[0];
@@ -10546,7 +11049,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     light:'light', selection:'selection', nudge:'nudge', settle:'success',
     dragtick:'soft', toggle:'rigid', unmute:'nudge', mute:'rigid', open:'medium', comment:'success',
     sent:'success', tip:'success', like:'medium', dislike:'warning', share:'soft', attach:'success',
-    lock:'rigid', unlock:'nudge', success:'success', funds:'success', error:'error',
+    lock:'rigid', unlock:'nudge', success:'success', funds:'success', error:'error', copyAddr:'soft',
     // Pull-to-refresh — custom patterns via web-haptics (https://haptics.lochie.me)
     pulltick:  [{ duration: 8, intensity: 0.22 }],
     pullmorph: [{ duration: 14, intensity: 0.4 }],
@@ -10555,6 +11058,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     pullfire:  [{ duration: 28, intensity: 0.7 }, { delay: 50, duration: 55, intensity: 0.9 }, { delay: 40, duration: 30, intensity: 0.4 }],
     pullcancel:[{ duration: 16, intensity: 0.38 }],
     pullsettle:[{ duration: 40, intensity: 0.55 }, { delay: 55, duration: 55, intensity: 0.75 }],
+    copyAddr:  [{ duration: 10, intensity: 0.24 }],
   };
   const HAPTIC_PATTERNS = {
     light:     { vibrate: [7], taps: 1 },
@@ -10576,6 +11080,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     lock:      { vibrate: [12, 22, 16], taps: 1 },
     unlock:    { vibrate: [8, 20, 10, 28, 8], taps: 2, tapGap: 36 },
     success:   { vibrate: [10, 28, 14, 36, 18], taps: 2, tapGap: 42 },
+    copyAddr:  { vibrate: [5, 14, 6], taps: 1 },
     funds:     { vibrate: [12, 32, 16, 40, 20], taps: 3, tapGap: 48 },
     error:     { vibrate: [40, 40, 40, 40, 40], taps: 3, tapGap: 80 },
     pulltick:  { vibrate: [4], taps: 0 },
@@ -10591,7 +11096,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     light:'light', selection:'light', nudge:'light', settle:false, attach:'settle', dragtick:false,
     toggle:'toggle', unmute:'unmute', mute:'mute', open:'open', comment:'comment', sent:'sent', share:'share',
     tip:'tip', like:'like', dislike:'dislike', lock:'lock', unlock:'unlock',
-    success:'sent', funds:'funds', error:'dislike',
+    success:'sent', funds:'funds', error:'dislike', copyAddr:'copyAddr',
     pulltick:false, pullmorph:'light', pullarm:'light', pulldisarm:false,
     pullfire:'open', pullcancel:false, pullsettle:'refresh',
   };
@@ -10777,6 +11282,11 @@ html.dark .qhc-id{color:#6BA3FF;}
     open:{layers:[
       {source:{type:'sine',frequency:533},envelope:{attack:0.001,decay:0.027,sustain:0,release:0,curve:'ramp'},gain:0.153},
       {source:{type:'sine',frequency:598},envelope:{attack:0.001,decay:0.056,sustain:0,release:0,curve:'ramp'},gain:0.114,delay:0.041}
+    ]},
+    copyAddr:{layers:[
+      {source:{type:'sine',frequency:556.4143525139505},envelope:{attack:0.006,decay:0.09951142738561437,sustain:0,release:0.004,curve:'ramp'},gain:0.176,effects:[{type:'delay',delay:0.063,feedback:0.286,wet:0.103,lowpass:3742}]},
+      {source:{type:'sine',frequency:701.0376225774419},envelope:{attack:0.004,decay:0.11255074962865588,sustain:0,release:0.004,curve:'ramp'},gain:0.164,delay:0.06389185797484542,effects:[{type:'delay',delay:0.063,feedback:0.286,wet:0.103,lowpass:3742}]},
+      {source:{type:'sine',frequency:935.7726808012197},envelope:{attack:0.006,decay:0.19164009205588167,sustain:0,release:0.004,curve:'ramp'},gain:0.147,delay:0.12778371594969085,effects:[{type:'delay',delay:0.063,feedback:0.286,wet:0.103,lowpass:3742}]}
     ]}
   };
   function slotReelTick(ctx, step, vel){
@@ -12265,7 +12775,7 @@ html.dark .qhc-id{color:#6BA3FF;}
             spawnTipFloat(tipBtn); haptic('tip');
             signalActivity('tip', { item, avatar: myAvatarUrl(), amount: TIP_USD });
             logActivity('tip', 'Tip', TIP_USD);
-          }, 'Gift ' + usdLabel(TIP_USD));
+          }, 'Tip ' + usdLabel(TIP_USD));
         });
       }
 
@@ -15145,6 +15655,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     hoverShowTimer = hoverHideTimer = 0;
     const doHide = ()=>{
       hoverCardEls().forEach(c=> c.classList.remove('show'));
+      if(infoHoverTip) infoHoverTip.style.minWidth = '';
       document.querySelectorAll('.pill.is-morph').forEach(b=>{
         b.classList.remove('is-morph');
         b.setAttribute('aria-expanded', 'false');
@@ -15235,6 +15746,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     const body = Object.prototype.hasOwnProperty.call(anchor.dataset, 'tipBody')
       ? (anchor.dataset.tipBody || '')
       : (addr ? '' : 'Image posted by the token creator at launch.');
+    const copiedState = /copied/i.test(title);
     const cta = anchor.dataset.tipCta || '';
     const t = infoHoverTip.querySelector('.kb-info-tip-title');
     const b = infoHoverTip.querySelector('.kb-info-tip-body');
@@ -15259,6 +15771,17 @@ html.dark .qhc-id{color:#6BA3FF;}
         addrWrap.innerHTML = '';
       }
     }
+    requestAnimationFrame(()=>{
+      if(!infoHoverTip) return;
+      const measured = Math.ceil(infoHoverTip.offsetWidth);
+      if(body && !copiedState) anchor._tipMinW = measured;
+      if(copiedState) infoHoverTip.style.minWidth = '';
+      else if(anchor._tipMinW) infoHoverTip.style.minWidth = `${anchor._tipMinW}px`;
+      else infoHoverTip.style.minWidth = '';
+      if(hoverAnchor === anchor && infoHoverTip.classList.contains('show')){
+        positionHoverCard(infoHoverTip, anchor);
+      }
+    });
   }
   function measureMorphPill(el){
     if(!el) return;
@@ -15791,7 +16314,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         pulse(originBtn || cfxCaption.querySelector('.cfx-react.tip'));
         haptic('tip');
         logActivity('tip', 'Tip', TIP_USD);
-      }, 'Gift ' + usdLabel(TIP_USD));
+      }, 'Tip ' + usdLabel(TIP_USD));
       return;
     }
 

@@ -214,7 +214,7 @@
 - Fake browser-extension popup (desktop-positioned)
 - MetaMask / Coinbase / generic branded
 - States: Connect → Approve → Confirming → Done (or Rejected)
-- Used for: login signature, buy/sell/send on wallet-login, gift on wallet-login
+- Used for: login signature, buy/sell/send on wallet-login, tip on wallet-login
 
 ### 4.9 Notification / Signals Panels
 

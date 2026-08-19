@@ -31,9 +31,11 @@
 ### Account identity
 - Large blockie + animal name for social and EOA. Under it: method icon, handle or short address, copy control. Copy is the receive address (Kumbaya for social, EOA for wallet). README [#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth)
 - Prototype exception to the design PRD: social still shows a copyable receive row so funds can be sent to the balance. Default view remains **USD balance**.
+- Wallet settings rows are borderless (no divider lines), including active wallet rows and the Connect wallet row.
+- Account eyebrow uses sentence caps (**USD Balance**) and is the only element that morphs to the short address on hover; the dollar amount remains fixed.
 
 ### EOA wallet popups
-- Fake extension (`#walletExt`) is the **default** for MetaMask connect and for gift / buy / sell / send / launch. Social stays sponsored. Skip with [`?autosig`](https://kby-feed.vercel.app/feed?autosig). Cancel morphs the wait sheet to **Connection rejected** / **Signature rejected**. README [#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth)
+- Fake extension (`#walletExt`) is the **default** for MetaMask connect and for tip / buy / sell / send / launch. Social stays sponsored. Skip with [`?autosig`](https://kby-feed.vercel.app/feed?autosig). Cancel morphs the wait sheet to **Connection rejected** / **Signature rejected**. README [#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth)
 - `/flows`: **Signature**, **Signature rejected**, **Crypto wallets**, **Wallet login** (Connect then Account), **Buy (wallet)**
 
 ### Sounds & `/flows`
