@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Account dropdown navigation (preview branch)
+- Logged-in topbar balance pill opens an account menu instead of toggling the wallet tray directly.
+- Menu rows map to the existing breakdown: Account (Tokens hub), Activity, Tips, Profile, Settings, and Disconnect.
+- In-tray tab strip removed; deep screens use the existing back chevron to return to the Tokens hub.
+
 ## 0.1.2 — 2026-08-18
 
 ### PRD audit (onboarding, auth, deposits)

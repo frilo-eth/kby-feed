@@ -140,17 +140,16 @@
 
 ### 4.2 Account Modal (Wallet Tray)
 
-**Tabs:** Tokens, Activity, Tips, Profile, Settings
+**Navigation:** Topbar balance pill (`#walletBtn`) opens an account dropdown. **Account** opens the Tokens hub; **Activity**, **Tips**, **Profile**, and **Settings** open deep screens in the wallet tray (back returns to Tokens). **Disconnect** lives in the dropdown (danger row).
 
 | Section | Key elements |
 |---------|-------------|
-| **Header** | Blockie, animal name + pencil, login-method copy row, Disconnect (red) |
-| **USD balance** | Dollar amount + copy-address button (36×36) |
-| **Tokens tab** | Token rows (icon + ticker + balance), Refresh button |
-| **Activity tab** | Transaction history rows |
-| **Tips tab** | Tip history rows |
-| **Profile tab** | 1:1 avatar + Update pic, username input, description textarea, "View my profile" button |
-| **Settings tab** | See 4.3 |
+| **Account menu** | Blockie + name + balance summary row, then Activity / Tips / Profile / Settings / Disconnect |
+| **Tokens hub** | Blockie, animal name, login-method copy row, USD Balance, Send + Top up, token rows + Refresh |
+| **Activity** | Transaction history rows (includes deposits after Top up) |
+| **Tips** | Tip history rows |
+| **Profile** | 1:1 avatar + Update pic, username input, description textarea, "View my profile" button |
+| **Settings** | See 4.3 |
 
 ### 4.3 Settings Panel
 

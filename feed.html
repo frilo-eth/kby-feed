@@ -182,8 +182,11 @@ html.dark .side-brand .mark-dark{display:block;}
   box-shadow:inset 0 1px 0 rgba(255,255,255,.45);
 }
 .btn-wallet-ic svg{width:14px;height:14px;display:block;}
+.btn-wallet-ic .btn-wallet-avatar{width:22px;height:22px;border-radius:50%;display:block;object-fit:cover;}
+.btn-wallet-ic:has(.btn-wallet-avatar){background:transparent;box-shadow:none;}
 .btn-wallet-label{display:inline;font-variant-numeric:tabular-nums;letter-spacing:-.02em;}
 .btn-wallet-avatar{display:none;}
+.btn-wallet.is-menu-open{background:color-mix(in srgb, var(--card) 78%, white);border-color:color-mix(in srgb, var(--line) 55%, white);}
 .btn-signin{
   background:var(--card);color:var(--ink);border:1px solid var(--line);
   border-radius:10px;padding:9px 16px;font-weight:700;font-size:13px;
@@ -4234,6 +4237,64 @@ html.dark .flow-status-ok circle{fill:rgba(31,164,99,.22);}
   html.dark .mnav-item.more-open{background:rgba(255,255,255,.08);box-shadow:none;}
 }
 
+/* ---- topbar account menu (desktop popover + mobile sheet) ---- */
+.account-menu-scrim{display:none;}
+.account-menu{
+  position:fixed;z-index:92;min-width:248px;max-width:min(300px,calc(100vw - 24px));
+  padding:6px;background:var(--card);border:1px solid var(--line);border-radius:16px;
+  box-shadow:0 14px 40px rgba(42,36,28,.16);
+  opacity:0;pointer-events:none;transform:scale(.96) translateY(-4px);transform-origin:top right;
+  transition:opacity .18s ease,transform .22s cubic-bezier(.22,1.4,.36,1);
+}
+.account-menu.show{opacity:1;pointer-events:auto;transform:none;}
+.account-menu-handle{display:none;}
+.account-menu-head{padding:4px 4px 2px;}
+.account-menu-account{
+  display:flex;align-items:center;gap:10px;width:100%;margin:0;padding:10px 12px;
+  border:none;border-radius:12px;background:var(--bg);color:var(--ink);text-align:left;
+  font:inherit;cursor:pointer;transition:background .15s;
+}
+.account-menu-account:hover{background:color-mix(in srgb, var(--ink) 5%, var(--bg));}
+.account-menu-account:active{transform:scale(.99);}
+.account-menu-account img{width:36px;height:36px;border-radius:50%;flex-shrink:0;object-fit:cover;}
+.account-menu-account-meta{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.account-menu-account-meta strong{font-size:14px;font-weight:800;letter-spacing:-.02em;line-height:1.2;}
+.account-menu-account-meta span{font-size:12px;font-weight:600;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+.account-menu-inner{display:flex;flex-direction:column;gap:2px;padding:2px 4px 4px;}
+.account-menu-inner button{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:none;border:none;
+  padding:10px 12px;border-radius:10px;font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;
+  transition:background .15s;
+}
+.account-menu-inner button svg{width:16px;height:16px;flex-shrink:0;color:var(--ink-soft);}
+.account-menu-inner button:hover{background:var(--bg);}
+.account-menu-inner button:hover svg{color:var(--ink);}
+.account-menu-inner button.is-danger{color:var(--red);}
+.account-menu-inner button.is-danger svg{color:var(--red);}
+.account-menu-inner button.is-danger:hover{background:rgba(229,69,63,.1);}
+.account-menu-sep{height:1px;margin:4px 8px;background:var(--line);}
+@media (max-width:860px){
+  .account-menu-scrim{
+    display:block;position:fixed;inset:0;bottom:calc(var(--mobile-nav-h) + env(safe-area-inset-bottom));
+    z-index:91;background:rgba(0,0,0,.28);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+    opacity:0;pointer-events:none;transition:opacity .28s ease;
+  }
+  .account-menu-scrim.show{opacity:1;pointer-events:auto;}
+  .account-menu{
+    left:0!important;right:0!important;top:auto!important;bottom:calc(var(--mobile-nav-h) + env(safe-area-inset-bottom));
+    min-width:0;max-width:none;border-radius:22px 22px 0 0;border-bottom:none;
+    transform:translateY(110%);transform-origin:bottom center;
+    transition:transform .4s cubic-bezier(.32,.72,0,1),opacity .28s ease;
+    padding:8px 8px 10px;max-height:min(72vh,520px);overflow:auto;
+  }
+  .account-menu.show{transform:translateY(0);opacity:1;}
+  .account-menu-handle{display:block;}
+  .account-menu-head{padding:8px 6px 4px;}
+  .account-menu-inner{padding:6px 6px 8px;}
+  .account-menu-inner button{padding:14px 14px;border-radius:14px;font-size:16px;}
+  .account-menu-inner button svg{width:20px;height:20px;}
+}
+
 /* ================= MOBILE: full-screen TikTok-style feed ================= */
 .mobile-nav{display:none;}
 @media (max-width: 860px){
@@ -4849,7 +4910,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         </button>
         <button class="icon-btn" type="button" id="themeBtn" title="Toggle theme" aria-label="Toggle theme"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
         <button class="btn-signin" type="button" id="signInBtn">Sign up / Log in</button>
-        <button class="btn-wallet" type="button" id="walletBtn" title="Balance" aria-label="Open account" hidden>
+        <button class="btn-wallet" type="button" id="walletBtn" title="Account menu" aria-label="Account menu" aria-haspopup="menu" aria-expanded="false" hidden>
           <span class="btn-wallet-ic" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none"><ellipse cx="8.5" cy="14.2" rx="4.2" ry="3.4" fill="#F4F7FA"/><ellipse cx="14.2" cy="13.4" rx="5.2" ry="4.4" fill="#fff"/><ellipse cx="11.6" cy="10.4" rx="3.6" ry="3.1" fill="#E6EEF5"/></svg>
           </span>
@@ -5116,6 +5177,13 @@ html.dark .qhc-id{color:#6BA3FF;}
     <button type="button" class="mnav-item" data-nav="pools" aria-label="Pools"><svg class="ic-fill" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M1.66666 11.0491H0.916656V12.5491H1.66666V11.7991V11.0491ZM14.3333 12.5491H15.0833V11.0491H14.3333V11.7991V12.5491ZM1.66666 13.3111H0.916656V14.8111H1.66666V14.0611V13.3111ZM14.3333 14.8111H15.0833V13.3111H14.3333V14.0611V14.8111ZM1.66666 11.7991V12.5491C2.43809 12.5491 3.15066 12.1248 3.62932 11.8533C3.9016 11.6988 4.12664 11.5718 4.34306 11.4792C4.55663 11.3879 4.7127 11.3527 4.83332 11.3527V10.6027V9.85266C4.43151 9.85266 4.06423 9.96703 3.75323 10.1C3.44508 10.2318 3.14433 10.4039 2.88926 10.5485C2.31323 10.8753 1.96491 11.0491 1.66666 11.0491V11.7991ZM4.83332 10.6027V11.3527C5.12558 11.3527 5.46967 11.5252 6.04809 11.8533C6.52339 12.1229 7.23456 12.5491 7.99999 12.5491V11.7991V11.0491C7.71002 11.0491 7.36753 10.8772 6.78818 10.5485C6.31196 10.2784 5.60041 9.85266 4.83332 9.85266V10.6027ZM7.99999 11.7991V12.5491C8.76254 12.5491 9.47312 12.122 9.94683 11.8533C10.5237 11.526 10.8705 11.3527 11.1667 11.3527V10.6027V9.85266C10.3968 9.85266 9.68457 10.2775 9.20676 10.5485C8.62579 10.8781 8.28604 11.0491 7.99999 11.0491V11.7991ZM11.1667 10.6027V11.3527C11.2851 11.3527 11.4398 11.3875 11.6529 11.4789C11.8689 11.5715 12.0937 11.6986 12.3663 11.8533C12.8463 12.1255 13.5595 12.5491 14.3333 12.5491V11.7991V11.0491C14.0317 11.0491 13.6811 10.8745 13.1064 10.5485C12.8517 10.4041 12.5513 10.232 12.2441 10.1003C11.9342 9.96741 11.5677 9.85266 11.1667 9.85266V10.6027ZM1.66666 14.0611V14.8111C2.43809 14.8111 3.15066 14.3867 3.62932 14.1152C3.9016 13.9608 4.12664 13.8337 4.34306 13.7412C4.55663 13.6498 4.7127 13.6146 4.83332 13.6146V12.8646V12.1146C4.43151 12.1146 4.06423 12.229 3.75323 12.362C3.44508 12.4938 3.14433 12.6658 2.88926 12.8105C2.31323 13.1372 1.96491 13.3111 1.66666 13.3111V14.0611ZM4.83332 12.8646V13.6146C5.12558 13.6146 5.46967 13.7871 6.04809 14.1152C6.52339 14.3848 7.23456 14.8111 7.99999 14.8111V14.0611V13.3111C7.71002 13.3111 7.36753 13.1392 6.78818 12.8105C6.31196 12.5404 5.60041 12.1146 4.83332 12.1146V12.8646ZM7.99999 14.0611V14.8111C8.76254 14.8111 9.47312 14.3839 9.94683 14.1152C10.5237 13.788 10.8705 13.6146 11.1667 13.6146V12.8646V12.1146C10.3968 12.1146 9.68457 12.5395 9.20676 12.8105C8.62579 13.1401 8.28604 13.3111 7.99999 13.3111V14.0611ZM11.1667 12.8646V13.6146C11.2851 13.6146 11.4398 13.6495 11.6529 13.7409C11.8689 13.8335 12.0937 13.9606 12.3663 14.1152C12.8463 14.3875 13.5595 14.8111 14.3333 14.8111V14.0611V13.3111C14.0317 13.3111 13.6811 13.1365 13.1064 12.8105C12.8517 12.666 12.5513 12.494 12.2441 12.3623C11.9342 12.2294 11.5677 12.1146 11.1667 12.1146V12.8646ZM6.18124 9.4993H6.93124V4.08179H6.18124H5.43124V9.4993H6.18124ZM6.18124 4.08179H6.93124C6.93124 3.03636 6.08374 2.18887 5.03831 2.18887V2.93887V3.68887C5.25533 3.68887 5.43124 3.86479 5.43124 4.08179H6.18124ZM5.03831 2.93887V2.18887C3.99289 2.18887 3.1454 3.03635 3.1454 4.08178H3.8954H4.6454C4.6454 3.86479 4.82131 3.68887 5.03831 3.68887V2.93887ZM3.8954 4.08178H3.1454V4.73772H3.8954H4.6454V4.08178H3.8954ZM11.4034 8.83763H12.1534V4.08179H11.4034H10.6534V8.83763H11.4034ZM11.4034 4.08179H12.1534C12.1534 3.03636 11.3059 2.18887 10.2605 2.18887V2.93887V3.68887C10.4775 3.68887 10.6534 3.86479 10.6534 4.08179H11.4034ZM10.2605 2.93887V2.18887C9.21505 2.18887 8.36755 3.03635 8.36755 4.08178H9.11755H9.86755C9.86755 3.86479 10.0435 3.68887 10.2605 3.68887V2.93887ZM9.11755 4.08178H8.36755V4.73772H9.11755H9.86755V4.08178H9.11755ZM6.18902 6.97009V7.72009H8.80584V6.97009V6.22009H6.18902V6.97009ZM8.80584 6.97009V7.72009H11.4227V6.97009V6.22009H8.80584V6.97009Z" fill="currentColor"/></svg></button>
     <button type="button" class="mnav-item" data-nav="more" aria-label="More" aria-haspopup="true" aria-expanded="false"><svg class="ic-fill" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="10" width="4" height="4" fill="currentColor"/><rect x="10" y="10" width="4" height="4" fill="currentColor"/><rect x="17" y="10" width="4" height="4" fill="currentColor"/></svg></button>
   </nav>
+
+  <div class="account-menu-scrim" id="accountMenuScrim" hidden></div>
+  <div class="account-menu" id="accountMenuPop" role="menu" aria-label="Account" hidden>
+    <div class="sheet-handle account-menu-handle" id="accountMenuHandle"></div>
+    <div class="account-menu-head" id="accountMenuHead"></div>
+    <div class="account-menu-inner" id="accountMenuInner"></div>
+  </div>
 
   <div class="more-sheet-scrim" id="moreSheetScrim"></div>
   <div class="more-sheet" id="moreSheet" aria-hidden="true">
@@ -5966,6 +6034,16 @@ html.dark .qhc-id{color:#6BA3FF;}
     document.getElementById('topbar')?.classList.toggle('is-authed', authed);
     if(walletBtn) walletBtn.hidden = !authed;
     if(walletLabel) walletLabel.textContent = usdLabel(totalBal());
+    const walletIc = walletBtn?.querySelector('.btn-wallet-ic');
+    if(walletIc){
+      if(authed){
+        const av = userAvatar(accountReceiveAddr());
+        walletIc.innerHTML = `<img class="btn-wallet-avatar circle blockie" src="${escHtml(av)}" alt="">`;
+      } else {
+        walletIc.innerHTML = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><ellipse cx="8.5" cy="14.2" rx="4.2" ry="3.4" fill="#F4F7FA"/><ellipse cx="14.2" cy="13.4" rx="5.2" ry="4.4" fill="#fff"/><ellipse cx="11.6" cy="10.4" rx="3.6" ry="3.1" fill="#E6EEF5"/></svg>`;
+      }
+    }
+    paintAccountMenuChrome();
     paintTradeCta();
     if(typeof paintCommentComposeAuth === 'function') paintCommentComposeAuth();
   }
@@ -7067,7 +7145,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     copy: [1, 1, 0, 0],
     check: [1, 1, 0, 0]
   };
-  const WALLET_MORPH_DUR = { in: 320, out: 280, success: 340 };
+  const WALLET_MORPH_DUR = { in: 220, out: 190, success: 230 };
   const ADDR_LINES_CHECK = [
     { x1: 3, y1: 8.2, x2: 6.4, y2: 12 },
     { x1: 6.4, y1: 12, x2: 13.2, y2: 4.5 },
@@ -7700,6 +7778,109 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   const WALLET_MORE_SVG = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="6" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18" cy="12" r="1.7"/></svg>`;
   const WALLET_MEGA_IC = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip_wallet_mega)"><path d="M5.87354 5.60386V4.85386H5.12354V5.60386H5.87354ZM6.59146 5.60386L7.29086 5.33305L7.10531 4.85386H6.59146V5.60386ZM7.9928 9.22296L7.2934 9.49377L7.47895 9.97296H7.9928V9.22296ZM9.47945 5.60386V4.85386H8.97546L8.78504 5.32049L9.47945 5.60386ZM10.1253 5.60386H10.8753V4.85386H10.1253V5.60386ZM8.00257 9.22296V9.97296H8.50656L8.69698 9.50633L8.00257 9.22296ZM6.66843 9.99789C6.25422 9.99789 5.91843 10.3337 5.91843 10.7479C5.91843 11.1621 6.25422 11.4979 6.66843 11.4979V10.7479V9.99789ZM6.67509 11.4979C7.0893 11.4979 7.42509 11.1621 7.42509 10.7479C7.42509 10.3337 7.0893 9.99789 6.67509 9.99789V10.7479V11.4979ZM9.33232 9.99789C8.9181 9.99789 8.58232 10.3337 8.58232 10.7479C8.58232 11.1621 8.9181 11.4979 9.33232 11.4979V10.7479V9.99789ZM9.33898 11.4979C9.75319 11.4979 10.089 11.1621 10.089 10.7479C10.089 10.3337 9.75319 9.99789 9.33898 9.99789V10.7479V11.4979ZM5.87354 9.6373H6.62354V5.60386H5.87354H5.12354V9.6373H5.87354ZM5.87354 5.60386V6.35386H6.59146V5.60386V4.85386H5.87354V5.60386ZM6.59146 5.60386L5.89206 5.87467L7.2934 9.49377L7.9928 9.22296L8.6922 8.95215L7.29086 5.33305L6.59146 5.60386ZM9.47945 5.60386V6.35386H10.1253V5.60386V4.85386H9.47945V5.60386ZM10.1253 5.60386H9.37529V9.6373H10.1253H10.8753V5.60386H10.1253ZM7.9928 9.22296V9.97296H8.00257V9.22296V8.47296H7.9928V9.22296ZM8.00257 9.22296L8.69698 9.50633L10.1739 5.88723L9.47945 5.60386L8.78504 5.32049L7.30817 8.93959L8.00257 9.22296ZM14.5 8H13.75C13.75 11.1756 11.1756 13.75 8 13.75V14.5V15.25C12.0041 15.25 15.25 12.0041 15.25 8H14.5ZM8 14.5V13.75C4.82436 13.75 2.25 11.1756 2.25 8H1.5H0.75C0.75 12.0041 3.99594 15.25 8 15.25V14.5ZM1.5 8H2.25C2.25 4.82436 4.82436 2.25 8 2.25V1.5V0.75C3.99594 0.75 0.75 3.99594 0.75 8H1.5ZM8 1.5V2.25C11.1756 2.25 13.75 4.82436 13.75 8H14.5H15.25C15.25 3.99594 12.0041 0.75 8 0.75V1.5ZM6.66843 10.7479V11.4979H6.67509V10.7479V9.99789H6.66843V10.7479ZM6.83491 10.7479H7.58491C7.58491 10.2417 7.17452 9.83142 6.66843 9.83142V10.5814V11.3314C6.34622 11.3314 6.08491 11.0702 6.08491 10.7479H6.83491ZM6.66843 10.5814V9.83142C6.16233 9.83142 5.75195 10.2417 5.75195 10.7479H6.50195H7.25195C7.25195 11.0702 6.99064 11.3314 6.66843 11.3314V10.5814ZM6.50195 10.7479H5.75195C5.75195 11.2541 6.16233 11.6644 6.66843 11.6644V10.9144V10.1644C6.99064 10.1644 7.25195 10.4256 7.25195 10.7479H6.50195ZM6.66843 10.9144V11.6644C7.17453 11.6644 7.58491 11.2541 7.58491 10.7479H6.83491H6.08491C6.08491 10.4256 6.34622 10.1644 6.66843 10.1644V10.9144ZM9.33232 10.7479V11.4979H9.33898V10.7479V9.99789H9.33232V10.7479ZM9.49879 10.7479H10.2488C10.2488 10.2417 9.83849 9.83142 9.33232 9.83142V10.5814V11.3314C9.01007 11.3314 8.74879 11.0701 8.74879 10.7479H9.49879ZM9.33232 10.5814V9.83142C8.82614 9.83142 8.41584 10.2417 8.41584 10.7479H9.16584H9.91584C9.91584 11.0701 9.65457 11.3314 9.33232 11.3314V10.5814ZM9.16584 10.7479H8.41584C8.41584 11.2541 8.82614 11.6644 9.33232 11.6644V10.9144V10.1644C9.65457 10.1644 9.91584 10.4256 9.91584 10.7479H9.16584ZM9.33232 10.9144V11.6644C9.83849 11.6644 10.2488 11.2541 10.2488 10.7479H9.49879H8.74879C8.74879 10.4256 9.01007 10.1644 9.33232 10.1644V10.9144Z" fill="currentColor"/></g><defs><clipPath id="clip_wallet_mega"><rect width="16" height="16" fill="white"/></clipPath></defs></svg>`;
+  const ACCOUNT_MENU_IC = {
+    activity: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4.4l3 1.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    tips: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 11.2V7.6a1.4 1.4 0 0 1 2.8 0v3.4M10.8 10.6V6.6a1.4 1.4 0 0 1 2.8 0v4.2M13.6 10.6V7.8a1.4 1.4 0 0 1 2.8 0V13c0 2.8-1.8 4.8-4.6 4.8h-.8C8.4 17.8 6 15.8 6 12.6v-1.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    profile: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8.2" r="3.1" stroke="currentColor" stroke-width="1.8"/><path d="M5.6 19c.7-3.1 3.1-4.8 6.4-4.8s5.7 1.7 6.4 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    settings: SETTINGS_IC,
+    disconnect: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 7V5.8A1.8 1.8 0 0 1 10.8 4h8.4A1.8 1.8 0 0 1 21 5.8v12.4a1.8 1.8 0 0 1-1.8 1.8h-8.4A1.8 1.8 0 0 1 9 18.2V17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3.5 12H15M11.5 8.2 15.3 12l-3.8 3.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  };
+  const accountMenuPop = document.getElementById('accountMenuPop');
+  const accountMenuScrim = document.getElementById('accountMenuScrim');
+  const accountMenuHead = document.getElementById('accountMenuHead');
+  const accountMenuInner = document.getElementById('accountMenuInner');
+  function accountMenuOpen(){
+    return !!(accountMenuPop && accountMenuPop.classList.contains('show'));
+  }
+  function paintAccountMenuChrome(){
+    if(!accountMenuOpen()) return;
+    fillAccountMenu();
+  }
+  function fillAccountMenu(){
+    if(!accountMenuHead || !accountMenuInner) return;
+    const av = userAvatar(accountReceiveAddr());
+    const name = displayName();
+    const bal = usdLabel(totalBal());
+    accountMenuHead.innerHTML = `<button type="button" class="account-menu-account" data-account-nav="account" role="menuitem">
+      <img class="circle blockie" src="${escHtml(av)}" alt="">
+      <span class="account-menu-account-meta">
+        <strong>${escHtml(name)}</strong>
+        <span>${escHtml(bal)}</span>
+      </span>
+    </button>`;
+    accountMenuInner.innerHTML = [
+      ['activity', 'Activity'],
+      ['tips', 'Tips'],
+      ['profile', 'Profile'],
+      ['settings', 'Settings'],
+    ].map(([id, lab]) =>
+      `<button type="button" data-account-nav="${id}" role="menuitem">${ACCOUNT_MENU_IC[id] || ''}${escHtml(lab)}</button>`
+    ).join('') + `<div class="account-menu-sep" aria-hidden="true"></div>
+      <button type="button" class="is-danger" data-account-nav="disconnect" role="menuitem">${ACCOUNT_MENU_IC.disconnect}Disconnect</button>`;
+  }
+  function positionAccountMenuPop(){
+    if(!accountMenuPop || !walletBtn || window.innerWidth <= 860) return;
+    const r = walletBtn.getBoundingClientRect();
+    const w = accountMenuPop.offsetWidth || 260;
+    const left = Math.min(Math.max(8, r.right - w), window.innerWidth - w - 8);
+    const top = Math.min(r.bottom + 8, window.innerHeight - accountMenuPop.offsetHeight - 8);
+    accountMenuPop.style.left = `${left}px`;
+    accountMenuPop.style.top = `${Math.max(8, top)}px`;
+  }
+  function closeAccountMenu(){
+    accountMenuPop?.classList.remove('show');
+    accountMenuScrim?.classList.remove('show');
+    accountMenuPop?.setAttribute('hidden', '');
+    accountMenuScrim?.setAttribute('hidden', '');
+    walletBtn?.classList.remove('is-menu-open');
+    walletBtn?.setAttribute('aria-expanded', 'false');
+  }
+  function openAccountMenu(){
+    if(!isAuthed() || !accountMenuPop) return;
+    closeWalletPop();
+    if(walletOverlay?.classList.contains('show')) closeWalletModal();
+    fillAccountMenu();
+    accountMenuPop.removeAttribute('hidden');
+    accountMenuPop.classList.add('show');
+    if(window.innerWidth <= 860){
+      accountMenuScrim?.removeAttribute('hidden');
+      accountMenuScrim?.classList.add('show');
+    } else {
+      requestAnimationFrame(()=> positionAccountMenuPop());
+    }
+    walletBtn?.classList.add('is-menu-open');
+    walletBtn?.setAttribute('aria-expanded', 'true');
+  }
+  function toggleAccountMenu(){
+    if(accountMenuOpen()) closeAccountMenu();
+    else openAccountMenu();
+  }
+  function openWalletScreen(tab, depth){
+    const nextTab = tab || 'tokens';
+    const nextDepth = depth || (nextTab === 'tokens' ? 'top' : 'deep');
+    const prevTab = session.walletTab;
+    const prevDepth = session.walletDepth;
+    session.walletView = 'list';
+    session.walletTab = nextTab;
+    session.walletDepth = nextDepth;
+    lastWalletView = 'list';
+    lastWalletDepth = nextDepth;
+    const modal = walletOverlay?.querySelector('.wallet-modal');
+    const live = walletOverlay?.classList.contains('show');
+    const changed = prevTab !== nextTab || prevDepth !== nextDepth || session.walletView !== 'list';
+    if(live && changed) morphSheet(modal, fillWalletBody);
+    else fillWalletBody();
+    overlayOpen(walletOverlay);
+  }
+  function navigateAccountMenu(nav){
+    closeAccountMenu();
+    if(nav === 'disconnect'){
+      signOut();
+      return;
+    }
+    const tab = nav === 'account' ? 'tokens' : nav;
+    openWalletScreen(tab, tab === 'tokens' ? 'top' : 'deep');
+  }
   let walletPopEl = null;
   function closeWalletPop(){
     const pop = walletPopEl || document.getElementById('kbWalletPop');
@@ -8122,9 +8303,6 @@ html.dark .qhc-id{color:#6BA3FF;}
             <div class="wallet-id-who-row">
               ${whoHtml}
             </div>
-            <button type="button" class="wallet-signout" id="signOutBtn" aria-label="Disconnect">
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 7V5.8A1.8 1.8 0 0 1 10.8 4h8.4A1.8 1.8 0 0 1 21 5.8v12.4a1.8 1.8 0 0 1-1.8 1.8h-8.4A1.8 1.8 0 0 1 9 18.2V17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3.5 12H15M11.5 8.2 15.3 12l-3.8 3.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
           </div>
           <div class="wallet-id-tools">
             ${authMethodHtml(ident)}
@@ -8136,20 +8314,8 @@ html.dark .qhc-id{color:#6BA3FF;}
         <button type="button" id="walletSendBtn">Send</button>
         <button type="button" class="wallet-add" id="walletAddBtn">Top up</button>
       </div>`;
-    const walletTabsNav = isWalletDeep ? '' : `
-      <nav class="wallet-tabs" aria-label="Account">
-        ${[
-          ['tokens','Tokens','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.2" stroke="currentColor" stroke-width="1.8"/></svg>'],
-          ['activity','Activity','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v4.4l3 1.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
-          ['tips','Tips','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 11.2V7.6a1.4 1.4 0 0 1 2.8 0v3.4M10.8 10.6V6.6a1.4 1.4 0 0 1 2.8 0v4.2M13.6 10.6V7.8a1.4 1.4 0 0 1 2.8 0V13c0 2.8-1.8 4.8-4.6 4.8h-.8C8.4 17.8 6 15.8 6 12.6v-1.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'],
-          ['profile','Profile','<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8.2" r="3.1" stroke="currentColor" stroke-width="1.8"/><path d="M5.6 19c.7-3.1 3.1-4.8 6.4-4.8s5.7 1.7 6.4 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'],
-          ['settings','Settings', SETTINGS_IC],
-        ].map(([id,lab,ic]) =>
-          `<button type="button" data-wtab="${id}" class="${tab===id?'is-on':''}">${ic}<span>${lab}</span></button>`).join('')}
-      </nav>`;
     body.innerHTML = `
       ${walletTopSection}
-      ${walletTabsNav}
       ${tabBody}`;
     body.querySelectorAll('[data-switch]').forEach(btn=>{
       btn.addEventListener('click', ()=> switchActiveWallet(btn.dataset.switch));
@@ -8201,7 +8367,6 @@ html.dark .qhc-id{color:#6BA3FF;}
     });
     body.querySelector('#walletAddBtn')?.addEventListener('click', ()=> openDeposit(0, null));
     body.querySelector('#walletSendBtn')?.addEventListener('click', ()=> openSend());
-    body.querySelector('#signOutBtn')?.addEventListener('click', signOut);
     body.querySelector('#walletRefreshBtn')?.addEventListener('click', ()=>{
       refreshTokenBalances();
       fillWalletBody();
@@ -8300,10 +8465,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       walletAvEdit.addEventListener('blur', ()=> hideHoverCards(false));
       walletAvEdit.addEventListener('click', ()=>{
         if(session.walletTab === 'profile' && session.walletDepth === 'deep') return;
-        session.walletTab = 'profile';
-        session.walletDepth = 'deep';
-        closeWalletPop();
-        morphSheet(walletOverlay.querySelector('.wallet-modal'), fillWalletBody);
+        openWalletScreen('profile', 'deep');
       });
     }
     ;['dragenter','dragover'].forEach(ev => picDrop?.addEventListener(ev, (e)=>{
@@ -8372,17 +8534,6 @@ html.dark .qhc-id{color:#6BA3FF;}
     body.querySelector('#walletViewProfile')?.addEventListener('click', ()=>{
       location.href = '/profile?u=' + encodeURIComponent(ident.name);
     });
-    body.querySelectorAll('[data-wtab]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const nextTab = btn.dataset.wtab;
-        const nextDepth = nextTab === 'tokens' ? 'top' : 'deep';
-        if(session.walletTab === nextTab && session.walletDepth === nextDepth) return;
-        session.walletTab = btn.dataset.wtab;
-        session.walletDepth = nextDepth;
-        closeWalletPop();
-        morphSheet(walletOverlay.querySelector('.wallet-modal'), fillWalletBody);
-      });
-    });
   }
   function renderWalletBody(){
     const modal = walletOverlay?.querySelector('.wallet-modal');
@@ -8394,12 +8545,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     else fillWalletBody();
   }
   function openWalletModal(){
-    session.walletView = 'list';
-    session.walletDepth = session.walletTab === 'tokens' ? 'top' : 'deep';
-    lastWalletView = 'list';
-    lastWalletDepth = session.walletDepth;
-    fillWalletBody();
-    overlayOpen(walletOverlay);
+    openWalletScreen(session.walletTab || 'tokens', session.walletDepth || ((session.walletTab || 'tokens') === 'tokens' ? 'top' : 'deep'));
   }
   function closeWalletModal(){
     clearFlowTimer();
@@ -8407,7 +8553,9 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.pendingSpend = null;
     session.walletView = 'list';
     session.walletDepth = 'top';
+    session.walletTab = 'tokens';
     closeWalletPop();
+    closeAccountMenu();
     if(typeof hideHoverCards === 'function') hideHoverCards(true);
     overlayClose(walletOverlay);
   }
@@ -8418,13 +8566,36 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(e.target.closest?.('#kbWalletPop, [data-wmore]')) return;
     closeWalletPop();
   });
+  document.addEventListener('pointerdown', (e)=>{
+    if(!accountMenuOpen()) return;
+    if(e.target.closest?.('#walletBtn, #accountMenuPop, #accountMenuScrim')) return;
+    closeAccountMenu();
+  });
   document.addEventListener('keydown', (e)=>{
     if(e.key !== 'Escape') return;
+    if(accountMenuOpen()){
+      e.stopPropagation();
+      closeAccountMenu();
+      return;
+    }
     if(walletPopEl && !walletPopEl.hidden){
       e.stopPropagation();
       closeWalletPop();
     }
   }, true);
+  accountMenuPop?.addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-account-nav]');
+    if(!btn) return;
+    e.preventDefault();
+    navigateAccountMenu(btn.dataset.accountNav);
+  });
+  accountMenuScrim?.addEventListener('click', closeAccountMenu);
+  if(accountMenuPop && typeof enableSheetDrag === 'function'){
+    enableSheetDrag(accountMenuPop, document.getElementById('accountMenuHandle'), closeAccountMenu, accountMenuScrim);
+  }
+  window.addEventListener('resize', ()=>{
+    if(accountMenuOpen() && window.innerWidth > 860) positionAccountMenuPop();
+  });
 
   const NOTIF_ICONS = {
     launch:'<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.68 10.89L1.86 12.71M4.89 12.1L3.68 13.31M2.47 7.86s2.41.83 3.51 1.94c1.11 1.1 1.94 3.51 1.94 3.51L10.34 11.5V9.68c2.55-1.28 3.95-3.4 3.63-7.87C9.5 1.49 7.38 2.89 6.1 5.44H4.28L2.47 7.86Z" stroke="currentColor" stroke-linecap="square"/></svg>',
@@ -10168,16 +10339,14 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(flow === 'manage'){
       seedDemoEoa(180);
       session.wallets.push(fillEoaBag(mintWallet('rainbow', { active: false })));
-      session.walletTab = 'settings';
-      openWalletModal();
+      openWalletScreen('settings', 'deep');
       return;
     }
     if(flow === 'profile'){
       seedDemoSocial(248);
       seedDemoHoldings();
       session.bio = 'A short bio, a flex if you want.';
-      session.walletTab = 'profile';
-      openWalletModal();
+      openWalletScreen('profile', 'deep');
       return;
     }
     if(flow === 'buy'){
@@ -10623,9 +10792,12 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
 
   signInBtn?.addEventListener('click', ()=> openLogin());
-  walletBtn?.addEventListener('click', ()=>{
-    if(walletOverlay?.classList.contains('show')) closeWalletModal();
-    else openWalletModal();
+  walletBtn?.addEventListener('click', (e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    if(!isAuthed()) return;
+    toggleAccountMenu();
+    haptic('selection');
   });
   document.getElementById('notifBtn')?.addEventListener('click', ()=>{
     if(notifOverlay?.classList.contains('show')) closeNotifs();
@@ -17449,7 +17621,12 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     if(action === 'account' || action === 'tipjar'){
       haptic('selection');
-      requireAuth(()=> openWalletModal());
+      requireAuth(()=> openWalletScreen('tokens', 'top'));
+      return;
+    }
+    if(action === 'profile'){
+      haptic('selection');
+      requireAuth(()=> openWalletScreen('profile', 'deep'));
       return;
     }
     if(action === 'notifications'){
@@ -17494,6 +17671,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(kbdPanel?.classList.contains('show')){ setKbdOpen(false); return; }
     if(moreSheet?.classList.contains('show')){ closeMoreSheet(); return; }
     if(navMorePop?.classList.contains('show')){ closeNavMorePop(); return; }
+    if(accountMenuOpen()){ closeAccountMenu(); return; }
     if(shareOverlay?.classList.contains('show')){ closeShare(); return; }
     if(swapOverlay?.classList.contains('show')){
       if(session.swap?.step === 'wait') return;
