@@ -76,6 +76,7 @@
 - Anchored below trigger, `--card` bg, shadow
 - Title (bold) + optional body + optional address
 - Used on: copy address, copy method, USD balance
+- Login-method hover title: **Logged in with {provider}** (e.g. Google, X, TikTok, MetaMask)
 
 ---
 
@@ -87,6 +88,7 @@
 |---------|---------|----------|
 | **Address copy** (36×36) | Click button next to USD balance | Icon morphs clipboard→check, tooltip "Copied", green flash |
 | **Method copy** | Click login-method row under name | Same check + "Copied" tip, `.is-copied` green state |
+| **Method info** | Hover login-method row (social / wallet) | Tooltip **Logged in with {provider}** (Google, X, email, MetaMask, …) |
 | **Row copy** | Long-press or click on address in Settings | Copies address, brief flash |
 
 ### 3.2 Set Row (`.kb-setrow`)
@@ -144,7 +146,7 @@
 
 | Section | Key elements |
 |---------|-------------|
-| **Header** | Blockie, animal name + pencil, login-method copy row, Disconnect (red) |
+| **Header** | Blockie, animal name + pencil, login-method row (hover: **Logged in with {provider}**), Disconnect (red) |
 | **USD balance** | Dollar amount + copy-address button (36×36) |
 | **Tokens tab** | Token rows (icon + ticker + balance), Refresh button |
 | **Activity tab** | Transaction history rows |

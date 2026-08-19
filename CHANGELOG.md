@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Account UI
+- Login-method tooltip title is now **Logged in with {provider}** (Google, X, TikTok, MetaMask, etc.) instead of a bare "Logged in with".
+- Wallet identity login-method pill (`.wallet-id-method`) has slightly more horizontal padding.
+
 ## 0.1.2 — 2026-08-18
 
 ### PRD audit (onboarding, auth, deposits)

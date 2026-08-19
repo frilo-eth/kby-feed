@@ -2959,7 +2959,7 @@ html.dark .kb-wrow.is-add .kb-wrow-av.ic{background:rgba(255,255,255,.08);}
 }
 .wallet-id-method{
   display:inline-flex;align-items:center;gap:4px;min-width:0;max-width:100%;
-  margin:0;padding:2px 4px 2px 6px;border:none;border-radius:12px;
+  margin:0;padding:2px 10px 2px 10px;border:none;border-radius:12px;
   background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer;
   appearance:none;-webkit-appearance:none;
   min-height:36px;
@@ -3019,7 +3019,7 @@ button.wallet-id-method:active{transform:scale(.98);}
 .wallet-id-method-tail .wallet-copy-morph-svg{width:15px;height:15px;display:block;}
 .wallet-id-method.is-copied .wallet-id-method-tail{color:color-mix(in srgb, var(--green) 68%, var(--ink-soft));}
 .wallet-id-method.is-social{
-  padding-right:6px;
+  padding-right:10px;
 }
 .wallet-id-method-copy-icon{
   position:relative;width:32px;height:32px;flex-shrink:0;border:none;border-radius:10px;background:transparent;color:var(--ink-faint);cursor:pointer;
@@ -5689,9 +5689,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     const copyAddr = accountReceiveAddr();
     if(!label || !loginValue || !copyAddr) return '';
     const addrLabel = shortAddr(copyAddr);
+    const loginTip = authLoginTipTitle(ident);
     if(ident.kind !== 'eoa'){
       return `<div class="wallet-id-method-group">
-        <button type="button" class="wallet-id-method is-social" id="walletCopyMethod" data-auth-kind="${escHtml(ident.kind || '')}" data-login-value="${escHtml(loginValue)}" data-tip-title="Logged in with" data-tip-body="" data-tip-addr="" aria-label="Login method">
+        <button type="button" class="wallet-id-method is-social" id="walletCopyMethod" data-auth-kind="${escHtml(ident.kind || '')}" data-auth-key="${escHtml(ident.key || '')}" data-login-value="${escHtml(loginValue)}" data-tip-title="${escHtml(loginTip)}" data-login-tip-title="${escHtml(loginTip)}" data-tip-body="" data-tip-addr="" aria-label="Login method">
           <span class="wallet-id-method-ic">
             <span class="wallet-id-method-auth">${walletMethodIcon(ident)}</span>
           </span>
@@ -5704,7 +5705,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         </button>
       </div>`;
     }
-    return `<button type="button" class="wallet-id-method ${ident.kind === 'eoa' ? 'is-eoa' : ''}" id="walletCopyMethod" data-auth-kind="${escHtml(ident.kind || '')}" data-login-value="${escHtml(loginValue)}" data-addr="${escHtml(copyAddr)}" data-login-label="${escHtml(label)}" data-addr-label="${escHtml(addrLabel)}" data-tip-title="Logged in with" data-tip-body="" data-tip-addr="" aria-label="Copy account address">
+    return `<button type="button" class="wallet-id-method ${ident.kind === 'eoa' ? 'is-eoa' : ''}" id="walletCopyMethod" data-auth-kind="${escHtml(ident.kind || '')}" data-auth-key="${escHtml(ident.key || '')}" data-login-value="${escHtml(loginValue)}" data-addr="${escHtml(copyAddr)}" data-login-label="${escHtml(label)}" data-addr-label="${escHtml(addrLabel)}" data-tip-title="${escHtml(loginTip)}" data-login-tip-title="${escHtml(loginTip)}" data-tip-body="" data-tip-addr="" aria-label="Copy account address">
       <span class="wallet-id-method-ic">
         <span class="wallet-id-method-auth">${walletMethodIcon(ident)}</span>
         <span class="wallet-id-method-mega"><span class="auth-wicon is-light">${WALLET_MEGA_IC}</span></span>
@@ -6606,6 +6607,20 @@ html.dark .qhc-id{color:#6BA3FF;}
     const w = LOGIN_WALLETS.find(x => x.id === key) || WALLET_CATALOG[key];
     return (w && w.name) || 'wallet';
   }
+  function authProviderTipLabel(kind, key){
+    if(kind === 'eoa'){
+      const w = LOGIN_WALLETS.find(x => x.id === key) || WALLET_CATALOG[key];
+      return (w && w.name) || 'wallet';
+    }
+    if(key === 'Twitter') return 'X';
+    if(key === 'Email') return 'email';
+    if(key === 'Passkey') return 'passkey';
+    return key || 'your account';
+  }
+  function authLoginTipTitle(ident){
+    if(!ident) return 'Logged in with';
+    return `Logged in with ${authProviderTipLabel(ident.kind, ident.key)}`;
+  }
   const SOCIAL_MARKS = {
     Phone: '<svg viewBox="0 0 24 24" fill="none"><rect x="7.2" y="2.5" width="9.6" height="19" rx="2.2" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 18.6h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
     Twitter: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
@@ -7387,7 +7402,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       btn.classList.toggle('is-addr-lab', !!isAddr && !isWalletAuth);
       btn.dataset.tipTitle = isAddr
         ? (isWalletAuth ? WALLET_EOA_COPY_TITLE : RECV_COPY_TITLE)
-        : 'Logged in with';
+        : (btn.dataset.loginTipTitle || 'Logged in with');
       btn.dataset.tipBody = isAddr
         ? (isWalletAuth ? WALLET_EOA_COPY_BODY : RECV_COPY_BODY)
         : '';
