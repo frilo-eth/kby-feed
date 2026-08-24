@@ -8,6 +8,7 @@
 - All UI audio unified on [procedural-sounds](https://procedural-sounds.vercel.app/) recipes — former custom oscillators (`mute` / `unmute` / `lock` / `unlock` / `toggle` / `settle` / `dragtick`) are now `SOUND_RECIPES`. `/sounds` is recipe-only (Play + Copy).
 - Comment / send / sell success sound (`sent`) swapped to `success0m6r9` (soft sine pair + delay).
 - Tip sound (`tip` / `tipSuccess`) swapped to `successX9pkg` (bright sine stack + delay); buy stays on `buySuccess` / `successZhxpj`.
+- Attach / settle sound swapped to quieter `transitionQpv7x` (soft sine pair).
 
 ### Docs
 - README [#haptic-sound-map](https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map): full preset → WebHaptics → sound recipe catalog (success / error / clicks / pull).

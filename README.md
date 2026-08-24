@@ -965,12 +965,12 @@ Default “tap something” = **`selection`** (WebHaptics `selection` · sound *
 | **`share`** | [▶](https://kby-feed.vercel.app/sounds#share) | `share` (714→1069) | Share sheet / Post on X |
 | **`like`** | [▶](https://kby-feed.vercel.app/sounds#like) | `like` (651→728) | Like react |
 | **`toggle`** | [▶](https://kby-feed.vercel.app/sounds#toggle) | `toggle` (880 Hz tap) | Anon toggle · theme-adjacent toggles |
-| **`attach`** | [▶](https://kby-feed.vercel.app/sounds#settle) | `settle` (E–G#–B + sparkle) | Media attach to comment |
+| **`attach`** | [▶](https://kby-feed.vercel.app/sounds#settle) | `settle` (`transitionQpv7x` — soft sine pair) | Media attach to comment |
 | **`copyAddr`** | [▶](https://kby-feed.vercel.app/sounds#copyAddr) | `copyAddr` (shimmer delay arpeggio) | Copy receive / wallet address |
 | **`mute` / `unmute`** | [▶](https://kby-feed.vercel.app/sounds#mute) · [▶](https://kby-feed.vercel.app/sounds#unmute) | `mute` / `unmute` | Feed sound toggle |
 | **`lock` / `unlock`** | [▶](https://kby-feed.vercel.app/sounds#lock) · [▶](https://kby-feed.vercel.app/sounds#unlock) | `lock` / `unlock` | 2× hold lock / unlock |
 
-`attach` → `PRESET_SOUND.attach = 'settle'` → `playSound('settle')` (cheerful E–G#–B arpeggio recipe).
+`attach` → `PRESET_SOUND.attach = 'settle'` → `playSound('settle')` (soft sine pair, `transitionQpv7x`).
 
 ---
 
@@ -1051,7 +1051,7 @@ Default “tap something” = **`selection`** (WebHaptics `selection` · sound *
 | `unmute` | [▶](https://kby-feed.vercel.app/sounds#unmute) | Rising sine bloom + tick | Feed unmute |
 | `lock` | [▶](https://kby-feed.vercel.app/sounds#lock) | Low thud + square click | 2× lock |
 | `unlock` | [▶](https://kby-feed.vercel.app/sounds#unlock) | Rising bloom + tick | 2× unlock |
-| `settle` | [▶](https://kby-feed.vercel.app/sounds#settle) | E–G#–B + sparkle | Attach / slot land |
+| `settle` | [▶](https://kby-feed.vercel.app/sounds#settle) | Soft sine pair (`transitionQpv7x`) | Attach media |
 | `dragtick` | [▶](https://kby-feed.vercel.app/sounds#dragtick) | Short triangle + click | Sample only (`PRESET_SOUND` false in feed) |
 
 All UI audio is recipe-only ([procedural-sounds](https://procedural-sounds.vercel.app/) player). Haptics stay on WebHaptics / vibrate.
