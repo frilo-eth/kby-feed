@@ -28,14 +28,13 @@ h1{font-size:22px;letter-spacing:-.03em;margin:0 0 8px;}
 h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin:28px 0 8px;}
 .list{display:flex;flex-direction:column;border-top:1px solid var(--line);background:var(--card);border-radius:14px;border:1px solid var(--line);overflow:hidden;}
 .row{
-  display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;
   align-items:center;gap:12px 14px;
   padding:12px 14px;border-bottom:1px solid var(--line);
   scroll-margin-top:24px;
 }
 .row:last-child{border-bottom:none;}
 .row.is-target{background:color-mix(in srgb, var(--orange) 10%, transparent);outline:2px solid color-mix(in srgb, var(--orange) 45%, transparent);outline-offset:-2px;}
-.actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .play{
   width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;
   background:var(--green);color:#111;display:grid;place-items:center;flex-shrink:0;
@@ -45,15 +44,14 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
 .play:active{transform:scale(.94);}
 .play svg{width:16px;height:16px;margin-left:2px;}
 .copy{
-  height:40px;padding:0 12px;border-radius:12px;border:1px solid var(--line);cursor:pointer;
-  background:transparent;color:var(--ink-soft);display:inline-flex;align-items:center;gap:6px;
-  font:inherit;font-size:12px;font-weight:700;letter-spacing:.01em;
+  width:36px;height:36px;border-radius:10px;border:1px solid var(--line);cursor:pointer;
+  background:transparent;color:var(--ink-soft);display:grid;place-items:center;justify-self:end;
   transition:background .15s,color .15s,border-color .15s,transform .12s;
 }
 .copy:hover{background:var(--bg);color:var(--ink);border-color:color-mix(in srgb, var(--orange) 35%, var(--line));}
 .copy:active{transform:scale(.97);}
 .copy.is-done{color:#0B6B3A;border-color:rgba(61,220,151,.45);background:rgba(61,220,151,.12);}
-.copy svg{width:14px;height:14px;flex-shrink:0;}
+.copy svg{width:15px;height:15px;}
 .meta{min-width:0;}
 .name{font-size:14px;font-weight:750;letter-spacing:-.02em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
 .desc{font-size:12px;font-weight:500;color:var(--ink-soft);margin-top:2px;}
@@ -66,9 +64,9 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
 .tag.is-error{color:#9B1C1C;border-color:rgba(220,60,60,.35);background:rgba(220,60,60,.08);}
 .tag.is-custom{color:var(--ink-soft);}
 @media (max-width:520px){
-  .row{grid-template-columns:auto minmax(0,1fr);gap:8px 12px;}
-  .tag{grid-column:2;}
-  .actions{grid-column:1 / -1;}
+  .row{grid-template-columns:auto minmax(0,1fr) auto;gap:8px 12px;}
+  .tag{grid-column:2;justify-self:start;}
+  .copy{grid-column:3;grid-row:1;}
 }
 </style>
 </head>
@@ -483,15 +481,13 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
     row.className = 'row';
     row.id = item.id;
     row.innerHTML = `
-      <div class="actions">
-        <button type="button" class="play" data-play="${item.id}" aria-label="Play ${item.id}">${PLAY_SVG}</button>
-        <button type="button" class="copy" data-copy="${item.id}" aria-label="Copy ${item.id}">${COPY_SVG}<span>Copy</span></button>
-      </div>
+      <button type="button" class="play" data-play="${item.id}" aria-label="Play ${item.id}">${PLAY_SVG}</button>
       <div class="meta">
         <div class="name">${item.id}</div>
         <div class="desc">${item.desc}</div>
       </div>
-      <span class="tag ${item.tagClass || ''}">${item.tag}</span>`;
+      <span class="tag ${item.tagClass || ''}">${item.tag}</span>
+      <button type="button" class="copy" data-copy="${item.id}" aria-label="Copy ${item.id}" title="Copy">${COPY_SVG}</button>`;
     lists[item.group].appendChild(row);
   });
 
@@ -506,13 +502,12 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
     const id = copyBtn.dataset.copy;
     const ok = await copyText(copyPayload(id));
     if(!ok) return;
-    const label = copyBtn.querySelector('span');
     copyBtn.classList.add('is-done');
-    if(label) label.textContent = 'Copied';
+    copyBtn.title = 'Copied';
     clearTimeout(copyBtn._reset);
     copyBtn._reset = setTimeout(()=>{
       copyBtn.classList.remove('is-done');
-      if(label) label.textContent = 'Copy';
+      copyBtn.title = 'Copy';
     }, 1400);
   });
 
