@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kumbaya — Sound samples</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2EEEA;--card:#fff;--ink:#2A241C;--ink-soft:#6D6153;--ink-faint:#948A7B;
+  --orange:#FF6622;--green:#3DDC97;--line:rgba(80,70,59,.12);
+}
+html.dark{
+  --bg:#070403;--card:#14110E;--ink:#F4EFE7;--ink-soft:#B3A895;--ink-faint:#7A7062;
+  --line:rgba(255,255,255,.1);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:var(--bg);color:var(--ink);padding:28px 20px 100px;}
+.wrap{max-width:720px;margin:0 auto;}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:16px;font-weight:700;}
+.brand img{width:24px;height:24px;}
+.brand a{color:inherit;text-decoration:none;}
+h1{font-size:22px;letter-spacing:-.03em;margin:0 0 8px;}
+.lede{font-size:14px;font-weight:500;color:var(--ink-soft);line-height:1.5;margin:0 0 8px;}
+.lede a{color:var(--orange);}
+.note{font-size:12px;font-weight:600;color:var(--ink-faint);margin:0 0 24px;}
+h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin:28px 0 8px;}
+.list{display:flex;flex-direction:column;border-top:1px solid var(--line);background:var(--card);border-radius:14px;border:1px solid var(--line);overflow:hidden;}
+.row{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;
+  align-items:center;gap:12px 14px;
+  padding:12px 14px;border-bottom:1px solid var(--line);
+  scroll-margin-top:24px;
+}
+.row:last-child{border-bottom:none;}
+.row.is-target{background:color-mix(in srgb, var(--orange) 10%, transparent);outline:2px solid color-mix(in srgb, var(--orange) 45%, transparent);outline-offset:-2px;}
+.play{
+  width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;
+  background:var(--green);color:#111;display:grid;place-items:center;flex-shrink:0;
+  transition:transform .12s,filter .15s;
+}
+.play:hover{filter:brightness(1.04);}
+.play:active{transform:scale(.94);}
+.play svg{width:16px;height:16px;margin-left:2px;}
+.meta{min-width:0;}
+.name{font-size:14px;font-weight:750;letter-spacing:-.02em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
+.desc{font-size:12px;font-weight:500;color:var(--ink-soft);margin-top:2px;}
+.tag{
+  font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:var(--ink-faint);border:1px solid var(--line);border-radius:999px;padding:4px 8px;white-space:nowrap;
+}
+.tag.is-success{color:#0B6B3A;border-color:rgba(61,220,151,.45);background:rgba(61,220,151,.12);}
+.tag.is-warn{color:#8A4B00;border-color:rgba(255,166,34,.4);background:rgba(255,166,34,.1);}
+.tag.is-error{color:#9B1C1C;border-color:rgba(220,60,60,.35);background:rgba(220,60,60,.08);}
+.tag.is-custom{color:var(--ink-soft);}
+@media (max-width:520px){
+  .row{grid-template-columns:auto minmax(0,1fr);gap:8px 12px;}
+  .tag{grid-column:2;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <a href="/feed"><img src="/public/logo-light.png" alt=""></a>
+    <a href="/feed">Kumbaya</a>
+  </div>
+  <h1>Sound samples</h1>
+  <p class="lede">
+    Play the same recipes the feed uses. Map + docs:
+    <a href="https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map">README #haptic-sound-map</a>.
+    Deep-link any cue with <code>#buySuccess</code>, etc.
+  </p>
+  <p class="note">Click once to unlock audio (browser autoplay policy). Recipes stay in sync with <code>feed.html</code> <code>SOUND_RECIPES</code>.</p>
+
+  <h2>Success / funds</h2>
+  <div class="list" id="group-success"></div>
+
+  <h2>Warning / error</h2>
+  <div class="list" id="group-warn"></div>
+
+  <h2>Clicks &amp; reacts</h2>
+  <div class="list" id="group-click"></div>
+
+  <h2>Custom oscillators</h2>
+  <div class="list" id="group-custom"></div>
+</div>
+<script>
+(function(){
+  let actx = null, masterGain = null, audioReady = false;
+  function ensureAudio(){
+    if(!actx){
+      try{
+        actx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = actx.createGain();
+        masterGain.gain.value = 0.72;
+        masterGain.connect(actx.destination);
+      }catch(e){}
+    }
+    return actx;
+  }
+  function unlockAudio(){
+    const ctx = ensureAudio(); if(!ctx) return;
+    if(ctx.state === 'suspended') ctx.resume();
+    if(!audioReady){
+      audioReady = true;
+      try{
+        const buf = ctx.createBuffer(1, 1, ctx.sampleRate);
+        const src = ctx.createBufferSource();
+        src.buffer = buf; src.connect(masterGain); src.start(0);
+      }catch(e){}
+    }
+  }
+
+  // Same player as feed.html (procedural-sounds MIT).
+  function playRecipe(patch, ctx){
+    if(!patch || !ctx) return;
+    const sink = masterGain || ctx.destination;
+    const S = 0.0001;
+    const t0 = ctx.currentTime;
+    function noiseBuffer(seconds, color){
+      const len = Math.max(1, Math.floor(ctx.sampleRate * seconds));
+      const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      if(color === 'pink'){
+        let b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+        for(let i=0;i<len;i++){
+          const w = Math.random()*2-1;
+          b0=0.99886*b0+w*0.0555179; b1=0.99332*b1+w*0.0750759; b2=0.969*b2+w*0.153852;
+          b3=0.8665*b3+w*0.3104856; b4=0.55*b4+w*0.5329522; b5=-0.7616*b5-w*0.016898;
+          d[i]=(b0+b1+b2+b3+b4+b5+b6+w*0.5362)*0.11; b6=w*0.115926;
+        }
+      }else if(color === 'brown'){
+        let last=0;
+        for(let i=0;i<len;i++){ const w=Math.random()*2-1; last=(last+0.02*w)/1.02; d[i]=last*3.5; }
+      }else{
+        for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+      }
+      return buf;
+    }
+    function reverb(o){
+      const decay=o.decay==null?0.5:o.decay, mix=o.mix==null?0.3:o.mix, damping=o.damping==null?0:o.damping;
+      const input=ctx.createGain(), output=ctx.createGain();
+      const dry=ctx.createGain(); dry.gain.value=1-mix; input.connect(dry); dry.connect(output);
+      const wet=ctx.createGain(); wet.gain.value=mix; input.connect(wet);
+      const wetOut=ctx.createGain(); wetOut.connect(output);
+      const len=Math.ceil(ctx.sampleRate*decay*(o.roomSize==null?1:o.roomSize));
+      const buf=ctx.createBuffer(2,len,ctx.sampleRate);
+      for(let ch=0;ch<2;ch++){
+        const d=buf.getChannelData(ch);
+        for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(len*0.28));
+        if(damping>0){ const c=Math.min(damping,0.99); let prev=0; for(let i=0;i<len;i++){ prev=d[i]*(1-c)+prev*c; d[i]=prev; } }
+      }
+      const conv=ctx.createConvolver(); conv.buffer=buf;
+      const pre=o.preDelay==null?0:o.preDelay;
+      if(pre>0){ const pd=ctx.createDelay(Math.max(pre+0.01,1)); pd.delayTime.value=pre; wet.connect(pd); pd.connect(conv); }
+      else wet.connect(conv);
+      conv.connect(wetOut);
+      return {input, output};
+    }
+    function shimmer(o){
+      const input=ctx.createGain(), output=ctx.createGain(); input.connect(output);
+      const delay=ctx.createDelay(1); delay.delayTime.value=o.delay;
+      const lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=o.lowpass==null?4000:o.lowpass;
+      const fb=ctx.createGain(); fb.gain.value=o.feedback;
+      const wet=ctx.createGain(); wet.gain.value=o.wet;
+      input.connect(delay); delay.connect(lp); lp.connect(fb); fb.connect(delay); lp.connect(wet); wet.connect(output);
+      return {input, output};
+    }
+    for(const layer of (patch.layers || [patch])){
+      const t=t0+(layer.delay||0);
+      const gain=layer.gain==null?0.5:layer.gain;
+      const env=layer.envelope;
+      const a=env?env.attack||0:0, d=env?env.decay:0, sus=env?env.sustain||0:0, rel=env?env.release||0:0;
+      const dur=env?a+d+rel:0.5;
+      const g=ctx.createGain();
+      if(!env){ g.gain.setValueAtTime(gain,t); g.gain.setTargetAtTime(S,t,0.15); }
+      else if(env.curve==='ramp'){
+        const peak=Math.max(gain,S);
+        g.gain.setValueAtTime(S,t);
+        if(a>0) g.gain.exponentialRampToValueAtTime(peak,t+a); else g.gain.setValueAtTime(peak,t);
+        g.gain.exponentialRampToValueAtTime(S,t+a+d);
+      }else{
+        g.gain.setValueAtTime(S,t);
+        if(a>0) g.gain.linearRampToValueAtTime(gain,t+a); else g.gain.setValueAtTime(gain,t);
+        if(sus>0){ g.gain.setTargetAtTime(Math.max(sus*gain,S),t+a,d/3); if(rel>0) g.gain.setTargetAtTime(S,t+a+d,rel/3); }
+        else g.gain.setTargetAtTime(S,t+a,d/3);
+      }
+      let src;
+      const s=layer.source;
+      if(s.type==='noise'){ src=ctx.createBufferSource(); src.buffer=noiseBuffer(dur+0.1,s.color); }
+      else{
+        src=ctx.createOscillator(); src.type=s.type;
+        const f=s.frequency;
+        if(typeof f==='number') src.frequency.setValueAtTime(f,t);
+        else{ src.frequency.setValueAtTime(f.start,t); src.frequency.exponentialRampToValueAtTime(Math.max(f.end,1),t+Math.min(f.time==null?dur:f.time,dur)); }
+        if(s.detune) src.detune.value=s.detune;
+        if(s.fm){
+          const carrier=typeof f==='number'?f:f.start;
+          const mod=ctx.createOscillator(); mod.type='sine'; mod.frequency.value=carrier*s.fm.ratio;
+          const mg=ctx.createGain(); mg.gain.value=s.fm.depth;
+          mod.connect(mg); mg.connect(src.frequency); mod.start(t); mod.stop(t+dur+0.1);
+        }
+      }
+      src.start(t); src.stop(t+dur+0.1);
+      let node=src;
+      const filters=!layer.filter?[]:(Array.isArray(layer.filter)?layer.filter:[layer.filter]);
+      for(const f of filters){
+        const bq=ctx.createBiquadFilter(); bq.type=f.type;
+        bq.frequency.setValueAtTime(f.frequency,t);
+        bq.Q.value=f.Q==null?(f.resonance==null?1:f.resonance):f.Q;
+        if(f.envelope){
+          const peakAt=t+(f.envelope.attack||0);
+          bq.frequency.linearRampToValueAtTime(f.envelope.peak,peakAt);
+          bq.frequency.exponentialRampToValueAtTime(Math.max(f.frequency,1),peakAt+f.envelope.decay);
+        }
+        node.connect(bq); node=bq;
+      }
+      node.connect(g);
+      let out=g;
+      for(const fx of (layer.effects||[])){
+        const built=fx.type==='reverb'?reverb(fx):fx.type==='delay'?shimmer(fx):null;
+        if(!built) continue;
+        out.connect(built.input); out=built.output;
+      }
+      out.connect(sink);
+    }
+  }
+
+  // Keep in sync with feed.html SOUND_RECIPES
+  const SOUND_RECIPES = {
+    funds:{layers:[
+      {source:{type:'sine',frequency:660,fm:{ratio:3,depth:300}},envelope:{attack:0,decay:0.5,sustain:0.03,release:0.2},effects:[{type:'reverb',decay:0.7,damping:0.4,mix:0.15}],gain:0.111},
+      {source:{type:'sine',frequency:990,fm:{ratio:3,depth:250}},envelope:{attack:0,decay:0.45,sustain:0.02,release:0.18},delay:0.12,effects:[{type:'reverb',decay:0.7,damping:0.4,mix:0.15}],gain:0.093}
+    ]},
+    sent:{layers:[
+      {source:{type:'triangle',frequency:444},envelope:{attack:0.003,decay:0.137,sustain:0,release:0},gain:0.124,filter:{type:'lowpass',frequency:1200}},
+      {source:{type:'triangle',frequency:560},envelope:{attack:0.003,decay:0.132,sustain:0,release:0},gain:0.125,delay:0.089,filter:{type:'lowpass',frequency:1399}},
+      {source:{type:'triangle',frequency:747},envelope:{attack:0.003,decay:0.164,sustain:0,release:0},gain:0.189,delay:0.163,filter:{type:'lowpass',frequency:1868}}
+    ]},
+    refresh:{layers:[
+      {source:{type:'sine',frequency:555},envelope:{attack:0.003,decay:0.09,sustain:0,release:0,curve:'ramp'},gain:0.161},
+      {source:{type:'sine',frequency:759},envelope:{attack:0.004,decay:0.134,sustain:0,release:0,curve:'ramp'},gain:0.15,delay:0.081},
+      {source:{type:'sine',frequency:1066},envelope:{attack:0.003,decay:0.256,sustain:0,release:0,curve:'ramp'},gain:0.167,delay:0.161}
+    ]},
+    like:{layers:[
+      {source:{type:'sine',frequency:651},envelope:{attack:0.003,decay:0.06,sustain:0,release:0,curve:'ramp'},gain:0.155},
+      {source:{type:'sine',frequency:728},envelope:{attack:0.003,decay:0.067,sustain:0,release:0,curve:'ramp'},gain:0.11,delay:0.138}
+    ]},
+    tip:{layers:[
+      {source:{type:'sine',frequency:494},envelope:{attack:0.004,decay:0.222,sustain:0,release:0,curve:'ramp'},gain:0.159},
+      {source:{type:'sine',frequency:988},envelope:{attack:0.004,decay:0.16,sustain:0,release:0,curve:'ramp'},gain:0.111,delay:0.133},
+      {source:{type:'sine',frequency:1480},envelope:{attack:0.004,decay:0.146,sustain:0,release:0,curve:'ramp'},gain:0.054,delay:0.28}
+    ]},
+    dislike:{layers:[
+      {source:{type:'triangle',frequency:371},envelope:{attack:0.004,decay:0.097,sustain:0,release:0,curve:'ramp'},gain:0.181},
+      {source:{type:'triangle',frequency:262},envelope:{attack:0.004,decay:0.135,sustain:0,release:0,curve:'ramp'},gain:0.167,delay:0.136}
+    ]},
+    comment:{layers:[
+      {source:{type:'sine',frequency:533},envelope:{attack:0.001,decay:0.027,sustain:0,release:0,curve:'ramp'},gain:0.153},
+      {source:{type:'sine',frequency:598},envelope:{attack:0.001,decay:0.056,sustain:0,release:0,curve:'ramp'},gain:0.114,delay:0.041}
+    ]},
+    share:{layers:[
+      {source:{type:'sine',frequency:714},envelope:{attack:0.007,decay:0.121,sustain:0,release:0,curve:'ramp'},gain:0.154},
+      {source:{type:'sine',frequency:1069},envelope:{attack:0.006,decay:0.176,sustain:0,release:0,curve:'ramp'},gain:0.116,delay:0.074}
+    ]},
+    light:{layers:[
+      {source:{type:'sine',frequency:998},envelope:{attack:0,decay:0.05,sustain:0,release:0},gain:0.1},
+      {source:{type:'sine',frequency:1817},envelope:{attack:0,decay:0.05,sustain:0,release:0},gain:0.05,delay:0.05}
+    ]},
+    open:{layers:[
+      {source:{type:'sine',frequency:533},envelope:{attack:0.001,decay:0.027,sustain:0,release:0,curve:'ramp'},gain:0.153},
+      {source:{type:'sine',frequency:598},envelope:{attack:0.001,decay:0.056,sustain:0,release:0,curve:'ramp'},gain:0.114,delay:0.041}
+    ]},
+    copyAddr:{layers:[
+      {source:{type:'sine',frequency:556.4143525139505},envelope:{attack:0.006,decay:0.09951142738561437,sustain:0,release:0.004,curve:'ramp'},gain:0.176,effects:[{type:'delay',delay:0.063,feedback:0.286,wet:0.103,lowpass:3742}]},
+      {source:{type:'sine',frequency:701.0376225774419},envelope:{attack:0.004,decay:0.11255074962865588,sustain:0,release:0.004,curve:'ramp'},gain:0.164,delay:0.06389185797484542,effects:[{type:'delay',delay:0.063,feedback:0.286,wet:0.103,lowpass:3742}]},
+      {source:{type:'sine',frequency:935.7726808012197},envelope:{attack:0.006,decay:0.19164009205588167,sustain:0,release:0.004,curve:'ramp'},gain:0.147,delay:0.12778371594969085,effects:[{type:'delay',delay:0.063,feedback:0.286,wet:0.103,lowpass:3742}]}
+    ]},
+    buySuccess:{layers:[
+      {source:{type:'sine',frequency:263.4036968717656},envelope:{attack:0.004,decay:0.06951115975279916,sustain:0.03,release:0.024494458004796108},gain:0.132,effects:[{type:'delay',delay:0.117,feedback:0.282,wet:0.116,lowpass:2815}]},
+      {source:{type:'triangle',frequency:394.65864711426985},envelope:{attack:0.004,decay:0.14054032240232858,sustain:0.03,release:0.07216735758456544},gain:0.104,delay:0.08923778687911745,effects:[{type:'delay',delay:0.117,feedback:0.282,wet:0.116,lowpass:2815}],filter:{type:'lowpass',frequency:2017.561584539315}},
+      {source:{type:'sine',frequency:394.65864711426985,detune:8},envelope:{attack:0.006,decay:0.14339698769518983,sustain:0.03,release:0.05270340030677575},gain:0.039,delay:0.08923778687911745,effects:[{type:'delay',delay:0.117,feedback:0.282,wet:0.116,lowpass:2815}]},
+      {source:{type:'sine',frequency:526.8065293369676},envelope:{attack:0.005,decay:0.28976836627196934,sustain:0.03,release:0.0780350393821972},gain:0.144,delay:0.1784755737582349,effects:[{type:'delay',delay:0.117,feedback:0.282,wet:0.116,lowpass:2815}]},
+      {source:{type:'sine',frequency:789.3181586351034},envelope:{attack:0.008,decay:0.15624069512277092,sustain:0.03,release:0.05515607299253277},gain:0.046,delay:0.1784755737582349,effects:[{type:'delay',delay:0.117,feedback:0.282,wet:0.116,lowpass:2815}]}
+    ]}
+  };
+
+  function microClick(ctx, hz){
+    const t0 = ctx.currentTime;
+    const osc = ctx.createOscillator(); osc.type='square'; osc.frequency.value = hz;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.05, t0 + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.03);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(t0); osc.stop(t0 + 0.035);
+  }
+  function slotLand(ctx){
+    const t0 = ctx.currentTime;
+    [659.25, 830.61, 987.77].forEach((f, i)=>{
+      const t = t0 + i * 0.042;
+      const osc = ctx.createOscillator(); osc.type='triangle'; osc.frequency.value = f;
+      const g = ctx.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.10 - i * 0.012, t + 0.008);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.19);
+      osc.connect(g); g.connect(masterGain);
+      osc.start(t); osc.stop(t + 0.21);
+    });
+  }
+  function slotReelTick(ctx){
+    const t0 = ctx.currentTime;
+    const pitch = 560;
+    const osc = ctx.createOscillator(); osc.type='triangle';
+    osc.frequency.setValueAtTime(pitch * 1.02, t0);
+    osc.frequency.exponentialRampToValueAtTime(pitch * 0.72, t0 + 0.045);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.11, t0 + 0.004);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.055);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(t0); osc.stop(t0 + 0.06);
+  }
+  function reactToggleSound(ctx){
+    const t0 = ctx.currentTime;
+    const osc = ctx.createOscillator(); osc.type='sine';
+    osc.frequency.setValueAtTime(880, t0);
+    osc.frequency.exponentialRampToValueAtTime(660, t0 + 0.06);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.1, t0 + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.08);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(t0); osc.stop(t0 + 0.09);
+  }
+  function reactMuteSound(ctx){
+    const t0 = ctx.currentTime;
+    const osc = ctx.createOscillator(); osc.type='triangle';
+    osc.frequency.setValueAtTime(520, t0);
+    osc.frequency.exponentialRampToValueAtTime(180, t0 + 0.1);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.12, t0 + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(t0); osc.stop(t0 + 0.13);
+  }
+  function reactUnmuteSound(ctx){
+    const t0 = ctx.currentTime;
+    const osc = ctx.createOscillator(); osc.type='sine';
+    osc.frequency.setValueAtTime(320, t0);
+    osc.frequency.exponentialRampToValueAtTime(920, t0 + 0.1);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.11, t0 + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(t0); osc.stop(t0 + 0.13);
+    setTimeout(()=>microClick(ctx, 1400), 50);
+  }
+  function reactLockSound(ctx){
+    const t0 = ctx.currentTime;
+    const body = ctx.createOscillator(); body.type = 'triangle';
+    body.frequency.setValueAtTime(240, t0);
+    body.frequency.exponentialRampToValueAtTime(95, t0 + 0.08);
+    const bg = ctx.createGain();
+    bg.gain.setValueAtTime(0.0001, t0);
+    bg.gain.exponentialRampToValueAtTime(0.14, t0 + 0.005);
+    bg.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.1);
+    body.connect(bg); bg.connect(masterGain);
+    body.start(t0); body.stop(t0 + 0.11);
+    const click = ctx.createOscillator(); click.type = 'square';
+    click.frequency.setValueAtTime(1450, t0 + 0.028);
+    const cg = ctx.createGain();
+    cg.gain.setValueAtTime(0.0001, t0 + 0.028);
+    cg.gain.exponentialRampToValueAtTime(0.07, t0 + 0.034);
+    cg.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.055);
+    click.connect(cg); cg.connect(masterGain);
+    click.start(t0 + 0.028); click.stop(t0 + 0.06);
+  }
+  function reactUnlockSound(ctx){
+    const t0 = ctx.currentTime;
+    const osc = ctx.createOscillator(); osc.type = 'sine';
+    osc.frequency.setValueAtTime(360, t0);
+    osc.frequency.exponentialRampToValueAtTime(980, t0 + 0.09);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.12, t0 + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(t0); osc.stop(t0 + 0.13);
+    setTimeout(()=>microClick(ctx, 1320), 58);
+  }
+
+  function playSound(kind){
+    unlockAudio();
+    const ctx = actx; if(!ctx) return;
+    const recipe = SOUND_RECIPES[kind];
+    if(recipe){ playRecipe(recipe, ctx); return; }
+    if(kind === 'settle') slotLand(ctx);
+    else if(kind === 'dragtick') slotReelTick(ctx);
+    else if(kind === 'toggle') reactToggleSound(ctx);
+    else if(kind === 'unmute') reactUnmuteSound(ctx);
+    else if(kind === 'mute') reactMuteSound(ctx);
+    else if(kind === 'lock') reactLockSound(ctx);
+    else if(kind === 'unlock') reactUnlockSound(ctx);
+  }
+
+  const PLAY_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5L8 5.5Z"/></svg>';
+  const CATALOG = [
+    { group:'success', id:'buySuccess', desc:'Buy + tip success (successZhxpj)', tag:'success', tagClass:'is-success' },
+    { group:'success', id:'sent', desc:'Send / sell / comment success', tag:'success', tagClass:'is-success' },
+    { group:'success', id:'funds', desc:'Top-up credited', tag:'success', tagClass:'is-success' },
+    { group:'success', id:'refresh', desc:'Pull settle / new notifs', tag:'success', tagClass:'is-success' },
+    { group:'warn', id:'dislike', desc:'Dislike react · error audio', tag:'warning / error', tagClass:'is-error' },
+    { group:'warn', id:'tip', desc:'Legacy tip recipe (tips use buySuccess)', tag:'legacy', tagClass:'' },
+    { group:'click', id:'light', desc:'Default UI tap / selection sound', tag:'click', tagClass:'' },
+    { group:'click', id:'open', desc:'Open drawer / comments', tag:'click', tagClass:'' },
+    { group:'click', id:'comment', desc:'Comment affordance', tag:'click', tagClass:'' },
+    { group:'click', id:'like', desc:'Like react', tag:'click', tagClass:'' },
+    { group:'click', id:'share', desc:'Share sheet', tag:'click', tagClass:'' },
+    { group:'click', id:'copyAddr', desc:'Copy address', tag:'click', tagClass:'' },
+    { group:'custom', id:'toggle', desc:'Toggle (custom oscillator)', tag:'custom', tagClass:'is-custom' },
+    { group:'custom', id:'mute', desc:'Mute feed', tag:'custom', tagClass:'is-custom' },
+    { group:'custom', id:'unmute', desc:'Unmute feed', tag:'custom', tagClass:'is-custom' },
+    { group:'custom', id:'lock', desc:'2× hold lock', tag:'custom', tagClass:'is-custom' },
+    { group:'custom', id:'unlock', desc:'Unlock 2×', tag:'custom', tagClass:'is-custom' },
+    { group:'custom', id:'settle', desc:'Slot land / attach', tag:'custom', tagClass:'is-custom' },
+    { group:'custom', id:'dragtick', desc:'Drag tick sample', tag:'custom', tagClass:'is-custom' },
+  ];
+
+  const lists = {
+    success: document.getElementById('group-success'),
+    warn: document.getElementById('group-warn'),
+    click: document.getElementById('group-click'),
+    custom: document.getElementById('group-custom'),
+  };
+
+  CATALOG.forEach((item)=>{
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.id = item.id;
+    row.innerHTML = `
+      <button type="button" class="play" data-play="${item.id}" aria-label="Play ${item.id}">${PLAY_SVG}</button>
+      <div class="meta">
+        <div class="name">${item.id}</div>
+        <div class="desc">${item.desc}</div>
+      </div>
+      <span class="tag ${item.tagClass || ''}">${item.tag}</span>`;
+    lists[item.group].appendChild(row);
+  });
+
+  document.body.addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-play]');
+    if(!btn) return;
+    playSound(btn.dataset.play);
+  });
+
+  function focusHash(){
+    const id = (location.hash || '').replace(/^#/, '');
+    document.querySelectorAll('.row.is-target').forEach((el)=> el.classList.remove('is-target'));
+    if(!id) return;
+    const row = document.getElementById(id);
+    if(!row) return;
+    row.classList.add('is-target');
+    row.scrollIntoView({ behavior:'smooth', block:'center' });
+  }
+  window.addEventListener('hashchange', focusHash);
+  focusHash();
+})();
+</script>
+</body>
+</html>

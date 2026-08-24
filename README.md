@@ -32,7 +32,7 @@ Porting / review: open the heading, not the whole README. Production: [https://k
 | [Slippage](#slippage) | [README.md#slippage](https://github.com/frilo-eth/kby-feed/blob/main/README.md#slippage) |
 | [Pay with](#pay-with) (hidden on launchpad Buy) | [README.md#pay-with](https://github.com/frilo-eth/kby-feed/blob/main/README.md#pay-with) |
 | [Meta affordances](#meta-affordances) | [README.md#meta-affordances](https://github.com/frilo-eth/kby-feed/blob/main/README.md#meta-affordances) |
-| [Haptic + sound map](#haptic-sound-map) — success / error / clicks | [README.md#haptic-sound-map](https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map) |
+| [Haptic + sound map](#haptic-sound-map) — success / error / clicks · [▶ samples](https://kby-feed.vercel.app/sounds) | [README.md#haptic-sound-map](https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map) |
 | [Animation system](#animation-system) | [README.md#animation-system](https://github.com/frilo-eth/kby-feed/blob/main/README.md#animation-system) |
 
 ## Run locally
@@ -41,7 +41,7 @@ Porting / review: open the heading, not the whole README. Production: [https://k
 npm run dev
 ```
 
-Open [http://localhost:3000/feed](http://localhost:3000/feed). Token stub: [http://localhost:3000/token?t=SAUCE](http://localhost:3000/token?t=SAUCE). Profile stub: [http://localhost:3000/profile](http://localhost:3000/profile). Stakeholder index: [http://localhost:3000/flows](http://localhost:3000/flows). `/` also serves the feed.
+Open [http://localhost:3000/feed](http://localhost:3000/feed). Token stub: [http://localhost:3000/token?t=SAUCE](http://localhost:3000/token?t=SAUCE). Profile stub: [http://localhost:3000/profile](http://localhost:3000/profile). Stakeholder index: [http://localhost:3000/flows](http://localhost:3000/flows). Sound samples: [http://localhost:3000/sounds](http://localhost:3000/sounds). `/` also serves the feed.
 
 ## Controls
 
@@ -898,6 +898,12 @@ Source: CSS ~2228–2363 · JS ~5492–6080 · markup `#pullSpin` ~2541 · point
 
 **Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map](https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map)
 
+**Hear them:** GitHub markdown can’t play audio. Use the sample page — each cue has a play button:
+
+[https://kby-feed.vercel.app/sounds](https://kby-feed.vercel.app/sounds) · local [`/sounds`](http://localhost:3000/sounds)
+
+In the tables below, **▶** is a plain-text link that opens that sample (deep-linked to the cue).
+
 One call path: `haptic(preset, soundKind?, soundArg?)` → vibration + optional audio. Sources:
 
 | Layer | Library | Role |
@@ -915,16 +921,16 @@ Celebration helper: `celebrateSuccess(kind)` · `celebrateBuySuccess()` · `cele
 
 #### Outcome family — success / warning / error
 
-| Preset | When it fires | WebHaptics | Sound recipe | Notes |
-|--------|---------------|------------|--------------|-------|
-| **`buySuccess`** | Buy settles (`celebrateBuySuccess`) | Custom **rich** 8-step ascending pattern | **`buySuccess`** (`successZhxpj` export) | + full confetti |
-| **`tipSuccess`** | **First** tip ever (`celebrateTip`) | Same rich pattern | **`buySuccess`** (same recipe) | + tip-scale confetti · `kb_first_tip_v1` |
-| **`tip`** | Repeat tip | Custom tip 5-step pattern | **`buySuccess`** | No confetti |
-| **`success`** | Sell settle · send complete | Rich pattern | **`sent`** (triangle arpeggio 444→560→747) | Via `celebrateSuccess('sell'\|'send')` |
-| **`funds`** | Top-up / deposit credited | Rich pattern | **`funds`** (FM sine 660 + 990, reverb) | Via `celebrateSuccess('funds')` |
-| **`sent`** | Comment posted | Rich pattern | **`sent`** | Via `celebrateSuccess('sent')` |
-| **`dislike`** | Dislike react | Built-in `warning` | **`dislike`** (descending triangles) | Warning feel |
-| **`error`** | MoonPay under-$10 · leave Solana warn path | Built-in `error` | **`dislike`** (reused as error cue) | Sheet shake + red copy |
+| Preset | Hear | When it fires | WebHaptics | Sound recipe | Notes |
+|--------|------|---------------|------------|--------------|-------|
+| **`buySuccess`** | [▶](https://kby-feed.vercel.app/sounds#buySuccess) | Buy settles (`celebrateBuySuccess`) | Custom **rich** 8-step ascending pattern | **`buySuccess`** (`successZhxpj` export) | + full confetti |
+| **`tipSuccess`** | [▶](https://kby-feed.vercel.app/sounds#buySuccess) | **First** tip ever (`celebrateTip`) | Same rich pattern | **`buySuccess`** (same recipe) | + tip-scale confetti · `kb_first_tip_v1` |
+| **`tip`** | [▶](https://kby-feed.vercel.app/sounds#buySuccess) | Repeat tip | Custom tip 5-step pattern | **`buySuccess`** | No confetti |
+| **`success`** | [▶](https://kby-feed.vercel.app/sounds#sent) | Sell settle · send complete | Rich pattern | **`sent`** (triangle arpeggio 444→560→747) | Via `celebrateSuccess('sell'\|'send')` |
+| **`funds`** | [▶](https://kby-feed.vercel.app/sounds#funds) | Top-up / deposit credited | Rich pattern | **`funds`** (FM sine 660 + 990, reverb) | Via `celebrateSuccess('funds')` |
+| **`sent`** | [▶](https://kby-feed.vercel.app/sounds#sent) | Comment posted | Rich pattern | **`sent`** | Via `celebrateSuccess('sent')` |
+| **`dislike`** | [▶](https://kby-feed.vercel.app/sounds#dislike) | Dislike react | Built-in `warning` | **`dislike`** (descending triangles) | Warning feel |
+| **`error`** | [▶](https://kby-feed.vercel.app/sounds#dislike) | MoonPay under-$10 · leave Solana warn path | Built-in `error` | **`dislike`** (reused as error cue) | Sheet shake + red copy |
 
 Rich haptic = `RICH_SUCCESS_WEB` (8 pulses, peaks at intensity 1). Tip haptic = `TIP_RICH_WEB` (5 pulses). Both flatten to `navigator.vibrate` when needed.
 
@@ -934,20 +940,20 @@ Rich haptic = `RICH_SUCCESS_WEB` (8 pulses, peaks at intensity 1). Tip haptic = 
 
 Default “tap something” = **`selection`** (WebHaptics `selection` · sound **`light`**). Use this for tabs, chips, toggles that are not outcomes.
 
-| Preset | Sound | Typical use |
-|--------|-------|-------------|
-| **`light`** | `light` (brief 998 + 1817 Hz) | Chevron next/prev · copy URL flash · soft taps · `haptic('selection','light')` overrides |
-| **`selection`** | `light` | Trade unit / side / slip / pay chip · drawer chrome · comment identity · sheet chrome · most buttons |
-| **`nudge`** | `light` (or override `'refresh'`) | Soft attention · unread notifs (`nudge` + `refresh`) · 2× hold start |
-| **`open`** | `open` (= comment recipe: 533→598) | Open drawer · comments · launch nav · token surfaces |
-| **`comment`** | `comment` | Open comments affordance |
-| **`share`** | `share` (714→1069) | Share sheet / Post on X |
-| **`like`** | `like` (651→728) | Like react |
-| **`toggle`** | custom oscillator | Anon toggle · theme-adjacent toggles |
-| **`attach`** | `settle` → custom `slotLand` arpeggio | Media attach to comment |
-| **`copyAddr`** | `copyAddr` (shimmer delay arpeggio) | Copy receive / wallet address |
-| **`mute` / `unmute`** | custom oscillators | Feed sound toggle |
-| **`lock` / `unlock`** | custom oscillators | 2× hold lock / unlock |
+| Preset | Hear | Sound | Typical use |
+|--------|------|-------|-------------|
+| **`light`** | [▶](https://kby-feed.vercel.app/sounds#light) | `light` (brief 998 + 1817 Hz) | Chevron next/prev · copy URL flash · soft taps · `haptic('selection','light')` overrides |
+| **`selection`** | [▶](https://kby-feed.vercel.app/sounds#light) | `light` | Trade unit / side / slip / pay chip · drawer chrome · comment identity · sheet chrome · most buttons |
+| **`nudge`** | [▶](https://kby-feed.vercel.app/sounds#light) | `light` (or override `'refresh'`) | Soft attention · unread notifs (`nudge` + `refresh`) · 2× hold start |
+| **`open`** | [▶](https://kby-feed.vercel.app/sounds#open) | `open` (= comment recipe: 533→598) | Open drawer · comments · launch nav · token surfaces |
+| **`comment`** | [▶](https://kby-feed.vercel.app/sounds#comment) | `comment` | Open comments affordance |
+| **`share`** | [▶](https://kby-feed.vercel.app/sounds#share) | `share` (714→1069) | Share sheet / Post on X |
+| **`like`** | [▶](https://kby-feed.vercel.app/sounds#like) | `like` (651→728) | Like react |
+| **`toggle`** | [▶](https://kby-feed.vercel.app/sounds#toggle) | custom oscillator | Anon toggle · theme-adjacent toggles |
+| **`attach`** | [▶](https://kby-feed.vercel.app/sounds#settle) | `settle` → custom `slotLand` arpeggio | Media attach to comment |
+| **`copyAddr`** | [▶](https://kby-feed.vercel.app/sounds#copyAddr) | `copyAddr` (shimmer delay arpeggio) | Copy receive / wallet address |
+| **`mute` / `unmute`** | [▶](https://kby-feed.vercel.app/sounds#mute) · [▶](https://kby-feed.vercel.app/sounds#unmute) | custom oscillators | Feed sound toggle |
+| **`lock` / `unlock`** | [▶](https://kby-feed.vercel.app/sounds#lock) · [▶](https://kby-feed.vercel.app/sounds#unlock) | custom oscillators | 2× hold lock / unlock |
 
 `attach` → `PRESET_SOUND.attach = 'settle'` → `playSound('settle')` → `slotLand()` (cheerful E–G#–B arpeggio), not a procedural recipe.
 
@@ -1009,21 +1015,21 @@ Default “tap something” = **`selection`** (WebHaptics `selection` · sound *
 
 #### Procedural recipes in `SOUND_RECIPES`
 
-| Key | Character | Origin |
-|-----|-----------|--------|
-| `light` | Tiny double ping | Library-style tap |
-| `open` / `comment` | Soft rising pair | Same patch family |
-| `like` | Short rising pair | React |
-| `share` | Mid rising pair | Share |
-| `tip` | Triple rising (494→988→1480) | Legacy tip (unused by tip preset; tips use `buySuccess`) |
-| `dislike` | Descending triangles | Warning / error audio |
-| `sent` | Triangle arpeggio | Send / sell / comment success |
-| `funds` | FM + reverb bloom | Deposit credit |
-| `refresh` | Rising sine ramp | Pull settle / notifs |
-| `copyAddr` | Delay-shimmer arpeggio | Address copy |
-| **`buySuccess`** | Five-layer sine/triangle + delay (`successZhxpj`) | Buy + tip success |
+| Key | Hear | Character | Origin |
+|-----|------|-----------|--------|
+| `light` | [▶](https://kby-feed.vercel.app/sounds#light) | Tiny double ping | Library-style tap |
+| `open` / `comment` | [▶](https://kby-feed.vercel.app/sounds#open) · [▶](https://kby-feed.vercel.app/sounds#comment) | Soft rising pair | Same patch family |
+| `like` | [▶](https://kby-feed.vercel.app/sounds#like) | Short rising pair | React |
+| `share` | [▶](https://kby-feed.vercel.app/sounds#share) | Mid rising pair | Share |
+| `tip` | [▶](https://kby-feed.vercel.app/sounds#tip) | Triple rising (494→988→1480) | Legacy tip (unused by tip preset; tips use `buySuccess`) |
+| `dislike` | [▶](https://kby-feed.vercel.app/sounds#dislike) | Descending triangles | Warning / error audio |
+| `sent` | [▶](https://kby-feed.vercel.app/sounds#sent) | Triangle arpeggio | Send / sell / comment success |
+| `funds` | [▶](https://kby-feed.vercel.app/sounds#funds) | FM + reverb bloom | Deposit credit |
+| `refresh` | [▶](https://kby-feed.vercel.app/sounds#refresh) | Rising sine ramp | Pull settle / notifs |
+| `copyAddr` | [▶](https://kby-feed.vercel.app/sounds#copyAddr) | Delay-shimmer arpeggio | Address copy |
+| **`buySuccess`** | [▶](https://kby-feed.vercel.app/sounds#buySuccess) | Five-layer sine/triangle + delay (`successZhxpj`) | Buy + tip success |
 
-Custom (not recipes): `toggle`, `mute`, `unmute`, `lock`, `unlock`, `settle`/`slotLand`, `dragtick`/`slotReelTick`.
+Custom (not recipes) — also on the sample page: [toggle](https://kby-feed.vercel.app/sounds#toggle) · [mute](https://kby-feed.vercel.app/sounds#mute) · [unmute](https://kby-feed.vercel.app/sounds#unmute) · [lock](https://kby-feed.vercel.app/sounds#lock) · [unlock](https://kby-feed.vercel.app/sounds#unlock) · [settle](https://kby-feed.vercel.app/sounds#settle) · [dragtick](https://kby-feed.vercel.app/sounds#dragtick).
 
 ---
 

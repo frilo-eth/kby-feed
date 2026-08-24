@@ -19,6 +19,7 @@
     { "source": "/feed", "destination": "/feed.html" },
     { "source": "/token", "destination": "/token.html" },
     { "source": "/profile", "destination": "/profile.html" },
-    { "source": "/flows", "destination": "/flows.html" }
+    { "source": "/flows", "destination": "/flows.html" },
+    { "source": "/sounds", "destination": "/sounds.html" }
   ]
 }
