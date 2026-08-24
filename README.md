@@ -930,7 +930,7 @@ Celebration helper: `celebrateSuccess(kind)` · `celebrateBuySuccess()` · `cele
 | **`sent`** | [▶](https://kby-feed.vercel.app/sounds#sent) | Comment posted | Rich pattern | **`sent`** | Via `celebrateSuccess('sent')` |
 | **`dislike`** | [▶](https://kby-feed.vercel.app/sounds#dislike) | Dislike react | Built-in `warning` | **`dislike`** (descending triangles) | React only |
 | **`warning`** | [▶](https://kby-feed.vercel.app/sounds#warning) | Top up to continue · short wallet · Enter an amount · Not enough in this wallet | Built-in `warning` | **`warning`** (triangle + soft double ping) | Soft gate — recoverable |
-| **`error`** | [▶](https://kby-feed.vercel.app/sounds#error) | MoonPay under-$10 · leave Solana warn · checkout / connect / auth cancel · signature reject · Sign-in cancelled · settle fail | Built-in `error` | **`error`** (low square + descending triangles) | Hard reject · sheet shake where applicable |
+| **`error`** | [▶](https://kby-feed.vercel.app/sounds#error) | MoonPay under-$10 · leave Solana warn · checkout / connect / auth cancel · signature reject · Sign-in cancelled · settle fail | Built-in `error` | **`error`** (`errorY8d0h` — noise tick + low sines + delay) | Hard reject · sheet shake where applicable |
 
 Rich haptic = `RICH_SUCCESS_WEB` (8 pulses, peaks at intensity 1). Tip haptic = `TIP_RICH_WEB` (5 pulses). Both flatten to `navigator.vibrate` when needed.
 
@@ -1040,7 +1040,7 @@ Default “tap something” = **`selection`** (WebHaptics `selection` · sound *
 | `tip` | [▶](https://kby-feed.vercel.app/sounds#tip) | Bright sine stack + delay (`successX9pkg`) | Tip (first + repeat) |
 | `dislike` | [▶](https://kby-feed.vercel.app/sounds#dislike) | Descending triangles | Dislike react |
 | `warning` | [▶](https://kby-feed.vercel.app/sounds#warning) | Soft double ping | Top-up / short / soft gates |
-| `error` | [▶](https://kby-feed.vercel.app/sounds#error) | Low square + descending | Hard reject / cancel |
+| `error` | [▶](https://kby-feed.vercel.app/sounds#error) | Noise tick + low sines (`errorY8d0h`) | Hard reject / cancel |
 | `sent` | [▶](https://kby-feed.vercel.app/sounds#sent) | Soft sine pair + delay (`success0m6r9`) | Send / sell / comment success |
 | `funds` | [▶](https://kby-feed.vercel.app/sounds#funds) | FM + reverb bloom | Deposit credit |
 | `refresh` | [▶](https://kby-feed.vercel.app/sounds#refresh) | Rising sine ramp | Pull settle / notifs |
