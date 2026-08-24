@@ -35,6 +35,7 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
 }
 .row:last-child{border-bottom:none;}
 .row.is-target{background:color-mix(in srgb, var(--orange) 10%, transparent);outline:2px solid color-mix(in srgb, var(--orange) 45%, transparent);outline-offset:-2px;}
+.actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .play{
   width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;
   background:var(--green);color:#111;display:grid;place-items:center;flex-shrink:0;
@@ -43,6 +44,16 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
 .play:hover{filter:brightness(1.04);}
 .play:active{transform:scale(.94);}
 .play svg{width:16px;height:16px;margin-left:2px;}
+.copy{
+  height:40px;padding:0 12px;border-radius:12px;border:1px solid var(--line);cursor:pointer;
+  background:transparent;color:var(--ink-soft);display:inline-flex;align-items:center;gap:6px;
+  font:inherit;font-size:12px;font-weight:700;letter-spacing:.01em;
+  transition:background .15s,color .15s,border-color .15s,transform .12s;
+}
+.copy:hover{background:var(--bg);color:var(--ink);border-color:color-mix(in srgb, var(--orange) 35%, var(--line));}
+.copy:active{transform:scale(.97);}
+.copy.is-done{color:#0B6B3A;border-color:rgba(61,220,151,.45);background:rgba(61,220,151,.12);}
+.copy svg{width:14px;height:14px;flex-shrink:0;}
 .meta{min-width:0;}
 .name{font-size:14px;font-weight:750;letter-spacing:-.02em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;}
 .desc{font-size:12px;font-weight:500;color:var(--ink-soft);margin-top:2px;}
@@ -57,6 +68,7 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
 @media (max-width:520px){
   .row{grid-template-columns:auto minmax(0,1fr);gap:8px 12px;}
   .tag{grid-column:2;}
+  .actions{grid-column:1 / -1;}
 }
 </style>
 </head>
@@ -72,7 +84,7 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
     <a href="https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map">README #haptic-sound-map</a>.
     Deep-link any cue with <code>#buySuccess</code>, etc.
   </p>
-  <p class="note">Click once to unlock audio (browser autoplay policy). Recipes stay in sync with <code>feed.html</code> <code>SOUND_RECIPES</code>.</p>
+  <p class="note">Click once to unlock audio (browser autoplay policy). <strong>Copy</strong> pastes the recipe object (or <code>haptic('…')</code> for custom cues) for use with the procedural-sounds player. Recipes stay in sync with <code>feed.html</code> <code>SOUND_RECIPES</code>.</p>
 
   <h2>Success / funds</h2>
   <div class="list" id="group-success"></div>
@@ -409,6 +421,7 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
   }
 
   const PLAY_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5L8 5.5Z"/></svg>';
+  const COPY_SVG = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
   const CATALOG = [
     { group:'success', id:'buySuccess', desc:'Buy + tip success (successZhxpj)', tag:'success', tagClass:'is-success' },
     { group:'success', id:'sent', desc:'Send / sell / comment success', tag:'success', tagClass:'is-success' },
@@ -422,13 +435,13 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
     { group:'click', id:'like', desc:'Like react', tag:'click', tagClass:'' },
     { group:'click', id:'share', desc:'Share sheet', tag:'click', tagClass:'' },
     { group:'click', id:'copyAddr', desc:'Copy address', tag:'click', tagClass:'' },
-    { group:'custom', id:'toggle', desc:'Toggle (custom oscillator)', tag:'custom', tagClass:'is-custom' },
-    { group:'custom', id:'mute', desc:'Mute feed', tag:'custom', tagClass:'is-custom' },
-    { group:'custom', id:'unmute', desc:'Unmute feed', tag:'custom', tagClass:'is-custom' },
-    { group:'custom', id:'lock', desc:'2× hold lock', tag:'custom', tagClass:'is-custom' },
-    { group:'custom', id:'unlock', desc:'Unlock 2×', tag:'custom', tagClass:'is-custom' },
-    { group:'custom', id:'settle', desc:'Slot land / attach', tag:'custom', tagClass:'is-custom' },
-    { group:'custom', id:'dragtick', desc:'Drag tick sample', tag:'custom', tagClass:'is-custom' },
+    { group:'custom', id:'toggle', desc:'Toggle (custom oscillator)', tag:'custom', tagClass:'is-custom', haptic:true },
+    { group:'custom', id:'mute', desc:'Mute feed', tag:'custom', tagClass:'is-custom', haptic:true },
+    { group:'custom', id:'unmute', desc:'Unmute feed', tag:'custom', tagClass:'is-custom', haptic:true },
+    { group:'custom', id:'lock', desc:'2× hold lock', tag:'custom', tagClass:'is-custom', haptic:true },
+    { group:'custom', id:'unlock', desc:'Unlock 2×', tag:'custom', tagClass:'is-custom', haptic:true },
+    { group:'custom', id:'settle', desc:'Slot land / attach', tag:'custom', tagClass:'is-custom', haptic:true },
+    { group:'custom', id:'dragtick', desc:'Drag tick sample', tag:'custom', tagClass:'is-custom', haptic:true },
   ];
 
   const lists = {
@@ -438,12 +451,42 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
     custom: document.getElementById('group-custom'),
   };
 
+  function copyPayload(id){
+    const recipe = SOUND_RECIPES[id];
+    if(recipe){
+      return `const ${id} = ${JSON.stringify(recipe, null, 2)};\n\n// With the procedural-sounds player:\nplaySound(${id});`;
+    }
+    return `// Custom oscillator in feed.html — call via the shared haptic helper:\nhaptic('${id}');`;
+  }
+
+  async function copyText(text){
+    try{
+      await navigator.clipboard.writeText(text);
+      return true;
+    }catch(_){
+      try{
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly','');
+        ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+        document.body.appendChild(ta);
+        ta.select();
+        const ok = document.execCommand('copy');
+        ta.remove();
+        return ok;
+      }catch(e){ return false; }
+    }
+  }
+
   CATALOG.forEach((item)=>{
     const row = document.createElement('div');
     row.className = 'row';
     row.id = item.id;
     row.innerHTML = `
-      <button type="button" class="play" data-play="${item.id}" aria-label="Play ${item.id}">${PLAY_SVG}</button>
+      <div class="actions">
+        <button type="button" class="play" data-play="${item.id}" aria-label="Play ${item.id}">${PLAY_SVG}</button>
+        <button type="button" class="copy" data-copy="${item.id}" aria-label="Copy ${item.id}">${COPY_SVG}<span>Copy</span></button>
+      </div>
       <div class="meta">
         <div class="name">${item.id}</div>
         <div class="desc">${item.desc}</div>
@@ -452,10 +495,25 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
     lists[item.group].appendChild(row);
   });
 
-  document.body.addEventListener('click', (e)=>{
-    const btn = e.target.closest('[data-play]');
-    if(!btn) return;
-    playSound(btn.dataset.play);
+  document.body.addEventListener('click', async (e)=>{
+    const playBtn = e.target.closest('[data-play]');
+    if(playBtn){
+      playSound(playBtn.dataset.play);
+      return;
+    }
+    const copyBtn = e.target.closest('[data-copy]');
+    if(!copyBtn) return;
+    const id = copyBtn.dataset.copy;
+    const ok = await copyText(copyPayload(id));
+    if(!ok) return;
+    const label = copyBtn.querySelector('span');
+    copyBtn.classList.add('is-done');
+    if(label) label.textContent = 'Copied';
+    clearTimeout(copyBtn._reset);
+    copyBtn._reset = setTimeout(()=>{
+      copyBtn.classList.remove('is-done');
+      if(label) label.textContent = 'Copy';
+    }, 1400);
   });
 
   function focusHash(){

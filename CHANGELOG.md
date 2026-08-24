@@ -4,7 +4,7 @@
 
 ### Docs
 - README [#haptic-sound-map](https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map): full preset → WebHaptics → sound recipe catalog (success / error / clicks / pull).
-- Playable samples at [`/sounds`](https://kby-feed.vercel.app/sounds) — README tables link **▶** to each cue.
+- Playable samples at [`/sounds`](https://kby-feed.vercel.app/sounds) — **Play** + **Copy** recipe; README tables link **▶** to each cue.
 
 ## 0.1.3 — 2026-08-19
 

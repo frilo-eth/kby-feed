@@ -898,7 +898,7 @@ Source: CSS ~2228–2363 · JS ~5492–6080 · markup `#pullSpin` ~2541 · point
 
 **Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map](https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map)
 
-**Hear them:** GitHub markdown can’t play audio. Use the sample page — each cue has a play button:
+**Hear them:** GitHub markdown can’t play audio. Use the sample page — each cue has **Play** + **Copy** (recipe object or `haptic('…')`):
 
 [https://kby-feed.vercel.app/sounds](https://kby-feed.vercel.app/sounds) · local [`/sounds`](http://localhost:3000/sounds)
 
