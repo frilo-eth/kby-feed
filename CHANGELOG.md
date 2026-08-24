@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Feedback
+- Dedicated **`warning`** and **`error`** sound recipes (no longer reuse `dislike` for flow failures).
+- Flow failures fire haptics: hard rejects (`error`) for checkout / connect / auth cancel, signature reject, under-$10 cash, sign-in cancelled; soft gates (`warning`) for top-up shortfalls, short wallet, and empty trade amount.
+- All UI audio unified on [procedural-sounds](https://procedural-sounds.vercel.app/) recipes — former custom oscillators (`mute` / `unmute` / `lock` / `unlock` / `toggle` / `settle` / `dragtick`) are now `SOUND_RECIPES`. `/sounds` is recipe-only (Play + Copy).
+- Comment / send / sell success sound (`sent`) swapped to `success0m6r9` (soft sine pair + delay).
+- Tip sound (`tip` / `tipSuccess`) swapped to `successX9pkg` (bright sine stack + delay); buy stays on `buySuccess` / `successZhxpj`.
+
 ### Docs
 - README [#haptic-sound-map](https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map): full preset → WebHaptics → sound recipe catalog (success / error / clicks / pull).
 - Playable samples at [`/sounds`](https://kby-feed.vercel.app/sounds) — **Play** + **Copy** recipe; README tables link **▶** to each cue.

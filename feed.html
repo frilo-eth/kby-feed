@@ -6792,6 +6792,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     const sub = 'You cancelled the request in your wallet.';
     const markHtml = extra && extra.markHtml;
     const inAuth = !!(extra && extra.inAuth) || login || flowHost() === 'auth' || session.authPanel === 'sig';
+    if(typeof haptic === 'function') haptic('error');
     session._sigRetry = ()=>{
       const last = session._extLast;
       if(session.swap && session.swap.step === 'fail'){
@@ -6995,12 +6996,14 @@ html.dark .qhc-id{color:#6BA3FF;}
       const need = spendShortfall(amt);
       if(need > 0){
         if(session.auth !== 'social' && totalBal() >= amt){
+          if(typeof haptic === 'function') haptic('warning');
           showToast('Active wallet is short. Switch wallet or add funds.');
           session.pendingSpend = ()=> requireSpend(amt, then, label);
           openWalletModal();
           return;
         }
         session.pendingSpend = null;
+        if(typeof haptic === 'function') haptic('warning');
         showToast('Top up to continue.');
         openTopUp(need, ()=> requireSpend(amt, then, label));
         return;
@@ -9531,13 +9534,16 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(!f) return;
     clearFlowTimer();
     if(f.step === 'cashWait'){
+      if(typeof haptic === 'function') haptic('error');
       showToast('Checkout declined.');
       f.step = 'cash';
     } else if(f.step === 'cwWait'){
+      if(typeof haptic === 'function') haptic('error');
       showToast('Connection rejected.');
       f.step = 'cwFamily';
       f.listReady = true;
     } else if(f.step === 'exWait'){
+      if(typeof haptic === 'function') haptic('error');
       showToast('Authorization cancelled.');
       f.step = 'exList';
       f.listReady = true;
@@ -10025,6 +10031,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     body.querySelector('[data-send-go]')?.addEventListener('click', ()=>{
       if(sendCtaState().kind === 'short'){
         if(session.flow && session.flow.kind === 'deposit'){
+          if(typeof haptic === 'function') haptic('warning');
           showToast('Not enough in this wallet.');
           return;
         }
@@ -10155,11 +10162,13 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     if(flow === 'login-error' || err === 'login'){
       openLogin();
+      if(typeof haptic === 'function') haptic('error');
       showToast('Sign-in cancelled.');
       return;
     }
     if(flow === 'topup' || flow === 'low'){
       seedDemoSocial(0);
+      if(typeof haptic === 'function') haptic('warning');
       showToast('Top up to continue.');
       demoOpenDeposit('cash', { amt:5, method:'MoonPay', payMethod:'apple' });
       return;
@@ -10335,6 +10344,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     const f = session.flow;
     const from = sendFromWallet();
     if(!sendCanTopUp(from)){
+      if(typeof haptic === 'function') haptic('warning');
       showToast('Not enough in this wallet.');
       return;
     }
@@ -10353,6 +10363,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       understood: f.understood,
       method: f.method,
     } : defaultFlow('send', 0);
+    if(typeof haptic === 'function') haptic('warning');
     openDeposit(need || 25, ()=> resumeSend(draft));
   }
   function openWithdraw(){ openSend(); }
@@ -10581,7 +10592,11 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   function openSwapConfirm(side){
     const amt = tradeUsdAmt();
-    if(amt <= 0){ showToast('Enter an amount.'); return; }
+    if(amt <= 0){
+      if(typeof haptic === 'function') haptic('warning');
+      showToast('Enter an amount.');
+      return;
+    }
     session.swap = snapshotSwap(side);
     if(needsSig()){
       session.swap.step = 'wait';
@@ -10619,6 +10634,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       if(!ok){
         session.swap.step = 'confirm';
         paintSwapSheet(true);
+        if(typeof haptic === 'function') haptic('error');
         showToast('Not enough funds.');
         return;
       }
@@ -10638,6 +10654,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       const a = cashWallet();
       const need = spendShortfall(s.amt);
       if(!a || need > 0){
+        if(typeof haptic === 'function') haptic('warning');
         showToast('Not enough funds.');
         closeSwap();
         openTopUp(need, ()=> resumeTrade('buy', true));
@@ -11111,7 +11128,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     light:'light', selection:'selection', nudge:'nudge', settle:'success',
     dragtick:'soft', toggle:'rigid', unmute:'nudge', mute:'rigid', open:'medium', comment:'success',
     sent:RICH_SUCCESS_WEB, tip:TIP_RICH_WEB, tipSuccess:RICH_SUCCESS_WEB, like:'medium', dislike:'warning', share:'soft', attach:'success',
-    lock:'rigid', unlock:'nudge', success:RICH_SUCCESS_WEB, funds:RICH_SUCCESS_WEB, buySuccess:RICH_SUCCESS_WEB, error:'error', copyAddr:'soft',
+    lock:'rigid', unlock:'nudge', success:RICH_SUCCESS_WEB, funds:RICH_SUCCESS_WEB, buySuccess:RICH_SUCCESS_WEB, error:'error', warning:'warning', copyAddr:'soft',
     // Pull-to-refresh — custom patterns via web-haptics (https://haptics.lochie.me)
     pulltick:  [{ duration: 8, intensity: 0.22 }],
     pullmorph: [{ duration: 14, intensity: 0.4 }],
@@ -11140,6 +11157,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     tipSuccess:{ vibrate: RICH_SUCCESS_VIBRATE, ...RICH_SUCCESS_TAPS },
     like:      { vibrate: [7, 28, 11], taps: 2, tapGap: 32 },
     dislike:   { vibrate: [26, 16, 22], taps: 1 },
+    warning:   { vibrate: [18, 28, 22, 32, 18], taps: 2, tapGap: 48 },
     lock:      { vibrate: [12, 22, 16], taps: 1 },
     unlock:    { vibrate: [8, 20, 10, 28, 8], taps: 2, tapGap: 36 },
     success:   { vibrate: RICH_SUCCESS_VIBRATE, ...RICH_SUCCESS_TAPS },
@@ -11159,8 +11177,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     // Swipe ticks are haptic-only — audio is reserved for intentional cues (react, mute, lock, …)
     light:'light', selection:'light', nudge:'light', settle:false, attach:'settle', dragtick:false,
     toggle:'toggle', unmute:'unmute', mute:'mute', open:'open', comment:'comment', sent:'sent', share:'share',
-    tip:'buySuccess', tipSuccess:'buySuccess', like:'like', dislike:'dislike', lock:'lock', unlock:'unlock',
-    success:'sent', buySuccess:'buySuccess', funds:'funds', error:'dislike', copyAddr:'copyAddr',
+    tip:'tip', tipSuccess:'tip', like:'like', dislike:'dislike', lock:'lock', unlock:'unlock',
+    success:'sent', buySuccess:'buySuccess', funds:'funds', error:'error', warning:'warning', copyAddr:'copyAddr',
     pulltick:false, pullmorph:'light', pullarm:'light', pulldisarm:false,
     pullfire:'open', pullcancel:false, pullsettle:'refresh',
   };
@@ -11187,8 +11205,9 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
   }
   // Recipe player + library patches from procedural-sounds (MIT).
-  // Player is a standalone copy of their synth; recipes are hand-curated pool sounds.
+  // Player is a standalone copy of their synth; every cue is a recipe object.
   // https://github.com/m1ckc3s/procedural-sounds — synth core adapted from @web-kits/audio (Raphael Salaja, MIT).
+  // https://procedural-sounds.vercel.app/
   // Named playRecipe so it does not collide with playSound(kind).
   function playRecipe(patch, ctx){
     if(!patch || !ctx) return;
@@ -11308,10 +11327,10 @@ html.dark .qhc-id{color:#6BA3FF;}
       {source:{type:'sine',frequency:660,fm:{ratio:3,depth:300}},envelope:{attack:0,decay:0.5,sustain:0.03,release:0.2},effects:[{type:'reverb',decay:0.7,damping:0.4,mix:0.15}],gain:0.111},
       {source:{type:'sine',frequency:990,fm:{ratio:3,depth:250}},envelope:{attack:0,decay:0.45,sustain:0.02,release:0.18},delay:0.12,effects:[{type:'reverb',decay:0.7,damping:0.4,mix:0.15}],gain:0.093}
     ]},
+    // success0m6r9 — https://procedural-sounds.vercel.app/
     sent:{layers:[
-      {source:{type:'triangle',frequency:444},envelope:{attack:0.003,decay:0.137,sustain:0,release:0},gain:0.124,filter:{type:'lowpass',frequency:1200}},
-      {source:{type:'triangle',frequency:560},envelope:{attack:0.003,decay:0.132,sustain:0,release:0},gain:0.125,delay:0.089,filter:{type:'lowpass',frequency:1399}},
-      {source:{type:'triangle',frequency:747},envelope:{attack:0.003,decay:0.164,sustain:0,release:0},gain:0.189,delay:0.163,filter:{type:'lowpass',frequency:1868}}
+      {source:{type:'sine',frequency:597.4686278829638},envelope:{attack:0.007,decay:0.20139927550773518,sustain:0,release:0.004},gain:0.138,effects:[{type:'delay',delay:0.118,feedback:0.267,wet:0.169,lowpass:4143}]},
+      {source:{type:'sine',frequency:797.5252853090024},envelope:{attack:0.003,decay:0.166445692138274,sustain:0,release:0.004},gain:0.122,delay:0.08996842557537804,effects:[{type:'delay',delay:0.118,feedback:0.267,wet:0.169,lowpass:4143}]}
     ]},
     refresh:{layers:[
       {source:{type:'sine',frequency:555},envelope:{attack:0.003,decay:0.09,sustain:0,release:0,curve:'ramp'},gain:0.161},
@@ -11322,14 +11341,26 @@ html.dark .qhc-id{color:#6BA3FF;}
       {source:{type:'sine',frequency:651},envelope:{attack:0.003,decay:0.06,sustain:0,release:0,curve:'ramp'},gain:0.155},
       {source:{type:'sine',frequency:728},envelope:{attack:0.003,decay:0.067,sustain:0,release:0,curve:'ramp'},gain:0.11,delay:0.138}
     ]},
+    // successX9pkg — tip (first + repeat) · https://procedural-sounds.vercel.app/
     tip:{layers:[
-      {source:{type:'sine',frequency:494},envelope:{attack:0.004,decay:0.222,sustain:0,release:0,curve:'ramp'},gain:0.159},
-      {source:{type:'sine',frequency:988},envelope:{attack:0.004,decay:0.16,sustain:0,release:0,curve:'ramp'},gain:0.111,delay:0.133},
-      {source:{type:'sine',frequency:1480},envelope:{attack:0.004,decay:0.146,sustain:0,release:0,curve:'ramp'},gain:0.054,delay:0.28}
+      {source:{type:'sine',frequency:1051.594452949106},envelope:{attack:0.004,decay:0.17999645023203553,sustain:0,release:0.004,curve:'ramp'},gain:0.129,effects:[{type:'delay',delay:0.1433468823925163,feedback:0.30814427260100086,wet:0.14060819700262958,lowpass:3242.266138456832}]},
+      {source:{type:'sine',frequency:1575.611951779618},envelope:{attack:0.003,decay:0.16766326801899298,sustain:0,release:0.004,curve:'ramp'},gain:0.165,delay:0.036369851608482356,effects:[{type:'delay',delay:0.1433468823925163,feedback:0.30814427260100086,wet:0.14060819700262958,lowpass:3242.266138456832}]},
+      {source:{type:'sine',frequency:2103.188905898212},envelope:{attack:0.004,decay:0.16123430720797802,sustain:0,release:0.004,curve:'ramp'},gain:0.065,delay:0.06364724031484413,effects:[{type:'delay',delay:0.1433468823925163,feedback:0.30814427260100086,wet:0.14060819700262958,lowpass:3242.266138456832}]},
+      {source:{type:'sine',frequency:525.797226474553},envelope:{attack:0.004,decay:0.16678281854130098,sustain:0,release:0.004,curve:'ramp'},gain:0.061,delay:0,effects:[{type:'delay',delay:0.1433468823925163,feedback:0.30814427260100086,wet:0.14060819700262958,lowpass:3242.266138456832}]}
     ]},
     dislike:{layers:[
       {source:{type:'triangle',frequency:371},envelope:{attack:0.004,decay:0.097,sustain:0,release:0,curve:'ramp'},gain:0.181},
       {source:{type:'triangle',frequency:262},envelope:{attack:0.004,decay:0.135,sustain:0,release:0,curve:'ramp'},gain:0.167,delay:0.136}
+    ]},
+    warning:{layers:[
+      {source:{type:'triangle',frequency:420},envelope:{attack:0.004,decay:0.12,sustain:0,release:0,curve:'ramp'},gain:0.16},
+      {source:{type:'sine',frequency:560},envelope:{attack:0.004,decay:0.14,sustain:0,release:0,curve:'ramp'},gain:0.1,delay:0.1},
+      {source:{type:'sine',frequency:420},envelope:{attack:0.003,decay:0.11,sustain:0,release:0,curve:'ramp'},gain:0.07,delay:0.2}
+    ]},
+    error:{layers:[
+      {source:{type:'square',frequency:220},envelope:{attack:0.002,decay:0.11,sustain:0,release:0,curve:'ramp'},gain:0.09,filter:{type:'lowpass',frequency:900}},
+      {source:{type:'triangle',frequency:165},envelope:{attack:0.003,decay:0.16,sustain:0,release:0,curve:'ramp'},gain:0.14,delay:0.08},
+      {source:{type:'triangle',frequency:130},envelope:{attack:0.003,decay:0.2,sustain:0,release:0,curve:'ramp'},gain:0.12,delay:0.18}
     ]},
     comment:{layers:[
       {source:{type:'sine',frequency:533},envelope:{attack:0.001,decay:0.027,sustain:0,release:0,curve:'ramp'},gain:0.153},
@@ -11358,140 +11389,56 @@ html.dark .qhc-id{color:#6BA3FF;}
       {source:{type:'sine',frequency:394.65864711426985,detune:8},envelope:{attack:0.006,decay:0.14339698769518983,sustain:0.03,release:0.05270340030677575},gain:0.039,delay:0.08923778687911745,effects:[{type:'delay',delay:0.117,feedback:0.282,wet:0.116,lowpass:2815}]},
       {source:{type:'sine',frequency:526.8065293369676},envelope:{attack:0.005,decay:0.28976836627196934,sustain:0.03,release:0.0780350393821972},gain:0.144,delay:0.1784755737582349,effects:[{type:'delay',delay:0.117,feedback:0.282,wet:0.116,lowpass:2815}]},
       {source:{type:'sine',frequency:789.3181586351034},envelope:{attack:0.008,decay:0.15624069512277092,sustain:0.03,release:0.05515607299253277},gain:0.046,delay:0.1784755737582349,effects:[{type:'delay',delay:0.117,feedback:0.282,wet:0.116,lowpass:2815}]}
+    ]},
+    // Former custom oscillators — same character, procedural-sounds recipe format
+    // https://procedural-sounds.vercel.app/
+    toggle:{layers:[
+      {source:{type:'sine',frequency:880},envelope:{attack:0,decay:0.025,sustain:0,release:0},gain:0.1}
+    ]},
+    mute:{layers:[
+      {source:{type:'triangle',frequency:480},envelope:{attack:0.004,decay:0.06,sustain:0,release:0,curve:'ramp'},gain:0.12},
+      {source:{type:'triangle',frequency:280},envelope:{attack:0.004,decay:0.08,sustain:0,release:0,curve:'ramp'},gain:0.1,delay:0.035},
+      {source:{type:'triangle',frequency:150},envelope:{attack:0.003,decay:0.09,sustain:0,release:0,curve:'ramp'},gain:0.08,delay:0.07},
+      {source:{type:'sine',frequency:420},envelope:{attack:0,decay:0.02,sustain:0,release:0},gain:0.04,delay:0.055}
+    ]},
+    unmute:{layers:[
+      {source:{type:'sine',frequency:520},envelope:{attack:0.004,decay:0.12,sustain:0,release:0,curve:'ramp'},gain:0.085},
+      {source:{type:'sine',frequency:760},envelope:{attack:0.004,decay:0.12,sustain:0,release:0,curve:'ramp'},gain:0.067,delay:0.032},
+      {source:{type:'sine',frequency:1040},envelope:{attack:0.004,decay:0.12,sustain:0,release:0,curve:'ramp'},gain:0.049,delay:0.064},
+      {source:{type:'sine',frequency:1180},envelope:{attack:0,decay:0.025,sustain:0,release:0},gain:0.04,delay:0.07}
+    ]},
+    lock:{layers:[
+      {source:{type:'triangle',frequency:240},envelope:{attack:0.002,decay:0.06,sustain:0,release:0,curve:'ramp'},gain:0.14,filter:{type:'lowpass',frequency:800}},
+      {source:{type:'triangle',frequency:110},envelope:{attack:0.002,decay:0.08,sustain:0,release:0,curve:'ramp'},gain:0.1,delay:0.03,filter:{type:'lowpass',frequency:600}},
+      {source:{type:'square',frequency:1450},envelope:{attack:0.001,decay:0.028,sustain:0,release:0},gain:0.055,delay:0.028,filter:{type:'lowpass',frequency:3200}}
+    ]},
+    unlock:{layers:[
+      {source:{type:'sine',frequency:360},envelope:{attack:0.004,decay:0.05,sustain:0,release:0,curve:'ramp'},gain:0.1},
+      {source:{type:'sine',frequency:620},envelope:{attack:0.004,decay:0.07,sustain:0,release:0,curve:'ramp'},gain:0.09,delay:0.03},
+      {source:{type:'sine',frequency:980},envelope:{attack:0.004,decay:0.08,sustain:0,release:0,curve:'ramp'},gain:0.08,delay:0.06},
+      {source:{type:'sine',frequency:1320},envelope:{attack:0,decay:0.025,sustain:0,release:0},gain:0.045,delay:0.058}
+    ]},
+    settle:{layers:[
+      {source:{type:'triangle',frequency:659.25},envelope:{attack:0.004,decay:0.18,sustain:0,release:0,curve:'ramp'},gain:0.1},
+      {source:{type:'triangle',frequency:830.61},envelope:{attack:0.004,decay:0.17,sustain:0,release:0,curve:'ramp'},gain:0.088,delay:0.042},
+      {source:{type:'triangle',frequency:987.77},envelope:{attack:0.004,decay:0.16,sustain:0,release:0,curve:'ramp'},gain:0.076,delay:0.084},
+      {source:{type:'sine',frequency:1318.51},envelope:{attack:0.006,decay:0.15,sustain:0,release:0,curve:'ramp'},gain:0.045,delay:0.086}
+    ]},
+    dragtick:{layers:[
+      {source:{type:'triangle',frequency:560},envelope:{attack:0.002,decay:0.045,sustain:0,release:0,curve:'ramp'},gain:0.1},
+      {source:{type:'square',frequency:1800},envelope:{attack:0,decay:0.016,sustain:0,release:0},gain:0.035,filter:{type:'lowpass',frequency:4000}}
     ]}
   };
-  function slotReelTick(ctx, step, vel){
-    const t0 = ctx.currentTime;
-    const pitch = 520 + (step % 5) * 38 + Math.min(Math.abs(vel||0) * 18, 120);
-    const osc = ctx.createOscillator(); osc.type='triangle';
-    osc.frequency.setValueAtTime(pitch * 1.02, t0);
-    osc.frequency.exponentialRampToValueAtTime(pitch * 0.72, t0 + 0.045);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(0.11, t0 + 0.004);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.055);
-    const click = ctx.createOscillator(); click.type='square';
-    click.frequency.setValueAtTime(1800 + (step % 3) * 90, t0);
-    const cg = ctx.createGain();
-    cg.gain.setValueAtTime(0.04, t0); cg.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.018);
-    osc.connect(g); g.connect(masterGain); click.connect(cg); cg.connect(masterGain);
-    osc.start(t0); osc.stop(t0 + 0.06);
-    click.start(t0); click.stop(t0 + 0.02);
-  }
-  function slotLand(ctx){
-    const t0 = ctx.currentTime;
-    // cheerful rising major arpeggio (E5 -> G#5 -> B5), bright triangle body
-    [659.25, 830.61, 987.77].forEach((f, i)=>{
-      const t = t0 + i * 0.042;
-      const osc = ctx.createOscillator(); osc.type='triangle'; osc.frequency.value = f;
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.10 - i * 0.012, t + 0.008);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.19);
-      osc.connect(g); g.connect(masterGain);
-      osc.start(t); osc.stop(t + 0.21);
-    });
-    // a little sparkle on top (E6) to keep it optimistic and light
-    const ts = t0 + 0.086;
-    const spark = ctx.createOscillator(); spark.type='sine'; spark.frequency.value = 1318.51;
-    const sg = ctx.createGain();
-    sg.gain.setValueAtTime(0.0001, ts);
-    sg.gain.exponentialRampToValueAtTime(0.045, ts + 0.01);
-    sg.gain.exponentialRampToValueAtTime(0.0001, ts + 0.17);
-    spark.connect(sg); sg.connect(masterGain);
-    spark.start(ts); spark.stop(ts + 0.19);
-  }
-  function microClick(ctx, freq){
-    const t0 = ctx.currentTime;
-    const osc = ctx.createOscillator(); osc.type='sine'; osc.frequency.value = freq || 1200;
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.03, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.02);
-    osc.connect(g); g.connect(masterGain); osc.start(t0); osc.stop(t0 + 0.025);
-  }
-  function reactToggleSound(ctx){
-    microClick(ctx, feedSoundOn ? 980 : 640);
-  }
-  function reactUnmuteSound(ctx){
-    const t0 = ctx.currentTime;
-    // soft rising bloom — sound coming back
-    [520, 760, 1040].forEach((f, i)=>{
-      const t = t0 + i * 0.032;
-      const osc = ctx.createOscillator(); osc.type = 'sine'; osc.frequency.value = f;
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.085 - i * 0.018, t + 0.01);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
-      osc.connect(g); g.connect(masterGain);
-      osc.start(t); osc.stop(t + 0.15);
-    });
-    setTimeout(()=>microClick(ctx, 1180), 70);
-  }
-  function reactMuteSound(ctx){
-    const t0 = ctx.currentTime;
-    // descending cut — sound shut off
-    const osc = ctx.createOscillator(); osc.type = 'triangle';
-    osc.frequency.setValueAtTime(480, t0);
-    osc.frequency.exponentialRampToValueAtTime(150, t0 + 0.1);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(0.1, t0 + 0.008);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12);
-    osc.connect(g); g.connect(masterGain);
-    osc.start(t0); osc.stop(t0 + 0.13);
-    setTimeout(()=>microClick(ctx, 420), 55);
-  }
-  function reactLockSound(ctx){
-    // mechanical latch — low thud + bright click
-    const t0 = ctx.currentTime;
-    const body = ctx.createOscillator(); body.type = 'triangle';
-    body.frequency.setValueAtTime(240, t0);
-    body.frequency.exponentialRampToValueAtTime(95, t0 + 0.08);
-    const bg = ctx.createGain();
-    bg.gain.setValueAtTime(0.0001, t0);
-    bg.gain.exponentialRampToValueAtTime(0.14, t0 + 0.005);
-    bg.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.1);
-    body.connect(bg); bg.connect(masterGain);
-    body.start(t0); body.stop(t0 + 0.11);
-    const click = ctx.createOscillator(); click.type = 'square';
-    click.frequency.setValueAtTime(1450, t0 + 0.028);
-    const cg = ctx.createGain();
-    cg.gain.setValueAtTime(0.0001, t0 + 0.028);
-    cg.gain.exponentialRampToValueAtTime(0.07, t0 + 0.034);
-    cg.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.055);
-    click.connect(cg); cg.connect(masterGain);
-    click.start(t0 + 0.028); click.stop(t0 + 0.06);
-  }
-  function reactUnlockSound(ctx){
-    // springy open latch — rising bloom + tick (mute/unmute family)
-    const t0 = ctx.currentTime;
-    const osc = ctx.createOscillator(); osc.type = 'sine';
-    osc.frequency.setValueAtTime(360, t0);
-    osc.frequency.exponentialRampToValueAtTime(980, t0 + 0.09);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(0.12, t0 + 0.008);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12);
-    osc.connect(g); g.connect(masterGain);
-    osc.start(t0); osc.stop(t0 + 0.13);
-    setTimeout(()=>microClick(ctx, 1320), 58);
-  }
-  function playSound(kind, arg){
+  function playSound(kind){
     unlockAudio();
     const ctx = actx; if(!ctx) return;
-    const recipe = SOUND_RECIPES[kind];
-    if(recipe){ playRecipe(recipe, ctx); return; }
-    if(kind==='dragtick'){
+    if(kind === 'dragtick'){
       const now = performance.now();
       if(now - lastDragSound < 55) return;
       lastDragSound = now;
-      slotReelTick(ctx, arg || 0, 0);
     }
-    else if(kind==='settle') slotLand(ctx);
-    else if(kind==='toggle') reactToggleSound(ctx);
-    else if(kind==='unmute') reactUnmuteSound(ctx);
-    else if(kind==='mute') reactMuteSound(ctx);
-    else if(kind==='lock') reactLockSound(ctx);
-    else if(kind==='unlock') reactUnlockSound(ctx);
+    const recipe = SOUND_RECIPES[kind];
+    if(recipe) playRecipe(recipe, ctx);
   }
 
   const hapticSwitch = document.createElement('input');

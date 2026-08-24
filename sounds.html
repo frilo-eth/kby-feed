@@ -62,7 +62,6 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
 .tag.is-success{color:#0B6B3A;border-color:rgba(61,220,151,.45);background:rgba(61,220,151,.12);}
 .tag.is-warn{color:#8A4B00;border-color:rgba(255,166,34,.4);background:rgba(255,166,34,.1);}
 .tag.is-error{color:#9B1C1C;border-color:rgba(220,60,60,.35);background:rgba(220,60,60,.08);}
-.tag.is-custom{color:var(--ink-soft);}
 @media (max-width:520px){
   .row{grid-template-columns:auto minmax(0,1fr) auto;gap:8px 12px;}
   .tag{grid-column:2;justify-self:start;}
@@ -82,7 +81,7 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
     <a href="https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map">README #haptic-sound-map</a>.
     Deep-link any cue with <code>#buySuccess</code>, etc.
   </p>
-  <p class="note">Click once to unlock audio (browser autoplay policy). <strong>Copy</strong> pastes the recipe object (or <code>haptic('…')</code> for custom cues) for use with the procedural-sounds player. Recipes stay in sync with <code>feed.html</code> <code>SOUND_RECIPES</code>.</p>
+  <p class="note">Click once to unlock audio (browser autoplay policy). <strong>Copy</strong> pastes a <a href="https://procedural-sounds.vercel.app/">procedural-sounds</a> recipe for the shared player. Catalog stays in sync with <code>feed.html</code> <code>SOUND_RECIPES</code> — no custom oscillators.</p>
 
   <h2>Success / funds</h2>
   <div class="list" id="group-success"></div>
@@ -93,8 +92,8 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
   <h2>Clicks &amp; reacts</h2>
   <div class="list" id="group-click"></div>
 
-  <h2>Custom oscillators</h2>
-  <div class="list" id="group-custom"></div>
+  <h2>Gesture &amp; motion</h2>
+  <div class="list" id="group-gesture"></div>
 </div>
 <script>
 (function(){
@@ -244,10 +243,10 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
       {source:{type:'sine',frequency:660,fm:{ratio:3,depth:300}},envelope:{attack:0,decay:0.5,sustain:0.03,release:0.2},effects:[{type:'reverb',decay:0.7,damping:0.4,mix:0.15}],gain:0.111},
       {source:{type:'sine',frequency:990,fm:{ratio:3,depth:250}},envelope:{attack:0,decay:0.45,sustain:0.02,release:0.18},delay:0.12,effects:[{type:'reverb',decay:0.7,damping:0.4,mix:0.15}],gain:0.093}
     ]},
+    // success0m6r9 — https://procedural-sounds.vercel.app/
     sent:{layers:[
-      {source:{type:'triangle',frequency:444},envelope:{attack:0.003,decay:0.137,sustain:0,release:0},gain:0.124,filter:{type:'lowpass',frequency:1200}},
-      {source:{type:'triangle',frequency:560},envelope:{attack:0.003,decay:0.132,sustain:0,release:0},gain:0.125,delay:0.089,filter:{type:'lowpass',frequency:1399}},
-      {source:{type:'triangle',frequency:747},envelope:{attack:0.003,decay:0.164,sustain:0,release:0},gain:0.189,delay:0.163,filter:{type:'lowpass',frequency:1868}}
+      {source:{type:'sine',frequency:597.4686278829638},envelope:{attack:0.007,decay:0.20139927550773518,sustain:0,release:0.004},gain:0.138,effects:[{type:'delay',delay:0.118,feedback:0.267,wet:0.169,lowpass:4143}]},
+      {source:{type:'sine',frequency:797.5252853090024},envelope:{attack:0.003,decay:0.166445692138274,sustain:0,release:0.004},gain:0.122,delay:0.08996842557537804,effects:[{type:'delay',delay:0.118,feedback:0.267,wet:0.169,lowpass:4143}]}
     ]},
     refresh:{layers:[
       {source:{type:'sine',frequency:555},envelope:{attack:0.003,decay:0.09,sustain:0,release:0,curve:'ramp'},gain:0.161},
@@ -258,14 +257,26 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
       {source:{type:'sine',frequency:651},envelope:{attack:0.003,decay:0.06,sustain:0,release:0,curve:'ramp'},gain:0.155},
       {source:{type:'sine',frequency:728},envelope:{attack:0.003,decay:0.067,sustain:0,release:0,curve:'ramp'},gain:0.11,delay:0.138}
     ]},
+    // successX9pkg — tip (first + repeat) · https://procedural-sounds.vercel.app/
     tip:{layers:[
-      {source:{type:'sine',frequency:494},envelope:{attack:0.004,decay:0.222,sustain:0,release:0,curve:'ramp'},gain:0.159},
-      {source:{type:'sine',frequency:988},envelope:{attack:0.004,decay:0.16,sustain:0,release:0,curve:'ramp'},gain:0.111,delay:0.133},
-      {source:{type:'sine',frequency:1480},envelope:{attack:0.004,decay:0.146,sustain:0,release:0,curve:'ramp'},gain:0.054,delay:0.28}
+      {source:{type:'sine',frequency:1051.594452949106},envelope:{attack:0.004,decay:0.17999645023203553,sustain:0,release:0.004,curve:'ramp'},gain:0.129,effects:[{type:'delay',delay:0.1433468823925163,feedback:0.30814427260100086,wet:0.14060819700262958,lowpass:3242.266138456832}]},
+      {source:{type:'sine',frequency:1575.611951779618},envelope:{attack:0.003,decay:0.16766326801899298,sustain:0,release:0.004,curve:'ramp'},gain:0.165,delay:0.036369851608482356,effects:[{type:'delay',delay:0.1433468823925163,feedback:0.30814427260100086,wet:0.14060819700262958,lowpass:3242.266138456832}]},
+      {source:{type:'sine',frequency:2103.188905898212},envelope:{attack:0.004,decay:0.16123430720797802,sustain:0,release:0.004,curve:'ramp'},gain:0.065,delay:0.06364724031484413,effects:[{type:'delay',delay:0.1433468823925163,feedback:0.30814427260100086,wet:0.14060819700262958,lowpass:3242.266138456832}]},
+      {source:{type:'sine',frequency:525.797226474553},envelope:{attack:0.004,decay:0.16678281854130098,sustain:0,release:0.004,curve:'ramp'},gain:0.061,delay:0,effects:[{type:'delay',delay:0.1433468823925163,feedback:0.30814427260100086,wet:0.14060819700262958,lowpass:3242.266138456832}]}
     ]},
     dislike:{layers:[
       {source:{type:'triangle',frequency:371},envelope:{attack:0.004,decay:0.097,sustain:0,release:0,curve:'ramp'},gain:0.181},
       {source:{type:'triangle',frequency:262},envelope:{attack:0.004,decay:0.135,sustain:0,release:0,curve:'ramp'},gain:0.167,delay:0.136}
+    ]},
+    warning:{layers:[
+      {source:{type:'triangle',frequency:420},envelope:{attack:0.004,decay:0.12,sustain:0,release:0,curve:'ramp'},gain:0.16},
+      {source:{type:'sine',frequency:560},envelope:{attack:0.004,decay:0.14,sustain:0,release:0,curve:'ramp'},gain:0.1,delay:0.1},
+      {source:{type:'sine',frequency:420},envelope:{attack:0.003,decay:0.11,sustain:0,release:0,curve:'ramp'},gain:0.07,delay:0.2}
+    ]},
+    error:{layers:[
+      {source:{type:'square',frequency:220},envelope:{attack:0.002,decay:0.11,sustain:0,release:0,curve:'ramp'},gain:0.09,filter:{type:'lowpass',frequency:900}},
+      {source:{type:'triangle',frequency:165},envelope:{attack:0.003,decay:0.16,sustain:0,release:0,curve:'ramp'},gain:0.14,delay:0.08},
+      {source:{type:'triangle',frequency:130},envelope:{attack:0.003,decay:0.2,sustain:0,release:0,curve:'ramp'},gain:0.12,delay:0.18}
     ]},
     comment:{layers:[
       {source:{type:'sine',frequency:533},envelope:{attack:0.001,decay:0.027,sustain:0,release:0,curve:'ramp'},gain:0.153},
@@ -294,167 +305,89 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
       {source:{type:'sine',frequency:394.65864711426985,detune:8},envelope:{attack:0.006,decay:0.14339698769518983,sustain:0.03,release:0.05270340030677575},gain:0.039,delay:0.08923778687911745,effects:[{type:'delay',delay:0.117,feedback:0.282,wet:0.116,lowpass:2815}]},
       {source:{type:'sine',frequency:526.8065293369676},envelope:{attack:0.005,decay:0.28976836627196934,sustain:0.03,release:0.0780350393821972},gain:0.144,delay:0.1784755737582349,effects:[{type:'delay',delay:0.117,feedback:0.282,wet:0.116,lowpass:2815}]},
       {source:{type:'sine',frequency:789.3181586351034},envelope:{attack:0.008,decay:0.15624069512277092,sustain:0.03,release:0.05515607299253277},gain:0.046,delay:0.1784755737582349,effects:[{type:'delay',delay:0.117,feedback:0.282,wet:0.116,lowpass:2815}]}
+    ]},
+    toggle:{layers:[
+      {source:{type:'sine',frequency:880},envelope:{attack:0,decay:0.025,sustain:0,release:0},gain:0.1}
+    ]},
+    mute:{layers:[
+      {source:{type:'triangle',frequency:480},envelope:{attack:0.004,decay:0.06,sustain:0,release:0,curve:'ramp'},gain:0.12},
+      {source:{type:'triangle',frequency:280},envelope:{attack:0.004,decay:0.08,sustain:0,release:0,curve:'ramp'},gain:0.1,delay:0.035},
+      {source:{type:'triangle',frequency:150},envelope:{attack:0.003,decay:0.09,sustain:0,release:0,curve:'ramp'},gain:0.08,delay:0.07},
+      {source:{type:'sine',frequency:420},envelope:{attack:0,decay:0.02,sustain:0,release:0},gain:0.04,delay:0.055}
+    ]},
+    unmute:{layers:[
+      {source:{type:'sine',frequency:520},envelope:{attack:0.004,decay:0.12,sustain:0,release:0,curve:'ramp'},gain:0.085},
+      {source:{type:'sine',frequency:760},envelope:{attack:0.004,decay:0.12,sustain:0,release:0,curve:'ramp'},gain:0.067,delay:0.032},
+      {source:{type:'sine',frequency:1040},envelope:{attack:0.004,decay:0.12,sustain:0,release:0,curve:'ramp'},gain:0.049,delay:0.064},
+      {source:{type:'sine',frequency:1180},envelope:{attack:0,decay:0.025,sustain:0,release:0},gain:0.04,delay:0.07}
+    ]},
+    lock:{layers:[
+      {source:{type:'triangle',frequency:240},envelope:{attack:0.002,decay:0.06,sustain:0,release:0,curve:'ramp'},gain:0.14,filter:{type:'lowpass',frequency:800}},
+      {source:{type:'triangle',frequency:110},envelope:{attack:0.002,decay:0.08,sustain:0,release:0,curve:'ramp'},gain:0.1,delay:0.03,filter:{type:'lowpass',frequency:600}},
+      {source:{type:'square',frequency:1450},envelope:{attack:0.001,decay:0.028,sustain:0,release:0},gain:0.055,delay:0.028,filter:{type:'lowpass',frequency:3200}}
+    ]},
+    unlock:{layers:[
+      {source:{type:'sine',frequency:360},envelope:{attack:0.004,decay:0.05,sustain:0,release:0,curve:'ramp'},gain:0.1},
+      {source:{type:'sine',frequency:620},envelope:{attack:0.004,decay:0.07,sustain:0,release:0,curve:'ramp'},gain:0.09,delay:0.03},
+      {source:{type:'sine',frequency:980},envelope:{attack:0.004,decay:0.08,sustain:0,release:0,curve:'ramp'},gain:0.08,delay:0.06},
+      {source:{type:'sine',frequency:1320},envelope:{attack:0,decay:0.025,sustain:0,release:0},gain:0.045,delay:0.058}
+    ]},
+    settle:{layers:[
+      {source:{type:'triangle',frequency:659.25},envelope:{attack:0.004,decay:0.18,sustain:0,release:0,curve:'ramp'},gain:0.1},
+      {source:{type:'triangle',frequency:830.61},envelope:{attack:0.004,decay:0.17,sustain:0,release:0,curve:'ramp'},gain:0.088,delay:0.042},
+      {source:{type:'triangle',frequency:987.77},envelope:{attack:0.004,decay:0.16,sustain:0,release:0,curve:'ramp'},gain:0.076,delay:0.084},
+      {source:{type:'sine',frequency:1318.51},envelope:{attack:0.006,decay:0.15,sustain:0,release:0,curve:'ramp'},gain:0.045,delay:0.086}
+    ]},
+    dragtick:{layers:[
+      {source:{type:'triangle',frequency:560},envelope:{attack:0.002,decay:0.045,sustain:0,release:0,curve:'ramp'},gain:0.1},
+      {source:{type:'square',frequency:1800},envelope:{attack:0,decay:0.016,sustain:0,release:0},gain:0.035,filter:{type:'lowpass',frequency:4000}}
     ]}
   };
-
-  function microClick(ctx, hz){
-    const t0 = ctx.currentTime;
-    const osc = ctx.createOscillator(); osc.type='square'; osc.frequency.value = hz;
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(0.05, t0 + 0.004);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.03);
-    osc.connect(g); g.connect(masterGain);
-    osc.start(t0); osc.stop(t0 + 0.035);
-  }
-  function slotLand(ctx){
-    const t0 = ctx.currentTime;
-    [659.25, 830.61, 987.77].forEach((f, i)=>{
-      const t = t0 + i * 0.042;
-      const osc = ctx.createOscillator(); osc.type='triangle'; osc.frequency.value = f;
-      const g = ctx.createGain();
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.10 - i * 0.012, t + 0.008);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.19);
-      osc.connect(g); g.connect(masterGain);
-      osc.start(t); osc.stop(t + 0.21);
-    });
-  }
-  function slotReelTick(ctx){
-    const t0 = ctx.currentTime;
-    const pitch = 560;
-    const osc = ctx.createOscillator(); osc.type='triangle';
-    osc.frequency.setValueAtTime(pitch * 1.02, t0);
-    osc.frequency.exponentialRampToValueAtTime(pitch * 0.72, t0 + 0.045);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(0.11, t0 + 0.004);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.055);
-    osc.connect(g); g.connect(masterGain);
-    osc.start(t0); osc.stop(t0 + 0.06);
-  }
-  function reactToggleSound(ctx){
-    const t0 = ctx.currentTime;
-    const osc = ctx.createOscillator(); osc.type='sine';
-    osc.frequency.setValueAtTime(880, t0);
-    osc.frequency.exponentialRampToValueAtTime(660, t0 + 0.06);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(0.1, t0 + 0.006);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.08);
-    osc.connect(g); g.connect(masterGain);
-    osc.start(t0); osc.stop(t0 + 0.09);
-  }
-  function reactMuteSound(ctx){
-    const t0 = ctx.currentTime;
-    const osc = ctx.createOscillator(); osc.type='triangle';
-    osc.frequency.setValueAtTime(520, t0);
-    osc.frequency.exponentialRampToValueAtTime(180, t0 + 0.1);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(0.12, t0 + 0.008);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12);
-    osc.connect(g); g.connect(masterGain);
-    osc.start(t0); osc.stop(t0 + 0.13);
-  }
-  function reactUnmuteSound(ctx){
-    const t0 = ctx.currentTime;
-    const osc = ctx.createOscillator(); osc.type='sine';
-    osc.frequency.setValueAtTime(320, t0);
-    osc.frequency.exponentialRampToValueAtTime(920, t0 + 0.1);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(0.11, t0 + 0.008);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12);
-    osc.connect(g); g.connect(masterGain);
-    osc.start(t0); osc.stop(t0 + 0.13);
-    setTimeout(()=>microClick(ctx, 1400), 50);
-  }
-  function reactLockSound(ctx){
-    const t0 = ctx.currentTime;
-    const body = ctx.createOscillator(); body.type = 'triangle';
-    body.frequency.setValueAtTime(240, t0);
-    body.frequency.exponentialRampToValueAtTime(95, t0 + 0.08);
-    const bg = ctx.createGain();
-    bg.gain.setValueAtTime(0.0001, t0);
-    bg.gain.exponentialRampToValueAtTime(0.14, t0 + 0.005);
-    bg.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.1);
-    body.connect(bg); bg.connect(masterGain);
-    body.start(t0); body.stop(t0 + 0.11);
-    const click = ctx.createOscillator(); click.type = 'square';
-    click.frequency.setValueAtTime(1450, t0 + 0.028);
-    const cg = ctx.createGain();
-    cg.gain.setValueAtTime(0.0001, t0 + 0.028);
-    cg.gain.exponentialRampToValueAtTime(0.07, t0 + 0.034);
-    cg.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.055);
-    click.connect(cg); cg.connect(masterGain);
-    click.start(t0 + 0.028); click.stop(t0 + 0.06);
-  }
-  function reactUnlockSound(ctx){
-    const t0 = ctx.currentTime;
-    const osc = ctx.createOscillator(); osc.type = 'sine';
-    osc.frequency.setValueAtTime(360, t0);
-    osc.frequency.exponentialRampToValueAtTime(980, t0 + 0.09);
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, t0);
-    g.gain.exponentialRampToValueAtTime(0.12, t0 + 0.008);
-    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12);
-    osc.connect(g); g.connect(masterGain);
-    osc.start(t0); osc.stop(t0 + 0.13);
-    setTimeout(()=>microClick(ctx, 1320), 58);
-  }
 
   function playSound(kind){
     unlockAudio();
     const ctx = actx; if(!ctx) return;
     const recipe = SOUND_RECIPES[kind];
-    if(recipe){ playRecipe(recipe, ctx); return; }
-    if(kind === 'settle') slotLand(ctx);
-    else if(kind === 'dragtick') slotReelTick(ctx);
-    else if(kind === 'toggle') reactToggleSound(ctx);
-    else if(kind === 'unmute') reactUnmuteSound(ctx);
-    else if(kind === 'mute') reactMuteSound(ctx);
-    else if(kind === 'lock') reactLockSound(ctx);
-    else if(kind === 'unlock') reactUnlockSound(ctx);
+    if(recipe) playRecipe(recipe, ctx);
   }
 
   const PLAY_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5L8 5.5Z"/></svg>';
   const COPY_SVG = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
   const CATALOG = [
-    { group:'success', id:'buySuccess', desc:'Buy + tip success (successZhxpj)', tag:'success', tagClass:'is-success' },
-    { group:'success', id:'sent', desc:'Send / sell / comment success', tag:'success', tagClass:'is-success' },
+    { group:'success', id:'buySuccess', desc:'Buy success (successZhxpj)', tag:'success', tagClass:'is-success' },
+    { group:'success', id:'sent', desc:'Send / sell / comment (success0m6r9)', tag:'success', tagClass:'is-success' },
+    { group:'success', id:'tip', desc:'Tip first + repeat (successX9pkg)', tag:'success', tagClass:'is-success' },
     { group:'success', id:'funds', desc:'Top-up credited', tag:'success', tagClass:'is-success' },
     { group:'success', id:'refresh', desc:'Pull settle / new notifs', tag:'success', tagClass:'is-success' },
-    { group:'warn', id:'dislike', desc:'Dislike react · error audio', tag:'warning / error', tagClass:'is-error' },
-    { group:'warn', id:'tip', desc:'Legacy tip recipe (tips use buySuccess)', tag:'legacy', tagClass:'' },
+    { group:'success', id:'settle', desc:'Attach media · slot land arpeggio', tag:'success', tagClass:'is-success' },
+    { group:'warn', id:'warning', desc:'Top up / short wallet / soft gates', tag:'warning', tagClass:'is-warn' },
+    { group:'warn', id:'error', desc:'Reject · cancel · under-$10 · hard fail', tag:'error', tagClass:'is-error' },
+    { group:'warn', id:'dislike', desc:'Dislike react (descending triangles)', tag:'react', tagClass:'' },
     { group:'click', id:'light', desc:'Default UI tap / selection sound', tag:'click', tagClass:'' },
     { group:'click', id:'open', desc:'Open drawer / comments', tag:'click', tagClass:'' },
     { group:'click', id:'comment', desc:'Comment affordance', tag:'click', tagClass:'' },
     { group:'click', id:'like', desc:'Like react', tag:'click', tagClass:'' },
     { group:'click', id:'share', desc:'Share sheet', tag:'click', tagClass:'' },
     { group:'click', id:'copyAddr', desc:'Copy address', tag:'click', tagClass:'' },
-    { group:'custom', id:'toggle', desc:'Toggle (custom oscillator)', tag:'custom', tagClass:'is-custom', haptic:true },
-    { group:'custom', id:'mute', desc:'Mute feed', tag:'custom', tagClass:'is-custom', haptic:true },
-    { group:'custom', id:'unmute', desc:'Unmute feed', tag:'custom', tagClass:'is-custom', haptic:true },
-    { group:'custom', id:'lock', desc:'2× hold lock', tag:'custom', tagClass:'is-custom', haptic:true },
-    { group:'custom', id:'unlock', desc:'Unlock 2×', tag:'custom', tagClass:'is-custom', haptic:true },
-    { group:'custom', id:'settle', desc:'Slot land / attach', tag:'custom', tagClass:'is-custom', haptic:true },
-    { group:'custom', id:'dragtick', desc:'Drag tick sample', tag:'custom', tagClass:'is-custom', haptic:true },
+    { group:'click', id:'toggle', desc:'Anon / chrome toggle', tag:'click', tagClass:'' },
+    { group:'gesture', id:'mute', desc:'Mute feed', tag:'gesture', tagClass:'' },
+    { group:'gesture', id:'unmute', desc:'Unmute feed', tag:'gesture', tagClass:'' },
+    { group:'gesture', id:'lock', desc:'2× hold lock', tag:'gesture', tagClass:'' },
+    { group:'gesture', id:'unlock', desc:'Unlock 2×', tag:'gesture', tagClass:'' },
+    { group:'gesture', id:'dragtick', desc:'Drag tick sample (haptic-only in feed)', tag:'sample', tagClass:'' },
   ];
 
   const lists = {
     success: document.getElementById('group-success'),
     warn: document.getElementById('group-warn'),
     click: document.getElementById('group-click'),
-    custom: document.getElementById('group-custom'),
+    gesture: document.getElementById('group-gesture'),
   };
 
   function copyPayload(id){
     const recipe = SOUND_RECIPES[id];
-    if(recipe){
-      return `const ${id} = ${JSON.stringify(recipe, null, 2)};\n\n// With the procedural-sounds player:\nplaySound(${id});`;
-    }
-    return `// Custom oscillator in feed.html — call via the shared haptic helper:\nhaptic('${id}');`;
+    if(!recipe) return `// Missing recipe: ${id}`;
+    return `const ${id} = ${JSON.stringify(recipe, null, 2)};\n\n// With the procedural-sounds player:\nplaySound(${id});`;
   }
 
   async function copyText(text){

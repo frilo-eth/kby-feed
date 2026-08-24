@@ -910,8 +910,7 @@ One call path: `haptic(preset, soundKind?, soundArg?)` → vibration + optional 
 |-------|---------|------|
 | Vibration | [WebHaptics](https://haptics.lochie.me/) (`web-haptics`) | Primary pattern (`WEB_HAPTIC_PRESETS`) |
 | Fallback | `navigator.vibrate` + native taptic burst | `HAPTIC_PATTERNS` when WebHaptics missing |
-| UI audio | [procedural-sounds](https://procedural-sounds.vercel.app/) recipes | `SOUND_RECIPES` + vendored `playRecipe()` |
-| Custom oscillators | In-file Web Audio | `toggle` / `mute` / `unmute` / `lock` / `unlock` / slot ticks |
+| UI audio | [procedural-sounds](https://procedural-sounds.vercel.app/) | All cues are `SOUND_RECIPES` + vendored `playRecipe()` (paste-player model; no npm yet) |
 
 `PRESET_SOUND` maps each haptic preset → sound key (or `false` = haptic only). Override with `haptic(preset, false)` or `haptic(preset, 'otherSound')`.
 
@@ -924,15 +923,31 @@ Celebration helper: `celebrateSuccess(kind)` · `celebrateBuySuccess()` · `cele
 | Preset | Hear | When it fires | WebHaptics | Sound recipe | Notes |
 |--------|------|---------------|------------|--------------|-------|
 | **`buySuccess`** | [▶](https://kby-feed.vercel.app/sounds#buySuccess) | Buy settles (`celebrateBuySuccess`) | Custom **rich** 8-step ascending pattern | **`buySuccess`** (`successZhxpj` export) | + full confetti |
-| **`tipSuccess`** | [▶](https://kby-feed.vercel.app/sounds#buySuccess) | **First** tip ever (`celebrateTip`) | Same rich pattern | **`buySuccess`** (same recipe) | + tip-scale confetti · `kb_first_tip_v1` |
-| **`tip`** | [▶](https://kby-feed.vercel.app/sounds#buySuccess) | Repeat tip | Custom tip 5-step pattern | **`buySuccess`** | No confetti |
-| **`success`** | [▶](https://kby-feed.vercel.app/sounds#sent) | Sell settle · send complete | Rich pattern | **`sent`** (triangle arpeggio 444→560→747) | Via `celebrateSuccess('sell'\|'send')` |
+| **`tipSuccess`** | [▶](https://kby-feed.vercel.app/sounds#tip) | **First** tip ever (`celebrateTip`) | Same rich pattern | **`tip`** (`successX9pkg`) | + tip-scale confetti · `kb_first_tip_v1` |
+| **`tip`** | [▶](https://kby-feed.vercel.app/sounds#tip) | Repeat tip | Custom tip 5-step pattern | **`tip`** (`successX9pkg`) | No confetti |
+| **`success`** | [▶](https://kby-feed.vercel.app/sounds#sent) | Sell settle · send complete | Rich pattern | **`sent`** (`success0m6r9` — soft sine pair + delay) | Via `celebrateSuccess('sell'\|'send')` |
 | **`funds`** | [▶](https://kby-feed.vercel.app/sounds#funds) | Top-up / deposit credited | Rich pattern | **`funds`** (FM sine 660 + 990, reverb) | Via `celebrateSuccess('funds')` |
 | **`sent`** | [▶](https://kby-feed.vercel.app/sounds#sent) | Comment posted | Rich pattern | **`sent`** | Via `celebrateSuccess('sent')` |
-| **`dislike`** | [▶](https://kby-feed.vercel.app/sounds#dislike) | Dislike react | Built-in `warning` | **`dislike`** (descending triangles) | Warning feel |
-| **`error`** | [▶](https://kby-feed.vercel.app/sounds#dislike) | MoonPay under-$10 · leave Solana warn path | Built-in `error` | **`dislike`** (reused as error cue) | Sheet shake + red copy |
+| **`dislike`** | [▶](https://kby-feed.vercel.app/sounds#dislike) | Dislike react | Built-in `warning` | **`dislike`** (descending triangles) | React only |
+| **`warning`** | [▶](https://kby-feed.vercel.app/sounds#warning) | Top up to continue · short wallet · Enter an amount · Not enough in this wallet | Built-in `warning` | **`warning`** (triangle + soft double ping) | Soft gate — recoverable |
+| **`error`** | [▶](https://kby-feed.vercel.app/sounds#error) | MoonPay under-$10 · leave Solana warn · checkout / connect / auth cancel · signature reject · Sign-in cancelled · settle fail | Built-in `error` | **`error`** (low square + descending triangles) | Hard reject · sheet shake where applicable |
 
 Rich haptic = `RICH_SUCCESS_WEB` (8 pulses, peaks at intensity 1). Tip haptic = `TIP_RICH_WEB` (5 pulses). Both flatten to `navigator.vibrate` when needed.
+
+**Flow mapping (quick):**
+
+| Situation | Preset |
+|-----------|--------|
+| Under-$10 cash · shake + red Solana note | `error` |
+| Checkout declined · Connection rejected · Authorization cancelled | `error` |
+| Signature / connection rejected in wallet popup | `error` |
+| Sign-in cancelled | `error` |
+| Swap settle “Not enough funds” (hard fail back to confirm) | `error` |
+| `requireSpend` / buy shortfall → Top up | `warning` |
+| Active wallet short (switch wallet toast) | `warning` |
+| Send “Not enough in this wallet” / can’t top up that EOA | `warning` |
+| Trade confirm with $0 (“Enter an amount”) | `warning` |
+| Send **Top up to send** → open deposit | `warning` |
 
 ---
 
@@ -949,13 +964,13 @@ Default “tap something” = **`selection`** (WebHaptics `selection` · sound *
 | **`comment`** | [▶](https://kby-feed.vercel.app/sounds#comment) | `comment` | Open comments affordance |
 | **`share`** | [▶](https://kby-feed.vercel.app/sounds#share) | `share` (714→1069) | Share sheet / Post on X |
 | **`like`** | [▶](https://kby-feed.vercel.app/sounds#like) | `like` (651→728) | Like react |
-| **`toggle`** | [▶](https://kby-feed.vercel.app/sounds#toggle) | custom oscillator | Anon toggle · theme-adjacent toggles |
-| **`attach`** | [▶](https://kby-feed.vercel.app/sounds#settle) | `settle` → custom `slotLand` arpeggio | Media attach to comment |
+| **`toggle`** | [▶](https://kby-feed.vercel.app/sounds#toggle) | `toggle` (880 Hz tap) | Anon toggle · theme-adjacent toggles |
+| **`attach`** | [▶](https://kby-feed.vercel.app/sounds#settle) | `settle` (E–G#–B + sparkle) | Media attach to comment |
 | **`copyAddr`** | [▶](https://kby-feed.vercel.app/sounds#copyAddr) | `copyAddr` (shimmer delay arpeggio) | Copy receive / wallet address |
-| **`mute` / `unmute`** | [▶](https://kby-feed.vercel.app/sounds#mute) · [▶](https://kby-feed.vercel.app/sounds#unmute) | custom oscillators | Feed sound toggle |
-| **`lock` / `unlock`** | [▶](https://kby-feed.vercel.app/sounds#lock) · [▶](https://kby-feed.vercel.app/sounds#unlock) | custom oscillators | 2× hold lock / unlock |
+| **`mute` / `unmute`** | [▶](https://kby-feed.vercel.app/sounds#mute) · [▶](https://kby-feed.vercel.app/sounds#unmute) | `mute` / `unmute` | Feed sound toggle |
+| **`lock` / `unlock`** | [▶](https://kby-feed.vercel.app/sounds#lock) · [▶](https://kby-feed.vercel.app/sounds#unlock) | `lock` / `unlock` | 2× hold lock / unlock |
 
-`attach` → `PRESET_SOUND.attach = 'settle'` → `playSound('settle')` → `slotLand()` (cheerful E–G#–B arpeggio), not a procedural recipe.
+`attach` → `PRESET_SOUND.attach = 'settle'` → `playSound('settle')` (cheerful E–G#–B arpeggio recipe).
 
 ---
 
@@ -984,24 +999,25 @@ Default “tap something” = **`selection`** (WebHaptics `selection` · sound *
 | `nudge` | `light` | `nudge` | `[11,32,9]` · 2 taps |
 | `settle` | **false** | `success` | `[13,34,17]` · 2 taps |
 | `dragtick` | **false** | `soft` | `[3]` |
-| `toggle` | `toggle` (custom) | `rigid` | `[5,18,5]` · 1 tap |
-| `unmute` | `unmute` (custom) | `nudge` | `[8,26,12,36,10]` · 2 taps |
-| `mute` | `mute` (custom) | `rigid` | `[14,22,8]` · 1 tap |
+| `toggle` | `toggle` | `rigid` | `[5,18,5]` · 1 tap |
+| `unmute` | `unmute` | `nudge` | `[8,26,12,36,10]` · 2 taps |
+| `mute` | `mute` | `rigid` | `[14,22,8]` · 1 tap |
 | `open` | `open` | `medium` | `[8,28,9]` · 1 tap |
 | `comment` | `comment` | `success` | `[9,30,9]` · 2 taps |
 | `sent` | `sent` | rich success | rich · 5 taps |
 | `share` | `share` | `soft` | `[7,32,7]` · 2 taps |
-| `tip` | `buySuccess` | tip rich | tip · 3 taps |
-| `tipSuccess` | `buySuccess` | rich success | rich · 5 taps |
+| `tip` | `tip` | tip rich | tip · 3 taps |
+| `tipSuccess` | `tip` | rich success | rich · 5 taps |
 | `like` | `like` | `medium` | `[7,28,11]` · 2 taps |
 | `dislike` | `dislike` | `warning` | `[26,16,22]` · 1 tap |
-| `attach` | `settle` (custom land) | `success` | `[10,28,14,40,18]` · 2 taps |
-| `lock` | `lock` (custom) | `rigid` | `[12,22,16]` · 1 tap |
-| `unlock` | `unlock` (custom) | `nudge` | `[8,20,10,28,8]` · 2 taps |
+| `warning` | `warning` | `warning` | `[18,28,22,32,18]` · 2 taps |
+| `attach` | `settle` | `success` | `[10,28,14,40,18]` · 2 taps |
+| `lock` | `lock` | `rigid` | `[12,22,16]` · 1 tap |
+| `unlock` | `unlock` | `nudge` | `[8,20,10,28,8]` · 2 taps |
 | `success` | `sent` | rich success | rich · 5 taps |
 | `buySuccess` | `buySuccess` | rich success | rich · 5 taps |
 | `funds` | `funds` | rich success | rich · 5 taps |
-| `error` | `dislike` | `error` | `[40,40,40,40,40]` · 3 taps |
+| `error` | `error` | `error` | `[40,40,40,40,40]` · 3 taps |
 | `copyAddr` | `copyAddr` | custom soft pulse | `[5,14,6]` · 1 tap |
 | `pulltick` | **false** | 8ms @ 0.22 | `[4]` |
 | `pullmorph` | `light` | 14ms @ 0.4 | `[8]` · 1 tap |
@@ -1021,15 +1037,24 @@ Default “tap something” = **`selection`** (WebHaptics `selection` · sound *
 | `open` / `comment` | [▶](https://kby-feed.vercel.app/sounds#open) · [▶](https://kby-feed.vercel.app/sounds#comment) | Soft rising pair | Same patch family |
 | `like` | [▶](https://kby-feed.vercel.app/sounds#like) | Short rising pair | React |
 | `share` | [▶](https://kby-feed.vercel.app/sounds#share) | Mid rising pair | Share |
-| `tip` | [▶](https://kby-feed.vercel.app/sounds#tip) | Triple rising (494→988→1480) | Legacy tip (unused by tip preset; tips use `buySuccess`) |
-| `dislike` | [▶](https://kby-feed.vercel.app/sounds#dislike) | Descending triangles | Warning / error audio |
-| `sent` | [▶](https://kby-feed.vercel.app/sounds#sent) | Triangle arpeggio | Send / sell / comment success |
+| `tip` | [▶](https://kby-feed.vercel.app/sounds#tip) | Bright sine stack + delay (`successX9pkg`) | Tip (first + repeat) |
+| `dislike` | [▶](https://kby-feed.vercel.app/sounds#dislike) | Descending triangles | Dislike react |
+| `warning` | [▶](https://kby-feed.vercel.app/sounds#warning) | Soft double ping | Top-up / short / soft gates |
+| `error` | [▶](https://kby-feed.vercel.app/sounds#error) | Low square + descending | Hard reject / cancel |
+| `sent` | [▶](https://kby-feed.vercel.app/sounds#sent) | Soft sine pair + delay (`success0m6r9`) | Send / sell / comment success |
 | `funds` | [▶](https://kby-feed.vercel.app/sounds#funds) | FM + reverb bloom | Deposit credit |
 | `refresh` | [▶](https://kby-feed.vercel.app/sounds#refresh) | Rising sine ramp | Pull settle / notifs |
 | `copyAddr` | [▶](https://kby-feed.vercel.app/sounds#copyAddr) | Delay-shimmer arpeggio | Address copy |
-| **`buySuccess`** | [▶](https://kby-feed.vercel.app/sounds#buySuccess) | Five-layer sine/triangle + delay (`successZhxpj`) | Buy + tip success |
+| **`buySuccess`** | [▶](https://kby-feed.vercel.app/sounds#buySuccess) | Five-layer sine/triangle + delay (`successZhxpj`) | Buy success |
+| `toggle` | [▶](https://kby-feed.vercel.app/sounds#toggle) | Single 880 Hz sine tap | Chrome toggles |
+| `mute` | [▶](https://kby-feed.vercel.app/sounds#mute) | Descending triangles + tick | Feed mute |
+| `unmute` | [▶](https://kby-feed.vercel.app/sounds#unmute) | Rising sine bloom + tick | Feed unmute |
+| `lock` | [▶](https://kby-feed.vercel.app/sounds#lock) | Low thud + square click | 2× lock |
+| `unlock` | [▶](https://kby-feed.vercel.app/sounds#unlock) | Rising bloom + tick | 2× unlock |
+| `settle` | [▶](https://kby-feed.vercel.app/sounds#settle) | E–G#–B + sparkle | Attach / slot land |
+| `dragtick` | [▶](https://kby-feed.vercel.app/sounds#dragtick) | Short triangle + click | Sample only (`PRESET_SOUND` false in feed) |
 
-Custom (not recipes) — also on the sample page: [toggle](https://kby-feed.vercel.app/sounds#toggle) · [mute](https://kby-feed.vercel.app/sounds#mute) · [unmute](https://kby-feed.vercel.app/sounds#unmute) · [lock](https://kby-feed.vercel.app/sounds#lock) · [unlock](https://kby-feed.vercel.app/sounds#unlock) · [settle](https://kby-feed.vercel.app/sounds#settle) · [dragtick](https://kby-feed.vercel.app/sounds#dragtick).
+All UI audio is recipe-only ([procedural-sounds](https://procedural-sounds.vercel.app/) player). Haptics stay on WebHaptics / vibrate.
 
 ---
 
@@ -1574,7 +1599,7 @@ Error demos (skip wait, fire the same cancel toast / inline UI):
 
 `#error-checkout` (etc.) also. Signature / trade / send demos: [Auth](#auth).
 
-Prefill the MoonPay amount with the shortfall (`openTopUp(need, then)`), floored to the **$10 cash minimum**. Do **not** put the need in the title. Amounts under $10 turn the amount red, morph the Solana note to a red **Minimum top up is $10** warning, shake the sheet, and fire the [web-haptics Error](https://haptics.lochie.me/) preset. Clearing the amount morphs the note back to the amber Solana warning. When `need > 0`, skip the Cash/Crypto hub and open the cash step. Completing checkout runs `pendingFunds` (tip spends; buy confirms) only if a rounded shortfall remains — never reopen the hub at `$0`. Account **Top up** does not adopt a leftover `pendingSpend`.
+Prefill the MoonPay amount with the shortfall (`openTopUp(need, then)`), floored to the **$10 cash minimum**. Do **not** put the need in the title. Amounts under $10 turn the amount red, morph the Solana note to a red **Minimum top up is $10** warning, shake the sheet, and fire `haptic('error')` ([web-haptics Error](https://haptics.lochie.me/) + dedicated error recipe). Clearing the amount morphs the note back to the amber Solana warning. When `need > 0`, skip the Cash/Crypto hub and open the cash step. Completing checkout runs `pendingFunds` (tip spends; buy confirms) only if a rounded shortfall remains — never reopen the hub at `$0`. Account **Top up** does not adopt a leftover `pendingSpend`.
 
 Hub is two jobs. One back chevron + [`morphSheet`](#sheet-morph). No stacked breadcrumbs.
 
