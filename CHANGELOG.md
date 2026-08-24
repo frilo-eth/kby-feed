@@ -10,6 +10,7 @@
 - Tip sound (`tip` / `tipSuccess`) swapped to `successX9pkg` (bright sine stack + delay); buy stays on `buySuccess` / `successZhxpj`.
 - Attach / settle sound swapped to quieter `transitionQpv7x` (soft sine pair).
 - Error sound swapped to `errorY8d0h` (bandpass noise tick + low sines + delay).
+- Warning sound swapped to `warningY6w1j` (low sine/triangle stack + delay).
 
 ### Docs
 - README [#haptic-sound-map](https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map): full preset → WebHaptics → sound recipe catalog (success / error / clicks / pull).
