@@ -32,6 +32,7 @@ Porting / review: open the heading, not the whole README. Production: [https://k
 | [Slippage](#slippage) | [README.md#slippage](https://github.com/frilo-eth/kby-feed/blob/main/README.md#slippage) |
 | [Pay with](#pay-with) (hidden on launchpad Buy) | [README.md#pay-with](https://github.com/frilo-eth/kby-feed/blob/main/README.md#pay-with) |
 | [Meta affordances](#meta-affordances) | [README.md#meta-affordances](https://github.com/frilo-eth/kby-feed/blob/main/README.md#meta-affordances) |
+| [Haptic + sound map](#haptic-sound-map) — success / error / clicks | [README.md#haptic-sound-map](https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map) |
 | [Animation system](#animation-system) | [README.md#animation-system](https://github.com/frilo-eth/kby-feed/blob/main/README.md#animation-system) |
 
 ## Run locally
@@ -890,13 +891,149 @@ Source: CSS ~2228–2363 · JS ~5492–6080 · markup `#pullSpin` ~2541 · point
 
 ---
 
-### 9. Haptics (paired with motion)
+<a id="haptics"></a>
+<a id="haptic-sound-map"></a>
 
-Presets via [web-haptics](https://haptics.lochie.me/) + `navigator.vibrate` fallback:
+### 9. Haptic + sound map (for porting)
 
-`light` · `selection` · `nudge` · `settle` · `dragtick` · `toggle` · `unmute` · `mute` · `open` · `comment` · `sent` · `share` · `tip` · `like` · `dislike` · `attach` · `lock` · `unlock` · `success` · `funds` · `pullsettle`→`refresh`
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map](https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map)
 
-Swipe settle/dragtick = haptic only. UI audio for funds, send/success, notifications, like/tip/share, and light taps comes from [procedural-sounds](https://procedural-sounds.vercel.app/) recipes (MIT; player vendored as `playRecipe`). Slot ticks, mute, and lock stay custom oscillators. Deposit credit plays `funds` — FM sine 660 + 990 Hz, light reverb, delayed second partial. Send / buy / sell success plays `success`. New unread notifications play `nudge` + `refresh`.
+One call path: `haptic(preset, soundKind?, soundArg?)` → vibration + optional audio. Sources:
+
+| Layer | Library | Role |
+|-------|---------|------|
+| Vibration | [WebHaptics](https://haptics.lochie.me/) (`web-haptics`) | Primary pattern (`WEB_HAPTIC_PRESETS`) |
+| Fallback | `navigator.vibrate` + native taptic burst | `HAPTIC_PATTERNS` when WebHaptics missing |
+| UI audio | [procedural-sounds](https://procedural-sounds.vercel.app/) recipes | `SOUND_RECIPES` + vendored `playRecipe()` |
+| Custom oscillators | In-file Web Audio | `toggle` / `mute` / `unmute` / `lock` / `unlock` / slot ticks |
+
+`PRESET_SOUND` maps each haptic preset → sound key (or `false` = haptic only). Override with `haptic(preset, false)` or `haptic(preset, 'otherSound')`.
+
+Celebration helper: `celebrateSuccess(kind)` · `celebrateBuySuccess()` · `celebrateTip(btn)` — pick a success preset and optionally fire confetti.
+
+---
+
+#### Outcome family — success / warning / error
+
+| Preset | When it fires | WebHaptics | Sound recipe | Notes |
+|--------|---------------|------------|--------------|-------|
+| **`buySuccess`** | Buy settles (`celebrateBuySuccess`) | Custom **rich** 8-step ascending pattern | **`buySuccess`** (`successZhxpj` export) | + full confetti |
+| **`tipSuccess`** | **First** tip ever (`celebrateTip`) | Same rich pattern | **`buySuccess`** (same recipe) | + tip-scale confetti · `kb_first_tip_v1` |
+| **`tip`** | Repeat tip | Custom tip 5-step pattern | **`buySuccess`** | No confetti |
+| **`success`** | Sell settle · send complete | Rich pattern | **`sent`** (triangle arpeggio 444→560→747) | Via `celebrateSuccess('sell'\|'send')` |
+| **`funds`** | Top-up / deposit credited | Rich pattern | **`funds`** (FM sine 660 + 990, reverb) | Via `celebrateSuccess('funds')` |
+| **`sent`** | Comment posted | Rich pattern | **`sent`** | Via `celebrateSuccess('sent')` |
+| **`dislike`** | Dislike react | Built-in `warning` | **`dislike`** (descending triangles) | Warning feel |
+| **`error`** | MoonPay under-$10 · leave Solana warn path | Built-in `error` | **`dislike`** (reused as error cue) | Sheet shake + red copy |
+
+Rich haptic = `RICH_SUCCESS_WEB` (8 pulses, peaks at intensity 1). Tip haptic = `TIP_RICH_WEB` (5 pulses). Both flatten to `navigator.vibrate` when needed.
+
+---
+
+#### Everyday clicks / selection (UI chrome)
+
+Default “tap something” = **`selection`** (WebHaptics `selection` · sound **`light`**). Use this for tabs, chips, toggles that are not outcomes.
+
+| Preset | Sound | Typical use |
+|--------|-------|-------------|
+| **`light`** | `light` (brief 998 + 1817 Hz) | Chevron next/prev · copy URL flash · soft taps · `haptic('selection','light')` overrides |
+| **`selection`** | `light` | Trade unit / side / slip / pay chip · drawer chrome · comment identity · sheet chrome · most buttons |
+| **`nudge`** | `light` (or override `'refresh'`) | Soft attention · unread notifs (`nudge` + `refresh`) · 2× hold start |
+| **`open`** | `open` (= comment recipe: 533→598) | Open drawer · comments · launch nav · token surfaces |
+| **`comment`** | `comment` | Open comments affordance |
+| **`share`** | `share` (714→1069) | Share sheet / Post on X |
+| **`like`** | `like` (651→728) | Like react |
+| **`toggle`** | custom oscillator | Anon toggle · theme-adjacent toggles |
+| **`attach`** | `settle` → custom `slotLand` arpeggio | Media attach to comment |
+| **`copyAddr`** | `copyAddr` (shimmer delay arpeggio) | Copy receive / wallet address |
+| **`mute` / `unmute`** | custom oscillators | Feed sound toggle |
+| **`lock` / `unlock`** | custom oscillators | 2× hold lock / unlock |
+
+`attach` → `PRESET_SOUND.attach = 'settle'` → `playSound('settle')` → `slotLand()` (cheerful E–G#–B arpeggio), not a procedural recipe.
+
+---
+
+#### Motion / continuous (mostly haptic-only)
+
+| Preset | Sound | Use |
+|--------|-------|-----|
+| **`settle`** | **none** | Feed index settle after swipe |
+| **`dragtick`** | **none** (slot tick only if forced) | Cross index while dragging |
+| **`pulltick`** | none | Pull-to-refresh notches |
+| **`pullmorph`** | `light` | Morph into refresh glyph |
+| **`pullarm`** | `light` | Cross arm threshold |
+| **`pulldisarm`** | none | Fall back under threshold |
+| **`pullfire`** | `open` | Release → refresh fires |
+| **`pullcancel`** | none | Early release |
+| **`pullsettle`** | **`refresh`** (555→759→1066 ramp) | Band returns home after load |
+
+---
+
+#### Full preset → sound → vibration cheat sheet
+
+| `haptic(…)` preset | `PRESET_SOUND` | WebHaptics input | `vibrate` fallback (ms) |
+|--------------------|----------------|------------------|-------------------------|
+| `light` | `light` | `light` | `[7]` · 1 tap |
+| `selection` | `light` | `selection` | `[9,24,7]` · 1 tap |
+| `nudge` | `light` | `nudge` | `[11,32,9]` · 2 taps |
+| `settle` | **false** | `success` | `[13,34,17]` · 2 taps |
+| `dragtick` | **false** | `soft` | `[3]` |
+| `toggle` | `toggle` (custom) | `rigid` | `[5,18,5]` · 1 tap |
+| `unmute` | `unmute` (custom) | `nudge` | `[8,26,12,36,10]` · 2 taps |
+| `mute` | `mute` (custom) | `rigid` | `[14,22,8]` · 1 tap |
+| `open` | `open` | `medium` | `[8,28,9]` · 1 tap |
+| `comment` | `comment` | `success` | `[9,30,9]` · 2 taps |
+| `sent` | `sent` | rich success | rich · 5 taps |
+| `share` | `share` | `soft` | `[7,32,7]` · 2 taps |
+| `tip` | `buySuccess` | tip rich | tip · 3 taps |
+| `tipSuccess` | `buySuccess` | rich success | rich · 5 taps |
+| `like` | `like` | `medium` | `[7,28,11]` · 2 taps |
+| `dislike` | `dislike` | `warning` | `[26,16,22]` · 1 tap |
+| `attach` | `settle` (custom land) | `success` | `[10,28,14,40,18]` · 2 taps |
+| `lock` | `lock` (custom) | `rigid` | `[12,22,16]` · 1 tap |
+| `unlock` | `unlock` (custom) | `nudge` | `[8,20,10,28,8]` · 2 taps |
+| `success` | `sent` | rich success | rich · 5 taps |
+| `buySuccess` | `buySuccess` | rich success | rich · 5 taps |
+| `funds` | `funds` | rich success | rich · 5 taps |
+| `error` | `dislike` | `error` | `[40,40,40,40,40]` · 3 taps |
+| `copyAddr` | `copyAddr` | custom soft pulse | `[5,14,6]` · 1 tap |
+| `pulltick` | **false** | 8ms @ 0.22 | `[4]` |
+| `pullmorph` | `light` | 14ms @ 0.4 | `[8]` · 1 tap |
+| `pullarm` | `light` | 32@0.85 → 48@0.5 | `[14,36,18]` · 2 taps |
+| `pulldisarm` | **false** | 12ms @ 0.32 | `[7]` · 1 tap |
+| `pullfire` | `open` | 28@0.7 → 55@0.9 → 30@0.4 | `[12,32,16,40,12]` · 2 taps |
+| `pullcancel` | **false** | 16ms @ 0.38 | `[10]` · 1 tap |
+| `pullsettle` | `refresh` | 40@0.55 → 55@0.75 | `[14,36,20]` · 2 taps |
+
+---
+
+#### Procedural recipes in `SOUND_RECIPES`
+
+| Key | Character | Origin |
+|-----|-----------|--------|
+| `light` | Tiny double ping | Library-style tap |
+| `open` / `comment` | Soft rising pair | Same patch family |
+| `like` | Short rising pair | React |
+| `share` | Mid rising pair | Share |
+| `tip` | Triple rising (494→988→1480) | Legacy tip (unused by tip preset; tips use `buySuccess`) |
+| `dislike` | Descending triangles | Warning / error audio |
+| `sent` | Triangle arpeggio | Send / sell / comment success |
+| `funds` | FM + reverb bloom | Deposit credit |
+| `refresh` | Rising sine ramp | Pull settle / notifs |
+| `copyAddr` | Delay-shimmer arpeggio | Address copy |
+| **`buySuccess`** | Five-layer sine/triangle + delay (`successZhxpj`) | Buy + tip success |
+
+Custom (not recipes): `toggle`, `mute`, `unmute`, `lock`, `unlock`, `settle`/`slotLand`, `dragtick`/`slotReelTick`.
+
+---
+
+#### Porting rules
+
+1. Call **`haptic(preset)`** — do not invent parallel audio/vibrate paths.
+2. Outcome moments go through **`celebrateSuccess` / `celebrateBuySuccess` / `celebrateTip`** so confetti and rich patterns stay consistent.
+3. Continuous motion (swipe, pull notches) stays **haptic-only** (`false` in `PRESET_SOUND`).
+4. Respect `prefers-reduced-motion` for confetti; vibration still runs.
+5. Source of truth in `feed.html`: `WEB_HAPTIC_PRESETS` · `HAPTIC_PATTERNS` · `PRESET_SOUND` · `SOUND_RECIPES` · `celebrateSuccess`.
 
 ---
 

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Docs
+- README [#haptic-sound-map](https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map): full preset → WebHaptics → sound recipe catalog (success / error / clicks / pull).
+
 ## 0.1.3 — 2026-08-19
 
 ### Account UI & trade
