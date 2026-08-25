@@ -10171,25 +10171,19 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(flow === 'tip-topup'){
       seedDemoSocial(0);
       paintAuthChrome();
-      setTimeout(()=>{
-        const tipIdx = typeof firstTipablePostIndex === 'function' ? firstTipablePostIndex() : posts.findIndex(p => p && p.role !== 'op');
-        if(tipIdx < 0) return;
-        const runTip = ()=>{
-          const item = itemEls()[tipIdx];
-          const tipBtn = item?.querySelector('.react-btn.tip');
-          if(!tipBtn || tipBtn.classList.contains('active')) return;
-          const tipCountEl = item.querySelector('.tip-count');
-          const ctx = { commentId: 'post-' + tipIdx, tipBtn, tipCountEl, item, resumeTap: ()=> window.KbyTipping?.simulateTap(tipBtn, ctx) };
-          if(window.KbyTipping?.simulateTap){
-            if(!tipBtn.dataset.kbyTipBound) window.KbyTipping.wire(tipBtn, ctx);
-            window.KbyTipping.simulateTap(tipBtn, ctx);
-          } else tipBtn.click();
-        };
-        if(lastActiveIdx !== tipIdx){
-          springTo(tipIdx, 0.95);
-          setTimeout(runTip, 720);
-        } else runTip();
-      }, 520);
+      setTimeout(()=> demoEntryTip('tap'), 520);
+      return;
+    }
+    if(flow === 'tip-tap'){
+      seedDemoSocial(25);
+      paintAuthChrome();
+      setTimeout(()=> demoEntryTip('tap'), 520);
+      return;
+    }
+    if(flow === 'tip-hold'){
+      seedDemoSocial(25);
+      paintAuthChrome();
+      setTimeout(()=> demoEntryTip('hold'), 520);
       return;
     }
     if(flow === 'topup' || flow === 'low'){
@@ -12906,12 +12900,12 @@ html.dark .qhc-id{color:#6BA3FF;}
       const tipCountEl = item.querySelector('.tip-count');
       if(tipBtn){
         if(window.KbyTipping){
-          const ctx = {
+          wireFeedTipBtn(tipBtn, makeFeedTipCtx(tipBtn, {
+            kind: 'post',
             commentId: 'post-' + (item.dataset.index || '0'),
-            tipBtn, tipCountEl, item,
-            resumeTap: ()=> window.KbyTipping.simulateTap(tipBtn, ctx),
-          };
-          KbyTipping.wire(tipBtn, ctx);
+            tipCountEl,
+            item,
+          }));
         } else {
         tipBtn.addEventListener('click',(e)=>{
           e.stopPropagation(); if(tipBtn.classList.contains('active')) return;
@@ -13065,6 +13059,64 @@ html.dark .qhc-id{color:#6BA3FF;}
     const f=document.createElement('div'); f.className='tip-float'; f.textContent='+' + usdLabel(tipAmt);
     const rect=btn.getBoundingClientRect(); f.style.left=(rect.left+rect.width/2-12)+'px'; f.style.top=(rect.top-6)+'px';
     document.body.appendChild(f); setTimeout(()=>f.remove(),1000);
+  }
+  function commentTipId(c){
+    return 'comment-' + String(c?.user || 'anon') + '-' + String((c?.text || '').length) + '-' + String(c?.tips || 0);
+  }
+  function makeFeedTipCtx(tipBtn, extras){
+    const ctx = Object.assign({ tipBtn }, extras || {});
+    ctx.resumeTap = ()=> window.KbyTipping?.simulateTap(tipBtn, ctx);
+    ctx.resumeHold = (ms)=> window.KbyTipping?.simulateHold(tipBtn, ctx, ms);
+    return ctx;
+  }
+  function commitFeedTip(ctx, amt){
+    if(!ctx?.tipBtn) return;
+    const tipBtn = ctx.tipBtn;
+    if(ctx.kind === 'comment'){
+      const c = ctx.comment;
+      if(!c || c.tipped) return;
+      c.tipped = true;
+      c.tips = (c.tips || 0) + amt;
+      writeCommentReactCounts(c);
+      syncCommentReactionUI(c);
+      const pulseEl = ctx.originBtn || tipBtn;
+      pulseEl.classList.add('pulse'); setTimeout(()=> pulseEl.classList.remove('pulse'), 450);
+      spawnTipFloat(pulseEl, amt);
+      celebrateTip(pulseEl);
+      logActivity('tip', 'Tip', amt);
+      return;
+    }
+    if(tipBtn.classList.contains('active')) return;
+    const { tipCountEl, item } = ctx;
+    tipBtn.classList.add('active','pulse'); setTimeout(()=> tipBtn.classList.remove('pulse'), 450);
+    const val = parseInt(tipBtn.dataset.tips, 10) + amt;
+    tipBtn.dataset.tips = val;
+    if(tipCountEl) tipCountEl.textContent = usdLabel(val);
+    spawnTipFloat(tipBtn, amt);
+    celebrateTip(tipBtn);
+    signalActivity('tip', { item, avatar: myAvatarUrl(), amount: amt });
+    logActivity('tip', 'Tip', amt);
+  }
+  function wireFeedTipBtn(tipBtn, ctx){
+    if(!tipBtn || !window.KbyTipping) return false;
+    KbyTipping.wire(tipBtn, ctx);
+    return true;
+  }
+  function demoEntryTip(sim){
+    const tipIdx = typeof firstTipablePostIndex === 'function' ? firstTipablePostIndex() : posts.findIndex(p => p && p.role !== 'op');
+    if(tipIdx < 0) return;
+    const run = ()=>{
+      const item = itemEls()[tipIdx];
+      const tipBtn = item?.querySelector('.react-btn.tip');
+      if(!tipBtn || tipBtn.classList.contains('active')) return;
+      const tipCountEl = item.querySelector('.tip-count');
+      const ctx = makeFeedTipCtx(tipBtn, { kind: 'post', commentId: 'post-' + tipIdx, tipCountEl, item });
+      if(!tipBtn.dataset.kbyTipBound) wireFeedTipBtn(tipBtn, ctx);
+      if(sim === 'hold') KbyTipping.simulateHold(tipBtn, ctx, 820);
+      else KbyTipping.simulateTap(tipBtn, ctx);
+    };
+    if(lastActiveIdx !== tipIdx){ springTo(tipIdx, 0.95); setTimeout(run, 720); }
+    else run();
   }
 
   /* ---------------- infinite spring-physics doomscroll engine ---------------- */
@@ -16389,7 +16441,18 @@ html.dark .qhc-id{color:#6BA3FF;}
     const tipBtn = scope.querySelector('.c-pill.tip');
     const likeBtn = scope.querySelector('.c-pill.like');
     const dislikeBtn = scope.querySelector('.c-pill.dislike');
-    if(tipBtn) tipBtn.addEventListener('click', ()=> reactOnComment(c, 'tip', tipBtn));
+    if(tipBtn){
+      if(window.KbyTipping){
+        wireFeedTipBtn(tipBtn, makeFeedTipCtx(tipBtn, {
+          kind: 'comment',
+          commentId: commentTipId(c),
+          comment: c,
+          originBtn: tipBtn,
+        }));
+      } else {
+        tipBtn.addEventListener('click', ()=> reactOnComment(c, 'tip', tipBtn));
+      }
+    }
     if(likeBtn) likeBtn.addEventListener('click', ()=> reactOnComment(c, 'like', likeBtn));
     if(dislikeBtn) dislikeBtn.addEventListener('click', ()=> reactOnComment(c, 'dislike', dislikeBtn));
     syncCommentReactionUI(c, scope);
@@ -17054,7 +17117,19 @@ html.dark .qhc-id{color:#6BA3FF;}
         <button type="button" class="cfx-react like${c.liked ? ' active' : ''}" data-v="${c.likes}">${svgIcon('like')}<span>${fmt(c.likes)}</span></button>
         <button type="button" class="cfx-react dislike${c.disliked ? ' active' : ''}">${svgIcon('dislike')}</button>
       </div>`;
-    cfxCaption.querySelector('.cfx-react.tip')?.addEventListener('click', (e)=> reactOnComment(c, 'tip', e.currentTarget));
+    const cfxTipBtn = cfxCaption.querySelector('.cfx-react.tip');
+    if(cfxTipBtn){
+      if(window.KbyTipping){
+        wireFeedTipBtn(cfxTipBtn, makeFeedTipCtx(cfxTipBtn, {
+          kind: 'comment',
+          commentId: commentTipId(c),
+          comment: c,
+          originBtn: cfxTipBtn,
+        }));
+      } else {
+        cfxTipBtn.addEventListener('click', (e)=> reactOnComment(c, 'tip', e.currentTarget));
+      }
+    }
     cfxCaption.querySelector('.cfx-react.like')?.addEventListener('click', (e)=> reactOnComment(c, 'like', e.currentTarget));
     cfxCaption.querySelector('.cfx-react.dislike')?.addEventListener('click', (e)=> reactOnComment(c, 'dislike', e.currentTarget));
     if(!isAnonComment(c)){
@@ -17751,17 +17826,20 @@ html.dark .qhc-id{color:#6BA3FF;}
         const w = cashWallet();
         return { walletUsd: w?.bal || 0, jarUsd: 0 };
       },
+      onBeforeInteract(ctx){
+        if(isAuthed()) return true;
+        requireAuth(()=>{
+          if(ctx?.resumeTap) ctx.resumeTap();
+          else if(ctx?.resumeHold) ctx.resumeHold();
+        });
+        return false;
+      },
       onCommit(amt, meta, ctx){
-        if(!ctx?.tipBtn || ctx.tipBtn.classList.contains('active')) return;
+        if(!ctx?.tipBtn) return;
+        if(ctx.kind === 'comment' && ctx.comment?.tipped) return;
+        if(ctx.kind !== 'comment' && ctx.tipBtn.classList.contains('active')) return;
         const walletPart = Math.max(0, meta?.fromWallet || 0);
-        const finish = ()=>{
-          const { tipBtn, tipCountEl, item } = ctx;
-          tipBtn.classList.add('active','pulse'); setTimeout(()=> tipBtn.classList.remove('pulse'), 450);
-          const val = parseInt(tipBtn.dataset.tips, 10) + amt; tipBtn.dataset.tips = val; tipCountEl.textContent = usdLabel(val);
-          spawnTipFloat(tipBtn, amt); celebrateTip(tipBtn);
-          signalActivity('tip', { item, avatar: myAvatarUrl(), amount: amt });
-          logActivity('tip', 'Tip', amt);
-        };
+        const finish = ()=> commitFeedTip(ctx, amt);
         requireAuth(()=>{
           if(walletPart <= 0){ finish(); return; }
           requireSpend(walletPart, finish, 'Tip ' + usdLabel(amt));
@@ -17775,7 +17853,10 @@ html.dark .qhc-id{color:#6BA3FF;}
           setTimeout(()=>{
             if(typeof haptic === 'function') haptic('warning');
             showToast('Top up to continue.');
-            openTopUp(need, ()=>{ if(ctx?.resumeTap) ctx.resumeTap(); });
+            openTopUp(need, ()=>{
+              if(ctx?.resumeTap) ctx.resumeTap();
+              else if(ctx?.resumeHold) ctx.resumeHold();
+            });
           }, 960);
         });
       },

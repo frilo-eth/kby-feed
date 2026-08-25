@@ -2,7 +2,7 @@
   'use strict';
   let _activeBtn = null;
   let _activeCtx = null;
-  const _hooks = { onCommit: null, onNoBalance: null, syncBalances: null, onReady: null };
+  const _hooks = { onCommit: null, onNoBalance: null, syncBalances: null, onReady: null, onBeforeInteract: null };
 
   function getFlipBtn() { return _activeBtn; }
 
@@ -44,6 +44,22 @@
         btn.dispatchEvent(new PointerEvent('pointerup', Object.assign({}, opts, { buttons: 0 })));
       }, 140);
     },
+    simulateHold(btn, ctx, holdMs) {
+      if (!btn) return;
+      holdMs = holdMs || 720;
+      this.wire(btn, ctx);
+      this.syncBalances();
+      btn.classList.add('demo-tip-focus');
+      setTimeout(() => btn.classList.remove('demo-tip-focus'), holdMs + 400);
+      const r = btn.getBoundingClientRect();
+      const x = r.left + r.width / 2;
+      const y = r.top + r.height / 2;
+      const opts = { bubbles: true, cancelable: true, clientX: x, clientY: y, pointerId: 43, pointerType: 'mouse', button: 0, buttons: 1 };
+      btn.dispatchEvent(new PointerEvent('pointerdown', opts));
+      setTimeout(() => {
+        btn.dispatchEvent(new PointerEvent('pointerup', Object.assign({}, opts, { buttons: 0 })));
+      }, holdMs);
+    },
     _ready() {
       if (typeof _hooks.onReady === 'function') _hooks.onReady();
     }
@@ -56,6 +72,10 @@
   Object.defineProperty(window.KbyTipping, 'onNoBalance', {
     get() { return _hooks.onNoBalance; },
     set(fn) { _hooks.onNoBalance = fn; }
+  });
+  Object.defineProperty(window.KbyTipping, 'onBeforeInteract', {
+    get() { return _hooks.onBeforeInteract; },
+    set(fn) { _hooks.onBeforeInteract = fn; }
   });
 
   function injectShell() {
@@ -1291,9 +1311,7 @@
     holdChargeRaf = requestAnimationFrame(chargeLoop);
   }
 
-  function showMinimodalCharging() {
-    const outer = document.getElementById('tipMinimodalOuter');
-    const modal = document.getElementById('tipMinimodal');
+  function initMinimodalSession() {
     stopCountdownAnimation();
     tickJarSliceCooldown();
     ensureJarSliceRec();
@@ -1309,6 +1327,41 @@
       clearInterval(jarCapResetInterval);
       jarCapResetInterval = 0;
     }
+  }
+
+  /** Quick tap (modal closed): open minimodal, add one default unit, auto-send after countdown. */
+  function showMinimodalQuickTap() {
+    initMinimodalSession();
+    if (sessionCapUsd() <= 0) return;
+    const outer = document.getElementById('tipMinimodalOuter');
+    const modal = document.getElementById('tipMinimodal');
+    modalPhase = 'countdown';
+    modalShownAt = performance.now();
+    positionMinimodal();
+    if (outer) {
+      outer.classList.remove('tip-minimodal-outer--text-only');
+      outer.classList.add('visible');
+    }
+    if (modal) modal.setAttribute('aria-hidden', 'false');
+    pendingMinimodalUsd = 0;
+    countdownWalletRampUnlocked = false;
+    chargeRampHitCapNotified = false;
+    syncMinimodalPhaseUi();
+    addOnePendingUnit();
+    updatePendingTippingDisplay();
+    resetCountdown();
+    jarCapResetInterval = window.setInterval(() => {
+      if (modalPhase !== 'countdown') return;
+      updatePendingTippingDisplay();
+    }, 500);
+    positionCoinPoolAtBtn();
+    requestAnimationFrame(() => positionMinimodal());
+  }
+
+  function showMinimodalCharging() {
+    const outer = document.getElementById('tipMinimodalOuter');
+    const modal = document.getElementById('tipMinimodal');
+    initMinimodalSession();
     if (sessionCapUsd() <= 0) {
       return;
     }
@@ -1498,8 +1551,12 @@
     function onDown(e) {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       e.stopPropagation();
-      if (window.KbyTipping?.syncBalances) window.KbyTipping.syncBalances();
       if (window.KbyTipping?.setActive) window.KbyTipping.setActive(btn);
+      if (window.KbyTipping?.onBeforeInteract) {
+        const ok = window.KbyTipping.onBeforeInteract(window.KbyTipping.activeCtx?.());
+        if (ok === false) return;
+      }
+      if (window.KbyTipping?.syncBalances) window.KbyTipping.syncBalances();
       try {
         e.currentTarget.setPointerCapture(e.pointerId);
       } catch (_) {}
@@ -1586,8 +1643,11 @@
           }
           return;
         }
+        if (tapMs < HOLD_DELAY) {
+          showMinimodalQuickTap();
+          return;
+        }
       }
-      triggerFlip();
     }
 
     function onLeave() {

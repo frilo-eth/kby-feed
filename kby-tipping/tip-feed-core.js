@@ -1220,9 +1220,7 @@
     holdChargeRaf = requestAnimationFrame(chargeLoop);
   }
 
-  function showMinimodalCharging() {
-    const outer = document.getElementById('tipMinimodalOuter');
-    const modal = document.getElementById('tipMinimodal');
+  function initMinimodalSession() {
     stopCountdownAnimation();
     tickJarSliceCooldown();
     ensureJarSliceRec();
@@ -1238,6 +1236,41 @@
       clearInterval(jarCapResetInterval);
       jarCapResetInterval = 0;
     }
+  }
+
+  /** Quick tap (modal closed): open minimodal, add one default unit, auto-send after countdown. */
+  function showMinimodalQuickTap() {
+    initMinimodalSession();
+    if (sessionCapUsd() <= 0) return;
+    const outer = document.getElementById('tipMinimodalOuter');
+    const modal = document.getElementById('tipMinimodal');
+    modalPhase = 'countdown';
+    modalShownAt = performance.now();
+    positionMinimodal();
+    if (outer) {
+      outer.classList.remove('tip-minimodal-outer--text-only');
+      outer.classList.add('visible');
+    }
+    if (modal) modal.setAttribute('aria-hidden', 'false');
+    pendingMinimodalUsd = 0;
+    countdownWalletRampUnlocked = false;
+    chargeRampHitCapNotified = false;
+    syncMinimodalPhaseUi();
+    addOnePendingUnit();
+    updatePendingTippingDisplay();
+    resetCountdown();
+    jarCapResetInterval = window.setInterval(() => {
+      if (modalPhase !== 'countdown') return;
+      updatePendingTippingDisplay();
+    }, 500);
+    positionCoinPoolAtBtn();
+    requestAnimationFrame(() => positionMinimodal());
+  }
+
+  function showMinimodalCharging() {
+    const outer = document.getElementById('tipMinimodalOuter');
+    const modal = document.getElementById('tipMinimodal');
+    initMinimodalSession();
     if (sessionCapUsd() <= 0) {
       return;
     }
@@ -1427,8 +1460,12 @@
     function onDown(e) {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       e.stopPropagation();
-      if (window.KbyTipping?.syncBalances) window.KbyTipping.syncBalances();
       if (window.KbyTipping?.setActive) window.KbyTipping.setActive(btn);
+      if (window.KbyTipping?.onBeforeInteract) {
+        const ok = window.KbyTipping.onBeforeInteract(window.KbyTipping.activeCtx?.());
+        if (ok === false) return;
+      }
+      if (window.KbyTipping?.syncBalances) window.KbyTipping.syncBalances();
       try {
         e.currentTarget.setPointerCapture(e.pointerId);
       } catch (_) {}
@@ -1515,8 +1552,11 @@
           }
           return;
         }
+        if (tapMs < HOLD_DELAY) {
+          showMinimodalQuickTap();
+          return;
+        }
       }
-      triggerFlip();
     }
 
     function onLeave() {
