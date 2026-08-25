@@ -10170,8 +10170,16 @@ html.dark .qhc-id{color:#6BA3FF;}
       seedDemoSocial(0);
       paintAuthChrome();
       setTimeout(()=>{
-        const tipBtn = document.querySelector('.feed-item .react-btn.tip');
-        if(tipBtn && !tipBtn.classList.contains('active')) tipBtn.click();
+        const tipIdx = typeof firstTipablePostIndex === 'function' ? firstTipablePostIndex() : posts.findIndex(p => p && p.role !== 'op');
+        if(tipIdx < 0) return;
+        const runTip = ()=>{
+          const tipBtn = itemEls()[tipIdx]?.querySelector('.react-btn.tip');
+          if(tipBtn && !tipBtn.classList.contains('active')) tipBtn.click();
+        };
+        if(lastActiveIdx !== tipIdx){
+          springTo(tipIdx, 0.95);
+          setTimeout(runTip, 720);
+        } else runTip();
       }, 520);
       return;
     }
@@ -11660,6 +11668,12 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   function isOpPost(post){
     return post?.role === 'op';
+  }
+  function firstTipablePostIndex(){
+    for(let i = 0; i < posts.length; i++){
+      if(posts[i] && !isOpPost(posts[i])) return i;
+    }
+    return -1;
   }
   function parentTokenPost(post){
     if(!post) return post;

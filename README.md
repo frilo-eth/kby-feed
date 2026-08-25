@@ -1502,7 +1502,7 @@ Click-through for design reviews: [https://kby-feed.vercel.app/flows](https://kb
 |------|-----|
 | Land and browse | [`/feed`](https://kby-feed.vercel.app/feed) |
 | First action (login + pending tip) | [`/feed?flow=first`](https://kby-feed.vercel.app/feed?flow=first) |
-| Tip with $0 → Top up → auto-resume | [`/feed?flow=tip-topup`](https://kby-feed.vercel.app/feed?flow=tip-topup) |
+| Tip with $0 → Top up → auto-resume | [`/feed?flow=tip-topup`](https://kby-feed.vercel.app/feed?flow=tip-topup) (lands on first **entry** yap, not OP) |
 | Login · More options / cancelled | [`?flow=more`](https://kby-feed.vercel.app/feed?flow=more) · [`?flow=login-error`](https://kby-feed.vercel.app/feed?flow=login-error) |
 | Wallet catalog | [`/feed?flow=wallets`](https://kby-feed.vercel.app/feed?flow=wallets) (pick MetaMask → Connect) |
 | Top up to continue | [`/feed?flow=topup`](https://kby-feed.vercel.app/feed?flow=topup) |
