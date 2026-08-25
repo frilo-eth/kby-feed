@@ -11,6 +11,8 @@
 - Attach / settle sound swapped to quieter `transitionQpv7x` (soft sine pair).
 - Error sound swapped to `errorY8d0h` (bandpass noise tick + low sines + delay).
 - Warning sound swapped to `warningY6w1j` (low sine/triangle stack + delay).
+- Top-up success fires tip-scale confetti via `celebrateFunds()`.
+- `/flows`: **Tip → Top up** demo (`?flow=tip-topup`) — logged-in $0 balance, tip triggers deposit, checkout resumes tip.
 
 ### Docs
 - README [#haptic-sound-map](https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map): full preset → WebHaptics → sound recipe catalog; curated export IDs; recipe-only audio + haptic-only swipe/pull rules.

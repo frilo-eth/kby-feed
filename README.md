@@ -914,7 +914,7 @@ One call path: `haptic(preset, soundKind?, soundArg?)` → vibration + optional 
 
 `PRESET_SOUND` maps each haptic preset → sound key (or `false` = haptic only). Override with `haptic(preset, false)` or `haptic(preset, 'otherSound')`.
 
-Celebration helper: `celebrateSuccess(kind)` · `celebrateBuySuccess()` · `celebrateTip(btn)` — pick a success preset and optionally fire confetti.
+Celebration helper: `celebrateSuccess(kind)` · `celebrateBuySuccess()` · `celebrateFunds()` · `celebrateTip(btn)` — pick a success preset and optionally fire confetti.
 
 ---
 
@@ -926,7 +926,7 @@ Celebration helper: `celebrateSuccess(kind)` · `celebrateBuySuccess()` · `cele
 | **`tipSuccess`** | [▶](https://kby-feed.vercel.app/sounds#tip) | **First** tip ever (`celebrateTip`) | Same rich pattern | **`tip`** (`successX9pkg`) | + tip-scale confetti · `kb_first_tip_v1` |
 | **`tip`** | [▶](https://kby-feed.vercel.app/sounds#tip) | Repeat tip | Tip rich 5-step pattern | **`tip`** (`successX9pkg`) | No confetti |
 | **`success`** | [▶](https://kby-feed.vercel.app/sounds#sent) | Sell settle · send complete | Rich pattern | **`sent`** (`success0m6r9`) | Via `celebrateSuccess('sell'\|'send')` |
-| **`funds`** | [▶](https://kby-feed.vercel.app/sounds#funds) | Top-up / deposit credited | Rich pattern | **`funds`** (FM sine 660 + 990, reverb) | Via `celebrateSuccess('funds')` |
+| **`funds`** | [▶](https://kby-feed.vercel.app/sounds#funds) | Top-up / deposit credited | Rich pattern | **`funds`** (FM sine 660 + 990, reverb) | Via `celebrateFunds()` · + tip-scale confetti |
 | **`sent`** | [▶](https://kby-feed.vercel.app/sounds#sent) | Comment posted | Rich pattern | **`sent`** (`success0m6r9`) | Via `celebrateSuccess('sent')` |
 | **`dislike`** | [▶](https://kby-feed.vercel.app/sounds#dislike) | Dislike react | Built-in `warning` | **`dislike`** | React only — not used for flow errors |
 | **`warning`** | [▶](https://kby-feed.vercel.app/sounds#warning) | Top up to continue · short wallet · Enter an amount · Not enough in this wallet · Top up to send | Built-in `warning` | **`warning`** (`warningY6w1j`) | Soft gate — recoverable |
@@ -1061,7 +1061,7 @@ Audio = recipe-only. Vibration = WebHaptics / `navigator.vibrate`.
 #### Porting rules
 
 1. Call **`haptic(preset)`** — do not invent parallel audio/vibrate paths.
-2. Outcome moments go through **`celebrateSuccess` / `celebrateBuySuccess` / `celebrateTip`** so confetti and rich patterns stay consistent.
+2. Outcome moments go through **`celebrateSuccess` / `celebrateBuySuccess` / `celebrateFunds` / `celebrateTip`** so confetti and rich patterns stay consistent.
 3. Continuous motion (swipe, pull notches) stays **haptic-only** (`false` in `PRESET_SOUND`).
 4. Respect `prefers-reduced-motion` for confetti; vibration still runs.
 5. Source of truth in `feed.html`: `WEB_HAPTIC_PRESETS` · `HAPTIC_PATTERNS` · `PRESET_SOUND` · `SOUND_RECIPES` · `celebrateSuccess`. Mirror recipe objects in `sounds.html`.
@@ -1502,6 +1502,7 @@ Click-through for design reviews: [https://kby-feed.vercel.app/flows](https://kb
 |------|-----|
 | Land and browse | [`/feed`](https://kby-feed.vercel.app/feed) |
 | First action (login + pending tip) | [`/feed?flow=first`](https://kby-feed.vercel.app/feed?flow=first) |
+| Tip with $0 → Top up → auto-resume | [`/feed?flow=tip-topup`](https://kby-feed.vercel.app/feed?flow=tip-topup) |
 | Login · More options / cancelled | [`?flow=more`](https://kby-feed.vercel.app/feed?flow=more) · [`?flow=login-error`](https://kby-feed.vercel.app/feed?flow=login-error) |
 | Wallet catalog | [`/feed?flow=wallets`](https://kby-feed.vercel.app/feed?flow=wallets) (pick MetaMask → Connect) |
 | Top up to continue | [`/feed?flow=topup`](https://kby-feed.vercel.app/feed?flow=topup) |
@@ -1735,7 +1736,7 @@ Same chrome as comments (desktop 360 / mobile sheet). Buy / Sell tabs. Amount is
 | `'deposit'` | Top up to buy | `.is-short` ink | `openTopUp(shortfall, () => resumeTrade(side, true))` |
 | `'go'` | **Buy** / Sell | green `#3DDC97` / `--red` | confirm sheet / sell |
 
-After deposit, `creditFunds` runs `pendingFunds`. Social buys reopen the **Confirm purchase** summary (they must tap Buy). Wallet-login buys open the fake signature popup. A leftover `$0` shortfall does not reopen the hub. Login alone does not.
+After deposit, `creditFunds` runs `celebrateFunds()` (rich haptic + tip-scale confetti), then `pendingFunds` if set. Social buys reopen the **Confirm purchase** summary (they must tap Buy). Wallet-login buys open the fake signature popup. Tips auto-resume via `requireSpend` (`?flow=tip-topup` on [`/flows`](https://kby-feed.vercel.app/flows)). A leftover `$0` shortfall does not reopen the hub. Login alone does not.
 
 <a id="slippage"></a>
 

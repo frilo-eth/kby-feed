@@ -10166,6 +10166,15 @@ html.dark .qhc-id{color:#6BA3FF;}
       showToast('Sign-in cancelled.');
       return;
     }
+    if(flow === 'tip-topup'){
+      seedDemoSocial(0);
+      paintAuthChrome();
+      setTimeout(()=>{
+        const tipBtn = document.querySelector('.feed-item .react-btn.tip');
+        if(tipBtn && !tipBtn.classList.contains('active')) tipBtn.click();
+      }, 520);
+      return;
+    }
     if(flow === 'topup' || flow === 'low'){
       seedDemoSocial(0);
       if(typeof haptic === 'function') haptic('warning');
@@ -10384,7 +10393,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     logActivity('deposit', label ? `Top up · ${label}` : 'Top up', amt);
     finishFundsSheet();
     paintAuthChrome();
-    if(typeof haptic === 'function') celebrateSuccess('funds');
+    if(typeof celebrateFunds === 'function') celebrateFunds();
+    else if(typeof haptic === 'function') celebrateSuccess('funds');
     if(!(opts && opts.silent)) showToast(`Added ${usdLabel(amt)}${label ? ' via '+label : ''}.`);
     const next = session.pendingFunds;
     session.pendingFunds = null;
@@ -11542,6 +11552,14 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(opts && opts.confetti){
       fireConfetti({ origin: opts.origin, scale: opts.confettiScale || 'full' });
     }
+  }
+  function celebrateFunds(){
+    const anchor = fundsOverlay?.querySelector('.funds-modal') || document.getElementById('walletBtn');
+    celebrateSuccess('funds', {
+      confetti: true,
+      origin: anchor ? confettiOriginFromEl(anchor, 0.35) : undefined,
+      confettiScale: 'tip',
+    });
   }
   function celebrateBuySuccess(){
     const modal = swapOverlay?.querySelector('.swap-modal');
