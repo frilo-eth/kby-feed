@@ -1,0 +1,2255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Flip Coin</title>
+<!-- Jar: ?resetJar restores defaults. Cmd+Shift+R (Ctrl+Shift+R on Windows) also resets jar + cache-bust reload. -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.0/400.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.0/500.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/geist-mono@5.0.0/400.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/geist-mono@5.0.0/600.min.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: #F2EEEA;
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  .flip-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .action-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .tips-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── Coin ── (50% shorter travel, ~15% quicker) */
+  .coin-container {
+    position: relative;
+    width: 32px;
+    height: 130px;
+    flex-shrink: 0;
+    overflow: visible;
+    transform: scale(0.8);
+    transform-origin: bottom center;
+  }
+
+  .coin-pool {
+    position: absolute;
+    top: 0;
+    left: -12px;
+    width: 56px;
+    height: 130px;
+    pointer-events: none;
+  }
+
+  .coin-spawn {
+    position: absolute;
+    top: 0;
+    left: 12px;
+    width: 32px;
+    height: 130px;
+  }
+
+  .coin-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 32px;
+    height: 130px;
+    overflow: hidden;
+  }
+
+  .coin {
+    width: 32px;
+    height: 32px;
+    position: absolute;
+    left: 0;
+    top: 130px;
+    transform-style: preserve-3d;
+  }
+
+  .coin-face {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    overflow: hidden;
+    border-radius: 50%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .coin-face svg {
+    display: block;
+    width: 64px;
+    height: 64px;
+    transform: scale(0.5);
+    transform-origin: 0 0;
+    shape-rendering: geometricPrecision;
+  }
+  .coin-face.back {
+    transform: rotateY(180deg);
+  }
+
+  /* Diagonal shine streak */
+  .shine {
+    position: absolute;
+    inset: -6px;
+    background: linear-gradient(
+      -52deg,
+      transparent 28%,
+      rgba(255, 252, 220, 0)   41%,
+      rgba(255, 255, 255, 0.92) 50%,
+      rgba(255, 252, 220, 0)   59%,
+      transparent 72%
+    );
+    opacity: 0;
+    transform: translateX(-130%);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .coin.flipping .shine {
+    animation: shineSwipe 0.44s ease-in-out forwards;
+  }
+
+  @keyframes shineSwipe {
+    0%   { opacity: 0;   transform: translateX(-130%); }
+    36%  { opacity: 0;   transform: translateX(-130%); }
+    45%  { opacity: 1;   transform: translateX(-5%);   }
+    54%  { opacity: 0;   transform: translateX(130%);  }
+    100% { opacity: 0;   transform: translateX(130%);  }
+  }
+
+  /* 4-point star bling at coin edge */
+  .coin-star {
+    position: absolute;
+    top: 3px;
+    right: -4px;
+    width: 10px;
+    height: 10px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 10;
+    background: white;
+    clip-path: polygon(50% 0%, 56% 44%, 100% 50%, 56% 56%, 50% 100%, 44% 56%, 0% 50%, 44% 44%);
+    filter: drop-shadow(0 0 4px rgba(255, 200, 60, 0.95));
+  }
+
+  .coin-star.flinging {
+    animation: starBling 0.9s ease-in-out forwards;
+  }
+
+  @keyframes starBling {
+    0%   { opacity: 0; transform: scale(0)   rotate(-15deg); }
+    40%  { opacity: 0; transform: scale(0)   rotate(-15deg); }
+    48%  { opacity: 1; transform: scale(1.4) rotate(10deg);  }
+    57%  { opacity: 0; transform: scale(0.2) rotate(25deg);  }
+    100% { opacity: 0; transform: scale(0)   rotate(25deg);  }
+  }
+
+  .coin.flipping { animation: coinFlip 0.38s ease-in-out forwards; }
+  .coin.flipping.v2 { animation: coinFlipV2 0.365s ease-in-out forwards; }
+  .coin.flipping.v3 { animation: coinFlipV3 0.4s ease-in-out forwards; }
+  .coin.flipping.v4 { animation: coinFlipV4 0.375s ease-in-out forwards; }
+  .coin.flipping.v5 { animation: coinFlipV5 0.39s ease-in-out forwards; }
+  .coin.flipping.v6 { animation: coinFlipV6 0.36s ease-in-out forwards; }
+  .coin.flipping.v7 { animation: coinFlipV7 0.41s ease-in-out forwards; }
+  .coin.flipping.v8 { animation: coinFlipV8 0.37s ease-in-out forwards; }
+
+  @keyframes coinFlip {
+    0%   { top: 130px; transform: rotateY(0deg);   animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1); }
+    50%  { top: 0;     transform: rotateY(360deg); animation-timing-function: cubic-bezier(0.64, 0, 0.78, 0); }
+    100% { top: 130px; transform: rotateY(720deg); }
+  }
+  @keyframes coinFlipV2 {
+    0%   { top: 130px; transform: rotateY(0deg);   animation-timing-function: cubic-bezier(0.25, 0.55, 0.38, 1); }
+    48%  { top: 3px;   transform: rotateY(345deg); animation-timing-function: cubic-bezier(0.62, 0, 0.8, 0); }
+    100% { top: 130px; transform: rotateY(705deg); }
+  }
+  @keyframes coinFlipV3 {
+    0%   { top: 130px; transform: rotateY(0deg);   animation-timing-function: cubic-bezier(0.2, 0.65, 0.34, 1); }
+    52%  { top: -3px;  transform: rotateY(375deg); animation-timing-function: cubic-bezier(0.66, 0, 0.76, 0); }
+    100% { top: 130px; transform: rotateY(735deg); }
+  }
+  @keyframes coinFlipV4 {
+    0%   { top: 130px; transform: rotateY(0deg);   animation-timing-function: cubic-bezier(0.23, 0.6, 0.35, 1); }
+    50%  { top: -2px;  transform: rotateY(370deg); animation-timing-function: cubic-bezier(0.63, 0, 0.79, 0); }
+    100% { top: 130px; transform: rotateY(730deg); }
+  }
+  @keyframes coinFlipV5 {
+    0%   { top: 130px; transform: rotateY(0deg);   animation-timing-function: cubic-bezier(0.21, 0.62, 0.37, 1); }
+    50%  { top: 2px;   transform: rotateY(350deg); animation-timing-function: cubic-bezier(0.65, 0, 0.77, 0); }
+    100% { top: 130px; transform: rotateY(710deg); }
+  }
+  @keyframes coinFlipV6 {
+    0%   { top: 130px; transform: rotateY(0deg);   animation-timing-function: cubic-bezier(0.24, 0.58, 0.36, 1); }
+    49%  { top: 1px;   transform: rotateY(355deg); animation-timing-function: cubic-bezier(0.61, 0, 0.81, 0); }
+    100% { top: 130px; transform: rotateY(715deg); }
+  }
+  @keyframes coinFlipV7 {
+    0%   { top: 130px; transform: rotateY(0deg);   animation-timing-function: cubic-bezier(0.2, 0.64, 0.34, 1); }
+    51%  { top: -1px;  transform: rotateY(365deg); animation-timing-function: cubic-bezier(0.66, 0, 0.76, 0); }
+    100% { top: 130px; transform: rotateY(725deg); }
+  }
+  @keyframes coinFlipV8 {
+    0%   { top: 130px; transform: rotateY(0deg);   animation-timing-function: cubic-bezier(0.22, 0.59, 0.37, 1); }
+    50%  { top: 0;     transform: rotateY(360deg); animation-timing-function: cubic-bezier(0.64, 0, 0.78, 0); }
+    100% { top: 130px; transform: rotateY(720deg); }
+  }
+
+  /* ── Button ── */
+  .flip-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 6px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+    user-select: none;
+    white-space: nowrap;
+    overflow: visible;
+  }
+
+  .flip-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 4px;
+    border: 1px solid rgba(80, 70, 59, 0.12);
+    background: transparent;
+    z-index: -1;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .flip-btn:hover::before {
+    border-color: rgba(80, 70, 59, 0.16);
+    background: #FFF;
+  }
+
+  .flip-btn::after {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    border-radius: 3px;
+    background: #FAFAF9;
+    z-index: -1;
+    transition: background 0.2s;
+  }
+
+  .flip-btn:hover::after {
+    background: #FFF;
+  }
+
+  .flip-btn:active::after {
+    background: #F8F8F7;
+  }
+
+  /* Radial pulsating circle on tip – soft, blurred, from center */
+  .flip-btn .pulse-ring {
+    position: absolute;
+    inset: -16px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(249, 115, 22, 0.5) 0%, rgba(249, 115, 22, 0.2) 25%, rgba(249, 115, 22, 0.05) 50%, transparent 70%);
+    filter: blur(6px);
+    opacity: 0;
+    pointer-events: none;
+    z-index: -2;
+    transform-origin: center;
+  }
+
+  .flip-btn.pulse .pulse-ring {
+    animation: iconPulseSoft 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  @keyframes iconPulseSoft {
+    0%   { opacity: 0.9; transform: scale(0.3); }
+    70%  { opacity: 0.4; transform: scale(1.4); }
+    100% { opacity: 0; transform: scale(1.9); }
+  }
+
+
+  /* Already tipped state */
+  .flip-btn.tipped::after {
+    background: radial-gradient(120.26% 191.49% at 50% 146.17%, rgba(255, 147, 97, 0.20) 0%, rgba(250, 250, 250, 0.20) 100%), #FAFAF9;
+  }
+
+  .flip-btn.tipped::before {
+    border-color: #FFE5DD;
+  }
+
+  .flip-btn.tipped:hover::after {
+    background: radial-gradient(120.26% 191.49% at 50% 146.17%, rgba(255, 147, 97, 0.18) 0%, rgba(252, 252, 251, 0.25) 100%), #FFF;
+  }
+
+  .flip-btn.tipped:hover::before {
+    border-color: rgba(255, 229, 221, 0.9);
+    background: transparent;
+  }
+
+  .flip-btn.tipped .counter {
+    color: #F97316;
+  }
+
+  .flip-btn.tipped .btn-icon path {
+    stroke: #F97316;
+  }
+
+  /* ── Vote buttons (same style as tip, green/red) ── */
+  .vote-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 6px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+    user-select: none;
+  }
+
+  .vote-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 4px;
+    border: 1px solid rgba(80, 70, 59, 0.12);
+    background: transparent;
+    z-index: -1;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .vote-btn:hover::before {
+    border-color: rgba(80, 70, 59, 0.16);
+    background: #FFF;
+  }
+
+  .vote-btn::after {
+    content: '';
+    position: absolute;
+    inset: 1px;
+    border-radius: 3px;
+    background: #FAFAF9;
+    z-index: -1;
+    transition: background 0.2s;
+  }
+
+  .vote-btn:hover::after {
+    background: #FFF;
+  }
+
+  .vote-btn:active::after {
+    background: #F8F8F7;
+  }
+
+  .vote-btn .vote-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    aspect-ratio: 1/1;
+    display: block;
+  }
+
+  .vote-btn .vote-icon {
+    transition: transform 0.2s ease-out;
+  }
+
+  .vote-btn .vote-icon path {
+    stroke: #50463B;
+    transition: stroke 0.15s;
+  }
+
+  .vote-btn .vote-pulse {
+    position: absolute;
+    inset: -16px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, transparent 0%, transparent 30%);
+    filter: blur(6px);
+    opacity: 0;
+    pointer-events: none;
+    z-index: -2;
+    transform-origin: center;
+  }
+
+  .vote-btn.pulse .vote-pulse {
+    animation: iconPulseSoft 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  .vote-btn.upvote.pulse .vote-pulse {
+    background: radial-gradient(circle at center, rgba(0, 152, 96, 0.45) 0%, rgba(0, 152, 96, 0.18) 25%, rgba(0, 152, 96, 0.04) 50%, transparent 70%);
+  }
+
+  .vote-btn.downvote.pulse .vote-pulse {
+    background: radial-gradient(circle at center, rgba(208, 63, 69, 0.45) 0%, rgba(208, 63, 69, 0.18) 25%, rgba(208, 63, 69, 0.04) 50%, transparent 70%);
+  }
+
+  .vote-btn.voted .vote-icon {
+    animation: voteIconPop 0.35s ease-out;
+  }
+
+  @keyframes voteIconPop {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.25); }
+    100% { transform: scale(1); }
+  }
+
+  /* Upvote voted state – Grass green */
+  .vote-btn.upvote.voted::after {
+    background: radial-gradient(120.26% 191.49% at 50% 146.17%, rgba(85, 206, 161, 0.20) 0%, rgba(250, 250, 250, 0.20) 100%), #FFF;
+  }
+
+  .vote-btn.upvote.voted::before {
+    border-color: #C3FFEA;
+  }
+
+  .vote-btn.upvote.voted:hover::after {
+    background: radial-gradient(120.26% 191.49% at 50% 146.17%, rgba(85, 206, 161, 0.16) 0%, rgba(252, 252, 251, 0.25) 100%), #FFF;
+  }
+
+  .vote-btn.upvote.voted:hover::before {
+    border-color: rgba(195, 255, 234, 0.9);
+    background: transparent;
+  }
+
+  .vote-btn.upvote.voted .vote-icon path {
+    stroke: #009860;
+  }
+
+  .vote-btn.upvote.voted .vote-counter {
+    color: #009860;
+  }
+
+  /* Downvote voted state – Devil red */
+  .vote-btn.downvote.voted::after {
+    background: radial-gradient(120.26% 191.49% at 50% 146.17%, rgba(241, 134, 132, 0.20) 0%, rgba(250, 250, 250, 0.20) 100%), #FFF;
+  }
+
+  .vote-btn.downvote.voted::before {
+    border-color: #FFE1DD;
+  }
+
+  .vote-btn.downvote.voted:hover::after {
+    background: radial-gradient(120.26% 191.49% at 50% 146.17%, rgba(241, 134, 132, 0.16) 0%, rgba(252, 252, 251, 0.25) 100%), #FFF;
+  }
+
+  .vote-btn.downvote.voted:hover::before {
+    border-color: rgba(255, 225, 221, 0.9);
+    background: transparent;
+  }
+
+  .vote-btn.downvote.voted .vote-icon path {
+    stroke: #D03F45;
+  }
+
+  .btn-icon {
+    flex-shrink: 0;
+    display: block;
+    transition: transform 0.2s ease-out;
+  }
+
+  .flip-btn.icon-pop .btn-icon {
+    animation: voteIconPop 0.2s ease-out;
+  }
+
+  /* ── Animated counter (odometer-style digit roll) ── */
+  .counter {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 120%;
+    color: #50463B;
+    font-variant-numeric: tabular-nums;
+    transition: color 0.15s;
+  }
+
+
+  .digit-slot {
+    display: inline-block;
+    width: 0.65em;
+    height: 1.2em;
+    overflow: hidden;
+    line-height: 1.2;
+    text-align: center;
+    vertical-align: middle;
+    position: relative;
+  }
+
+  .digit-slot.decimal {
+    width: 0.3em;
+  }
+
+  .digit-roll {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    transition: transform 0.22s cubic-bezier(0.34, 1.2, 0.64, 1);
+    will-change: transform;
+  }
+
+  .digit-cell {
+    height: 1.2em;
+    min-height: 1.2em;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .digit-slot.decimal .digit-roll {
+    transition: none;
+  }
+
+  .counter.tick .digit-slot.decimal,
+  .counter.tick .digit-slot:nth-last-child(1),
+  .counter.tick .digit-slot:nth-last-child(2) {
+    animation: decimalTick 0.2s ease-out;
+  }
+
+  .vote-counter {
+    display: inline-flex;
+    align-items: center;
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 120%;
+    color: #50463B;
+    font-variant-numeric: tabular-nums;
+    transition: color 0.15s;
+  }
+
+  @keyframes decimalTick {
+    0%   { transform: scale(1); opacity: 1; }
+    45%  { transform: scale(1.06); opacity: 0.9; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* ── On-hold minimodal ── */
+  .tip-minimodal-outer {
+    --countdown-sweep: 0;
+    position: fixed;
+    z-index: 1000;
+    box-sizing: border-box;
+    width: 208px;
+    max-width: calc(100vw - 24px);
+    padding: 1px;
+    border-radius: 8px;
+    background: #EEE7DF;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(4px);
+    transition: opacity 0.2s, visibility 0.2s, transform 0.2s;
+  }
+
+  .tip-minimodal-outer.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  /**
+   * While the outer is not shown, keep the charging/countdown chrome hidden.
+   * Otherwise dismiss of the “broke” tooltip removes .tip-minimodal--no-balance before the
+   * fade finishes, and the main UI flashes inside the fading shell (looks like the previous modal).
+   */
+  .tip-minimodal-outer:not(.visible) .tip-minimodal-main,
+  .tip-minimodal-outer:not(.visible) .tip-minimodal-progress,
+  .tip-minimodal-outer:not(.visible) .tip-minimodal-actions {
+    display: none !important;
+  }
+
+  /** Click-only no-balance tooltip: width hugs copy (other states keep fixed 208px outer) */
+  .tip-minimodal-outer.tip-minimodal-outer--text-only {
+    width: max-content;
+    max-width: calc(100vw - 24px);
+  }
+
+  /** Wallet mode: neutral-600 base + orange sweep from 12 o'clock, smooth --countdown-sweep 0→1 */
+  .tip-minimodal-outer.tip-minimodal-outer--wallet {
+    background: conic-gradient(
+      from 0deg,
+      #ff9361 0deg,
+      #c43100 calc(var(--countdown-sweep, 0) * 360deg),
+      #525252 calc(var(--countdown-sweep, 0) * 360deg)
+    );
+  }
+
+  /** Wraps top row + progress so outer modal gap still separates actions correctly */
+  .tip-minimodal-main {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .tip-minimodal {
+    --Brand-500: #FF6622;
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 8px 11px;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 10px;
+    border-radius: 7px;
+    border: none;
+    background: #FAFAFA;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  .tip-minimodal.tip-minimodal--wallet {
+    background: #FFF8F5;
+    box-shadow: 0 10px 15px -3px rgba(196, 49, 0, 0.12), 0 4px 6px -4px rgba(0, 0, 0, 0.06);
+  }
+
+  .tip-minimodal-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    align-self: stretch;
+  }
+
+  .tip-minimodal-col--left {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    gap: 6px;
+    flex: 1 0 0;
+    align-self: stretch;
+    min-width: 0;
+  }
+
+  .tip-minimodal-countdown-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: #8B7E6F;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.18s ease, max-height 0.22s ease;
+  }
+
+  .tip-minimodal--phase-charging .tip-minimodal-countdown-line,
+  .tip-minimodal--countdown-phase .tip-minimodal-countdown-line {
+    opacity: 1;
+    max-height: 3.25em;
+  }
+
+  .tip-minimodal--countdown-ticking .tip-minimodal-countdown-line {
+    gap: 0.35em;
+  }
+
+  .tip-minimodal-countdown-label {
+    flex-shrink: 0;
+  }
+
+  .tip-minimodal-countdown-suffix {
+    display: inline-block;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-3px);
+    transition: opacity 0.38s ease, transform 0.38s ease, visibility 0s linear 0.38s;
+  }
+
+  .tip-minimodal--countdown-ticking .tip-minimodal-countdown-suffix {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+    transition: opacity 0.38s ease, transform 0.38s ease, visibility 0s linear 0s;
+  }
+
+  .tip-minimodal-usd-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 1.2em;
+  }
+
+  .tip-minimodal-usd-prefix {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 12px;
+    letter-spacing: -0.24px;
+    text-transform: uppercase;
+    color: #342C24;
+    flex-shrink: 0;
+  }
+
+  .tip-minimodal-usd-row .counter {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 12px;
+    letter-spacing: -0.24px;
+    text-transform: uppercase;
+    color: #342C24;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tip-minimodal-col--right {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-end;
+    gap: 6px;
+    flex: 1 0 0;
+    align-self: stretch;
+    min-width: 0;
+  }
+
+  .tip-minimodal-from {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 120%;
+    color: #50463B;
+  }
+
+  .tip-minimodal-from > svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+
+  .tip-minimodal-token-row {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 2px;
+    align-self: stretch;
+    line-height: 120%;
+  }
+
+  .tip-minimodal-token-row .counter {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: #50463B;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tip-minimodal-token-suffix {
+    font-family: 'Geist Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: #50463B;
+    flex-shrink: 0;
+  }
+
+  .tip-minimodal-progress {
+    display: flex;
+    height: 8px;
+    justify-content: space-between;
+    align-items: flex-start;
+    align-self: stretch;
+    border-radius: 8px;
+    background: #DCD2C8;
+    backdrop-filter: blur(1px);
+    overflow: hidden;
+  }
+
+  .tip-minimodal-progress-inner {
+    display: flex;
+    padding: 0 4px 0 1px;
+    align-items: center;
+    gap: 4px;
+    flex: 1 0 0;
+    align-self: stretch;
+    min-width: 0;
+  }
+
+  .tip-minimodal-progress-fill {
+    height: 100%;
+    width: 0%;
+    max-width: 100%;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #55cea1, #00b281);
+    transform-origin: left center;
+    transition: none;
+  }
+
+  /** Wallet: gradient only on the fill; neutral track (#DCD2C8) shows as the bar shrinks */
+  .tip-minimodal--wallet .tip-minimodal-progress-fill {
+    border-radius: 8px;
+    background: linear-gradient(90deg, #FFD05B 25%, var(--Brand-500, #F62) 100%);
+  }
+
+  /** No-balance: tooltip-only (main UI hidden via .tip-minimodal--no-balance) */
+  .tip-minimodal--no-balance {
+    width: max-content;
+    max-width: calc(100vw - 24px);
+    padding: 6px 10px;
+    align-items: center;
+    gap: 0;
+  }
+
+  .tip-minimodal--no-balance .tip-minimodal-main {
+    display: none !important;
+  }
+
+  .tip-minimodal--no-balance .tip-minimodal-send,
+  .tip-minimodal--no-balance .tip-minimodal-cancel {
+    display: none !important;
+  }
+
+  .tip-minimodal-no-balance-tooltip {
+    display: none;
+    margin: 0;
+    padding: 0;
+    width: auto;
+    max-width: 15rem;
+    box-sizing: border-box;
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.35;
+    color: #50463B;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .tip-minimodal--no-balance .tip-minimodal-no-balance-tooltip {
+    display: block;
+  }
+
+  .tip-minimodal-no-balance-tooltip[hidden] {
+    display: none !important;
+  }
+
+  .tip-minimodal-from > .tip-minimodal-from-icon-jar {
+    display: block;
+  }
+
+  .tip-minimodal-from > .tip-minimodal-from-icon-wallet {
+    display: none;
+  }
+
+  .tip-minimodal--wallet .tip-minimodal-from > .tip-minimodal-from-icon-jar {
+    display: none;
+  }
+
+  .tip-minimodal--wallet .tip-minimodal-from > .tip-minimodal-from-icon-wallet {
+    display: block;
+  }
+
+  /** Wallet mode: flat Brand-500 on ~$ USD row; token K stays jar styling */
+  .tip-minimodal-usd-row--wallet-hot .tip-minimodal-usd-prefix,
+  .tip-minimodal-usd-row--wallet-hot .tip-minimodal-usd-counter {
+    font-weight: 600;
+    line-height: 12px;
+    letter-spacing: -0.24px;
+    text-transform: uppercase;
+    color: var(--Brand-500, #FF6622);
+    -webkit-text-fill-color: var(--Brand-500, #FF6622);
+  }
+
+  .tip-minimodal-usd-row--wallet-hot .tip-minimodal-usd-counter .digit-cell {
+    color: var(--Brand-500, #FF6622);
+    -webkit-text-fill-color: var(--Brand-500, #FF6622);
+  }
+
+  .tip-minimodal-usd-row--wallet-hot .tip-minimodal-usd-counter .digit-slot.decimal,
+  .tip-minimodal-usd-row--wallet-hot .tip-minimodal-usd-counter .digit-slot.decimal .digit-cell {
+    color: var(--Brand-500, #FF6622);
+    -webkit-text-fill-color: var(--Brand-500, #FF6622);
+  }
+
+  .tip-minimodal-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    align-self: stretch;
+  }
+
+  .tip-minimodal-send {
+    display: flex;
+    padding: 2px;
+    align-items: center;
+    gap: 2px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 120%;
+    color: #50463B;
+    cursor: pointer;
+  }
+
+  .tip-minimodal-send:hover {
+    background: rgba(80, 70, 59, 0.06);
+  }
+
+  .tip-minimodal-send:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+  }
+
+  .tip-minimodal-send:disabled:hover {
+    background: transparent;
+  }
+
+  .tip-minimodal-cancel {
+    display: flex;
+    padding: 2px;
+    align-items: center;
+    gap: 2px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 120%;
+    color: #B50023;
+    cursor: pointer;
+  }
+
+  .tip-minimodal-cancel:hover {
+    background: rgba(181, 0, 35, 0.06);
+  }
+</style>
+</head>
+<body>
+
+<div class="flip-container">
+
+  <div class="action-row">
+    <div class="tips-group">
+      <!-- Coin pool: each click spawns a new coin that animates independently -->
+      <div class="coin-container">
+        <div class="coin-pool" id="coinPool"></div>
+    <template id="coinTemplate">
+      <div class="coin-spawn">
+        <div class="coin-wrapper">
+          <div class="coin">
+            <div class="coin-face front">
+              <svg width="64" height="64" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="8.00004" cy="7.99906" r="6.335" fill="url(#g1)"/>
+                <path d="M9.14851 8.46216C9.20078 8.7638 9.06263 8.97469 8.98861 9.0004C8.7434 8.86 8.63479 8.67423 8.5627 8.41056L7.89937 8.38836C8.04995 8.92406 8.80402 9.47982 9.13122 9.02688C9.23459 8.89349 9.23847 8.63995 9.18562 8.46236H9.14851V8.46216ZM6.45903 8.34182H5.6694C5.61636 9.16183 7.1995 9.56355 7.01414 8.50656C7.00443 8.45165 6.98714 8.39674 6.92399 8.38836C6.98072 8.49994 6.98442 8.98501 6.8078 8.94646C6.76602 8.93711 6.37762 8.46178 6.45903 8.34182ZM5.06552 9.3217L3.99805 8.18214C4.41618 8.10503 4.69208 8.09471 4.97207 8.11185L4.04351 6.78321C4.16748 6.7614 5.15451 6.78321 5.15451 6.78321C5.2948 6.58459 5.21669 5.47404 5.25108 5.17922C5.32355 5.09744 5.57711 5.4867 5.62044 5.52993C5.7751 5.68474 6.51266 6.65956 6.51266 6.65956L7.71342 6.64417C7.91103 6.33592 8.7605 5.20766 8.94353 5.17825C9.04573 5.16189 9.03135 5.31398 9.03407 5.38797C9.05311 5.89817 8.93381 6.26095 9.03407 6.75848C9.30201 6.74134 10.7392 6.73472 11.1754 6.75848C11.3398 6.76724 12.1438 6.88116 11.9206 7.18221C11.5522 7.51792 11.5114 7.4967 11.6149 7.82968L11.3134 7.70545L10.8688 8.09237L11.0105 8.48125L10.6844 8.32215L10.3347 8.66858L10.4068 8.89933C10.2434 8.90167 10.0862 8.79788 9.94281 8.92309L10.3951 9.21888L10.6617 9.08627C10.6881 9.08764 10.6975 9.29191 10.7068 9.40952C10.7095 9.44399 11.1063 9.81592 11.1364 9.82391L11.5215 9.69091C11.5425 10.095 11.3862 10.2202 11.757 10.4081C11.9206 10.491 12.0018 10.6755 12.0018 10.6755C12.0018 10.7561 11.4218 10.7983 11.2671 10.8085C10.6753 10.848 9.97059 10.8201 9.35972 10.8085C8.14282 10.7853 6.88727 10.8071 5.66921 10.8085C5.55069 10.8085 4.81974 10.181 4.67518 10.0369C4.47039 9.83228 4.23626 9.65566 4.04351 9.43737L5.06494 9.3215H5.06533L5.06552 9.3217Z" fill="#C6953D"/>
+                <path d="M14.3337 8.0013C14.3337 11.4991 11.4981 14.3346 8.00033 14.3346C4.50252 14.3346 1.66699 11.4991 1.66699 8.0013C1.66699 4.5035 4.50252 1.66797 8.00033 1.66797C11.4981 1.66797 14.3337 4.5035 14.3337 8.0013Z" stroke="#C6953D" stroke-linecap="square"/>
+                <defs>
+                  <linearGradient id="g1" x1="8" y1="14.334" x2="8" y2="1.664" gradientUnits="userSpaceOnUse">
+                    <stop offset="0.25" stop-color="#FFD05B"/>
+                    <stop offset="1" stop-color="#FFEEC5"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="shine"></div>
+            </div>
+            <div class="coin-face back">
+              <svg width="64" height="64" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="8.00004" cy="7.99906" r="6.335" fill="url(#g2)"/>
+                <path d="M8.00033 4.83464V4.13093M8.00033 11.168V11.8717M9.66699 6.0013C9.36279 5.58063 8.65153 5.18649 8.00033 5.18649C7.23879 5.18649 6.24107 5.5123 6.24107 6.43752C6.24107 8.44117 9.75959 7.5979 9.75959 9.51137C9.75959 10.4366 8.77386 10.8161 8.00033 10.8161C7.34913 10.8161 6.54525 10.422 6.24107 10.0013M14.3337 8.0013C14.3337 11.4991 11.4981 14.3346 8.00033 14.3346C4.50252 14.3346 1.66699 11.4991 1.66699 8.0013C1.66699 4.5035 4.50252 1.66797 8.00033 1.66797C11.4981 1.66797 14.3337 4.5035 14.3337 8.0013Z" stroke="#C6953D" stroke-linecap="square"/>
+                <defs>
+                  <linearGradient id="g2" x1="8" y1="14.334" x2="8" y2="1.664" gradientUnits="userSpaceOnUse">
+                    <stop offset="0.25" stop-color="#FFD05B"/>
+                    <stop offset="1" stop-color="#FFEEC5"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="shine"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+      </div>
+    <button class="flip-btn" id="flipBtn" type="button">
+      <span class="pulse-ring" aria-hidden="true"></span>
+      <svg class="btn-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g clip-path="url(#clip-btn)">
+          <path d="M8.00008 4.83464V4.13093M8.00008 11.168V11.8717M9.66675 6.0013C9.36255 5.58063 8.65128 5.18649 8.00008 5.18649C7.23855 5.18649 6.24082 5.5123 6.24082 6.43752C6.24082 8.44117 9.75935 7.5979 9.75935 9.51137C9.75935 10.4296 8.77361 10.8161 8.00008 10.8161C7.34888 10.8161 6.54501 10.422 6.24082 10.0013M14.3334 8.0013C14.3334 11.4991 11.4979 14.3346 8.00008 14.3346C4.50227 14.3346 1.66675 11.4991 1.66675 8.0013C1.66675 4.5035 4.50227 1.66797 8.00008 1.66797C11.4979 1.66797 14.3334 4.5035 14.3334 8.0013Z" stroke="#50463B" stroke-width="1.5" stroke-linecap="square"/>
+        </g>
+        <defs>
+          <clipPath id="clip-btn"><rect width="16" height="16" fill="white"/></clipPath>
+        </defs>
+      </svg>
+      <span class="counter" id="counter" data-value="512.23"></span>
+    </button>
+    </div>
+    <button class="vote-btn upvote" id="upvoteBtn" onclick="toggleUpvote()" aria-label="Upvote">
+      <span class="vote-pulse" aria-hidden="true"></span>
+      <svg class="vote-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4.33317 7.0013H1.6665V13.668H4.33317M4.33317 7.0013L7.36544 1.66797H7.7735C8.59257 1.66797 9.21804 2.39955 9.09064 3.20864L8.67724 5.83464H12.2973C13.536 5.83464 14.4768 6.9491 14.269 8.17024L13.6164 12.0036C13.4528 12.9648 12.6199 13.668 11.6448 13.668H4.33317M4.33317 7.0013V13.668" stroke-width="1.5"/>
+      </svg>
+      <span class="counter vote-counter" id="voteCounter" data-value="256"></span>
+    </button>
+    <button class="vote-btn downvote" id="downvoteBtn" onclick="toggleDownvote()" aria-label="Downvote">
+      <span class="vote-pulse" aria-hidden="true"></span>
+      <svg class="vote-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M11.699 8.9987H14.3657V2.33203H11.699M11.699 8.9987L8.6668 14.332H8.25867C7.4396 14.332 6.8142 13.6004 6.94153 12.7914L7.35493 10.1654H3.73489C2.49621 10.1654 1.5554 9.0509 1.76325 7.82976L2.41573 3.99643C2.57935 3.03518 3.4123 2.33203 4.38737 2.33203H11.699M11.699 8.9987V2.33203" stroke-width="1.5"/>
+      </svg>
+    </button>
+  </div>
+
+</div>
+
+<!-- On-hold minimodal — Figma: https://www.figma.com/design/DYukWIAVscGqu85nfGUhT5/Frontend?node-id=6360-443577 · Wallet: node-id=8958-229651 -->
+<div class="tip-minimodal-outer" id="tipMinimodalOuter">
+<div class="tip-minimodal" id="tipMinimodal" role="dialog" aria-label="Confirm tip" aria-hidden="true">
+  <div class="tip-minimodal-main" id="tipMinimodalMain">
+  <div class="tip-minimodal-top">
+    <div class="tip-minimodal-col--left">
+      <span class="tip-minimodal-countdown-line" id="minimodalCountdownLine">
+        <span class="tip-minimodal-countdown-label">Tipping</span>
+        <span class="tip-minimodal-countdown-suffix" id="minimodalCountdownSuffix" aria-live="polite"></span>
+      </span>
+      <div class="tip-minimodal-usd-row" id="minimodalUsdRow">
+        <span class="tip-minimodal-usd-prefix">~$</span>
+        <span class="counter tip-minimodal-usd-counter" id="minimodalUsdCounter" data-value="" aria-live="polite"></span>
+      </div>
+    </div>
+    <div class="tip-minimodal-col--right">
+      <div class="tip-minimodal-from">
+        <svg class="tip-minimodal-from-icon-jar" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M10.9179 3.08213H10.4179V3.16327L10.4436 3.24024L10.9179 3.08213ZM11.5709 5.04108H12.0709V4.95995L12.0453 4.88297L11.5709 5.04108ZM11.5709 12.8769V13.3769H12.0709V12.8769H11.5709ZM2.42911 12.8769H1.92911V13.3769H2.42911V12.8769ZM2.42911 5.04108L1.95477 4.88297L1.92911 4.95995V5.04108H2.42911ZM3.08209 3.08213L3.55644 3.24024L3.58209 3.16327V3.08213H3.08209ZM3.08209 1.12317V0.623169V1.12317ZM11.2444 1.62317H11.7444V0.623169H11.2444V1.12317V1.62317ZM2.65847 0.623169H2.15847V1.62317H2.65847V1.12317V0.623169ZM10.9179 1.12317H10.4179V3.08213H10.9179H11.4179V1.12317H10.9179ZM10.9179 3.08213L10.4436 3.24024L11.0966 5.1992L11.5709 5.04108L12.0453 4.88297L11.3923 2.92401L10.9179 3.08213ZM11.5709 5.04108H11.0709V12.8769H11.5709H12.0709V5.04108H11.5709ZM11.5709 12.8769V12.3769H2.42911V12.8769V13.3769H11.5709V12.8769ZM2.42911 12.8769H2.92911V5.04108H2.42911H1.92911V12.8769H2.42911ZM2.42911 5.04108L2.90345 5.1992L3.55644 3.24024L3.08209 3.08213L2.60775 2.92401L1.95477 4.88297L2.42911 5.04108ZM3.08209 3.08213H3.58209V1.12317H3.08209H2.58209V3.08213H3.08209ZM3.08209 1.12317V1.62317H10.9179V1.12317V0.623169H3.08209V1.12317ZM10.9179 1.12317V1.62317H11.2444V1.12317V0.623169H10.9179V1.12317ZM3.08209 1.12317V0.623169H2.65847V1.12317V1.62317H3.08209V1.12317ZM7.77652 6.69746L8.22896 6.48464C7.87007 5.72164 7.09371 5.19176 6.19258 5.19176V5.69176V6.19176C6.69194 6.19176 7.12389 6.48469 7.32407 6.91027L7.77652 6.69746ZM6.19258 5.69176V5.19176C4.95023 5.19176 3.94311 6.19888 3.94311 7.44122H4.44311H4.94311C4.94311 6.75116 5.50252 6.19176 6.19258 6.19176V5.69176ZM4.44311 7.44122H3.94311C3.94311 8.64939 4.89534 9.63482 6.09051 9.68841L6.11291 9.18891L6.13531 8.68942C5.47203 8.65968 4.94311 8.11209 4.94311 7.44122H4.44311ZM9.55693 8.51782H9.05693C9.05693 9.20789 8.49754 9.76728 7.80747 9.76728V10.2673V10.7673C9.04983 10.7673 10.0569 9.76018 10.0569 8.51782H9.55693ZM7.80747 10.2673V9.76728C7.1174 9.76728 6.558 9.20789 6.558 8.51782H6.058H5.558C5.558 9.76018 6.56511 10.7673 7.80747 10.7673V10.2673ZM6.058 8.51782H6.558C6.558 7.82774 7.11739 7.26835 7.80747 7.26835V6.76835V6.26835C6.56511 6.26835 5.558 7.27546 5.558 8.51782H6.058ZM7.80747 6.76835V7.26835C8.49754 7.26835 9.05693 7.82774 9.05693 8.51782H9.55693H10.0569C10.0569 7.27546 9.04983 6.26835 7.80747 6.26835V6.76835Z" fill="#50463B"/>
+        </svg>
+        <svg class="tip-minimodal-from-icon-wallet" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M9.14757 8.82292C9.34894 8.82292 9.51216 8.6597 9.51216 8.45833C9.51216 8.25697 9.34894 8.09375 9.14757 8.09375C8.94621 8.09375 8.78299 8.25697 8.78299 8.45833C8.78299 8.6597 8.94621 8.82292 9.14757 8.82292Z" fill="#50463B"/>
+          <path d="M9.73098 4.95848H3.60598C2.80056 4.95848 2.14764 4.30556 2.14764 3.50014C2.14764 2.69473 2.80056 2.04181 3.60598 2.04181H9.73098V4.95848ZM9.73098 4.95848H12.0643V11.9585H3.89764C2.93115 11.9585 2.14764 11.175 2.14764 10.2085V3.79181M9.14757 8.82292C9.34894 8.82292 9.51216 8.6597 9.51216 8.45833C9.51216 8.25697 9.34894 8.09375 9.14757 8.09375C8.94621 8.09375 8.78299 8.25697 8.78299 8.45833C8.78299 8.6597 8.94621 8.82292 9.14757 8.82292Z" stroke="#50463B" stroke-linecap="square"/>
+        </svg>
+        <span id="minimodalFromLabel">From Jar</span>
+      </div>
+      <div class="tip-minimodal-token-row" id="minimodalTokenRow">
+        <span class="counter tip-minimodal-token-counter" id="minimodalTokenCounter" data-value="" aria-live="polite"></span>
+        <span class="tip-minimodal-token-suffix">K</span>
+      </div>
+    </div>
+  </div>
+  <div class="tip-minimodal-progress" aria-hidden="true">
+    <div class="tip-minimodal-progress-inner">
+      <div class="tip-minimodal-progress-fill" id="minimodalProgressFill"></div>
+    </div>
+  </div>
+  </div>
+  <p class="tip-minimodal-no-balance-tooltip" id="minimodalNoBalanceTooltip" role="status" aria-live="polite" hidden>Hold your horses! You're broke.</p>
+  <div class="tip-minimodal-actions">
+    <button type="button" class="tip-minimodal-send" id="minimodalSend">Send</button>
+    <button type="button" class="tip-minimodal-cancel" id="minimodalCancel">Cancel</button>
+  </div>
+</div>
+</div>
+
+<script>
+  let total = 512.23;
+
+  const BASE   = 512.23;
+  const MY_TIP = 1.00;
+
+  function formatAmount(n) {
+    return n.toFixed(2);
+  }
+
+  function formatInteger(n) {
+    return Math.round(n).toString();
+  }
+
+  function renderCounter(container, value, formatFn) {
+    const str = (formatFn || formatAmount)(value);
+    container.innerHTML = '';
+    container.dataset.value = str;
+
+    for (let i = 0; i < str.length; i++) {
+      const ch = str[i];
+      const slot = document.createElement('span');
+      slot.className = 'digit-slot';
+
+      if (ch === '.') {
+        slot.classList.add('decimal');
+        slot.innerHTML = '<span class="digit-roll"><span class="digit-cell">.</span></span>';
+      } else {
+        const roll = document.createElement('span');
+        roll.className = 'digit-roll';
+        for (let d = 0; d <= 9; d++) {
+          const cell = document.createElement('span');
+          cell.className = 'digit-cell';
+          cell.textContent = d;
+          roll.appendChild(cell);
+        }
+        const d = parseInt(ch, 10);
+        roll.style.transform = `translateY(-${d * 1.2}em)`;
+        slot.appendChild(roll);
+      }
+      container.appendChild(slot);
+    }
+  }
+
+  function updateCounter(container, newValue, formatFn) {
+    const newStr = (formatFn || formatAmount)(newValue);
+    container.dataset.value = newStr;
+
+    let slotIdx = 0;
+    for (let i = 0; i < newStr.length; i++) {
+      const ch = newStr[i];
+      const slot = container.children[slotIdx];
+      if (!slot) break;
+
+      if (ch === '.') {
+        slotIdx++;
+        continue;
+      }
+
+      const roll = slot.querySelector('.digit-roll');
+      if (roll && roll.children.length > 1) {
+        const digit = parseInt(ch, 10);
+        roll.style.transform = `translateY(-${digit * 1.2}em)`;
+      }
+      slotIdx++;
+    }
+  }
+
+  const VARIANTS = ['', 'v2', 'v3', 'v4', 'v5', 'v6', 'v7', 'v8'];
+  const DURATIONS = { '': 390, 'v2': 370, 'v3': 405, 'v4': 385, 'v5': 395, 'v6': 365, 'v7': 415, 'v8': 375 };
+  let lastConfettiAt = 0;
+  let tickTimeout = 0;
+  let iconPopTimeout = 0;
+
+  function spawnCoin(opts) {
+    const grand = opts && opts.grand;
+    const pool   = document.getElementById('coinPool');
+    const tpl    = document.getElementById('coinTemplate');
+    const spawn  = tpl.content.cloneNode(true);
+
+    const suffix = Math.random().toString(36).slice(2, 8);
+    spawn.querySelectorAll('[id]').forEach(el => { el.id = el.id + suffix; });
+    spawn.querySelectorAll('[fill]').forEach(el => {
+      const fill = el.getAttribute('fill');
+      if (fill && fill.startsWith('url(#g')) {
+        const m = fill.match(/url\(#(g\d?)\)/);
+        if (m) el.setAttribute('fill', `url(#${m[1]}${suffix})`);
+      }
+    });
+
+    const variant = VARIANTS[Math.floor(Math.random() * VARIANTS.length)];
+    const duration = DURATIONS[variant];
+    const offsetX = 12 + (Math.random() - 0.5) * 22;
+    const scale = 0.94 + Math.random() * 0.12;
+    const tilt = (Math.random() - 0.5) * 4;
+
+    const spawnEl = spawn.querySelector('.coin-spawn');
+    spawnEl.style.left = offsetX + 'px';
+    spawnEl.style.transform = `scale(${scale}) rotate(${tilt}deg)`;
+    spawnEl.style.transformOrigin = 'center bottom';
+    spawn.querySelector('.coin').classList.add('flipping', variant);
+
+    pool.appendChild(spawn);
+    const added = pool.lastElementChild;
+
+    if (grand) {
+      setTimeout(() => spawnCoin(), 240);
+    }
+
+    setTimeout(() => {
+      const btn = document.getElementById('flipBtn');
+      const btnRect = btn.getBoundingClientRect();
+      const cx = (btnRect.left + btnRect.width  / 2) / window.innerWidth;
+      const cy = (btnRect.top  + btnRect.height / 2) / window.innerHeight;
+
+      const cOpts = {
+        origin: { x: cx, y: cy },
+        spread: grand ? 72 : 65,
+        angle: 90,
+        ticks: grand ? 48 : 40,
+        gravity: 0.35,
+        decay: 0.93,
+        startVelocity: grand ? 13 : 12,
+        drift: 0.35,
+        colors: ['#FFD05B', '#FFEEC5', '#C6953D', '#FFCA6C', '#e8b84b', '#F97316', '#FF9270', '#FFB088', '#FFE5DD', '#FFDAB9'],
+        shapes: ['circle'],
+        zIndex: 9999,
+      };
+
+      const fire = (typeof confetti === 'function' ? confetti : window.confetti);
+      if (fire && (Date.now() - lastConfettiAt) > 500) {
+        lastConfettiAt = Date.now();
+        fire({ ...cOpts, particleCount: grand ? 32 : 20, scalar: grand ? 0.58 : 0.5 });
+      }
+
+      if (added.parentNode) added.remove();
+    }, duration);
+  }
+
+  function fireTipParticles(btn, particleOpts) {
+    const wallet = particleOpts && particleOpts.wallet;
+    const rect = btn.getBoundingClientRect();
+    const cx = (rect.left + rect.width / 2) / window.innerWidth;
+    const cy = (rect.top + rect.height / 2) / window.innerHeight;
+    const fire = (typeof confetti === 'function' ? confetti : window.confetti);
+    if (!fire) return;
+    if (wallet) {
+      fire({
+        origin: { x: cx, y: cy },
+        spread: 82,
+        angle: 90,
+        ticks: 62,
+        gravity: 0.3,
+        decay: 0.945,
+        startVelocity: 15,
+        drift: 0.32,
+        colors: ['#FFD05B', '#FFEEC5', '#C43100', '#FF9361', '#FF7A45', '#FFECB3', '#FFF59D', '#FFFDE7', '#F97316'],
+        shapes: ['circle'],
+        particleCount: 58,
+        scalar: 0.58,
+        zIndex: 9999,
+      });
+      setTimeout(() => {
+        fire({
+          origin: { x: cx, y: cy },
+          spread: 58,
+          angle: 90,
+          ticks: 48,
+          gravity: 0.36,
+          decay: 0.93,
+          startVelocity: 11,
+          drift: 0.38,
+          colors: ['#FFD05B', '#F97316', '#FF9361', '#FFECB3', '#FFE0B2'],
+          shapes: ['circle'],
+          particleCount: 34,
+          scalar: 0.48,
+          zIndex: 9999,
+        });
+      }, 200);
+    } else {
+      fire({
+        origin: { x: cx, y: cy },
+        spread: 60,
+        angle: 90,
+        ticks: 35,
+        gravity: 0.35,
+        decay: 0.94,
+        startVelocity: 8,
+        drift: 0.4,
+        colors: ['#FFD05B', '#FFEEC5', '#F97316', '#FFCA6C', '#FFB088', '#FFE5DD', '#e8b84b'],
+        shapes: ['circle'],
+        particleCount: 14,
+        scalar: 0.4,
+        zIndex: 9999,
+      });
+    }
+  }
+
+  function walletPortionBeforeDeplete(amt) {
+    const fromJar = Math.min(amt, jarBalanceUsd);
+    return Math.round((amt - fromJar) * 100) / 100;
+  }
+
+  function triggerFlip(amount = MY_TIP) {
+    const cap = jarBalanceUsd + walletBalanceUsd;
+    const amt = Math.min(Math.round(amount * 100) / 100, cap);
+    if (amt <= 0) return;
+    const fromWallet = walletPortionBeforeDeplete(amt);
+    depleteTipBalances(amt);
+    total = Math.round((total + amt) * 100) / 100;
+    const counter = document.getElementById('counter');
+    updateCounter(counter, total);
+    clearTimeout(tickTimeout);
+    counter.classList.remove('tick');
+    void counter.offsetWidth;
+    counter.classList.add('tick');
+    tickTimeout = setTimeout(() => { counter.classList.remove('tick'); tickTimeout = 0; }, 220);
+
+    const btn = document.getElementById('flipBtn');
+    if (total > BASE) btn.classList.add('tipped');
+    clearTimeout(iconPopTimeout);
+    btn.classList.remove('icon-pop');
+    void btn.offsetWidth;
+    btn.classList.add('icon-pop');
+    const popMs = fromWallet > 0 ? 340 : 220;
+    iconPopTimeout = setTimeout(() => { btn.classList.remove('icon-pop'); iconPopTimeout = 0; }, popMs);
+    btn.classList.remove('pulse');
+    void btn.offsetWidth;
+    btn.classList.add('pulse');
+    setTimeout(() => btn.classList.remove('pulse'), fromWallet > 0 ? 720 : 520);
+    fireTipParticles(btn, { wallet: fromWallet > 0 });
+    if (fromWallet > 0) {
+      const h = window.__kbyWebHaptics;
+      if (h) h.trigger('success', { intensity: 0.85 });
+    }
+    spawnCoin(fromWallet > 0 ? { grand: true } : undefined);
+  }
+
+  const VOTE_BASE = 256;
+  let upvoted = false;
+  let downvoted = false;
+
+  function getVoteNet() {
+    return Math.max(0, VOTE_BASE + (upvoted ? 1 : downvoted ? -1 : 0));
+  }
+
+  function updateVoteCounter() {
+    const counter = document.getElementById('voteCounter');
+    const net = getVoteNet();
+    renderCounter(counter, net, formatInteger);
+    counter.classList.remove('tick');
+    void counter.offsetWidth;
+    counter.classList.add('tick');
+    setTimeout(() => counter.classList.remove('tick'), 360);
+  }
+
+  function triggerVotePulse(btn, colors) {
+    btn.classList.remove('pulse');
+    void btn.offsetWidth;
+    btn.classList.add('pulse');
+    setTimeout(() => btn.classList.remove('pulse'), 460);
+    const rect = btn.getBoundingClientRect();
+    const cx = (rect.left + rect.width / 2) / window.innerWidth;
+    const cy = (rect.top + rect.height / 2) / window.innerHeight;
+    const fire = (typeof confetti === 'function' ? confetti : window.confetti);
+    if (fire) {
+      fire({
+        origin: { x: cx, y: cy },
+        spread: 55,
+        angle: 90,
+        ticks: 32,
+        gravity: 0.4,
+        decay: 0.93,
+        startVelocity: 9,
+        drift: 0.35,
+        colors,
+        shapes: ['circle'],
+        particleCount: 12,
+        scalar: 0.38,
+        zIndex: 9999,
+      });
+    }
+  }
+
+  function toggleUpvote() {
+    if (downvoted) {
+      document.getElementById('downvoteBtn').classList.remove('voted');
+      downvoted = false;
+    }
+    upvoted = !upvoted;
+    const btn = document.getElementById('upvoteBtn');
+    btn.classList.toggle('voted', upvoted);
+    triggerVotePulse(btn, ['#009860', '#55CEA1', '#C3FFEA', '#7DD3C0', '#B8E6D9', '#A8D8EA']);
+    updateVoteCounter();
+  }
+
+  function toggleDownvote() {
+    if (upvoted) {
+      document.getElementById('upvoteBtn').classList.remove('voted');
+      upvoted = false;
+    }
+    downvoted = !downvoted;
+    const btn = document.getElementById('downvoteBtn');
+    btn.classList.toggle('voted', downvoted);
+    triggerVotePulse(btn, ['#D03F45', '#F18684', '#FFE1DD', '#E8A0A4', '#F5C6C8', '#F8D7DA']);
+    updateVoteCounter();
+  }
+
+  /* ── On-hold minimodal ── */
+  const HOLD_DELAY = 450;
+  const MINIMODAL_SEC = 5;
+  /** Time to ramp from $0 up to the segment cap while holding (ms); longer = gentler. */
+  const HOLD_CHARGE_MAX_MS = 5200;
+  /** Lower = more linear / less aggressive acceleration at the end of the hold. */
+  const HOLD_CHARGE_EASE = 1.75;
+  const LS_JAR_USD = 'kby_jar_balance_usd';
+  const LS_JAR_TOKEN_K = 'kby_jar_balance_token_k';
+  const LS_WALLET_USD = 'kby_wallet_balance_usd';
+  const LS_WALLET_TOKEN_K = 'kby_wallet_balance_token_k';
+  const DEFAULT_JAR_BALANCE_USD = 50;
+  const DEFAULT_JAR_TOKEN_K = 124.54;
+  const DEFAULT_WALLET_BALANCE_USD = 200;
+  const DEFAULT_WALLET_TOKEN_K = 512.0;
+
+  /** After this hold duration during countdown, smooth ramp (same ease as initial charge). */
+  const COUNTDOWN_SMOOTH_HOLD_DELAY_MS = 300;
+  /** After closing the minimodal, ignore new hold-open until this elapses (reduces rapid open/close flicker). */
+  const MINIMODAL_REOPEN_COOLDOWN_MS = 520;
+  /** Min time between odometer "tick" animations on the minimodal (rapid taps). */
+  const MINIMODAL_ODOMETER_TICK_MIN_MS = 220;
+
+  let holdTimer = 0;
+  let holdChargeRaf = 0;
+  let boostDelayTimer = 0;
+  let countdownBoostRaf = 0;
+  /** True after delay elapses while pointer is still down — smooth ramp active; release does not add $1. */
+  let countdownBoostEngaged = false;
+  let countdownBoostStartAt = 0;
+  let countdownBoostStartUsd = 0;
+  /**
+   * After entering countdown, first segment (jar-only cap) applies until the next pointer release,
+   * then wallet funds can be included (re-engage).
+   */
+  let countdownWalletRampUnlocked = false;
+  /** One-shot haptics when a hold ramp reaches the session cap (not repeated every frame). */
+  let chargeRampHitCapNotified = false;
+  let countdownBoostHitCapNotified = false;
+  /** 0 = never closed (skip cooldown for first open). */
+  let minimodalClosedAt = 0;
+  let lastMinimodalUsdOdometerTickAt = 0;
+  let lastMinimodalTokenOdometerTickAt = 0;
+  let minimodalUsdTickTimeout = 0;
+  let minimodalTokenTickTimeout = 0;
+  let minimodalCountdownRaf = 0;
+  let minimodalCountdownDeadline = 0;
+  /** 'closed' | 'charging' | 'countdown' | 'nobalance' (click-only zero-balance tooltip) */
+  let modalPhase = 'closed';
+  /** Flip button pointerdown time — detect tap vs hold when modal is closed */
+  let flipPointerDownAt = 0;
+  /** After charge ramp hits 100%, countdown starts while pointer is still down — skip duplicate tap on release */
+  let ignoreNextCountdownPointerUp = false;
+  let modalShownAt = 0;
+  let pendingMinimodalUsd = MY_TIP;
+  /** Persisted jar (bonus free tipping) + wallet (user funds). */
+  let jarBalanceUsd = DEFAULT_JAR_BALANCE_USD;
+  let jarTokenBalanceK = DEFAULT_JAR_TOKEN_K;
+  let walletBalanceUsd = DEFAULT_WALLET_BALANCE_USD;
+  let walletTokenBalanceK = DEFAULT_WALLET_TOKEN_K;
+  /** Snapshot at start of hold modal — combined cap = jar + wallet for this session. */
+  let sessionJarUsd = DEFAULT_JAR_BALANCE_USD;
+  let sessionJarTokenK = DEFAULT_JAR_TOKEN_K;
+  let sessionWalletUsd = DEFAULT_WALLET_BALANCE_USD;
+  let sessionWalletTokenK = DEFAULT_WALLET_TOKEN_K;
+
+  function loadJarBalance() {
+    try {
+      const u = parseFloat(localStorage.getItem(LS_JAR_USD), 10);
+      const t = parseFloat(localStorage.getItem(LS_JAR_TOKEN_K), 10);
+      if (!Number.isNaN(u) && u >= 0) jarBalanceUsd = Math.round(u * 100) / 100;
+      if (!Number.isNaN(t) && t >= 0) jarTokenBalanceK = Math.round(t * 100) / 100;
+      const wu = parseFloat(localStorage.getItem(LS_WALLET_USD), 10);
+      const wt = parseFloat(localStorage.getItem(LS_WALLET_TOKEN_K), 10);
+      if (!Number.isNaN(wu) && wu >= 0) walletBalanceUsd = Math.round(wu * 100) / 100;
+      if (!Number.isNaN(wt) && wt >= 0) walletTokenBalanceK = Math.round(wt * 100) / 100;
+    } catch (_) {}
+  }
+
+  function resetJarToDefaultsAndPersist() {
+    jarBalanceUsd = DEFAULT_JAR_BALANCE_USD;
+    jarTokenBalanceK = DEFAULT_JAR_TOKEN_K;
+    walletBalanceUsd = DEFAULT_WALLET_BALANCE_USD;
+    walletTokenBalanceK = DEFAULT_WALLET_TOKEN_K;
+    saveJarBalance();
+  }
+
+  /** Use when a normal refresh can’t clear storage: open tipping-minimodal.html?resetJar once. */
+  function initJarBalanceFromUrlOrStorage() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('resetJar')) {
+        resetJarToDefaultsAndPersist();
+        const u = new URL(window.location.href);
+        u.searchParams.delete('resetJar');
+        const next = u.pathname + (u.search ? u.search : '') + u.hash;
+        window.history.replaceState({}, '', next);
+        return;
+      }
+    } catch (_) {}
+    loadJarBalance();
+    try {
+      const u = new URL(window.location.href);
+      if (u.searchParams.has('_cb')) {
+        u.searchParams.delete('_cb');
+        window.history.replaceState({}, '', u.pathname + (u.search ? u.search : '') + u.hash);
+      }
+    } catch (_) {}
+  }
+
+  /** Cmd+Shift+R / Ctrl+Shift+R: reset jar + reload with cache-bust (file:// pages often ignore normal hard refresh). */
+  function hardReloadWithJarReset() {
+    resetJarToDefaultsAndPersist();
+    try {
+      const u = new URL(window.location.href);
+      u.searchParams.set('_cb', String(Date.now()));
+      window.location.replace(u.toString());
+    } catch (_) {
+      location.reload();
+    }
+  }
+
+  function saveJarBalance() {
+    try {
+      localStorage.setItem(LS_JAR_USD, String(jarBalanceUsd));
+      localStorage.setItem(LS_JAR_TOKEN_K, String(jarTokenBalanceK));
+      localStorage.setItem(LS_WALLET_USD, String(walletBalanceUsd));
+      localStorage.setItem(LS_WALLET_TOKEN_K, String(walletTokenBalanceK));
+    } catch (_) {}
+  }
+
+  /** Take from jar first, then wallet (same session ordering as the minimodal). */
+  function depleteTipBalances(usdAmount) {
+    let left = Math.round(Math.max(0, usdAmount) * 100) / 100;
+    if (left <= 0) return;
+    if (jarBalanceUsd > 0) {
+      const prevJ = jarBalanceUsd;
+      const fromJar = Math.min(left, jarBalanceUsd);
+      jarBalanceUsd = Math.round((prevJ - fromJar) * 100) / 100;
+      jarTokenBalanceK = Math.round(jarTokenBalanceK * (jarBalanceUsd / prevJ) * 100) / 100;
+      left = Math.round((left - fromJar) * 100) / 100;
+    }
+    if (left > 0 && walletBalanceUsd > 0) {
+      const prevW = walletBalanceUsd;
+      const fromW = Math.min(left, walletBalanceUsd);
+      walletBalanceUsd = Math.round((prevW - fromW) * 100) / 100;
+      walletTokenBalanceK = Math.round(walletTokenBalanceK * (walletBalanceUsd / prevW) * 100) / 100;
+    }
+    saveJarBalance();
+  }
+
+  /** Slow start, then ramps up (0 → 1) */
+  function easeHoldCharge(t) {
+    const x = Math.min(1, Math.max(0, t));
+    return Math.pow(x, HOLD_CHARGE_EASE);
+  }
+
+  function chargeRatioFromHoldMs(ms) {
+    return easeHoldCharge(ms / HOLD_CHARGE_MAX_MS);
+  }
+
+  /** Hold ramp: ratio 0→1 maps to $0 → sessionCapUsd() (same ease curve). */
+  function holdUsdFromRatio(r, capUsd) {
+    const cap = Math.max(0, capUsd);
+    const rClamped = Math.min(1, Math.max(0, r));
+    return rClamped * cap;
+  }
+
+  function positionMinimodal() {
+    const outer = document.getElementById('tipMinimodalOuter');
+    const modal = outer || document.getElementById('tipMinimodal');
+    const btn = document.getElementById('flipBtn');
+    const btnRect = btn.getBoundingClientRect();
+    const w = modal.offsetWidth || 208;
+    modal.style.left = Math.max(12, Math.min(btnRect.left + btnRect.width / 2 - w / 2, window.innerWidth - w - 12)) + 'px';
+    modal.style.bottom = (window.innerHeight - btnRect.top + 8) + 'px';
+    modal.style.top = 'auto';
+  }
+
+  function sessionCapUsd() {
+    return Math.max(0, sessionJarUsd + sessionWalletUsd);
+  }
+
+  /** Live jar + wallet (not session snapshot) — for hold vs tap gating before modal opens */
+  function liveTipBalanceCapUsd() {
+    return Math.max(0, jarBalanceUsd + walletBalanceUsd);
+  }
+
+  /**
+   * Charging hold-ramp stops at jar funds when wallet also exists; wallet is included only after
+   * the user releases into countdown (re-engage), then taps/holds apply to the full cap.
+   */
+  function getHoldRampCapUsdForCharge() {
+    const cap = sessionCapUsd();
+    if (cap <= 0) return 0;
+    if (sessionJarUsd > 0 && sessionWalletUsd > 0) return Math.min(cap, sessionJarUsd);
+    return cap;
+  }
+
+  /**
+   * Pending + smooth-boost cap in countdown: while jar + wallet both exist, spending is capped at
+   * the jar slice until the user releases after pending has reached the full jar amount (re-engage
+   * to tip from wallet).
+   */
+  function getCountdownPendingCapUsd() {
+    const cap = sessionCapUsd();
+    if (cap <= 0) return 0;
+    if (sessionJarUsd > 0 && sessionWalletUsd > 0 && !countdownWalletRampUnlocked) {
+      return Math.min(cap, sessionJarUsd);
+    }
+    return cap;
+  }
+
+  /** USD shown during charging (no MY_TIP floor — matches the ramp bar). */
+  function getChargingDisplayUsd() {
+    const rampCap = getHoldRampCapUsdForCharge();
+    if (rampCap <= 0) return 0;
+    const ms = performance.now() - modalShownAt;
+    return Math.min(rampCap, holdUsdFromRatio(chargeRatioFromHoldMs(ms), rampCap));
+  }
+
+  function canSendMinimodalTip() {
+    const cap = sessionCapUsd();
+    if (cap <= 0) return false;
+    if (modalPhase === 'charging') {
+      const shown = getChargingDisplayUsd();
+      const rampCap = getHoldRampCapUsdForCharge();
+      if (rampCap < MY_TIP) return shown > 0;
+      return shown >= MY_TIP - 1e-6;
+    }
+    if (modalPhase === 'countdown') {
+      const pendCap = getCountdownPendingCapUsd();
+      const amt = Math.min(pendCap, pendingMinimodalUsd);
+      if (amt <= 0) return false;
+      if (pendCap >= MY_TIP && amt + 1e-9 < MY_TIP) return false;
+      return true;
+    }
+    return false;
+  }
+
+  function syncMinimodalSendUi() {
+    const send = document.getElementById('minimodalSend');
+    if (!send) return;
+    send.disabled = false;
+    send.setAttribute('aria-disabled', 'false');
+  }
+
+  /** True when spending from wallet (jar exhausted for this session or no jar). */
+  function shouldShowWalletMode(pendingUsd) {
+    const p = Math.max(0, pendingUsd);
+    if (sessionWalletUsd <= 0) return false;
+    if (sessionJarUsd <= 0) return true;
+    return p >= sessionJarUsd;
+  }
+
+  /** Bar width = % of current funding pool still left (jar slice, then wallet slice). */
+  function sessionRemainingPercent(committedUsd) {
+    const p = Math.max(0, committedUsd);
+    if (sessionCapUsd() <= 0) return 0;
+    if (sessionJarUsd > 0 && p < sessionJarUsd) {
+      return Math.min(100, (Math.max(0, sessionJarUsd - p) / sessionJarUsd) * 100);
+    }
+    if (sessionWalletUsd <= 0) return 0;
+    const walletSpend = Math.max(0, p - sessionJarUsd);
+    const walletRem = Math.max(0, sessionWalletUsd - walletSpend);
+    return Math.min(100, (walletRem / sessionWalletUsd) * 100);
+  }
+
+  function sessionRemainingTokenK(committedUsd) {
+    const p = Math.max(0, committedUsd);
+    if (sessionJarUsd > 0 && p < sessionJarUsd) {
+      return sessionJarTokenK * (Math.max(0, sessionJarUsd - p) / sessionJarUsd);
+    }
+    if (sessionWalletUsd <= 0) return 0;
+    const walletSpend = Math.max(0, p - sessionJarUsd);
+    const walletRemUsd = Math.max(0, sessionWalletUsd - walletSpend);
+    return sessionWalletTokenK * (walletRemUsd / sessionWalletUsd);
+  }
+
+  function syncMinimodalWalletUi(walletMode) {
+    const outer = document.getElementById('tipMinimodalOuter');
+    const inner = document.getElementById('tipMinimodal');
+    const usdRow = document.getElementById('minimodalUsdRow');
+    const label = document.getElementById('minimodalFromLabel');
+    if (outer) outer.classList.toggle('tip-minimodal-outer--wallet', walletMode);
+    if (inner) inner.classList.toggle('tip-minimodal--wallet', walletMode);
+    if (usdRow) usdRow.classList.toggle('tip-minimodal-usd-row--wallet-hot', walletMode);
+    if (label) label.textContent = walletMode ? 'From Wallet' : 'From Jar';
+  }
+
+  function syncMinimodalPhaseUi() {
+    const modal = document.getElementById('tipMinimodal');
+    if (!modal) return;
+    modal.classList.toggle('tip-minimodal--phase-charging', modalPhase === 'charging');
+    modal.classList.toggle('tip-minimodal--countdown-phase', modalPhase === 'countdown');
+    const ticking = modalPhase === 'countdown' && !!modal._countdownActive;
+    modal.classList.toggle('tip-minimodal--countdown-ticking', ticking);
+  }
+
+  /** Odometer-style USD (same digit-roll as flip button counter). */
+  function renderMinimodalUsdCounter(usd, withTick = true) {
+    const container = document.getElementById('minimodalUsdCounter');
+    if (!container) return;
+    const str = formatAmount(usd);
+    const prev = container.dataset.value || '';
+    if (prev === str) return;
+    if (!prev || prev.length !== str.length) {
+      renderCounter(container, usd, formatAmount);
+    } else {
+      updateCounter(container, usd, formatAmount);
+    }
+    if (!withTick) {
+      container.classList.remove('tick');
+      return;
+    }
+    const now = performance.now();
+    if (now - lastMinimodalUsdOdometerTickAt < MINIMODAL_ODOMETER_TICK_MIN_MS) {
+      return;
+    }
+    lastMinimodalUsdOdometerTickAt = now;
+    container.classList.remove('tick');
+    void container.offsetWidth;
+    container.classList.add('tick');
+    if (minimodalUsdTickTimeout) clearTimeout(minimodalUsdTickTimeout);
+    minimodalUsdTickTimeout = setTimeout(() => {
+      container.classList.remove('tick');
+      minimodalUsdTickTimeout = 0;
+    }, 220);
+  }
+
+  /** Odometer-style remaining token K (same digit-roll as USD row). */
+  function renderMinimodalTokenCounter(remTok, withTick = true) {
+    const container = document.getElementById('minimodalTokenCounter');
+    if (!container) return;
+    const str = formatAmount(remTok);
+    const prev = container.dataset.value || '';
+    if (prev === str) return;
+    if (!prev || prev.length !== str.length) {
+      renderCounter(container, remTok, formatAmount);
+    } else {
+      updateCounter(container, remTok, formatAmount);
+    }
+    if (!withTick) {
+      container.classList.remove('tick');
+      return;
+    }
+    const now = performance.now();
+    if (now - lastMinimodalTokenOdometerTickAt < MINIMODAL_ODOMETER_TICK_MIN_MS) {
+      return;
+    }
+    lastMinimodalTokenOdometerTickAt = now;
+    container.classList.remove('tick');
+    void container.offsetWidth;
+    container.classList.add('tick');
+    if (minimodalTokenTickTimeout) clearTimeout(minimodalTokenTickTimeout);
+    minimodalTokenTickTimeout = setTimeout(() => {
+      container.classList.remove('tick');
+      minimodalTokenTickTimeout = 0;
+    }, 220);
+  }
+
+  /** Left: pending tip USD. Bar + token: exhaustion of jar then wallet (remaining token K). */
+  function renderModalTipDisplay(pendingTipUsd) {
+    const pending = Math.max(0, pendingTipUsd);
+    const cap = sessionCapUsd();
+    const walletMode = shouldShowWalletMode(pending);
+    syncMinimodalWalletUi(walletMode);
+    renderMinimodalUsdCounter(pending);
+    document.getElementById('minimodalProgressFill').style.width = sessionRemainingPercent(pending) + '%';
+    const remTok = sessionRemainingTokenK(pending);
+    renderMinimodalTokenCounter(remTok);
+    const modal = document.getElementById('tipMinimodal');
+    const noBalance = cap <= 1e-9;
+    if (modal) modal.classList.toggle('tip-minimodal--no-balance', noBalance);
+    const nbTip = document.getElementById('minimodalNoBalanceTooltip');
+    if (nbTip) nbTip.hidden = !noBalance;
+    syncMinimodalSendUi();
+  }
+
+  function updateMinimodalCommit(usd) {
+    renderModalTipDisplay(usd);
+  }
+
+  function updatePendingTippingDisplay() {
+    renderModalTipDisplay(pendingMinimodalUsd);
+  }
+
+  function clearBoostTimers() {
+    if (boostDelayTimer) {
+      clearTimeout(boostDelayTimer);
+      boostDelayTimer = 0;
+    }
+    if (countdownBoostRaf) {
+      cancelAnimationFrame(countdownBoostRaf);
+      countdownBoostRaf = 0;
+    }
+    countdownBoostEngaged = false;
+    countdownBoostHitCapNotified = false;
+  }
+
+  function countdownBoostLoop() {
+    if (modalPhase !== 'countdown' || !countdownBoostEngaged) return;
+    const ms = performance.now() - countdownBoostStartAt;
+    const ratio = chargeRatioFromHoldMs(ms);
+    const cap = getCountdownPendingCapUsd();
+    const headroom = Math.max(0, cap - countdownBoostStartUsd);
+    const prevPending = pendingMinimodalUsd;
+    pendingMinimodalUsd = Math.min(cap, countdownBoostStartUsd + ratio * headroom);
+    updatePendingTippingDisplay();
+    maybeResetCountdownImmediatelyAtSessionCap(prevPending);
+    if (ratio >= 1) {
+      if (cap > 0 && pendingMinimodalUsd >= cap - 1e-6 && !countdownBoostHitCapNotified) {
+        countdownBoostHitCapNotified = true;
+        triggerSessionCapHaptic();
+      }
+      countdownBoostRaf = 0;
+      return;
+    }
+    countdownBoostRaf = requestAnimationFrame(countdownBoostLoop);
+  }
+
+  function startCountdownSmoothHold() {
+    if (modalPhase !== 'countdown') return;
+    countdownBoostEngaged = true;
+    /** One $1 for the click in click-and-hold; do not resetCountdown here — pointer is still down. */
+    addOnePendingUnit();
+    const cap = getCountdownPendingCapUsd();
+    if (cap <= 0 || pendingMinimodalUsd >= cap - 1e-8) {
+      countdownBoostEngaged = false;
+      if (countdownBoostRaf) cancelAnimationFrame(countdownBoostRaf);
+      countdownBoostRaf = 0;
+      return;
+    }
+    countdownBoostHitCapNotified = false;
+    countdownBoostStartAt = performance.now();
+    countdownBoostStartUsd = pendingMinimodalUsd;
+    if (countdownBoostRaf) cancelAnimationFrame(countdownBoostRaf);
+    countdownBoostRaf = requestAnimationFrame(countdownBoostLoop);
+  }
+
+  /** Stops the auto-send interval without changing the label (freeze while pointer is down). */
+  function stopCountdownAnimation() {
+    const modal = document.getElementById('tipMinimodal');
+    if (minimodalCountdownRaf) {
+      cancelAnimationFrame(minimodalCountdownRaf);
+      minimodalCountdownRaf = 0;
+    }
+    if (modal) modal._countdownActive = false;
+    syncMinimodalPhaseUi();
+  }
+
+  function pauseCountdown() {
+    const sfx = document.getElementById('minimodalCountdownSuffix');
+    if (sfx) sfx.textContent = '';
+    stopCountdownAnimation();
+  }
+
+  /** When pending crosses up to the full session cap, restart auto-send immediately (e.g. while pointer still down). */
+  function maybeResetCountdownImmediatelyAtSessionCap(prevPending) {
+    if (modalPhase !== 'countdown') return;
+    const cap = sessionCapUsd();
+    if (cap <= 0) return;
+    if (prevPending >= cap - 1e-6) return;
+    if (pendingMinimodalUsd < cap - 1e-6) return;
+    resetCountdown();
+  }
+
+  function resetCountdown() {
+    const modal = document.getElementById('tipMinimodal');
+    const outer = document.getElementById('tipMinimodalOuter');
+    const suffixEl = document.getElementById('minimodalCountdownSuffix');
+    if (!modal || modalPhase !== 'countdown') return;
+    stopCountdownAnimation();
+    modal._countdownActive = true;
+    syncMinimodalPhaseUi();
+    minimodalCountdownDeadline = performance.now() + MINIMODAL_SEC * 1000;
+    if (outer) outer.style.setProperty('--countdown-sweep', '0');
+    let lastSec = -1;
+    function minimodalCountdownFrame() {
+      if (!modal._countdownActive || modalPhase !== 'countdown') return;
+      const now = performance.now();
+      const remaining = Math.max(0, minimodalCountdownDeadline - now);
+      const prog = 1 - remaining / (MINIMODAL_SEC * 1000);
+      if (outer) outer.style.setProperty('--countdown-sweep', String(Math.min(1, Math.max(0, prog))));
+      const secsLeft = Math.ceil(remaining / 1000);
+      if (secsLeft !== lastSec) {
+        lastSec = secsLeft;
+        if (suffixEl) suffixEl.textContent = 'in ' + secsLeft + 's';
+      }
+      if (remaining <= 0) {
+        minimodalCountdownRaf = 0;
+        modal._countdownActive = false;
+        syncMinimodalPhaseUi();
+        sendMinimodalNow();
+        return;
+      }
+      minimodalCountdownRaf = requestAnimationFrame(minimodalCountdownFrame);
+    }
+    minimodalCountdownRaf = requestAnimationFrame(minimodalCountdownFrame);
+  }
+
+  function triggerSessionCapHaptic() {
+    const h = window.__kbyWebHaptics;
+    if (h) h.trigger('error', { intensity: 0.45 });
+  }
+
+  /** Subtle error pattern (web-haptics array API — see https://haptics.lochie.me/) */
+  function triggerNoBalanceHaptic() {
+    const h = window.__kbyWebHaptics;
+    if (!h) return;
+    h.trigger(
+      [
+        { duration: 40, intensity: 0.7 },
+        { delay: 40, duration: 40, intensity: 0.7 },
+        { delay: 40, duration: 40, intensity: 0.9 },
+        { delay: 40, duration: 50, intensity: 0.6 },
+      ],
+      { intensity: 0.55 }
+    );
+  }
+
+  function showNoBalanceTooltipOnly() {
+    const outer = document.getElementById('tipMinimodalOuter');
+    const modal = document.getElementById('tipMinimodal');
+    if (!outer || !modal) return;
+    if (
+      minimodalClosedAt > 0 &&
+      performance.now() - minimodalClosedAt < MINIMODAL_REOPEN_COOLDOWN_MS
+    ) {
+      return;
+    }
+    stopCountdownAnimation();
+    stopChargeLoop();
+    clearBoostTimers();
+    modalPhase = 'nobalance';
+    modalShownAt = performance.now();
+    sessionJarUsd = jarBalanceUsd;
+    sessionJarTokenK = jarTokenBalanceK;
+    sessionWalletUsd = walletBalanceUsd;
+    sessionWalletTokenK = walletTokenBalanceK;
+    positionMinimodal();
+    outer.classList.add('visible', 'tip-minimodal-outer--text-only');
+    modal.setAttribute('aria-hidden', 'false');
+    syncMinimodalPhaseUi();
+    updateMinimodalCommit(0);
+    requestAnimationFrame(() => positionMinimodal());
+  }
+
+  function addOnePendingUnit() {
+    const cap =
+      modalPhase === 'countdown' ? getCountdownPendingCapUsd() : sessionCapUsd();
+    const prevPending = pendingMinimodalUsd;
+    const next = Math.min(
+      cap,
+      Math.round((pendingMinimodalUsd + MY_TIP) * 100) / 100
+    );
+    if (next <= pendingMinimodalUsd) {
+      triggerSessionCapHaptic();
+      return;
+    }
+    pendingMinimodalUsd = next;
+    updatePendingTippingDisplay();
+    maybeResetCountdownImmediatelyAtSessionCap(prevPending);
+  }
+
+  function addPendingUnitAndRefresh() {
+    addOnePendingUnit();
+    resetCountdown();
+  }
+
+  function stopChargeLoop() {
+    if (holdChargeRaf) {
+      cancelAnimationFrame(holdChargeRaf);
+      holdChargeRaf = 0;
+    }
+  }
+
+  function chargeLoop() {
+    if (modalPhase !== 'charging') return;
+    const ms = performance.now() - modalShownAt;
+    const ratio = chargeRatioFromHoldMs(ms);
+    const rampCap = getHoldRampCapUsdForCharge();
+    const raw = holdUsdFromRatio(ratio, rampCap);
+    const usd = Math.min(rampCap, raw);
+    const atFullRamp = rampCap > 0 && ratio >= 1 - 1e-9 && usd >= rampCap - 1e-6;
+    if (atFullRamp) {
+      if (!chargeRampHitCapNotified) {
+        chargeRampHitCapNotified = true;
+        triggerSessionCapHaptic();
+      }
+      updateMinimodalCommit(usd);
+      beginMinimodalCountdown({ fromChargeAtFullRamp: true });
+      return;
+    }
+    updateMinimodalCommit(usd);
+    holdChargeRaf = requestAnimationFrame(chargeLoop);
+  }
+
+  function showMinimodalCharging() {
+    const outer = document.getElementById('tipMinimodalOuter');
+    const modal = document.getElementById('tipMinimodal');
+    stopCountdownAnimation();
+    sessionJarUsd = jarBalanceUsd;
+    sessionJarTokenK = jarTokenBalanceK;
+    sessionWalletUsd = walletBalanceUsd;
+    sessionWalletTokenK = walletTokenBalanceK;
+    if (sessionCapUsd() <= 0) {
+      return;
+    }
+    modalPhase = 'charging';
+    modalShownAt = performance.now();
+    positionMinimodal();
+    if (outer) outer.classList.add('visible');
+    modal.setAttribute('aria-hidden', 'false');
+    chargeRampHitCapNotified = false;
+
+    const sfx = document.getElementById('minimodalCountdownSuffix');
+    if (sfx) sfx.textContent = '';
+    syncMinimodalPhaseUi();
+    updateMinimodalCommit(0);
+
+    stopChargeLoop();
+    holdChargeRaf = requestAnimationFrame(chargeLoop);
+  }
+
+  function beginMinimodalCountdown(opts) {
+    if (modalPhase !== 'charging') return;
+    stopChargeLoop();
+
+    const modal = document.getElementById('tipMinimodal');
+    stopCountdownAnimation();
+
+    const ms = performance.now() - modalShownAt;
+    const ratio = chargeRatioFromHoldMs(ms);
+    const cap = sessionCapUsd();
+    const rampCap = getHoldRampCapUsdForCharge();
+    const raw = holdUsdFromRatio(ratio, rampCap);
+    pendingMinimodalUsd = Math.min(cap, Math.max(MY_TIP, raw));
+    countdownWalletRampUnlocked = false;
+    updatePendingTippingDisplay();
+
+    modalPhase = 'countdown';
+    resetCountdown();
+    if (opts && opts.fromChargeAtFullRamp) {
+      ignoreNextCountdownPointerUp = true;
+    }
+  }
+
+  function hideMinimodal() {
+    const outer = document.getElementById('tipMinimodalOuter');
+    const modal = document.getElementById('tipMinimodal');
+    stopCountdownAnimation();
+    if (outer) {
+      outer.style.setProperty('--countdown-sweep', '0');
+      outer.classList.remove('visible', 'tip-minimodal-outer--wallet', 'tip-minimodal-outer--text-only');
+    }
+    if (modal) {
+      modal.classList.remove(
+        'tip-minimodal--wallet',
+        'tip-minimodal--no-balance',
+        'tip-minimodal--phase-charging',
+        'tip-minimodal--countdown-phase',
+        'tip-minimodal--countdown-ticking'
+      );
+    }
+    const usdRow = document.getElementById('minimodalUsdRow');
+    if (usdRow) usdRow.classList.remove('tip-minimodal-usd-row--wallet-hot');
+    const label = document.getElementById('minimodalFromLabel');
+    if (label) label.textContent = 'From Jar';
+    clearBoostTimers();
+    stopChargeLoop();
+    document.getElementById('minimodalProgressFill').style.width = '0%';
+    if (minimodalTokenTickTimeout) clearTimeout(minimodalTokenTickTimeout);
+    minimodalTokenTickTimeout = 0;
+    renderMinimodalTokenCounter(0, false);
+    if (minimodalUsdTickTimeout) clearTimeout(minimodalUsdTickTimeout);
+    minimodalUsdTickTimeout = 0;
+    renderMinimodalUsdCounter(MY_TIP, false);
+    const sfxHide = document.getElementById('minimodalCountdownSuffix');
+    if (sfxHide) sfxHide.textContent = '';
+    const nbHide = document.getElementById('minimodalNoBalanceTooltip');
+    if (nbHide) nbHide.hidden = true;
+    modal.setAttribute('aria-hidden', 'true');
+    modalPhase = 'closed';
+    pendingMinimodalUsd = MY_TIP;
+    countdownWalletRampUnlocked = false;
+    ignoreNextCountdownPointerUp = false;
+    minimodalClosedAt = performance.now();
+    lastMinimodalUsdOdometerTickAt = 0;
+    lastMinimodalTokenOdometerTickAt = 0;
+    const sendBtn = document.getElementById('minimodalSend');
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.setAttribute('aria-disabled', 'false');
+    }
+  }
+
+  function sendMinimodalNow() {
+    if (modalPhase === 'nobalance') return;
+    if (modalPhase !== 'charging' && modalPhase !== 'countdown') return;
+    if (!canSendMinimodalTip()) {
+      triggerSessionCapHaptic();
+      if (modalPhase === 'countdown') stopCountdownAnimation();
+      return;
+    }
+    if (modalPhase === 'charging') {
+      const ms = performance.now() - modalShownAt;
+      const cap = sessionCapUsd();
+      const rampCap = getHoldRampCapUsdForCharge();
+      const raw = holdUsdFromRatio(chargeRatioFromHoldMs(ms), rampCap);
+      pendingMinimodalUsd = Math.min(cap, Math.max(MY_TIP, raw));
+    }
+    stopCountdownAnimation();
+    clearBoostTimers();
+    stopChargeLoop();
+    const amt = Math.min(sessionCapUsd(), pendingMinimodalUsd);
+    hideMinimodal();
+    triggerFlip(amt);
+  }
+
+  function setupHoldToShow() {
+    const btn = document.getElementById('flipBtn');
+
+    function clearHold() {
+      if (holdTimer) {
+        clearTimeout(holdTimer);
+        holdTimer = 0;
+      }
+    }
+
+    function onDown(e) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      try {
+        e.currentTarget.setPointerCapture(e.pointerId);
+      } catch (_) {}
+
+      if (modalPhase === 'nobalance') {
+        clearHold();
+        flipPointerDownAt = performance.now();
+        return;
+      }
+
+      if (modalPhase === 'countdown') {
+        pauseCountdown();
+        countdownBoostEngaged = false;
+        boostDelayTimer = setTimeout(() => {
+          boostDelayTimer = 0;
+          startCountdownSmoothHold();
+        }, COUNTDOWN_SMOOTH_HOLD_DELAY_MS);
+        return;
+      }
+      if (modalPhase === 'charging') return;
+      clearHold();
+      if (modalPhase === 'closed') {
+        flipPointerDownAt = performance.now();
+      }
+      holdTimer = setTimeout(() => {
+        holdTimer = 0;
+        if (
+          minimodalClosedAt > 0 &&
+          performance.now() - minimodalClosedAt < MINIMODAL_REOPEN_COOLDOWN_MS
+        ) {
+          return;
+        }
+        if (liveTipBalanceCapUsd() <= 0) {
+          return;
+        }
+        showMinimodalCharging();
+      }, HOLD_DELAY);
+    }
+
+    function onUp(e) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      clearHold();
+      if (modalPhase === 'nobalance') {
+        if (e.type === 'pointercancel') return;
+        if (e.detail > 1) return;
+        hideMinimodal();
+        return;
+      }
+      if (modalPhase === 'charging') {
+        beginMinimodalCountdown();
+        return;
+      }
+      if (modalPhase === 'countdown') {
+        const jar = sessionJarUsd;
+        const wallet = sessionWalletUsd;
+        if (jar <= 0 || wallet <= 0) {
+          countdownWalletRampUnlocked = true;
+        } else if (pendingMinimodalUsd >= jar - 1e-6) {
+          countdownWalletRampUnlocked = true;
+        }
+        const engaged = countdownBoostEngaged;
+        clearBoostTimers();
+        if (ignoreNextCountdownPointerUp) {
+          ignoreNextCountdownPointerUp = false;
+          return;
+        }
+        if (!engaged) {
+          addPendingUnitAndRefresh();
+        } else {
+          resetCountdown();
+        }
+        return;
+      }
+      {
+        const cap = liveTipBalanceCapUsd();
+        const tapMs = performance.now() - flipPointerDownAt;
+        if (cap <= 0) {
+          if (e.type === 'pointercancel') return;
+          if (e.detail > 1) return;
+          if (tapMs < HOLD_DELAY) {
+            showNoBalanceTooltipOnly();
+            triggerNoBalanceHaptic();
+          }
+          return;
+        }
+      }
+      triggerFlip();
+    }
+
+    /** Leaving the hit target must not mimic a release (avoids spurious boosts / clock resets). */
+    function onLeave() {
+      if (modalPhase === 'closed') {
+        clearHold();
+      }
+    }
+
+    btn.addEventListener('pointerdown', onDown);
+    btn.addEventListener('pointerup', onUp);
+    btn.addEventListener('pointercancel', onUp);
+    btn.addEventListener('pointerleave', onLeave);
+    btn.addEventListener('dblclick', (ev) => {
+      ev.preventDefault();
+    });
+
+    document.getElementById('minimodalCancel').addEventListener('click', hideMinimodal);
+    document.getElementById('minimodalSend').addEventListener('click', sendMinimodalNow);
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && modalPhase !== 'closed') {
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+      e.preventDefault();
+      hideMinimodal();
+      return;
+    }
+    const isHardReloadCombo =
+      e.shiftKey && (e.metaKey || e.ctrlKey) && (e.key === 'r' || e.key === 'R');
+    if (!isHardReloadCombo) return;
+    const t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    hardReloadWithJarReset();
+  }, true);
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const { WebHaptics } = await import('./node_modules/web-haptics/dist/index.mjs');
+      window.__kbyWebHaptics = new WebHaptics();
+    } catch (_) {}
+    initJarBalanceFromUrlOrStorage();
+    renderCounter(document.getElementById('counter'), total);
+    renderCounter(document.getElementById('voteCounter'), VOTE_BASE, formatInteger);
+    setupHoldToShow();
+  });
+</script>
+
+</body>
+</html>

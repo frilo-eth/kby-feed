@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kumbaya Stats — Design Concept</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FDF8F3;
+    --bg-card: #FFFFFF;
+    --bg-warm: #FBF3EB;
+    --bg-stat: #FFF9F4;
+    --border: #F0E6DA;
+    --border-light: #F5EDE4;
+    --text-primary: #1A1A1A;
+    --text-secondary: #8C7E72;
+    --text-muted: #B5A89C;
+    --orange: #E8642C;
+    --orange-light: #FFF0E8;
+    --orange-bg: #FEF3EC;
+    --green: #22A06B;
+    --green-light: #E6F7EF;
+    --red: #E34935;
+    --red-light: #FEF0EE;
+    --amber: #D4890C;
+    --amber-light: #FFF7E6;
+    --purple: #8B5CF6;
+    --purple-light: #F3EEFF;
+    --blue: #91CDFF;
+    --navy: #000557;
+    --mono: 'DM Mono', monospace;
+    --sans: 'Instrument Sans', -apple-system, sans-serif;
+    --serif: 'Fraunces', Georgia, serif;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+    --shadow-md: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .concept-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 60px 32px 40px;
+  }
+
+  .concept-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  .concept-title {
+    font-family: var(--serif);
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+
+  .concept-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    max-width: 640px;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px;
+  }
+
+  .option-block {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .option-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .option-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .option-badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--orange);
+    background: var(--orange-light);
+    padding: 4px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.03em;
+  }
+
+  .option-badge.recommended {
+    background: var(--green-light);
+    color: var(--green);
+  }
+
+  .option-name {
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .option-tag {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+  }
+
+  .option-body {
+    padding: 28px 24px;
+  }
+
+  /* ============================================
+     1. LAUNCHPAD FEED — HEADER BANNER
+     ============================================ */
+  .stats-banner {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border-light);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .stat-cell {
+    background: var(--bg-card);
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+    transition: background 0.15s;
+  }
+
+  .stat-cell:hover {
+    background: var(--bg-stat);
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .stat-value {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .stat-sub .change {
+    color: var(--green);
+    font-weight: 600;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+
+  .stat-cell.highlight {
+    background: linear-gradient(135deg, #FFF5ED 0%, #FFF0E4 100%);
+    position: relative;
+  }
+
+  .stat-cell.highlight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--orange), #F0975A);
+  }
+
+  .stat-cell.highlight .stat-value {
+    color: var(--orange);
+  }
+
+  .stat-cell.highlight .stat-label {
+    color: var(--orange);
+    font-weight: 600;
+  }
+
+  /* 1B. Compact Ticker */
+  .stats-ticker {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .ticker-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-right: 1px solid var(--border-light);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .ticker-item:last-child { border-right: none; }
+
+  .ticker-item .t-label {
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .ticker-item .t-value {
+    font-family: var(--mono);
+    font-weight: 500;
+    font-size: 14px;
+  }
+
+  .ticker-item.highlight-ticker {
+    background: var(--orange-light);
+  }
+
+  .ticker-item.highlight-ticker .t-value {
+    color: var(--orange);
+    font-weight: 600;
+  }
+
+  .ticker-item.highlight-ticker .t-label {
+    color: var(--orange);
+  }
+
+  .pulse-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--orange);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
+  }
+
+  /* ============================================
+     FEED CARD
+     ============================================ */
+  .feed-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .feed-card-header {
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .feed-card-thumb {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-sm);
+    background: #EDE2D6;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+  }
+
+  .feed-card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .feed-card-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .feed-card-title {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .feed-card-type {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--orange-light);
+    color: var(--orange);
+  }
+
+  .feed-card-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .feed-card-vault {
+    margin: 0 20px 16px;
+    background: linear-gradient(135deg, #FFF8F2, #FFF3EA);
+    border: 1px solid #F0D4B8;
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .fcv-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .fcv-icon {
+    width: 28px;
+    height: 28px;
+    background: var(--orange);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+  }
+
+  .fcv-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .fcv-text .fcv-amount {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--orange);
+  }
+
+  .fcv-text .fcv-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .fcv-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .fcv-distributed {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--green);
+    font-weight: 500;
+  }
+
+  .fcv-arrow {
+    color: var(--text-muted);
+    font-size: 16px;
+  }
+
+  .feed-card-stats {
+    padding: 12px 20px;
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    flex-wrap: wrap;
+  }
+
+  .feed-card-stats span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+
+  .fcs-green { color: var(--green); font-weight: 500; }
+
+  /* ============================================
+     TOKEN PAGE — Tab bar
+     ============================================ */
+  .tab-bar {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+
+  .tab-item {
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .tab-item:hover { color: var(--text-secondary); }
+
+  .tab-item.active {
+    color: var(--text-primary);
+    border-bottom-color: var(--orange);
+  }
+
+  .tab-item .tab-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    background: var(--orange-light);
+    color: var(--orange);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  /* Tip Vault Banner */
+  .tip-vault-banner {
+    background: linear-gradient(135deg, #FFF7F0 0%, #FFF1E6 50%, #FFECD9 100%);
+    border: 1px solid #F0D4B8;
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .tip-vault-banner::after {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -20px;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(232,100,44,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .vault-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .vault-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--orange);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-family: var(--mono);
+  }
+
+  .vault-amount {
+    font-family: var(--mono);
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--text-primary);
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .vault-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  .vault-sub strong {
+    color: var(--orange);
+    font-weight: 600;
+  }
+
+  .vault-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .vault-cta {
+    background: var(--orange);
+    color: white;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: var(--radius-sm);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s;
+  }
+
+  .vault-cta:hover {
+    background: #D45A26;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(232,100,44,0.25);
+  }
+
+  .vault-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .vault-progress-bar {
+    width: 80px;
+    height: 4px;
+    background: rgba(232,100,44,0.15);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .vault-progress-fill {
+    height: 100%;
+    background: var(--orange);
+    border-radius: 2px;
+    width: 23%;
+  }
+
+  /* Sidebar vault */
+  .sidebar-vault {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .sidebar-vault-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .sidebar-vault-header h4 {
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sidebar-vault-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .sv-main-stat .label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-family: var(--mono);
+  }
+
+  .sv-main-stat .value {
+    font-family: var(--mono);
+    font-size: 24px;
+    font-weight: 500;
+    color: var(--orange);
+    letter-spacing: -0.02em;
+  }
+
+  .sv-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-top: 1px solid var(--border-light);
+  }
+
+  .sv-row .label {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .sv-row .value {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .sv-row .value.green { color: var(--green); }
+  .sv-row .value.orange { color: var(--orange); }
+
+  .earner-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .earner-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-top: 1px solid var(--border-light);
+  }
+
+  .earner-row:first-child { border-top: none; }
+
+  .earner-rank {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    width: 20px;
+    text-align: center;
+  }
+
+  .earner-rank.gold { color: #D4890C; font-weight: 600; }
+  .earner-rank.silver { color: #8C8C8C; font-weight: 600; }
+  .earner-rank.bronze { color: #B87333; font-weight: 600; }
+
+  .earner-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .earner-name {
+    font-size: 13px;
+    font-weight: 500;
+    flex: 1;
+  }
+
+  .earner-amount {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--green);
+  }
+
+  /* Thread items */
+  .thread-vault-inline {
+    background: linear-gradient(135deg, #FFF8F2, #FFF3EA);
+    border: 1px dashed #E8C4A0;
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .tvi-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, var(--orange), #F0975A);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .tvi-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 200px;
+  }
+
+  .tvi-content .tvi-headline {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .tvi-content .tvi-headline .amt {
+    color: var(--orange);
+    font-family: var(--mono);
+  }
+
+  .tvi-content .tvi-sub {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .tvi-action {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--orange);
+    background: white;
+    border: 1px solid #F0D4B8;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+
+  .tvi-action:hover {
+    background: var(--orange);
+    color: white;
+    border-color: var(--orange);
+  }
+
+  .thread-item {
+    display: flex;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .thread-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #EDE2D6;
+    flex-shrink: 0;
+  }
+
+  .thread-body { flex: 1; }
+
+  .thread-user {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .thread-user .time {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .thread-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  .thread-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .tip-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: var(--green-light);
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-family: var(--mono);
+  }
+
+  /* Cult fees grid */
+  .cult-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border-light);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .cult-stat {
+    background: var(--bg-card);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cult-stat .cs-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .cult-stat .cs-value {
+    font-family: var(--mono);
+    font-size: 20px;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  .cult-stat .cs-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--mono);
+  }
+
+  .cult-stat .cs-sub .up { color: var(--green); font-weight: 600; }
+
+  /* Annotations */
+  .annotation {
+    background: var(--amber-light);
+    border-left: 3px solid var(--amber);
+    padding: 12px 16px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin-top: 16px;
+    font-size: 13px;
+    color: #7A6120;
+    line-height: 1.5;
+  }
+
+  .annotation strong {
+    font-weight: 600;
+    color: #5C4A18;
+  }
+
+  .annotation-orange {
+    background: var(--orange-light);
+    border-left: 3px solid var(--orange);
+    padding: 12px 16px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin-top: 16px;
+    font-size: 13px;
+    color: #8B4513;
+    line-height: 1.5;
+  }
+
+  .annotation-orange strong {
+    font-weight: 600;
+    color: #6B2F0A;
+  }
+
+  .spacer { height: 20px; }
+  .spacer-lg { height: 48px; }
+
+  .inline-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  /* Summary table */
+  .summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .summary-table thead tr {
+    border-bottom: 2px solid var(--border);
+  }
+
+  .summary-table th {
+    text-align: left;
+    padding: 10px 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: var(--mono);
+  }
+
+  .summary-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .summary-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  @media (max-width: 768px) {
+    .stats-banner { grid-template-columns: repeat(2, 1fr); }
+    .cult-stats-grid { grid-template-columns: 1fr; }
+    .stats-ticker { flex-wrap: wrap; }
+    .ticker-item { flex: 0 0 50%; }
+    .concept-section { padding: 40px 20px 28px; }
+    .options-grid { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- =============================================
+     SECTION 1: LAUNCHPAD FEED — HEADER STATS
+     ============================================= -->
+
+<div class="concept-section">
+  <div class="concept-label">Surface 1 — Launchpad Feed</div>
+  <div class="concept-title">Header Stats Banner</div>
+  <div class="concept-desc">
+    Two options for surfacing protocol-wide "money on the table" at the top of the feed.
+    The highlighted cell draws attention to unclaimed tips — the primary engagement lever.
+  </div>
+</div>
+
+<div class="options-grid">
+
+  <!-- Option A: Full banner -->
+  <div class="option-block">
+    <div class="option-header">
+      <div class="option-header-left">
+        <span class="option-badge recommended">★ Recommended</span>
+        <span class="option-name">Option A — Full Stats Banner</span>
+      </div>
+      <span class="option-tag">Mirrors Pools page pattern</span>
+    </div>
+    <div class="option-body">
+      <div class="stats-banner">
+        <div class="stat-cell highlight">
+          <span class="stat-label">
+            <span class="icon">💰</span>
+            Unclaimed Tips
+          </span>
+          <span class="stat-value">$482.5K</span>
+          <span class="stat-sub">
+            across 312 tokens
+            <span class="change">↑ 12%</span>
+          </span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-label">Tips Distributed (24h)</span>
+          <span class="stat-value">$18.2K</span>
+          <span class="stat-sub">
+            to 847 creators
+            <span class="change">↑ 8%</span>
+          </span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-label">Tokens Launched (24h)</span>
+          <span class="stat-value">156</span>
+          <span class="stat-sub">
+            42 graduated
+            <span class="change">↑ 22%</span>
+          </span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-label">Trading Volume (24h)</span>
+          <span class="stat-value">$2.4M</span>
+          <span class="stat-sub">
+            generating $24K in fees
+            <span class="change">↑ 5%</span>
+          </span>
+        </div>
+      </div>
+
+      <div class="annotation">
+        <strong>Design rationale:</strong> The "Unclaimed Tips" cell gets the warm highlight + top-bar accent, creating visual urgency. This mirrors the Pools page TVL/Volume/Fees pattern so it's immediately familiar but with the added FOMO layer. The warm gradient signals opportunity without being aggressive.
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B: Compact Ticker -->
+  <div class="option-block">
+    <div class="option-header">
+      <div class="option-header-left">
+        <span class="option-badge">Option B</span>
+        <span class="option-name">Compact Stats Ticker</span>
+      </div>
+      <span class="option-tag">Less vertical space, still punchy</span>
+    </div>
+    <div class="option-body">
+      <div class="stats-ticker">
+        <div class="ticker-item highlight-ticker">
+          <div class="pulse-dot"></div>
+          <span class="t-label">Unclaimed Tips</span>
+          <span class="t-value">$482.5K</span>
+        </div>
+        <div class="ticker-item">
+          <span class="t-label">Tips 24h</span>
+          <span class="t-value">$18.2K</span>
+        </div>
+        <div class="ticker-item">
+          <span class="t-label">Launches 24h</span>
+          <span class="t-value">156</span>
+        </div>
+        <div class="ticker-item">
+          <span class="t-label">Volume 24h</span>
+          <span class="t-value">$2.4M</span>
+        </div>
+        <div class="ticker-item">
+          <span class="t-label">Top Earner 24h</span>
+          <span class="t-value" style="color: var(--green);">$1.2K</span>
+        </div>
+      </div>
+
+      <div class="annotation">
+        <strong>Design rationale:</strong> Single-row ticker uses less vertical real estate. The pulsing dot on "Unclaimed Tips" adds urgency without being aggressive. Good if the feed cards themselves carry per-card stats (see next section). Could also serve as the mobile version of Option A.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="divider"></div>
+
+<!-- =============================================
+     SECTION 2: PER-CARD STATS
+     ============================================= -->
+
+<div class="concept-section">
+  <div class="concept-label">Surface 1B — Feed Cards</div>
+  <div class="concept-title">Per-Card Tip Vault Callout</div>
+  <div class="concept-desc">
+    Each token card in the feed shows its tip vault — making every card a mini "money on the table" signal. Users scrolling the feed see opportunity everywhere.
+  </div>
+</div>
+
+<div class="options-grid">
+  <div class="option-block">
+    <div class="option-header">
+      <div class="option-header-left">
+        <span class="option-badge recommended">★ Recommended</span>
+        <span class="option-name">Feed Card with Vault Badge</span>
+      </div>
+    </div>
+    <div class="option-body">
+      <div class="feed-card" style="max-width: 680px;">
+        <div class="feed-card-header">
+          <div class="feed-card-thumb">🤔</div>
+          <div class="feed-card-info">
+            <div class="feed-card-top">
+              <span class="feed-card-title">Thinck boutet $THINCK</span>
+              <span class="feed-card-type">Meme</span>
+            </div>
+            <div class="feed-card-meta">
+              <span>by nath4an · 2h</span>
+              <span>🟢 1.45K Buyers</span>
+              <span>💬 1.23K</span>
+              <span>🏁 56%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="feed-card-vault">
+          <div class="fcv-left">
+            <div class="fcv-icon">💰</div>
+            <div class="fcv-text">
+              <span class="fcv-amount">$1,245 in vault</span>
+              <span class="fcv-label">unclaimed tips — create content to earn</span>
+            </div>
+          </div>
+          <div class="fcv-right">
+            <span class="fcv-distributed">$890 tipped ✓</span>
+            <span class="fcv-arrow">›</span>
+          </div>
+        </div>
+
+        <div class="feed-card-stats">
+          <span>MCap <strong style="color:var(--green)">$124.5K ↗</strong></span>
+          <span>Price <strong style="color:var(--red)">$0.06246 ↘</strong></span>
+          <span>ATH <strong>$185.5K</strong></span>
+          <span style="margin-left: auto;" class="fcs-green">Top earner: $42.50 today</span>
+        </div>
+      </div>
+
+      <div class="annotation">
+        <strong>Design rationale:</strong> The vault callout sits between the card header and stats — impossible to miss while scrolling. The warm gradient and icon create a clear "money" signal. "$890 tipped ✓" on the right is social proof that tips actually flow. "Top earner: $42.50 today" in the bottom bar adds concrete earning evidence.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- =============================================
+     SECTION 3: TOKEN DETAIL PAGE
+     ============================================= -->
+
+<div class="concept-section">
+  <div class="concept-label">Surface 2 — Token Detail Page</div>
+  <div class="concept-title">Vault & Earnings Integration</div>
+  <div class="concept-desc">
+    Stats surface in three places on the token page: a prominent vault banner in the main content area, a compact sidebar widget, and contextual callouts within the Thread tab.
+  </div>
+</div>
+
+<div class="options-grid">
+
+  <!-- Main Content: Vault Banner + Thread Nudge -->
+  <div class="option-block">
+    <div class="option-header">
+      <div class="option-header-left">
+        <span class="option-badge recommended">★ Recommended</span>
+        <span class="option-name">Vault Banner + Thread Nudge — Main Content Area</span>
+      </div>
+      <span class="option-tag">Below tabs, above content</span>
+    </div>
+    <div class="option-body">
+
+      <div class="tab-bar">
+        <div class="tab-item">🏠 The floor</div>
+        <div class="tab-item active">💬 Thread</div>
+        <div class="tab-item">
+          💰 Tips
+          <span class="tab-badge">$1.2K</span>
+        </div>
+        <div class="tab-item" style="opacity: 0.5;">🏆 Cult Fees <span style="font-size:10px; margin-left:4px; font-family: var(--mono);">SOON</span></div>
+        <div class="tab-item">👥 Buyers</div>
+        <div class="tab-item">📊 Trades</div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="tip-vault-banner">
+        <div class="vault-left">
+          <span class="vault-label">
+            <span>💰</span> TIP VAULT
+          </span>
+          <span class="vault-amount">$1,245.80</span>
+          <span class="vault-sub">
+            <strong>$890.25</strong> already distributed · <strong>23%</strong> of vault claimed
+          </span>
+        </div>
+        <div class="vault-right">
+          <button class="vault-cta">
+            <span>✍</span> Create Content
+          </button>
+          <div class="vault-progress">
+            <div class="vault-progress-bar">
+              <div class="vault-progress-fill"></div>
+            </div>
+            <span>23% claimed</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+      <div class="inline-label">Thread — vault nudge appears every ~5 posts</div>
+
+      <div class="thread-item">
+        <div class="thread-avatar"></div>
+        <div class="thread-body">
+          <div class="thread-user">
+            dani3l69 <span class="time">2h ago</span>
+            <span class="tip-badge">🔥 $12.75</span>
+          </div>
+          <div class="thread-text">to the moon and back mofosssss 🚀</div>
+          <div class="thread-actions">
+            <span>👁 512</span>
+            <span>👍 256</span>
+            <span>💬 Reply</span>
+            <span>🔥 Tip</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="thread-item">
+        <div class="thread-avatar"></div>
+        <div class="thread-body">
+          <div class="thread-user">
+            p3dr0u <span class="time">2h ago</span>
+          </div>
+          <div class="thread-text">dunno, maybe going up? 👀</div>
+          <div class="thread-actions">
+            <span>👁 512</span>
+            <span>👍 256</span>
+            <span>💬 Reply</span>
+            <span>🔥 Tip</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="thread-vault-inline">
+        <div class="tvi-icon">💰</div>
+        <div class="tvi-content">
+          <span class="tvi-headline"><span class="amt">$1,245</span> in this token's tip vault</span>
+          <span class="tvi-sub">Top earner today: dani3l69 earned $42.50 from 3 posts</span>
+        </div>
+        <button class="tvi-action">Post & Earn</button>
+      </div>
+
+      <div class="thread-item">
+        <div class="thread-avatar"></div>
+        <div class="thread-body">
+          <div class="thread-user">
+            x3p4ni <span class="time">3h ago</span>
+            <span class="tip-badge">🔥 $8.25</span>
+          </div>
+          <div class="thread-text">looking optimistic! 🚀</div>
+          <div class="thread-actions">
+            <span>👁 512</span>
+            <span>👍 256</span>
+            <span>💬 Reply</span>
+            <span>🔥 Tip</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="annotation-orange">
+        <strong>Key interaction:</strong> The inline vault nudge appears every ~5 posts in the thread, reminding users there's money waiting. The "Post & Earn" CTA is a direct content creation on-ramp. The top earner callout is social proof that real money is flowing. Note the green tip badges on posts that earned tips — reinforcing the "this works" narrative.
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar Widget -->
+  <div class="option-block">
+    <div class="option-header">
+      <div class="option-header-left">
+        <span class="option-badge">Sidebar</span>
+        <span class="option-name">Tip Vault Widget — Right Sidebar</span>
+      </div>
+      <span class="option-tag">Below swap panel, above Launchers</span>
+    </div>
+    <div class="option-body">
+      <div style="max-width: 340px;">
+        <div class="sidebar-vault">
+          <div class="sidebar-vault-header">
+            <h4>💰 Tip Vault</h4>
+            <span style="font-size: 11px; color: var(--text-muted); font-family: var(--mono);">Resets 24h</span>
+          </div>
+          <div class="sidebar-vault-body">
+            <div class="sv-main-stat">
+              <span class="label">Unclaimed</span>
+              <span class="value">$1,245.80</span>
+            </div>
+
+            <div class="sv-row">
+              <span class="label">Distributed today</span>
+              <span class="value green">$890.25</span>
+            </div>
+            <div class="sv-row">
+              <span class="label">Your earnings</span>
+              <span class="value orange">$42.50</span>
+            </div>
+            <div class="sv-row">
+              <span class="label">Active tippers</span>
+              <span class="value">127</span>
+            </div>
+
+            <div style="border-top: 1px solid var(--border-light); padding-top: 12px;">
+              <div class="inline-label" style="margin-bottom: 8px;">Top Earners Today</div>
+              <div class="earner-list">
+                <div class="earner-row">
+                  <span class="earner-rank gold">1</span>
+                  <div class="earner-avatar" style="background: #FFD6C4;"></div>
+                  <span class="earner-name">dani3l69</span>
+                  <span class="earner-amount">$42.50</span>
+                </div>
+                <div class="earner-row">
+                  <span class="earner-rank silver">2</span>
+                  <div class="earner-avatar" style="background: #C4E0FF;"></div>
+                  <span class="earner-name">jessica92</span>
+                  <span class="earner-amount">$38.20</span>
+                </div>
+                <div class="earner-row">
+                  <span class="earner-rank bronze">3</span>
+                  <div class="earner-avatar" style="background: #D4F7E6;"></div>
+                  <span class="earner-name">mark88</span>
+                  <span class="earner-amount">$25.75</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="annotation">
+        <strong>Design rationale:</strong> Sits in the right sidebar below the swap panel and "Your position" card — the natural place users look after trading. Follows the same card pattern as Launchers, On a Roll, Top Traders. "Your earnings" personalizes the urgency. The mini-leaderboard creates competitive FOMO. "Resets 24h" adds a ticking clock.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="divider"></div>
+
+<!-- =============================================
+     SECTION 4: CULT FEES TAB (POST-GRADUATION)
+     ============================================= -->
+
+<div class="concept-section">
+  <div class="concept-label">Surface 2B — Cult Fees Tab</div>
+  <div class="concept-title">Post-Graduation Stats</div>
+  <div class="concept-desc">
+    For graduated tokens, the Cult Fees tab shows the 24h fee pool, top 10 leaderboard, and payout projections. Pre-graduation, this tab is greyed with a "Coming Soon" tooltip.
+  </div>
+</div>
+
+<div class="options-grid">
+  <div class="option-block">
+    <div class="option-header">
+      <div class="option-header-left">
+        <span class="option-badge">Post-Graduation</span>
+        <span class="option-name">Cult Fees Stats Summary</span>
+      </div>
+    </div>
+    <div class="option-body">
+      <div class="cult-stats-grid">
+        <div class="cult-stat" style="background: linear-gradient(135deg, #FFF7F0, #FFF3EA);">
+          <span class="cs-label" style="color: var(--orange); font-weight: 600;">CULT Fee Pool (24h)</span>
+          <span class="cs-value" style="color: var(--orange);">$1,042.00</span>
+          <span class="cs-sub">from $250K buy volume · 0.40% rate</span>
+        </div>
+        <div class="cult-stat">
+          <span class="cs-label">Top Earner Projection</span>
+          <span class="cs-value">$406/day</span>
+          <span class="cs-sub">≈ $148K/yr at current volume <span class="up">↑</span></span>
+        </div>
+        <div class="cult-stat">
+          <span class="cs-label">Epoch Ends In</span>
+          <span class="cs-value" style="font-variant-numeric: tabular-nums;">14h 22m</span>
+          <span class="cs-sub">next payout at 00:00 UTC</span>
+        </div>
+      </div>
+
+      <div class="annotation">
+        <strong>Design rationale:</strong> The cult fee pool gets the warm highlight treatment — consistent with the "money on the table" pattern used everywhere. The projection stat is powerful social proof ($148K/yr catches eyes). The countdown creates urgency to participate before the epoch ends.
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- =============================================
+     SECTION 5: FULL SYSTEM MAP
+     ============================================= -->
+
+<div class="concept-section">
+  <div class="concept-label">System Summary</div>
+  <div class="concept-title">Where Stats Live</div>
+  <div class="concept-desc" style="max-width: 800px;">
+    Quick reference for where each stat component surfaces across the two main views.
+  </div>
+</div>
+
+<div class="options-grid">
+  <div class="option-block">
+    <div class="option-body" style="padding: 28px;">
+      <table class="summary-table">
+        <thead>
+          <tr>
+            <th>Component</th>
+            <th>Surface</th>
+            <th>Primary Stat</th>
+            <th>Goal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="font-weight: 500;">Stats Banner</td>
+            <td style="color: var(--text-secondary);">Launchpad feed header</td>
+            <td style="font-family: var(--mono); color: var(--orange); font-weight: 500;">Unclaimed Tips ($482K)</td>
+            <td style="color: var(--text-secondary);">Protocol-wide FOMO</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 500;">Feed Card Vault</td>
+            <td style="color: var(--text-secondary);">Each token card</td>
+            <td style="font-family: var(--mono); color: var(--orange); font-weight: 500;">Per-token vault ($1.2K)</td>
+            <td style="color: var(--text-secondary);">Per-token opportunity</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 500;">Vault Banner</td>
+            <td style="color: var(--text-secondary);">Token page (main)</td>
+            <td style="font-family: var(--mono); color: var(--orange); font-weight: 500;">Token vault + CTA</td>
+            <td style="color: var(--text-secondary);">Drive content creation</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 500;">Thread Nudge</td>
+            <td style="color: var(--text-secondary);">Thread tab (inline)</td>
+            <td style="font-family: var(--mono); color: var(--orange); font-weight: 500;">Vault + top earner</td>
+            <td style="color: var(--text-secondary);">Contextual reminder</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 500;">Sidebar Widget</td>
+            <td style="color: var(--text-secondary);">Token page (sidebar)</td>
+            <td style="font-family: var(--mono); color: var(--orange); font-weight: 500;">Vault + leaderboard</td>
+            <td style="color: var(--text-secondary);">Persistent visibility</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 500;">Cult Fees Summary</td>
+            <td style="color: var(--text-secondary);">Cult Fees tab</td>
+            <td style="font-family: var(--mono); color: var(--orange); font-weight: 500;">Daily pool + epoch</td>
+            <td style="color: var(--text-secondary);">Post-graduation depth</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="spacer-lg"></div>
+<div class="spacer-lg"></div>
+
+</body>
+</html>

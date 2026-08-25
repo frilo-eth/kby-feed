@@ -5405,6 +5405,8 @@ html.dark .qhc-id{color:#6BA3FF;}
   </div>
 </div>
 
+<link rel="stylesheet" href="kby-tipping/tip-feed.css">
+<script src="kby-tipping/tip-feed.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <script>
@@ -10173,8 +10175,15 @@ html.dark .qhc-id{color:#6BA3FF;}
         const tipIdx = typeof firstTipablePostIndex === 'function' ? firstTipablePostIndex() : posts.findIndex(p => p && p.role !== 'op');
         if(tipIdx < 0) return;
         const runTip = ()=>{
-          const tipBtn = itemEls()[tipIdx]?.querySelector('.react-btn.tip');
-          if(tipBtn && !tipBtn.classList.contains('active')) tipBtn.click();
+          const item = itemEls()[tipIdx];
+          const tipBtn = item?.querySelector('.react-btn.tip');
+          if(!tipBtn || tipBtn.classList.contains('active')) return;
+          const tipCountEl = item.querySelector('.tip-count');
+          const ctx = { commentId: 'post-' + tipIdx, tipBtn, tipCountEl, item, resumeTap: ()=> window.KbyTipping?.simulateTap(tipBtn, ctx) };
+          if(window.KbyTipping?.simulateTap){
+            if(!tipBtn.dataset.kbyTipBound) window.KbyTipping.wire(tipBtn, ctx);
+            window.KbyTipping.simulateTap(tipBtn, ctx);
+          } else tipBtn.click();
         };
         if(lastActiveIdx !== tipIdx){
           springTo(tipIdx, 0.95);
@@ -12896,6 +12905,14 @@ html.dark .qhc-id{color:#6BA3FF;}
       const tipBtn = item.querySelector('.react-btn.tip');
       const tipCountEl = item.querySelector('.tip-count');
       if(tipBtn){
+        if(window.KbyTipping){
+          const ctx = {
+            commentId: 'post-' + (item.dataset.index || '0'),
+            tipBtn, tipCountEl, item,
+            resumeTap: ()=> window.KbyTipping.simulateTap(tipBtn, ctx),
+          };
+          KbyTipping.wire(tipBtn, ctx);
+        } else {
         tipBtn.addEventListener('click',(e)=>{
           e.stopPropagation(); if(tipBtn.classList.contains('active')) return;
           requireSpend(TIP_USD, ()=>{
@@ -12906,6 +12923,7 @@ html.dark .qhc-id{color:#6BA3FF;}
             logActivity('tip', 'Tip', TIP_USD);
           }, 'Tip ' + usdLabel(TIP_USD));
         });
+        }
       }
 
       const likeBtn = item.querySelector('.react-btn.like');
@@ -13041,9 +13059,10 @@ html.dark .qhc-id{color:#6BA3FF;}
   function bindItems(){ itemEls().forEach(bindFeedItem); }
 
   function flashIcon(flashEl, which){ flashEl.innerHTML=`<div class="flash-btn">${svgIcon(which)}</div>`; flashEl.classList.remove('show'); void flashEl.offsetWidth; flashEl.classList.add('show'); }
-  function spawnTipFloat(btn){
+  function spawnTipFloat(btn, amt){
     if(!btn) return;
-    const f=document.createElement('div'); f.className='tip-float'; f.textContent='+' + usdLabel(TIP_USD);
+    const tipAmt = amt || TIP_USD;
+    const f=document.createElement('div'); f.className='tip-float'; f.textContent='+' + usdLabel(tipAmt);
     const rect=btn.getBoundingClientRect(); f.style.left=(rect.left+rect.width/2-12)+'px'; f.style.top=(rect.top-6)+'px';
     document.body.appendChild(f); setTimeout(()=>f.remove(),1000);
   }
@@ -17724,6 +17743,43 @@ html.dark .qhc-id{color:#6BA3FF;}
       if(now - start < DUR){ chromeReflowRAF = requestAnimationFrame(step); }
       else { chromeReflowRAF = null; }
     })(start);
+  }
+
+  if(window.KbyTipping){
+    KbyTipping.init({
+      syncBalances(){
+        const w = cashWallet();
+        return { walletUsd: w?.bal || 0, jarUsd: 0 };
+      },
+      onCommit(amt, meta, ctx){
+        if(!ctx?.tipBtn || ctx.tipBtn.classList.contains('active')) return;
+        const walletPart = Math.max(0, meta?.fromWallet || 0);
+        const finish = ()=>{
+          const { tipBtn, tipCountEl, item } = ctx;
+          tipBtn.classList.add('active','pulse'); setTimeout(()=> tipBtn.classList.remove('pulse'), 450);
+          const val = parseInt(tipBtn.dataset.tips, 10) + amt; tipBtn.dataset.tips = val; tipCountEl.textContent = usdLabel(val);
+          spawnTipFloat(tipBtn, amt); celebrateTip(tipBtn);
+          signalActivity('tip', { item, avatar: myAvatarUrl(), amount: amt });
+          logActivity('tip', 'Tip', amt);
+        };
+        requireAuth(()=>{
+          if(walletPart <= 0){ finish(); return; }
+          requireSpend(walletPart, finish, 'Tip ' + usdLabel(amt));
+        }, walletPart);
+      },
+      onNoBalance(ctx){
+        requireAuth(()=>{
+          const amt = Math.max(0.01, TIP_USD);
+          const need = spendShortfall(amt);
+          if(need <= 0) return;
+          setTimeout(()=>{
+            if(typeof haptic === 'function') haptic('warning');
+            showToast('Top up to continue.');
+            openTopUp(need, ()=>{ if(ctx?.resumeTap) ctx.resumeTap(); });
+          }, 960);
+        });
+      },
+    });
   }
 
   render();

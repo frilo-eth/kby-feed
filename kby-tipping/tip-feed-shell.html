@@ -1,0 +1,111 @@
+<div id="kbyTipCoinRoot" aria-hidden="true" style="position:fixed;inset:0;pointer-events:none;z-index:85;overflow:visible;">
+  <div class="coin-pool" id="coinPool"></div>
+</div>
+<!-- On-hold minimodal — Figma: https://www.figma.com/design/DYukWIAVscGqu85nfGUhT5/Frontend?node-id=6360-443577 · Wallet: node-id=8958-229651 -->
+<div class="tip-minimodal-outer" id="tipMinimodalOuter">
+<div class="tip-minimodal" id="tipMinimodal" role="dialog" aria-label="Confirm tip" aria-hidden="true">
+  <div class="tip-minimodal-main" id="tipMinimodalMain">
+  <div class="tip-minimodal-top">
+    <div class="tip-minimodal-col--left">
+      <span class="tip-minimodal-countdown-line" id="minimodalCountdownLine">
+        <span class="tip-minimodal-countdown-label">Tipping</span>
+        <span class="tip-minimodal-countdown-suffix" id="minimodalCountdownSuffix" aria-live="polite"></span>
+      </span>
+      <div class="tip-minimodal-usd-row" id="minimodalUsdRow">
+        <span class="tip-minimodal-usd-prefix">~$</span>
+        <span class="counter tip-minimodal-usd-counter" id="minimodalUsdCounter" data-value="" aria-live="polite"></span>
+      </div>
+    </div>
+    <div class="tip-minimodal-col--right">
+      <div class="tip-minimodal-from">
+        <svg class="tip-minimodal-from-icon-jar" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M10.9179 3.08213H10.4179V3.16327L10.4436 3.24024L10.9179 3.08213ZM11.5709 5.04108H12.0709V4.95995L12.0453 4.88297L11.5709 5.04108ZM11.5709 12.8769V13.3769H12.0709V12.8769H11.5709ZM2.42911 12.8769H1.92911V13.3769H2.42911V12.8769ZM2.42911 5.04108L1.95477 4.88297L1.92911 4.95995V5.04108H2.42911ZM3.08209 3.08213L3.55644 3.24024L3.58209 3.16327V3.08213H3.08209ZM3.08209 1.12317V0.623169V1.12317ZM11.2444 1.62317H11.7444V0.623169H11.2444V1.12317V1.62317ZM2.65847 0.623169H2.15847V1.62317H2.65847V1.12317V0.623169ZM10.9179 1.12317H10.4179V3.08213H10.9179H11.4179V1.12317H10.9179ZM10.9179 3.08213L10.4436 3.24024L11.0966 5.1992L11.5709 5.04108L12.0453 4.88297L11.3923 2.92401L10.9179 3.08213ZM11.5709 5.04108H11.0709V12.8769H11.5709H12.0709V5.04108H11.5709ZM11.5709 12.8769V12.3769H2.42911V12.8769V13.3769H11.5709V12.8769ZM2.42911 12.8769H2.92911V5.04108H2.42911H1.92911V12.8769H2.42911ZM2.42911 5.04108L2.90345 5.1992L3.55644 3.24024L3.08209 3.08213L2.60775 2.92401L1.95477 4.88297L2.42911 5.04108ZM3.08209 3.08213H3.58209V1.12317H3.08209H2.58209V3.08213H3.08209ZM3.08209 1.12317V1.62317H10.9179V1.12317V0.623169H3.08209V1.12317ZM10.9179 1.12317V1.62317H11.2444V1.12317V0.623169H10.9179V1.12317ZM3.08209 1.12317V0.623169H2.65847V1.12317V1.62317H3.08209V1.12317ZM7.77652 6.69746L8.22896 6.48464C7.87007 5.72164 7.09371 5.19176 6.19258 5.19176V5.69176V6.19176C6.69194 6.19176 7.12389 6.48469 7.32407 6.91027L7.77652 6.69746ZM6.19258 5.69176V5.19176C4.95023 5.19176 3.94311 6.19888 3.94311 7.44122H4.44311H4.94311C4.94311 6.75116 5.50252 6.19176 6.19258 6.19176V5.69176ZM4.44311 7.44122H3.94311C3.94311 8.64939 4.89534 9.63482 6.09051 9.68841L6.11291 9.18891L6.13531 8.68942C5.47203 8.65968 4.94311 8.11209 4.94311 7.44122H4.44311ZM9.55693 8.51782H9.05693C9.05693 9.20789 8.49754 9.76728 7.80747 9.76728V10.2673V10.7673C9.04983 10.7673 10.0569 9.76018 10.0569 8.51782H9.55693ZM7.80747 10.2673V9.76728C7.1174 9.76728 6.558 9.20789 6.558 8.51782H6.058H5.558C5.558 9.76018 6.56511 10.7673 7.80747 10.7673V10.2673ZM6.058 8.51782H6.558C6.558 7.82774 7.11739 7.26835 7.80747 7.26835V6.76835V6.26835C6.56511 6.26835 5.558 7.27546 5.558 8.51782H6.058ZM7.80747 6.76835V7.26835C8.49754 7.26835 9.05693 7.82774 9.05693 8.51782H9.55693H10.0569C10.0569 7.27546 9.04983 6.26835 7.80747 6.26835V6.76835Z" fill="#50463B"/>
+        </svg>
+        <svg class="tip-minimodal-from-icon-wallet" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M9.14757 8.82292C9.34894 8.82292 9.51216 8.6597 9.51216 8.45833C9.51216 8.25697 9.34894 8.09375 9.14757 8.09375C8.94621 8.09375 8.78299 8.25697 8.78299 8.45833C8.78299 8.6597 8.94621 8.82292 9.14757 8.82292Z" fill="#50463B"/>
+          <path d="M9.73098 4.95848H3.60598C2.80056 4.95848 2.14764 4.30556 2.14764 3.50014C2.14764 2.69473 2.80056 2.04181 3.60598 2.04181H9.73098V4.95848ZM9.73098 4.95848H12.0643V11.9585H3.89764C2.93115 11.9585 2.14764 11.175 2.14764 10.2085V3.79181M9.14757 8.82292C9.34894 8.82292 9.51216 8.6597 9.51216 8.45833C9.51216 8.25697 9.34894 8.09375 9.14757 8.09375C8.94621 8.09375 8.78299 8.25697 8.78299 8.45833C8.78299 8.6597 8.94621 8.82292 9.14757 8.82292Z" stroke="#50463B" stroke-linecap="square"/>
+        </svg>
+        <span id="minimodalFromLabel">From Jar</span>
+      </div>
+      <div class="tip-minimodal-token-row" id="minimodalTokenRow">
+        <span class="counter tip-minimodal-token-counter" id="minimodalTokenCounter" data-value="" aria-live="polite"></span>
+        <span class="tip-minimodal-token-suffix">K</span>
+      </div>
+    </div>
+  </div>
+  <div class="tip-minimodal-progress-wrap">
+    <div class="tip-minimodal-progress-slot" id="minimodalProgressSlot" style="--bar-flip-dur: 200ms;">
+      <div class="tip-minimodal-progress tip-minimodal-progress--jar" id="minimodalProgressJarLayer" aria-hidden="true">
+        <div class="tip-minimodal-progress-inner">
+          <div class="tip-minimodal-progress-fill tip-minimodal-progress-fill--jar" id="minimodalProgressJarFill"></div>
+        </div>
+      </div>
+      <div class="tip-minimodal-progress tip-minimodal-progress--wallet" id="minimodalProgressWalletLayer" aria-hidden="true">
+        <div class="tip-minimodal-progress-inner">
+          <div class="tip-minimodal-progress-fill tip-minimodal-progress-fill--wallet" id="minimodalProgressWalletFill"></div>
+        </div>
+      </div>
+    </div>
+    <div class="tip-minimodal-cap-row" id="minimodalCapRow" aria-live="polite">
+      <span class="tip-minimodal-cap-row-left" id="minimodalCapLeft"></span>
+      <span class="tip-minimodal-cap-row-right" id="minimodalCapRight"></span>
+    </div>
+    <div class="tip-minimodal-bottom-info" id="minimodalBottomInfo" aria-live="polite">
+      <div class="tip-minimodal-bottom-side tip-minimodal-bottom-side--jar" id="minimodalBottomJar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M10.9179 3.08213H10.4179V3.16327L10.4436 3.24024L10.9179 3.08213ZM11.5709 5.04108H12.0709V4.95995L12.0453 4.88297L11.5709 5.04108ZM11.5709 12.8769V13.3769H12.0709V12.8769H11.5709ZM2.42911 12.8769H1.92911V13.3769H2.42911V12.8769ZM2.42911 5.04108L1.95477 4.88297L1.92911 4.95995V5.04108H2.42911ZM3.08209 3.08213L3.55644 3.24024L3.58209 3.16327V3.08213H3.08209ZM3.08209 1.12317V0.623169V1.12317ZM11.2444 1.62317H11.7444V0.623169H11.2444V1.12317V1.62317ZM2.65847 0.623169H2.15847V1.62317H2.65847V1.12317V0.623169ZM10.9179 1.12317H10.4179V3.08213H10.9179H11.4179V1.12317H10.9179ZM10.9179 3.08213L10.4436 3.24024L11.0966 5.1992L11.5709 5.04108L12.0453 4.88297L11.3923 2.92401L10.9179 3.08213ZM11.5709 5.04108H11.0709V12.8769H11.5709H12.0709V5.04108H11.5709ZM11.5709 12.8769V12.3769H2.42911V12.8769V13.3769H11.5709V12.8769ZM2.42911 12.8769H2.92911V5.04108H2.42911H1.92911V12.8769H2.42911ZM2.42911 5.04108L2.90345 5.1992L3.55644 3.24024L3.08209 3.08213L2.60775 2.92401L1.95477 4.88297L2.42911 5.04108ZM3.08209 3.08213H3.58209V1.12317H3.08209H2.58209V3.08213H3.08209ZM3.08209 1.12317V1.62317H10.9179V1.12317V0.623169H3.08209V1.12317ZM10.9179 1.12317V1.62317H11.2444V1.12317V0.623169H10.9179V1.12317ZM3.08209 1.12317V0.623169H2.65847V1.12317V1.62317H3.08209V1.12317ZM7.77652 6.69746L8.22896 6.48464C7.87007 5.72164 7.09371 5.19176 6.19258 5.19176V5.69176V6.19176C6.69194 6.19176 7.12389 6.48469 7.32407 6.91027L7.77652 6.69746ZM6.19258 5.69176V5.19176C4.95023 5.19176 3.94311 6.19888 3.94311 7.44122H4.44311H4.94311C4.94311 6.75116 5.50252 6.19176 6.19258 6.19176V5.69176ZM4.44311 7.44122H3.94311C3.94311 8.64939 4.89534 9.63482 6.09051 9.68841L6.11291 9.18891L6.13531 8.68942C5.47203 8.65968 4.94311 8.11209 4.94311 7.44122H4.44311ZM9.55693 8.51782H9.05693C9.05693 9.20789 8.49754 9.76728 7.80747 9.76728V10.2673V10.7673C9.04983 10.7673 10.0569 9.76018 10.0569 8.51782H9.55693ZM7.80747 10.2673V9.76728C7.1174 9.76728 6.558 9.20789 6.558 8.51782H6.058H5.558C5.558 9.76018 6.56511 10.7673 7.80747 10.7673V10.2673ZM6.058 8.51782H6.558C6.558 7.82774 7.11739 7.26835 7.80747 7.26835V6.76835V6.26835C6.56511 6.26835 5.558 7.27546 5.558 8.51782H6.058ZM7.80747 6.76835V7.26835C8.49754 7.26835 9.05693 7.82774 9.05693 8.51782H9.55693H10.0569C10.0569 7.27546 9.04983 6.26835 7.80747 6.26835V6.76835Z" fill="#50463B"/>
+        </svg>
+        <span id="minimodalBottomJarText"></span>
+      </div>
+      <div class="tip-minimodal-bottom-side tip-minimodal-bottom-side--wallet" id="minimodalBottomWallet">
+        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M9.14757 8.82292C9.34894 8.82292 9.51216 8.6597 9.51216 8.45833C9.51216 8.25697 9.34894 8.09375 9.14757 8.09375C8.94621 8.09375 8.78299 8.25697 8.78299 8.45833C8.78299 8.6597 8.94621 8.82292 9.14757 8.82292Z" fill="#50463B"/>
+          <path d="M9.73098 4.95848H3.60598C2.80056 4.95848 2.14764 4.30556 2.14764 3.50014C2.14764 2.69473 2.80056 2.04181 3.60598 2.04181H9.73098V4.95848ZM9.73098 4.95848H12.0643V11.9585H3.89764C2.93115 11.9585 2.14764 11.175 2.14764 10.2085V3.79181M9.14757 8.82292C9.34894 8.82292 9.51216 8.6597 9.51216 8.45833C9.51216 8.25697 9.34894 8.09375 9.14757 8.09375C8.94621 8.09375 8.78299 8.25697 8.78299 8.45833C8.78299 8.6597 8.94621 8.82292 9.14757 8.82292Z" stroke="#50463B" stroke-linecap="square"/>
+        </svg>
+        <span class="tip-minimodal-bottom-wallet-val" id="minimodalBottomWalletText"></span>
+      </div>
+    </div>
+  </div>
+  </div>
+  <p class="tip-minimodal-no-balance-tooltip" id="minimodalNoBalanceTooltip" role="status" aria-live="polite" hidden>Hold your horses! You're broke.</p>
+  <div class="tip-minimodal-actions">
+    <button type="button" class="tip-minimodal-send" id="minimodalSend">Send</button>
+    <button type="button" class="tip-minimodal-cancel" id="minimodalCancel">Cancel</button>
+  </div>
+</div>
+</div>
+    <template id="coinTemplate">
+      <div class="coin-spawn">
+        <div class="coin-wrapper">
+          <div class="coin">
+            <div class="coin-face front">
+              <svg width="64" height="64" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="8.00004" cy="7.99906" r="6.335" fill="url(#g1)"/>
+                <path d="M9.14851 8.46216C9.20078 8.7638 9.06263 8.97469 8.98861 9.0004C8.7434 8.86 8.63479 8.67423 8.5627 8.41056L7.89937 8.38836C8.04995 8.92406 8.80402 9.47982 9.13122 9.02688C9.23459 8.89349 9.23847 8.63995 9.18562 8.46236H9.14851V8.46216ZM6.45903 8.34182H5.6694C5.61636 9.16183 7.1995 9.56355 7.01414 8.50656C7.00443 8.45165 6.98714 8.39674 6.92399 8.38836C6.98072 8.49994 6.98442 8.98501 6.8078 8.94646C6.76602 8.93711 6.37762 8.46178 6.45903 8.34182ZM5.06552 9.3217L3.99805 8.18214C4.41618 8.10503 4.69208 8.09471 4.97207 8.11185L4.04351 6.78321C4.16748 6.7614 5.15451 6.78321 5.15451 6.78321C5.2948 6.58459 5.21669 5.47404 5.25108 5.17922C5.32355 5.09744 5.57711 5.4867 5.62044 5.52993C5.7751 5.68474 6.51266 6.65956 6.51266 6.65956L7.71342 6.64417C7.91103 6.33592 8.7605 5.20766 8.94353 5.17825C9.04573 5.16189 9.03135 5.31398 9.03407 5.38797C9.05311 5.89817 8.93381 6.26095 9.03407 6.75848C9.30201 6.74134 10.7392 6.73472 11.1754 6.75848C11.3398 6.76724 12.1438 6.88116 11.9206 7.18221C11.5522 7.51792 11.5114 7.4967 11.6149 7.82968L11.3134 7.70545L10.8688 8.09237L11.0105 8.48125L10.6844 8.32215L10.3347 8.66858L10.4068 8.89933C10.2434 8.90167 10.0862 8.79788 9.94281 8.92309L10.3951 9.21888L10.6617 9.08627C10.6881 9.08764 10.6975 9.29191 10.7068 9.40952C10.7095 9.44399 11.1063 9.81592 11.1364 9.82391L11.5215 9.69091C11.5425 10.095 11.3862 10.2202 11.757 10.4081C11.9206 10.491 12.0018 10.6755 12.0018 10.6755C12.0018 10.7561 11.4218 10.7983 11.2671 10.8085C10.6753 10.848 9.97059 10.8201 9.35972 10.8085C8.14282 10.7853 6.88727 10.8071 5.66921 10.8085C5.55069 10.8085 4.81974 10.181 4.67518 10.0369C4.47039 9.83228 4.23626 9.65566 4.04351 9.43737L5.06494 9.3215H5.06533L5.06552 9.3217Z" fill="#C6953D"/>
+                <path d="M14.3337 8.0013C14.3337 11.4991 11.4981 14.3346 8.00033 14.3346C4.50252 14.3346 1.66699 11.4991 1.66699 8.0013C1.66699 4.5035 4.50252 1.66797 8.00033 1.66797C11.4981 1.66797 14.3337 4.5035 14.3337 8.0013Z" stroke="#C6953D" stroke-linecap="square"/>
+                <defs>
+                  <linearGradient id="g1" x1="8" y1="14.334" x2="8" y2="1.664" gradientUnits="userSpaceOnUse">
+                    <stop offset="0.25" stop-color="#FFD05B"/>
+                    <stop offset="1" stop-color="#FFEEC5"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="shine"></div>
+            </div>
+            <div class="coin-face back">
+              <svg width="64" height="64" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="8.00004" cy="7.99906" r="6.335" fill="url(#g2)"/>
+                <path d="M8.00033 4.83464V4.13093M8.00033 11.168V11.8717M9.66699 6.0013C9.36279 5.58063 8.65153 5.18649 8.00033 5.18649C7.23879 5.18649 6.24107 5.5123 6.24107 6.43752C6.24107 8.44117 9.75959 7.5979 9.75959 9.51137C9.75959 10.4366 8.77386 10.8161 8.00033 10.8161C7.34913 10.8161 6.54525 10.422 6.24107 10.0013M14.3337 8.0013C14.3337 11.4991 11.4981 14.3346 8.00033 14.3346C4.50252 14.3346 1.66699 11.4991 1.66699 8.0013C1.66699 4.5035 4.50252 1.66797 8.00033 1.66797C11.4981 1.66797 14.3337 4.5035 14.3337 8.0013Z" stroke="#C6953D" stroke-linecap="square"/>
+                <defs>
+                  <linearGradient id="g2" x1="8" y1="14.334" x2="8" y2="1.664" gradientUnits="userSpaceOnUse">
+                    <stop offset="0.25" stop-color="#FFD05B"/>
+                    <stop offset="1" stop-color="#FFEEC5"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="shine"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>

@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Reels — Vertical Swipe Video Slider</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.0/400.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.0/500.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/geist-mono@5.0.0/400.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/geist-mono@5.0.0/600.min.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #0a0a0a;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: pan-y;
+  }
+
+  /* ── Wrapper: full on mobile, bounded on desktop ── */
+  .reels-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 16px;
+  }
+
+  .reels-wrapper-inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+  }
+
+  /* Mobile: full viewport */
+  @media (max-width: 767px) {
+    .reels-wrapper {
+      padding: 0;
+      min-height: 100dvh;
+      height: 100dvh;
+    }
+    .reels-wrapper-inner {
+      max-width: 100%;
+      width: 100%;
+      height: 100%;
+      max-height: 100dvh;
+    }
+    .reels-container {
+      width: 100%;
+      height: 100%;
+      max-height: 100dvh;
+    }
+    .reel-slide {
+      min-height: 100dvh;
+    }
+    .reels-nav-arrows {
+      display: none;
+    }
+  }
+
+  /* Desktop: bounded, peek of adjacent slides */
+  @media (min-width: 768px) {
+    body {
+      background: #f0e8df;
+    }
+    .reels-wrapper-inner {
+      width: 100%;
+      max-width: 420px;
+      height: min(720px, 85vh);
+    }
+    .reels-container {
+      height: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 24px 48px rgba(0,0,0,0.4);
+    }
+    .reel-slide {
+      min-height: calc(100% + 40px);
+    }
+    .reels-nav-arrows {
+      display: flex;
+    }
+  }
+
+  /* ── Vertical swipe slider ── */
+  .reels-container {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .reel-slide {
+    position: relative;
+    width: 100%;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  /* Media layer (video/image) */
+  .reel-media {
+    position: absolute;
+    inset: 0;
+    background: #1a1a1a;
+  }
+
+  .reel-media img,
+  .reel-media video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .reel-media-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(160deg, #1e293b 0%, #0f172a 40%, #1e1e2e 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    color: rgba(255,255,255,0.12);
+  }
+
+  .reel-slide:nth-child(1) .reel-media-placeholder {
+    background: linear-gradient(160deg, #2d2a2e 0%, #1a181b 50%, #252225 100%);
+  }
+
+  .reel-slide:nth-child(2) .reel-media-placeholder {
+    background: linear-gradient(160deg, #2e2a1e 0%, #1b1a14 50%, #25221a 100%);
+  }
+
+  .reel-slide:nth-child(3) .reel-media-placeholder {
+    background: linear-gradient(160deg, #1e2e2a 0%, #141b1a 50%, #1a2522 100%);
+  }
+
+  /* ── Glassy overlay UI ── */
+  .reel-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .reel-overlay > * {
+    pointer-events: auto;
+  }
+
+  /* Top: ticker badge */
+  .reel-ticker {
+    align-self: flex-start;
+    margin: max(env(safe-area-inset-top), 12px) 0 0 max(env(safe-area-inset-left), 12px);
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-family: 'Geist Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* Bottom-left: user info */
+  .reel-user-block {
+    margin: 0 0 max(env(safe-area-inset-bottom), 80px) max(env(safe-area-inset-left), 12px);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-width: 75%;
+  }
+
+  .reel-user-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .reel-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #818cf8);
+    flex-shrink: 0;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .reel-username {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.98);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .reel-caption {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.4;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Right: vertical action buttons (glassy) – square buttons, counters outside */
+  .reel-actions {
+    position: absolute;
+    right: max(env(safe-area-inset-right), 12px);
+    bottom: max(env(safe-area-inset-bottom), 24px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .reel-action-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+  }
+
+  .reel-action-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    user-select: none;
+  }
+
+  .reel-action-btn:hover {
+    background: rgba(0, 0, 0, 0.45);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .reel-action-btn:active {
+    transform: scale(0.96);
+  }
+
+  .reel-action-btn .action-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    display: block;
+    transition: transform 0.2s ease-out;
+  }
+
+  .reel-action-btn .action-icon path {
+    stroke: rgba(255, 255, 255, 0.9);
+    transition: stroke 0.15s;
+  }
+
+  /* Counter outside button, below it */
+  .reel-action-counter {
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    font-variant-numeric: tabular-nums;
+    transition: color 0.15s;
+  }
+
+  .reel-action-item .reel-action-counter:empty {
+    display: none;
+  }
+
+  /* Pulse ring (same as tipping-minimodal.html) */
+  .reel-action-btn .pulse-ring {
+    position: absolute;
+    inset: -16px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, transparent 0%, transparent 30%);
+    filter: blur(6px);
+    opacity: 0;
+    pointer-events: none;
+    z-index: -1;
+    transform-origin: center;
+  }
+
+  .reel-action-btn.pulse .pulse-ring {
+    animation: iconPulseSoft 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  }
+
+  .reel-action-btn.tip-btn.pulse .pulse-ring {
+    background: radial-gradient(circle at center, rgba(249, 115, 22, 0.5) 0%, rgba(249, 115, 22, 0.2) 25%, rgba(249, 115, 22, 0.05) 50%, transparent 70%);
+  }
+
+  .reel-action-btn.upvote.pulse .pulse-ring {
+    background: radial-gradient(circle at center, rgba(0, 152, 96, 0.45) 0%, rgba(0, 152, 96, 0.18) 25%, rgba(0, 152, 96, 0.04) 50%, transparent 70%);
+  }
+
+  .reel-action-btn.downvote.pulse .pulse-ring {
+    background: radial-gradient(circle at center, rgba(208, 63, 69, 0.45) 0%, rgba(208, 63, 69, 0.18) 25%, rgba(208, 63, 69, 0.04) 50%, transparent 70%);
+  }
+
+  @keyframes iconPulseSoft {
+    0%   { opacity: 0.9; transform: scale(0.3); }
+    70%  { opacity: 0.4; transform: scale(1.4); }
+    100% { opacity: 0; transform: scale(1.9); }
+  }
+
+  /* Tip button – tipped state */
+  .reel-action-btn.tip-btn.tipped {
+    background: rgba(249, 115, 22, 0.25);
+    border-color: rgba(255, 229, 221, 0.35);
+  }
+
+  .reel-action-btn.tip-btn.tipped .action-icon path {
+    stroke: #F97316;
+  }
+
+  .reel-action-btn.tip-btn.tipped + .reel-action-counter {
+    color: #FFB088;
+  }
+
+  /* Upvote voted */
+  .reel-action-btn.upvote.voted {
+    background: rgba(0, 152, 96, 0.25);
+    border-color: rgba(195, 255, 234, 0.35);
+  }
+
+  .reel-action-btn.upvote.voted .action-icon path {
+    stroke: #55CEA1;
+  }
+
+  .reel-action-btn.upvote.voted + .reel-action-counter {
+    color: #55CEA1;
+  }
+
+  .reel-action-btn.upvote.voted .action-icon {
+    animation: voteIconPop 0.35s ease-out;
+  }
+
+  /* Downvote voted */
+  .reel-action-btn.downvote.voted {
+    background: rgba(208, 63, 69, 0.25);
+    border-color: rgba(255, 225, 221, 0.35);
+  }
+
+  .reel-action-btn.downvote.voted .action-icon path {
+    stroke: #F18684;
+  }
+
+  .reel-action-btn.downvote.voted .action-icon {
+    animation: voteIconPop 0.35s ease-out;
+  }
+
+  @keyframes voteIconPop {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.25); }
+    100% { transform: scale(1); }
+  }
+
+  /* Digit roll counter (from tipping-minimodal.html) */
+  .digit-slot {
+    display: inline-block;
+    width: 0.65em;
+    height: 1.2em;
+    overflow: hidden;
+    line-height: 1.2;
+    text-align: center;
+    vertical-align: middle;
+    position: relative;
+  }
+
+  .digit-slot.decimal {
+    width: 0.3em;
+  }
+
+  .digit-roll {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    transition: transform 0.22s cubic-bezier(0.34, 1.2, 0.64, 1);
+    will-change: transform;
+  }
+
+  .digit-cell {
+    height: 1.2em;
+    min-height: 1.2em;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .digit-slot.decimal .digit-roll {
+    transition: none;
+  }
+
+  .action-label.tick .digit-slot.decimal,
+  .action-label.tick .digit-slot:nth-last-child(1),
+  .action-label.tick .digit-slot:nth-last-child(2) {
+    animation: decimalTick 0.2s ease-out;
+  }
+
+  @keyframes decimalTick {
+    0%   { transform: scale(1); opacity: 1; }
+    45%  { transform: scale(1.06); opacity: 0.9; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Coin animation – above the tipping button */
+  .reel-action-item.tip-item {
+    position: relative;
+  }
+
+  .coin-pool {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: 4px;
+    width: 40px;
+    height: 56px;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  .coin-spawn {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 56px;
+  }
+
+  .coin-wrapper {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 56px;
+    overflow: hidden;
+  }
+
+  .coin {
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    left: 0;
+    bottom: -24px;
+    transform-style: preserve-3d;
+  }
+
+  .coin-face {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    overflow: hidden;
+    border-radius: 50%;
+    backface-visibility: hidden;
+  }
+
+  .coin-face svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .coin-face.back {
+    transform: rotateY(180deg);
+  }
+
+  .coin.flipping { animation: coinFlipReel 0.38s ease-in-out forwards; }
+
+  @keyframes coinFlipReel {
+    0%   { bottom: -24px; transform: rotateY(0deg);   }
+    50%  { bottom: 20px;  transform: rotateY(360deg); }
+    100% { bottom: -24px; transform: rotateY(720deg); }
+  }
+
+  /* On-hold minimodal (glassy variant) */
+  .tip-minimodal {
+    position: fixed;
+    z-index: 1000;
+    width: 300px;
+    background: rgba(30, 30, 30, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: opacity 0.2s, visibility 0.2s, transform 0.2s;
+  }
+
+  .tip-minimodal.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .tip-minimodal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .tip-minimodal-title {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .tip-minimodal-amount {
+    font-family: 'Geist Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.95);
+  }
+
+  .tip-minimodal-bar-wrap {
+    margin: 0 0 8px;
+  }
+
+  .tip-minimodal-bar {
+    height: 12px;
+    width: 100%;
+    background: rgba(255,255,255,0.1);
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tip-minimodal-bar-progress {
+    height: 100%;
+    border-radius: 12px;
+    background: linear-gradient(to left, #00b281, #80e0ba);
+    transition: width 0.2s;
+  }
+
+  .tip-minimodal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 8px;
+  }
+
+  .tip-minimodal-status {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .tip-minimodal-status strong {
+    color: rgba(255,255,255,0.95);
+  }
+
+  .tip-minimodal-cancel {
+    background: none;
+    border: none;
+    font-size: 12px;
+    font-weight: 500;
+    color: #F18684;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .tip-minimodal-cancel:hover {
+    text-decoration: underline;
+  }
+</style>
+  /* ── Desktop nav arrows ── */
+  .reels-nav-arrows {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .reels-nav-btn {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .reels-nav-btn:hover {
+    background: rgba(0, 0, 0, 0.5);
+    transform: scale(1.05);
+  }
+
+  .reels-nav-btn:active {
+    transform: scale(0.96);
+  }
+
+  .reels-nav-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .reels-nav-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+</style>
+</head>
+<body>
+
+<div class="reels-wrapper">
+  <div class="reels-wrapper-inner">
+    <div class="reels-container" id="reelsContainer">
+  <!-- Slide 1 -->
+  <div class="reel-slide" data-index="0">
+    <div class="reel-media">
+      <div class="reel-media-placeholder">1</div>
+    </div>
+    <div class="reel-overlay">
+      <span class="reel-ticker">$TICKER</span>
+      <div class="reel-user-block">
+        <div class="reel-user-row">
+          <div class="reel-avatar"></div>
+          <span class="reel-username">nath4an</span>
+        </div>
+        <p class="reel-caption">droppin' the mic here</p>
+      </div>
+      <div class="reel-actions">
+        <div class="reel-action-item tip-item">
+          <button class="reel-action-btn tip-btn" type="button" data-slide="0" aria-label="Tip">
+            <span class="pulse-ring" aria-hidden="true"></span>
+            <svg class="action-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8.00008 4.83464V4.13093M8.00008 11.168V11.8717M9.66675 6.0013C9.36255 5.58063 8.65128 5.18649 8.00008 5.18649C7.23855 5.18649 6.24082 5.5123 6.24082 6.43752C6.24082 8.44117 9.75935 7.5979 9.75935 9.51137C9.75935 10.4296 8.77361 10.8161 8.00008 10.8161C7.34888 10.8161 6.54501 10.422 6.24082 10.0013M14.3334 8.0013C14.3334 11.4991 11.4979 14.3346 8.00008 14.3346C4.50227 14.3346 1.66675 11.4991 1.66675 8.0013C1.66675 4.5035 4.50227 1.66797 8.00008 1.66797C11.4979 1.66797 14.3334 4.5035 14.3334 8.0013Z" stroke-width="1.5" stroke-linecap="square"/>
+            </svg>
+          </button>
+          <span class="reel-action-counter" data-value="512.23">$512</span>
+        </div>
+        <div class="reel-action-item">
+          <button class="reel-action-btn upvote" type="button" data-slide="0" aria-label="Upvote">
+            <span class="pulse-ring" aria-hidden="true"></span>
+            <svg class="action-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4.33317 7.0013H1.6665V13.668H4.33317M4.33317 7.0013L7.36544 1.66797H7.7735C8.59257 1.66797 9.21804 2.39955 9.09064 3.20864L8.67724 5.83464H12.2973C13.536 5.83464 14.4768 6.9491 14.269 8.17024L13.6164 12.0036C13.4528 12.9648 12.6199 13.668 11.6448 13.668H4.33317M4.33317 7.0013V13.668" stroke-width="1.5"/>
+            </svg>
+          </button>
+          <span class="reel-action-counter">256</span>
+        </div>
+        <div class="reel-action-item">
+          <button class="reel-action-btn downvote" type="button" data-slide="0" aria-label="Downvote">
+            <span class="pulse-ring" aria-hidden="true"></span>
+            <svg class="action-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M11.699 8.9987H14.3657V2.33203H11.699M11.699 8.9987L8.6668 14.332H8.25867C7.4396 14.332 6.8142 13.6004 6.94153 12.7914L7.35493 10.1654H3.73489C2.49621 10.1654 1.5554 9.0509 1.76325 7.82976L2.41573 3.99643C2.57935 3.03518 3.4123 2.33203 4.38737 2.33203H11.699M11.699 8.9987V2.33203" stroke-width="1.5"/>
+            </svg>
+          </button>
+          <span class="reel-action-counter"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 2 -->
+  <div class="reel-slide" data-index="1">
+    <div class="reel-media">
+      <div class="reel-media-placeholder">2</div>
+    </div>
+    <div class="reel-overlay">
+      <span class="reel-ticker">$TICKER</span>
+      <div class="reel-user-block">
+        <div class="reel-user-row">
+          <div class="reel-avatar" style="background: linear-gradient(135deg, #F97316, #fb923c);"></div>
+          <span class="reel-username">creator2</span>
+        </div>
+        <p class="reel-caption">another vibe</p>
+      </div>
+      <div class="reel-actions">
+        <div class="reel-action-item tip-item">
+          <button class="reel-action-btn tip-btn" type="button" data-slide="1" aria-label="Tip">
+            <span class="pulse-ring" aria-hidden="true"></span>
+            <svg class="action-icon" viewBox="0 0 16 16" fill="none"><path d="M8.00008 4.83464V4.13093M8.00008 11.168V11.8717M9.66675 6.0013C9.36255 5.58063 8.65128 5.18649 8.00008 5.18649C7.23855 5.18649 6.24082 5.5123 6.24082 6.43752C6.24082 8.44117 9.75935 7.5979 9.75935 9.51137C9.75935 10.4296 8.77361 10.8161 8.00008 10.8161C7.34888 10.8161 6.54501 10.422 6.24082 10.0013M14.3334 8.0013C14.3334 11.4991 11.4979 14.3346 8.00008 14.3346C4.50227 14.3346 1.66675 11.4991 1.66675 8.0013C1.66675 4.5035 4.50227 1.66797 8.00008 1.66797C11.4979 1.66797 14.3334 4.5035 14.3334 8.0013Z" stroke-width="1.5" stroke-linecap="square"/></svg>
+          </button>
+          <span class="reel-action-counter" data-value="128.50">$128</span>
+        </div>
+        <div class="reel-action-item">
+          <button class="reel-action-btn upvote" type="button" data-slide="1" aria-label="Upvote">
+            <span class="pulse-ring" aria-hidden="true"></span>
+            <svg class="action-icon" viewBox="0 0 16 16" fill="none"><path d="M4.33317 7.0013H1.6665V13.668H4.33317M4.33317 7.0013L7.36544 1.66797H7.7735C8.59257 1.66797 9.21804 2.39955 9.09064 3.20864L8.67724 5.83464H12.2973C13.536 5.83464 14.4768 6.9491 14.269 8.17024L13.6164 12.0036C13.4528 12.9648 12.6199 13.668 11.6448 13.668H4.33317M4.33317 7.0013V13.668" stroke-width="1.5"/></svg>
+          </button>
+          <span class="reel-action-counter">89</span>
+        </div>
+        <div class="reel-action-item">
+          <button class="reel-action-btn downvote" type="button" data-slide="1" aria-label="Downvote">
+            <span class="pulse-ring" aria-hidden="true"></span>
+            <svg class="action-icon" viewBox="0 0 16 16" fill="none"><path d="M11.699 8.9987H14.3657V2.33203H11.699M11.699 8.9987L8.6668 14.332H8.25867C7.4396 14.332 6.8142 13.6004 6.94153 12.7914L7.35493 10.1654H3.73489C2.49621 10.1654 1.5554 9.0509 1.76325 7.82976L2.41573 3.99643C2.57935 3.03518 3.4123 2.33203 4.38737 2.33203H11.699M11.699 8.9987V2.33203" stroke-width="1.5"/></svg>
+          </button>
+          <span class="reel-action-counter"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide 3 -->
+  <div class="reel-slide" data-index="2">
+    <div class="reel-media">
+      <div class="reel-media-placeholder">3</div>
+    </div>
+    <div class="reel-overlay">
+      <span class="reel-ticker">$TICKER</span>
+      <div class="reel-user-block">
+        <div class="reel-user-row">
+          <div class="reel-avatar" style="background: linear-gradient(135deg, #22c55e, #4ade80);"></div>
+          <span class="reel-username">user3</span>
+        </div>
+        <p class="reel-caption">kumbaya moment</p>
+      </div>
+      <div class="reel-actions">
+        <div class="reel-action-item tip-item">
+          <button class="reel-action-btn tip-btn" type="button" data-slide="2" aria-label="Tip">
+            <span class="pulse-ring" aria-hidden="true"></span>
+            <svg class="action-icon" viewBox="0 0 16 16" fill="none"><path d="M8.00008 4.83464V4.13093M8.00008 11.168V11.8717M9.66675 6.0013C9.36255 5.58063 8.65128 5.18649 8.00008 5.18649C7.23855 5.18649 6.24082 5.5123 6.24082 6.43752C6.24082 8.44117 9.75935 7.5979 9.75935 9.51137C9.75935 10.4296 8.77361 10.8161 8.00008 10.8161C7.34888 10.8161 6.54501 10.422 6.24082 10.0013M14.3334 8.0013C14.3334 11.4991 11.4979 14.3346 8.00008 14.3346C4.50227 14.3346 1.66675 11.4991 1.66675 8.0013C1.66675 4.5035 4.50227 1.66797 8.00008 1.66797C11.4979 1.66797 14.3334 4.5035 14.3334 8.0013Z" stroke-width="1.5" stroke-linecap="square"/></svg>
+          </button>
+          <span class="reel-action-counter" data-value="42.00">$42</span>
+        </div>
+        <div class="reel-action-item">
+          <button class="reel-action-btn upvote" type="button" data-slide="2" aria-label="Upvote">
+            <span class="pulse-ring" aria-hidden="true"></span>
+            <svg class="action-icon" viewBox="0 0 16 16" fill="none"><path d="M4.33317 7.0013H1.6665V13.668H4.33317M4.33317 7.0013L7.36544 1.66797H7.7735C8.59257 1.66797 9.21804 2.39955 9.09064 3.20864L8.67724 5.83464H12.2973C13.536 5.83464 14.4768 6.9491 14.269 8.17024L13.6164 12.0036C13.4528 12.9648 12.6199 13.668 11.6448 13.668H4.33317M4.33317 7.0013V13.668" stroke-width="1.5"/></svg>
+          </button>
+          <span class="reel-action-counter">312</span>
+        </div>
+        <div class="reel-action-item">
+          <button class="reel-action-btn downvote" type="button" data-slide="2" aria-label="Downvote">
+            <span class="pulse-ring" aria-hidden="true"></span>
+            <svg class="action-icon" viewBox="0 0 16 16" fill="none"><path d="M11.699 8.9987H14.3657V2.33203H11.699M11.699 8.9987L8.6668 14.332H8.25867C7.4396 14.332 6.8142 13.6004 6.94153 12.7914L7.35493 10.1654H3.73489C2.49621 10.1654 1.5554 9.0509 1.76325 7.82976L2.41573 3.99643C2.57935 3.03518 3.4123 2.33203 4.38737 2.33203H11.699M11.699 8.9987V2.33203" stroke-width="1.5"/></svg>
+          </button>
+          <span class="reel-action-counter"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div class="reels-nav-arrows" aria-label="Navigate slides">
+    <button class="reels-nav-btn" id="navPrev" type="button" aria-label="Previous">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>
+    </button>
+    <button class="reels-nav-btn" id="navNext" type="button" aria-label="Next">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+  </div>
+</div>
+</div>
+
+<!-- On-hold minimodal (glassy) -->
+<div class="tip-minimodal" id="tipMinimodal" role="dialog" aria-label="Tipping options">
+  <div class="tip-minimodal-header">
+    <span class="tip-minimodal-title">Tipping</span>
+    <span class="tip-minimodal-amount" id="minimodalAmount">~$5.32</span>
+  </div>
+  <div class="tip-minimodal-bar-wrap">
+    <div class="tip-minimodal-bar">
+      <div class="tip-minimodal-bar-progress" id="minimodalProgress" style="width: 44%;"></div>
+    </div>
+  </div>
+  <div class="tip-minimodal-footer">
+    <span class="tip-minimodal-status">Sends in <strong id="minimodalCountdown">3</strong> Secs</span>
+    <button type="button" class="tip-minimodal-cancel" id="minimodalCancel">Cancel</button>
+  </div>
+</div>
+
+<script>
+  const MY_TIP = 1.00;
+  const HOLD_DELAY = 450;
+  let holdTimer = 0;
+  let holdActivated = false;
+
+  // Per-slide state
+  const slideState = new Map();
+
+  function getSlideState(slideIdx) {
+    if (!slideState.has(slideIdx)) {
+      const tipCounter = document.querySelector(`[data-slide="${slideIdx}"].tip-btn`)?.closest('.reel-action-item')?.querySelector('.reel-action-counter');
+      const voteCounter = document.querySelector(`[data-slide="${slideIdx}"].upvote`)?.closest('.reel-action-item')?.querySelector('.reel-action-counter');
+      slideState.set(slideIdx, {
+        total: parseFloat(tipCounter?.dataset?.value || tipCounter?.textContent?.replace(/[^0-9.]/g, '') || '0'),
+        upvoted: false,
+        downvoted: false,
+        voteBase: parseInt(voteCounter?.textContent || '0', 10) || 0
+      });
+    }
+    return slideState.get(slideIdx);
+  }
+
+  function formatAmount(n) {
+    return n.toFixed(2);
+  }
+
+  function formatDisplay(n) {
+    if (n >= 1000) return '$' + (n / 1000).toFixed(1) + 'K';
+    return '$' + Math.round(n).toString();
+  }
+
+  function formatInteger(n) {
+    return Math.round(n).toString();
+  }
+
+  function renderCounter(container, value, formatFn) {
+    if (!container) return;
+    const str = (formatFn || formatAmount)(value);
+    container.innerHTML = '';
+    container.dataset.value = str;
+
+    for (let i = 0; i < str.length; i++) {
+      const ch = str[i];
+      const slot = document.createElement('span');
+      slot.className = 'digit-slot';
+      if (ch === '.') {
+        slot.classList.add('decimal');
+        slot.innerHTML = '<span class="digit-roll"><span class="digit-cell">.</span></span>';
+      } else {
+        const roll = document.createElement('span');
+        roll.className = 'digit-roll';
+        for (let d = 0; d <= 9; d++) {
+          const cell = document.createElement('span');
+          cell.className = 'digit-cell';
+          cell.textContent = d;
+          roll.appendChild(cell);
+        }
+        const d = parseInt(ch, 10);
+        roll.style.transform = `translateY(-${d * 1.2}em)`;
+        slot.appendChild(roll);
+      }
+      container.appendChild(slot);
+    }
+  }
+
+  function updateCounter(container, newValue, formatFn) {
+    if (!container) return;
+    const newStr = (formatFn || formatAmount)(newValue);
+    container.dataset.value = newStr;
+    let slotIdx = 0;
+    for (let i = 0; i < newStr.length; i++) {
+      const ch = newStr[i];
+      const slot = container.children[slotIdx];
+      if (!slot) break;
+      if (ch === '.') { slotIdx++; continue; }
+      const roll = slot.querySelector('.digit-roll');
+      if (roll && roll.children.length > 1) {
+        const digit = parseInt(ch, 10);
+        roll.style.transform = `translateY(-${digit * 1.2}em)`;
+      }
+      slotIdx++;
+    }
+  }
+
+  function fireConfetti(btn, colors) {
+    const rect = btn.getBoundingClientRect();
+    const cx = (rect.left + rect.width / 2) / window.innerWidth;
+    const cy = (rect.top + rect.height / 2) / window.innerHeight;
+    const fire = (typeof confetti === 'function' ? confetti : window.confetti);
+    if (fire) {
+      fire({
+        origin: { x: cx, y: cy },
+        spread: 55,
+        angle: 90,
+        ticks: 32,
+        gravity: 0.4,
+        decay: 0.93,
+        startVelocity: 9,
+        drift: 0.35,
+        colors: colors || ['#FFD05B', '#FFEEC5', '#F97316', '#FFCA6C', '#FFB088', '#FFE5DD'],
+        shapes: ['circle'],
+        particleCount: 12,
+        scalar: 0.38,
+        zIndex: 9999,
+      });
+    }
+  }
+
+  function triggerPulse(btn, type) {
+    btn.classList.remove('pulse');
+    void btn.offsetWidth;
+    btn.classList.add('pulse');
+    setTimeout(() => btn.classList.remove('pulse'), 520);
+  }
+
+  function spawnCoin(btn) {
+    const pool = document.createElement('div');
+    pool.className = 'coin-pool';
+    const tipItem = btn.closest('.reel-action-item.tip-item');
+    if (tipItem) {
+      tipItem.insertBefore(pool, tipItem.firstChild);
+      const coin = document.createElement('div');
+      coin.className = 'coin-spawn';
+      coin.innerHTML = `
+        <div class="coin-wrapper">
+          <div class="coin">
+            <div class="coin-face front">
+              <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.335" fill="url(#g1)"/><defs><linearGradient id="g1" x1="8" y1="14.334" x2="8" y2="1.664"><stop offset="0.25" stop-color="#FFD05B"/><stop offset="1" stop-color="#FFEEC5"/></linearGradient></defs></svg>
+            </div>
+            <div class="coin-face back">
+              <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.335" fill="url(#g2)"/><defs><linearGradient id="g2" x1="8" y1="14.334" x2="8" y2="1.664"><stop offset="0.25" stop-color="#FFD05B"/><stop offset="1" stop-color="#FFEEC5"/></linearGradient></defs></svg>
+            </div>
+          </div>
+        </div>
+      `;
+      pool.appendChild(coin);
+      coin.querySelector('.coin').classList.add('flipping');
+      setTimeout(() => pool.remove(), 400);
+    }
+  }
+
+  function handleTip(btn) {
+    const slideIdx = parseInt(btn.dataset.slide, 10);
+    const state = getSlideState(slideIdx);
+    state.total += MY_TIP;
+
+    const counter = btn.closest('.reel-action-item')?.querySelector('.reel-action-counter');
+    if (counter) {
+      counter.dataset.value = state.total.toFixed(2);
+      counter.textContent = formatDisplay(state.total);
+    }
+
+    btn.classList.add('tipped');
+    btn.classList.remove('pulse');
+    void btn.offsetWidth;
+    triggerPulse(btn, 'tip');
+    fireConfetti(btn);
+    spawnCoin(btn);
+  }
+
+  function handleUpvote(btn) {
+    const slideIdx = parseInt(btn.dataset.slide, 10);
+    const state = getSlideState(slideIdx);
+    const downBtn = btn.closest('.reel-actions')?.querySelector('.downvote');
+    if (downBtn) downBtn.classList.remove('voted');
+    state.downvoted = false;
+    state.upvoted = !state.upvoted;
+    btn.classList.toggle('voted', state.upvoted);
+
+    const counter = btn.closest('.reel-action-item')?.querySelector('.reel-action-counter');
+    if (counter) {
+      const net = Math.max(0, state.voteBase + (state.upvoted ? 1 : state.downvoted ? -1 : 0));
+      counter.textContent = net.toString();
+    }
+
+    triggerPulse(btn, 'upvote');
+    if (state.upvoted) fireConfetti(btn, ['#009860', '#55CEA1', '#C3FFEA', '#7DD3C0']);
+  }
+
+  function handleDownvote(btn) {
+    const slideIdx = parseInt(btn.dataset.slide, 10);
+    const state = getSlideState(slideIdx);
+    const upBtn = btn.closest('.reel-actions')?.querySelector('.upvote');
+    if (upBtn) upBtn.classList.remove('voted');
+    state.upvoted = false;
+    state.downvoted = !state.downvoted;
+    btn.classList.toggle('voted', state.downvoted);
+
+    const upCounter = upBtn?.closest('.reel-action-item')?.querySelector('.reel-action-counter');
+    if (upCounter) {
+      const net = Math.max(0, state.voteBase + (state.upvoted ? 1 : state.downvoted ? -1 : 0));
+      upCounter.textContent = net.toString();
+    }
+
+    triggerPulse(btn, 'downvote');
+    if (state.downvoted) fireConfetti(btn, ['#D03F45', '#F18684', '#FFE1DD']);
+  }
+
+  /* On-hold minimodal */
+  function showMinimodal(btn) {
+    const modal = document.getElementById('tipMinimodal');
+    modal.style.left = '50%';
+    modal.style.transform = 'translateX(-50%) translateY(0)';
+    modal.style.top = 'auto';
+    modal.style.bottom = 'max(env(safe-area-inset-bottom), 100px)';
+    modal.classList.add('visible');
+
+    const slideIdx = parseInt(btn.dataset.slide, 10);
+    const state = getSlideState(slideIdx);
+    document.getElementById('minimodalAmount').textContent = '~$' + state.total.toFixed(2);
+    document.getElementById('minimodalProgress').style.width = Math.min(100, (state.total / 600) * 100) + '%';
+
+    let count = 3;
+    const countEl = document.getElementById('minimodalCountdown');
+    const countInterval = setInterval(() => {
+      count--;
+      countEl.textContent = count;
+      if (count <= 0) {
+        clearInterval(countInterval);
+        hideMinimodal();
+        handleTip(btn);
+      }
+    }, 1000);
+    modal._countInterval = countInterval;
+    modal._btn = btn;
+  }
+
+  function hideMinimodal() {
+    const modal = document.getElementById('tipMinimodal');
+    if (modal._countInterval) clearInterval(modal._countInterval);
+    modal._countInterval = null;
+    modal._btn = null;
+    modal.classList.remove('visible');
+  }
+
+  function setupHoldToShow(btn) {
+    function clearHold() {
+      if (holdTimer) {
+        clearTimeout(holdTimer);
+        holdTimer = 0;
+      }
+    }
+
+    function onUp() {
+      clearHold();
+      if (!holdActivated) {
+        handleTip(btn);
+      }
+      holdActivated = false;
+    }
+
+    btn.addEventListener('pointerdown', () => {
+      holdActivated = false;
+      clearHold();
+      holdTimer = setTimeout(() => {
+        holdTimer = 0;
+        holdActivated = true;
+        showMinimodal(btn);
+      }, HOLD_DELAY);
+    });
+
+    btn.addEventListener('pointerup', onUp);
+    btn.addEventListener('pointerleave', onUp);
+    btn.addEventListener('pointercancel', onUp);
+  }
+
+  document.getElementById('minimodalCancel').addEventListener('click', hideMinimodal);
+
+  document.querySelectorAll('.tip-btn').forEach(btn => {
+    setupHoldToShow(btn);
+  });
+
+  document.querySelectorAll('.upvote').forEach(btn => {
+    btn.addEventListener('click', () => handleUpvote(btn));
+  });
+
+  document.querySelectorAll('.downvote').forEach(btn => {
+    btn.addEventListener('click', () => handleDownvote(btn));
+  });
+
+  /* Desktop nav arrows */
+  const container = document.getElementById('reelsContainer');
+  const navPrev = document.getElementById('navPrev');
+  const navNext = document.getElementById('navNext');
+  const slides = document.querySelectorAll('.reel-slide');
+
+  function updateNavButtons() {
+    const scrollTop = container.scrollTop;
+    const slideHeight = slides[0]?.offsetHeight || 1;
+    const currentIdx = Math.round(scrollTop / slideHeight);
+    const total = slides.length;
+    if (navPrev) navPrev.disabled = currentIdx <= 0;
+    if (navNext) navNext.disabled = currentIdx >= total - 1;
+  }
+
+  function goToSlide(idx) {
+    const slide = slides[idx];
+    if (slide) slide.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  if (navPrev) navPrev.addEventListener('click', () => {
+    const scrollTop = container.scrollTop;
+    const slideHeight = slides[0]?.offsetHeight || 1;
+    const currentIdx = Math.round(scrollTop / slideHeight);
+    goToSlide(Math.max(0, currentIdx - 1));
+  });
+
+  if (navNext) navNext.addEventListener('click', () => {
+    const scrollTop = container.scrollTop;
+    const slideHeight = slides[0]?.offsetHeight || 1;
+    const currentIdx = Math.round(scrollTop / slideHeight);
+    goToSlide(Math.min(slides.length - 1, currentIdx + 1));
+  });
+
+  container.addEventListener('scroll', updateNavButtons);
+  updateNavButtons();
+</script>
+
+</body>
+</html>
