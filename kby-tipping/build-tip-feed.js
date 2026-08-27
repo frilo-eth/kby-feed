@@ -32,6 +32,16 @@ const out = `(function(){
       this.setActive(btn, ctx || _activeCtx);
       if (typeof wireTipButton === 'function') wireTipButton(btn);
     },
+    /** Resume a pending tip without re-pressing the tip button (auth / top-up return). */
+    openQuickTip(btn, ctx) {
+      if (!btn) return;
+      this.wire(btn, ctx);
+      if (typeof window.KbyTipping.hide === 'function') window.KbyTipping.hide();
+      this.syncBalances();
+      if (typeof window.KbyTipping._openQuickTip === 'function') {
+        window.KbyTipping._openQuickTip();
+      }
+    },
     simulateTap(btn, ctx) {
       if (!btn) return;
       this.wire(btn, ctx);

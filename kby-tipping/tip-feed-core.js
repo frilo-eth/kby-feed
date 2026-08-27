@@ -1618,3 +1618,11 @@
     hideMinimodal();
     minimodalClosedAt = 0;
   };
+  window.KbyTipping._openQuickTip = function() {
+    if (liveTipBalanceCapUsd() <= 0) {
+      showNoBalanceTooltipOnly();
+      triggerNoBalanceHaptic();
+      return;
+    }
+    showMinimodalQuickTap();
+  };

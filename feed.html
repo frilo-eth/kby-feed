@@ -13345,7 +13345,11 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   function makeFeedTipCtx(tipBtn, extras){
     const ctx = Object.assign({ tipBtn }, extras || {});
-    ctx.resumeTap = ()=> window.KbyTipping?.simulateTap(tipBtn, ctx);
+    // Resume after auth/top-up opens the tip UI in place — never re-press the tip button.
+    ctx.resumeTap = ()=>{
+      if(window.KbyTipping?.openQuickTip) window.KbyTipping.openQuickTip(tipBtn, ctx);
+      else window.KbyTipping?.simulateTap(tipBtn, ctx);
+    };
     ctx.resumeHold = (ms)=> window.KbyTipping?.simulateHold(tipBtn, ctx, ms);
     return ctx;
   }
@@ -18109,6 +18113,22 @@ html.dark .qhc-id{color:#6BA3FF;}
       onBeforeInteract(ctx){
         if(isAuthed()) return true;
         requireAuth(()=>{
+          // Happy tip chain: skip a second tip press — go top-up then resume the tip UI.
+          if(session.happyChain?.kind === 'tip'){
+            const need = spendShortfall(Math.max(0.01, TIP_USD));
+            if(need > 0){
+              window.KbyTipping?.hide?.();
+              const send = document.getElementById('minimodalSend');
+              if(send) delete send.dataset.demoGuided;
+              openTopUp(need, ()=>{
+                window.KbyTipping?.hide?.();
+                window.KbyTipping?.syncBalances?.();
+                if(send) delete send.dataset.demoGuided;
+                setTimeout(()=>{ if(ctx?.resumeTap) ctx.resumeTap(); }, 120);
+              });
+              return;
+            }
+          }
           if(ctx?.resumeTap) ctx.resumeTap();
           else if(ctx?.resumeHold) ctx.resumeHold();
         });
@@ -18129,7 +18149,11 @@ html.dark .qhc-id{color:#6BA3FF;}
         requireAuth(()=>{
           const amt = Math.max(0.01, TIP_USD);
           const need = spendShortfall(amt);
-          if(need <= 0) return;
+          if(need <= 0){
+            // Funded while tooltip was up — resume tip UI, don't re-press tip.
+            setTimeout(()=>{ if(ctx?.resumeTap) ctx.resumeTap(); }, 80);
+            return;
+          }
           setTimeout(()=>{
             if(typeof haptic === 'function') haptic('warning');
             showToast('Top up to continue.');
@@ -18141,15 +18165,11 @@ html.dark .qhc-id{color:#6BA3FF;}
               window.KbyTipping?.hide?.();
               window.KbyTipping?.syncBalances?.();
               if(send) delete send.dataset.demoGuided;
-              const resume = ()=>{
+              // Resume tip sheet in place; happy-path guide only clicks Send.
+              setTimeout(()=>{
                 if(ctx?.resumeTap) ctx.resumeTap();
                 else if(ctx?.resumeHold) ctx.resumeHold();
-              };
-              if(session.happyChain?.kind === 'tip' && ctx?.tipBtn && typeof demoGuideTo === 'function'){
-                demoGuideTo(ctx.tipBtn, { hide: false }).then(()=> setTimeout(resume, 40));
-              } else {
-                setTimeout(resume, 120);
-              }
+              }, 120);
             });
           }, 960);
         });
