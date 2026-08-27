@@ -6928,7 +6928,8 @@ html.dark .qhc-id{color:#6BA3FF;}
         session.wallets = [mintWallet('emb', { bal: 0, active: true })];
         seedAccountHoldings();
       } else {
-        const funded = (demoHas('sig') && !demoError()) ? 250 : null;
+        const funded = session.demoZeroBal ? 0
+          : ((demoHas('sig') && !demoError()) ? 250 : null);
         session.wallets = [fillEoaBag(mintWallet(key || 'mm', { active: true }), funded)];
       }
       afterAuth(pending, need);
@@ -7032,6 +7033,11 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     if(state === 'amt' || state === 'empty') return;
     openSwapConfirm(side);
+    if(session.happyChain?.kind === 'buy' && session.happyChain.wallet !== 'eoa'){
+      setTimeout(()=>{
+        if(session.swap && session.swap.step === 'confirm') confirmSwap();
+      }, 700);
+    }
   }
 
   function requestSignature(label, then, opts){
@@ -10098,15 +10104,107 @@ html.dark .qhc-id{color:#6BA3FF;}
       session.flow.amt = cashAmt;
     }
     const host = flowHost();
-    if(host === 'auth'){ setAuthPanel('funds'); return; }
-    if(host === 'wallet'){ session.walletView = 'flow'; renderWalletBody(); return; }
-    const title = document.getElementById('fundsTitle');
-    if(title) title.textContent = flowTitle();
-    paintFlowInto(document.getElementById('fundsBody'));
-    overlayOpen(fundsOverlay);
+    if(host === 'auth'){ setAuthPanel('funds'); }
+    else if(host === 'wallet'){ session.walletView = 'flow'; renderWalletBody(); }
+    else {
+      const title = document.getElementById('fundsTitle');
+      if(title) title.textContent = flowTitle();
+      paintFlowInto(document.getElementById('fundsBody'));
+      overlayOpen(fundsOverlay);
+    }
+    if(session.happyChain) scheduleHappyChainDeposit();
   }
   function openTopUp(need, then){ openDeposit(need, then); }
   function wantsDepositDemo(){ return demoHas('deposit'); }
+  function armHappyChain(opts){
+    session.happyChain = {
+      kind: opts.kind || 'buy',
+      wallet: opts.wallet || 'social',
+    };
+    session.suppressFundsCelebrate = true;
+    session.demoZeroBal = true;
+  }
+  function clearHappyChain(){
+    session.happyChain = null;
+    session.suppressFundsCelebrate = false;
+    session.demoZeroBal = false;
+  }
+  function scheduleHappyChainDeposit(){
+    clearTimeout(session._happyDepTimer);
+    session._happyDepTimer = setTimeout(()=>{
+      if(!session.happyChain || !session.flow || session.flow.kind !== 'deposit') return;
+      if(session.flow.step === 'cashWait' || session.flow.step === 'confirm') return;
+      session.flow.amt = session.flow.amt || Math.max(session.fundsNeed || 25, CASH_MIN || 10);
+      session.flow.method = 'MoonPay';
+      session.flow.payMethod = session.flow.payMethod || 'apple';
+      session.flow.creditLabel = 'MoonPay';
+      if(typeof startMoonPayWait === 'function') startMoonPayWait();
+    }, 720);
+  }
+  function resetDemoGuest(){
+    session.auth = null;
+    session.authKey = null;
+    session.anonName = null;
+    session.displayName = null;
+    session.personaIndex = null;
+    session.email = null;
+    session.wallets = [];
+    session.holdings = [];
+    session.pending = null;
+    session.pendingNeed = 0;
+    session.pendingFunds = null;
+    session.pendingSpend = null;
+    session.flow = null;
+    paintAuthChrome();
+  }
+  function demoAutoLogin(wallet){
+    if(wallet === 'eoa') completeLogin('eoa', 'mm');
+    else completeLogin('social', 'Google');
+  }
+  function demoChainBuy(wallet){
+    const eoa = wallet === 'eoa';
+    clearHappyChain();
+    resetDemoGuest();
+    armHappyChain({ kind: 'buy', wallet: eoa ? 'eoa' : 'social' });
+    setTimeout(()=>{
+      openDrawer(posts[0]);
+      setTimeout(()=>{
+        const input = document.getElementById('tradePayInput');
+        if(input) input.value = '25';
+        paintTradeCta();
+        const cta = document.getElementById('tradeBuyBtn');
+        if(cta) cta.click();
+        else {
+          session.pending = ()=> resumeTrade('buy', false);
+          session.pendingNeed = 25;
+          openLogin();
+        }
+        setTimeout(()=> demoAutoLogin(eoa ? 'eoa' : 'social'), 900);
+      }, 480);
+    }, 360);
+  }
+  function demoChainTip(wallet){
+    const eoa = wallet === 'eoa';
+    clearHappyChain();
+    resetDemoGuest();
+    armHappyChain({ kind: 'tip', wallet: eoa ? 'eoa' : 'social' });
+    setTimeout(()=>{
+      const tipIdx = typeof firstTipablePostIndex === 'function' ? firstTipablePostIndex() : posts.findIndex(p => p && p.role !== 'op');
+      if(tipIdx < 0) return;
+      const run = ()=>{
+        const item = itemEls()[tipIdx];
+        const tipBtn = item?.querySelector('.react-btn.tip');
+        if(!tipBtn) return;
+        const tipCountEl = item.querySelector('.tip-count');
+        const ctx = makeFeedTipCtx(tipBtn, { kind: 'post', commentId: 'post-' + tipIdx, tipCountEl, item });
+        wireFeedTipBtn(tipBtn, ctx);
+        if(window.KbyTipping?.simulateTap) window.KbyTipping.simulateTap(tipBtn, ctx);
+        setTimeout(()=>{ if(!isAuthed()) demoAutoLogin(eoa ? 'eoa' : 'social'); }, 900);
+      };
+      if(lastActiveIdx !== tipIdx){ springTo(tipIdx, 0.95); setTimeout(run, 720); }
+      else run();
+    }, 420);
+  }
   function seedDemoEoa(bal){
     session.auth = 'eoa';
     session.authKey = 'mm';
@@ -10184,6 +10282,22 @@ html.dark .qhc-id{color:#6BA3FF;}
       seedDemoSocial(25);
       paintAuthChrome();
       setTimeout(()=> demoEntryTip('hold'), 520);
+      return;
+    }
+    if(flow === 'buy-chain'){
+      demoChainBuy('social');
+      return;
+    }
+    if(flow === 'buy-chain-eoa'){
+      demoChainBuy('eoa');
+      return;
+    }
+    if(flow === 'tip-chain'){
+      demoChainTip('social');
+      return;
+    }
+    if(flow === 'tip-chain-eoa'){
+      demoChainTip('eoa');
       return;
     }
     if(flow === 'topup' || flow === 'low'){
@@ -10404,8 +10518,13 @@ html.dark .qhc-id{color:#6BA3FF;}
     logActivity('deposit', label ? `Top up · ${label}` : 'Top up', amt);
     finishFundsSheet();
     paintAuthChrome();
-    if(typeof celebrateFunds === 'function') celebrateFunds();
-    else if(typeof haptic === 'function') celebrateSuccess('funds');
+    const quiet = (opts && opts.silentCelebrate) || session.suppressFundsCelebrate;
+    if(!quiet){
+      if(typeof celebrateFunds === 'function') celebrateFunds();
+      else if(typeof haptic === 'function') celebrateSuccess('funds');
+    } else if(typeof haptic === 'function'){
+      haptic('funds');
+    }
     if(!(opts && opts.silent)) showToast(`Added ${usdLabel(amt)}${label ? ' via '+label : ''}.`);
     const next = session.pendingFunds;
     session.pendingFunds = null;
@@ -10662,6 +10781,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       recordBuy(s.amt);
       celebrateBuySuccess();
       showToast(`Bought ${s.tokenShort} ${s.ticker}.`);
+      if(session.happyChain?.kind === 'buy') clearHappyChain();
     }
     s.tx = mockSwapTx();
     s.step = 'done';
@@ -11583,11 +11703,13 @@ html.dark .qhc-id{color:#6BA3FF;}
   function celebrateTip(btn){
     const first = !hasTippedBefore();
     if(first) markFirstTip();
+    const chainEnd = session.happyChain?.kind === 'tip';
     celebrateSuccess(first ? 'firstTip' : 'tip', {
-      confetti: first,
+      confetti: first || chainEnd,
       origin: confettiOriginFromEl(btn, 0.35),
       confettiScale: 'tip',
     });
+    if(chainEnd) clearHappyChain();
   }
   const feedWrap = document.querySelector('.feed-wrap');
   if(feedWrap) feedWrap.addEventListener('pointerdown', unlockAudio, { capture: true, passive: true });
@@ -17856,6 +17978,9 @@ html.dark .qhc-id{color:#6BA3FF;}
             openTopUp(need, ()=>{
               if(ctx?.resumeTap) ctx.resumeTap();
               else if(ctx?.resumeHold) ctx.resumeHold();
+              if(session.happyChain?.kind === 'tip'){
+                setTimeout(()=> document.getElementById('minimodalSend')?.click(), 900);
+              }
             });
           }, 960);
         });

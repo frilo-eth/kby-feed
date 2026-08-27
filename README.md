@@ -1503,6 +1503,10 @@ Click-through for design reviews: [https://kby-feed.vercel.app/flows](https://kb
 | Land and browse | [`/feed`](https://kby-feed.vercel.app/feed) |
 | First action (login + pending tip) | [`/feed?flow=first`](https://kby-feed.vercel.app/feed?flow=first) |
 | Tip with $0 → Top up → auto-resume | [`/feed?flow=tip-topup`](https://kby-feed.vercel.app/feed?flow=tip-topup) (lands on first **entry** yap, not OP) |
+| **Happy path · Buy** (embedded) | [`/feed?flow=buy-chain`](https://kby-feed.vercel.app/feed?flow=buy-chain) — land → buy → auth → top up → buy · **one confetti** at buy |
+| **Happy path · Buy** (EOA) | [`/feed?flow=buy-chain-eoa`](https://kby-feed.vercel.app/feed?flow=buy-chain-eoa) — same + Connect / Confirm |
+| **Happy path · Tip** (embedded) | [`/feed?flow=tip-chain`](https://kby-feed.vercel.app/feed?flow=tip-chain) — land → tip → auth → top up → tip · **one confetti** at tip |
+| **Happy path · Tip** (EOA) | [`/feed?flow=tip-chain-eoa`](https://kby-feed.vercel.app/feed?flow=tip-chain-eoa) — same + Connect / Confirm |
 | Login · More options / cancelled | [`?flow=more`](https://kby-feed.vercel.app/feed?flow=more) · [`?flow=login-error`](https://kby-feed.vercel.app/feed?flow=login-error) |
 | Wallet catalog | [`/feed?flow=wallets`](https://kby-feed.vercel.app/feed?flow=wallets) (pick MetaMask → Connect) |
 | Top up to continue | [`/feed?flow=topup`](https://kby-feed.vercel.app/feed?flow=topup) |
