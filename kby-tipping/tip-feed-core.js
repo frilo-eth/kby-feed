@@ -1614,3 +1614,7 @@
     jarBalanceUsd = Math.round(Math.max(0, jarUsd || 0) * 100) / 100;
     jarTokenBalanceK = jarBalanceUsd;
   };
+  window.KbyTipping.hide = function() {
+    hideMinimodal();
+    minimodalClosedAt = 0;
+  };

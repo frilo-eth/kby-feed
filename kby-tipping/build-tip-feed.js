@@ -35,6 +35,9 @@ const out = `(function(){
     simulateTap(btn, ctx) {
       if (!btn) return;
       this.wire(btn, ctx);
+      // Core sets .hide to dismiss tip UI + clear reopen cooldown. Required so
+      // resume after top-up does not only dismiss the stuck "broke" tooltip.
+      if (typeof window.KbyTipping.hide === 'function') window.KbyTipping.hide();
       this.syncBalances();
       btn.classList.add('demo-tip-focus');
       setTimeout(() => btn.classList.remove('demo-tip-focus'), 1400);
@@ -42,15 +45,18 @@ const out = `(function(){
       const x = r.left + r.width / 2;
       const y = r.top + r.height / 2;
       const opts = { bubbles: true, cancelable: true, clientX: x, clientY: y, pointerId: 42, pointerType: 'mouse', button: 0, buttons: 1 };
-      btn.dispatchEvent(new PointerEvent('pointerdown', opts));
       setTimeout(() => {
-        btn.dispatchEvent(new PointerEvent('pointerup', Object.assign({}, opts, { buttons: 0 })));
-      }, 140);
+        btn.dispatchEvent(new PointerEvent('pointerdown', opts));
+        setTimeout(() => {
+          btn.dispatchEvent(new PointerEvent('pointerup', Object.assign({}, opts, { buttons: 0 })));
+        }, 140);
+      }, 80);
     },
     simulateHold(btn, ctx, holdMs) {
       if (!btn) return;
       holdMs = holdMs || 720;
       this.wire(btn, ctx);
+      if (typeof window.KbyTipping.hide === 'function') window.KbyTipping.hide();
       this.syncBalances();
       btn.classList.add('demo-tip-focus');
       setTimeout(() => btn.classList.remove('demo-tip-focus'), holdMs + 400);
@@ -58,10 +64,12 @@ const out = `(function(){
       const x = r.left + r.width / 2;
       const y = r.top + r.height / 2;
       const opts = { bubbles: true, cancelable: true, clientX: x, clientY: y, pointerId: 43, pointerType: 'mouse', button: 0, buttons: 1 };
-      btn.dispatchEvent(new PointerEvent('pointerdown', opts));
       setTimeout(() => {
-        btn.dispatchEvent(new PointerEvent('pointerup', Object.assign({}, opts, { buttons: 0 })));
-      }, holdMs);
+        btn.dispatchEvent(new PointerEvent('pointerdown', opts));
+        setTimeout(() => {
+          btn.dispatchEvent(new PointerEvent('pointerup', Object.assign({}, opts, { buttons: 0 })));
+        }, holdMs);
+      }, 80);
     },
     _ready() {
       if (typeof _hooks.onReady === 'function') _hooks.onReady();

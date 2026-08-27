@@ -18133,9 +18133,23 @@ html.dark .qhc-id{color:#6BA3FF;}
           setTimeout(()=>{
             if(typeof haptic === 'function') haptic('warning');
             showToast('Top up to continue.');
+            // Dismiss frozen "Hold your horses" tooltip before deposit UI.
+            window.KbyTipping?.hide?.();
+            const send = document.getElementById('minimodalSend');
+            if(send) delete send.dataset.demoGuided;
             openTopUp(need, ()=>{
-              if(ctx?.resumeTap) ctx.resumeTap();
-              else if(ctx?.resumeHold) ctx.resumeHold();
+              window.KbyTipping?.hide?.();
+              window.KbyTipping?.syncBalances?.();
+              if(send) delete send.dataset.demoGuided;
+              const resume = ()=>{
+                if(ctx?.resumeTap) ctx.resumeTap();
+                else if(ctx?.resumeHold) ctx.resumeHold();
+              };
+              if(session.happyChain?.kind === 'tip' && ctx?.tipBtn && typeof demoGuideTo === 'function'){
+                demoGuideTo(ctx.tipBtn, { hide: false }).then(()=> setTimeout(resume, 40));
+              } else {
+                setTimeout(resume, 120);
+              }
             });
           }, 960);
         });
