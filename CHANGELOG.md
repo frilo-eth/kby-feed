@@ -14,6 +14,7 @@
 - Top-up success fires tip-scale confetti via `celebrateFunds()`.
 - `/flows`: **Tip → Top up** demo (`?flow=tip-topup`) — logged-in $0 on first entry yap, tip triggers deposit, checkout resumes tip.
 - `/flows` **Happy paths**: `buy-chain` / `buy-chain-eoa` / `tip-chain` / `tip-chain-eoa` — land → intent → auth → top up → complete. Funds confetti suppressed mid-chain; single celebration at tip/buy end. Guided with a fake cursor + button pulse (GSAP). Floating **Friction** counter tallies guided actions and settles when the path completes.
+- Tips always debit the account cash wallet (feed has no tip jar); balance updates after Send.
 
 ### Docs
 - README [#haptic-sound-map](https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map): full preset → WebHaptics → sound recipe catalog; curated export IDs; recipe-only audio + haptic-only swipe/pull rules.

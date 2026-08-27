@@ -18274,12 +18274,16 @@ html.dark .qhc-id{color:#6BA3FF;}
         if(!ctx?.tipBtn) return;
         if(ctx.kind === 'comment' && ctx.comment?.tipped) return;
         if(ctx.kind !== 'comment' && ctx.tipBtn.classList.contains('active')) return;
-        const walletPart = Math.max(0, meta?.fromWallet || 0);
-        const finish = ()=> commitFeedTip(ctx, amt);
+        const tipAmt = Math.max(0, Math.round((amt || 0) * 100) / 100);
+        if(tipAmt <= 0) return;
+        // Feed has no tip jar — always debit the account wallet for the full tip.
+        const finish = ()=>{
+          commitFeedTip(ctx, tipAmt);
+          window.KbyTipping?.syncBalances?.();
+        };
         requireAuth(()=>{
-          if(walletPart <= 0){ finish(); return; }
-          requireSpend(walletPart, finish, 'Tip ' + usdLabel(amt));
-        }, walletPart);
+          requireSpend(tipAmt, finish, 'Tip ' + usdLabel(tipAmt));
+        }, tipAmt);
       },
       onNoBalance(ctx){
         requireAuth(()=>{
@@ -18311,6 +18315,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         });
       },
     });
+    KbyTipping.syncBalances();
   }
 
   render();

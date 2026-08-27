@@ -244,13 +244,14 @@
     const cap = liveTipBalanceCapUsd();
     const amt = Math.min(Math.round(amount * 100) / 100, cap);
     if (amt <= 0) return;
-    const fromWallet = walletPortionBeforeDeplete(amt);
     const btn = getFlipBtn();
     if (!btn) return;
+    // When a host handles onCommit (feed), cash wallet pays the full tip — no local jar.
+    const hostOwns = typeof window.KbyTipping?.onCommit === 'function';
+    const fromWallet = hostOwns ? amt : walletPortionBeforeDeplete(amt);
     const fromJar = Math.round((amt - fromWallet) * 100) / 100;
     const ctx = window.KbyTipping?.activeCtx?.() || null;
-    if (window.KbyTipping?.onCommit) {
-      if (fromJar > 0) depleteTipBalances(fromJar);
+    if (hostOwns) {
       window.KbyTipping.onCommit(amt, { fromWallet, fromJar }, ctx);
     } else {
       depleteTipBalances(amt);
