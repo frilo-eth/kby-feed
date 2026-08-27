@@ -20,40 +20,42 @@ body{margin:0;font-family:Inter,ui-sans-serif,system-ui,sans-serif;background:va
 .wrap{max-width:760px;margin:0 auto;}
 .brand{display:flex;align-items:center;gap:10px;margin-bottom:20px;font-weight:700;}
 .brand img{width:24px;height:24px;}
-h1{font-size:22px;letter-spacing:-.03em;margin:0 0 8px;}
-h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin:28px 0 8px;}
+h1{font-size:22px;letter-spacing:-.03em;margin:0 0 4px;}
+.lede{font-size:13px;font-weight:500;color:var(--ink-soft);margin:0 0 8px;}
+h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);margin:32px 0 8px;}
 .list{display:flex;flex-direction:column;border-top:1px solid var(--line);}
 .row{
-  display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.4fr) auto;
-  align-items:center;gap:12px 16px;
-  padding:12px 0;border-bottom:1px solid var(--line);
+  display:grid;
+  grid-template-columns:minmax(140px,0.9fr) minmax(0,1.4fr) minmax(200px,auto);
+  align-items:center;gap:10px 20px;
+  padding:11px 0;border-bottom:1px solid var(--line);
 }
-.name{font-size:15px;font-weight:650;letter-spacing:-.02em;}
-.desc{font-size:13px;font-weight:500;color:var(--ink-soft);}
+.name{font-size:14px;font-weight:650;letter-spacing:-.02em;}
+.desc{font-size:13px;font-weight:500;color:var(--ink-soft);line-height:1.35;}
 .url{
   display:flex;align-items:center;justify-content:flex-end;gap:8px;
   min-width:0;
 }
 .path{
-  font-size:12px;font-weight:500;color:var(--ink-faint);
+  font-size:11px;font-weight:500;color:var(--ink-faint);
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
   letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  max-width:220px;text-decoration:none;
+  max-width:200px;text-decoration:none;
 }
 .path:hover{color:var(--orange);}
 .open{
   display:flex;align-items:center;gap:4px;flex-shrink:0;
 }
 .open a{
-  font-size:11px;font-weight:650;letter-spacing:.02em;text-transform:uppercase;
-  color:var(--ink-faint);text-decoration:none;padding:4px 7px;border-radius:6px;
+  font-size:10px;font-weight:650;letter-spacing:.03em;text-transform:uppercase;
+  color:var(--ink-faint);text-decoration:none;padding:3px 6px;border-radius:5px;
   border:1px solid var(--line);
 }
 .open a:hover{color:var(--orange);border-color:color-mix(in srgb, var(--orange) 35%, var(--line));}
 .open a.is-here{color:var(--ink-soft);}
 @media (max-width:640px){
-  .row{grid-template-columns:1fr;gap:4px;}
-  .url{justify-content:flex-start;}
+  .row{grid-template-columns:1fr;gap:4px;padding:12px 0;}
+  .url{justify-content:flex-start;flex-wrap:wrap;}
   .path{max-width:none;}
 }
 </style>
@@ -65,20 +67,14 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
     Kumbaya
   </div>
   <h1>Flows</h1>
+  <p class="lede">Stakeholder click-throughs. Happy paths first.</p>
 
   <h2>Happy paths</h2>
   <div class="list" data-group>
-    <div class="row" data-path="/feed?flow=buy-chain"><span class="name">Happy path · Buy</span><span class="desc">Land → buy $25 · auth · top up · buy · confetti once</span></div>
-    <div class="row" data-path="/feed?flow=buy-chain-eoa"><span class="name">Happy path · Buy (EOA)</span><span class="desc">Same · Connect + Confirm wallet steps</span></div>
-    <div class="row" data-path="/feed?flow=tip-chain"><span class="name">Happy path · Tip</span><span class="desc">Land → tip · auth · top up · tip · confetti once</span></div>
-    <div class="row" data-path="/feed?flow=tip-chain-eoa"><span class="name">Happy path · Tip (EOA)</span><span class="desc">Same · Connect + Confirm wallet steps</span></div>
-  </div>
-
-  <h2>Tipping</h2>
-  <div class="list" data-group>
-    <div class="row" data-path="/feed?flow=tip-tap"><span class="name">Tip · tap</span><span class="desc">Entry yap · minimodal · default unit · auto-send</span></div>
-    <div class="row" data-path="/feed?flow=tip-hold"><span class="name">Tip · hold</span><span class="desc">Entry yap · fast burner ramp · countdown burst</span></div>
-    <div class="row" data-path="/feed?flow=tip-topup"><span class="name">Tip → Top up</span><span class="desc">Entry yap · tap tip · broke tooltip · top up · resume</span></div>
+    <div class="row" data-path="/feed?flow=buy-chain"><span class="name">Buy</span><span class="desc">Land → buy → auth → top up → buy · confetti once</span></div>
+    <div class="row" data-path="/feed?flow=buy-chain-eoa"><span class="name">Buy (EOA)</span><span class="desc">Same · Connect + Confirm wallet steps</span></div>
+    <div class="row" data-path="/feed?flow=tip-chain"><span class="name">Tip</span><span class="desc">Land → tip → auth → top up → tip · confetti once</span></div>
+    <div class="row" data-path="/feed?flow=tip-chain-eoa"><span class="name">Tip (EOA)</span><span class="desc">Same · Connect + Confirm wallet steps</span></div>
   </div>
 
   <h2>Auth</h2>
@@ -88,11 +84,26 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
     <div class="row" data-path="/feed?flow=more"><span class="name">More options</span><span class="desc">Apple, Discord, GitHub, Telegram</span></div>
     <div class="row" data-path="/feed?flow=login-error"><span class="name">Login cancelled</span><span class="desc">Toast on the sheet</span></div>
     <div class="row" data-path="/feed?flow=wallets"><span class="name">Crypto wallets</span><span class="desc">Pick MetaMask → Connect</span></div>
+    <div class="row" data-path="/feed?flow=wallet"><span class="name">Wallet login</span><span class="desc">Connect, then Account</span></div>
     <div class="row" data-path="/feed?sig"><span class="name">Signature</span><span class="desc">Wait + Connect popup</span></div>
     <div class="row" data-path="/feed?flow=sig-reject"><span class="name">Signature rejected</span><span class="desc">Cancel in the wallet</span></div>
   </div>
 
-  <h2>Funds</h2>
+  <h2>Buy</h2>
+  <div class="list" data-group>
+    <div class="row" data-path="/feed?flow=buy"><span class="name">Buy</span><span class="desc">Trade drawer in USD</span></div>
+    <div class="row" data-path="/feed?flow=buy-wallet"><span class="name">Buy (wallet)</span><span class="desc">EOA Confirm popup</span></div>
+    <div class="row" data-path="/feed?flow=launch"><span class="name">Launch token</span><span class="desc">After the form</span></div>
+  </div>
+
+  <h2>Tip</h2>
+  <div class="list" data-group>
+    <div class="row" data-path="/feed?flow=tip-tap"><span class="name">Tip · tap</span><span class="desc">Entry yap · minimodal · default unit · auto-send</span></div>
+    <div class="row" data-path="/feed?flow=tip-hold"><span class="name">Tip · hold</span><span class="desc">Entry yap · fast burner ramp · countdown burst</span></div>
+    <div class="row" data-path="/feed?flow=tip-topup"><span class="name">Tip → Top up</span><span class="desc">Logged in $0 · broke tooltip · top up · resume</span></div>
+  </div>
+
+  <h2>Everything else</h2>
   <div class="list" data-group>
     <div class="row" data-path="/feed?flow=topup"><span class="name">Top up</span><span class="desc">Cash hub · $10 min</span></div>
     <div class="row" data-path="/feed?flow=moonpay"><span class="name">MoonPay wait</span><span class="desc">Checkout in progress</span></div>
@@ -100,17 +111,9 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
     <div class="row" data-path="/feed?flow=abandoned"><span class="name">Checkout declined</span><span class="desc">Abandoned</span></div>
     <div class="row" data-path="/feed?flow=account"><span class="name">Account</span><span class="desc">Social · USD + holdings</span></div>
     <div class="row" data-path="/feed?flow=account-empty"><span class="name">Account empty</span><span class="desc">$0</span></div>
-    <div class="row" data-path="/feed?flow=wallet"><span class="name">Wallet login</span><span class="desc">Connect, then Account</span></div>
     <div class="row" data-path="/feed?flow=manage"><span class="name">Settings</span><span class="desc">Login connections · Passkey · Crypto wallets</span></div>
     <div class="row" data-path="/feed?flow=profile"><span class="name">Profile</span><span class="desc">Account profile tab</span></div>
     <div class="row" data-path="/profile"><span class="name">Profile page</span><span class="desc">/profile stub</span></div>
-    <div class="row" data-path="/feed?flow=buy"><span class="name">Buy</span><span class="desc">Trade drawer in USD</span></div>
-    <div class="row" data-path="/feed?flow=buy-wallet"><span class="name">Buy (wallet)</span><span class="desc">EOA Confirm popup</span></div>
-    <div class="row" data-path="/feed?flow=launch"><span class="name">Launch token</span><span class="desc">After the form</span></div>
-  </div>
-
-  <h2>Others</h2>
-  <div class="list" data-group>
     <div class="row" data-path="/feed?refresh"><span class="name">Pull to refresh</span><span class="desc">Plays once</span></div>
     <div class="row" data-path="/feed?notiff"><span class="name">Notifications</span><span class="desc">Unread badge</span></div>
     <div class="row" data-path="/feed?flow=onboard"><span class="name">Onboarding</span><span class="desc">Hint, then one auto-swipe</span></div>
