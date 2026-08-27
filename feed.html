@@ -1428,6 +1428,52 @@ html.dark .act-bubble.is-rx-open .act-hit-rx{
   .demo-cursor.is-click,.demo-guide-hit{animation:none}
 }
 
+/* Happy-path friction meter (stakeholder) */
+.friction-meter{
+  position:fixed;left:max(12px, env(safe-area-inset-left));bottom:max(12px, env(safe-area-inset-bottom));
+  z-index:20010;min-width:148px;padding:10px 12px 11px;
+  border-radius:14px;border:1px solid var(--line);
+  background:color-mix(in srgb, var(--card) 92%, transparent);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  box-shadow:var(--shadow);pointer-events:none;
+  opacity:0;transform:translateY(8px) scale(.98);
+  transition:opacity .22s ease, transform .22s ease;
+  font-family:inherit;color:var(--ink);
+}
+.friction-meter.is-on{opacity:1;transform:translateY(0) scale(1);}
+.friction-meter.is-done{
+  border-color:color-mix(in srgb, var(--orange) 40%, var(--line));
+}
+.friction-meter-kicker{
+  display:block;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--ink-faint);margin:0 0 4px;
+}
+.friction-meter-row{
+  display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+}
+.friction-meter-count{
+  font-size:28px;font-weight:800;letter-spacing:-.04em;line-height:1;
+  font-variant-numeric:tabular-nums;color:var(--ink);
+}
+.friction-meter-count.is-bump{animation:frictionBump .34s ease-out;}
+.friction-meter-unit{
+  font-size:12px;font-weight:650;color:var(--ink-soft);letter-spacing:-.01em;
+}
+.friction-meter-last{
+  display:block;margin-top:6px;font-size:11px;font-weight:600;color:var(--ink-faint);
+  letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;
+}
+.friction-meter.is-done .friction-meter-last{color:var(--orange);}
+@keyframes frictionBump{
+  0%{transform:scale(1)}
+  35%{transform:scale(1.14)}
+  100%{transform:scale(1)}
+}
+@media (prefers-reduced-motion:reduce){
+  .friction-meter{transition:none}
+  .friction-meter-count.is-bump{animation:none}
+}
+
 .chevron-nav{position:absolute;right:16px;top:50%;transform:translateY(-50%);z-index:20;display:flex;flex-direction:column;gap:14px;pointer-events:none;}
 .chevron-nav .chev-btn{pointer-events:auto;}
 .chev-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);box-shadow:var(--shadow);transition:background .15s, color .15s;}
@@ -10149,17 +10195,104 @@ html.dark .qhc-id{color:#6BA3FF;}
     };
     session.suppressFundsCelebrate = true;
     session.demoZeroBal = true;
+    resetFrictionMeter(session.happyChain.kind);
     armHappyChainGuides();
   }
   function clearHappyChain(){
+    const finishing = !!session.happyChain;
     session.happyChain = null;
     session.suppressFundsCelebrate = false;
     session.demoZeroBal = false;
     clearTimeout(session._happyGuideObs);
     session._happyGuideObs = 0;
     hideDemoCursor();
+    if(finishing) completeFrictionMeter();
   }
   const DEMO_CURSOR_SVG = `<svg viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M6 3.5 21.5 14.2l-6.2 1.4 3.4 7.4-3.1 1.4-3.4-7.3-4.7 4.6V3.5Z" fill="#fff" stroke="#2A241C" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
+  function frictionLabelFromEl(el){
+    if(!el) return 'Action';
+    if(el.id === 'minimodalSend') return 'Send tip';
+    if(el.id === 'tradeBuyBtn') return 'Buy';
+    if(el.id === 'walletExtConfirm'){
+      const t = (el.textContent || '').replace(/\s+/g, ' ').trim();
+      return t || 'Confirm';
+    }
+    if(el.classList?.contains('tip') && el.classList.contains('react-btn')) return 'Tip';
+    if(el.matches?.('[data-flow-continue]')) return 'Top up';
+    if(el.dataset?.swap === 'go') return 'Confirm buy';
+    if(el.dataset?.login) return 'Sign in';
+    if(el.dataset?.wallet) return 'Wallet';
+    if(el.dataset?.authPanel === 'wallets') return 'Wallets';
+    const aria = (el.getAttribute('aria-label') || '').trim();
+    if(aria) return aria.slice(0, 28);
+    const text = (el.textContent || '').replace(/\s+/g, ' ').trim();
+    return (text || 'Action').slice(0, 28);
+  }
+  function ensureFrictionMeter(){
+    let el = document.getElementById('frictionMeter');
+    if(el) return el;
+    el = document.createElement('div');
+    el.id = 'frictionMeter';
+    el.className = 'friction-meter';
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    el.innerHTML = `<span class="friction-meter-kicker">Friction</span>
+      <div class="friction-meter-row">
+        <span class="friction-meter-count" id="frictionMeterCount">0</span>
+        <span class="friction-meter-unit" id="frictionMeterUnit">actions</span>
+      </div>
+      <span class="friction-meter-last" id="frictionMeterLast">Waiting for first action…</span>`;
+    document.body.appendChild(el);
+    return el;
+  }
+  function resetFrictionMeter(kind){
+    session.frictionCount = 0;
+    session.frictionActive = true;
+    session.frictionKind = kind || 'path';
+    const el = ensureFrictionMeter();
+    el.classList.remove('is-done');
+    el.classList.add('is-on');
+    const count = document.getElementById('frictionMeterCount');
+    const unit = document.getElementById('frictionMeterUnit');
+    const last = document.getElementById('frictionMeterLast');
+    if(count){
+      count.textContent = '0';
+      count.classList.remove('is-bump');
+    }
+    if(unit) unit.textContent = 'actions';
+    if(last) last.textContent = kind === 'tip' ? 'Tip happy path' : kind === 'buy' ? 'Buy happy path' : 'Happy path';
+  }
+  function bumpFriction(label){
+    if(!session.frictionActive && !session.happyChain) return;
+    session.frictionCount = (session.frictionCount || 0) + 1;
+    const el = ensureFrictionMeter();
+    el.classList.add('is-on');
+    el.classList.remove('is-done');
+    const count = document.getElementById('frictionMeterCount');
+    const unit = document.getElementById('frictionMeterUnit');
+    const last = document.getElementById('frictionMeterLast');
+    const n = session.frictionCount;
+    if(count){
+      count.textContent = String(n);
+      count.classList.remove('is-bump');
+      void count.offsetWidth;
+      count.classList.add('is-bump');
+    }
+    if(unit) unit.textContent = n === 1 ? 'action' : 'actions';
+    if(last) last.textContent = label || 'Action';
+  }
+  function completeFrictionMeter(){
+    if(!session.frictionActive && !(session.frictionCount > 0)) return;
+    session.frictionActive = false;
+    const el = document.getElementById('frictionMeter');
+    if(!el) return;
+    el.classList.add('is-on', 'is-done');
+    const n = session.frictionCount || 0;
+    const unit = document.getElementById('frictionMeterUnit');
+    const last = document.getElementById('frictionMeterLast');
+    if(unit) unit.textContent = n === 1 ? 'action' : 'actions';
+    if(last) last.textContent = n ? `Done · ${n} total` : 'Done';
+  }
   function ensureDemoCursor(){
     let el = document.getElementById('demoCursor');
     if(el) return el;
@@ -10199,6 +10332,9 @@ html.dark .qhc-id{color:#6BA3FF;}
           cursor.classList.remove('is-click');
           if(opts.click){
             try{ el.click(); }catch(_){}
+          }
+          if(session.happyChain || session.frictionActive){
+            bumpFriction(frictionLabelFromEl(el));
           }
           if(opts.hide) hideDemoCursor();
           else el.classList.remove('demo-guide-hit');
