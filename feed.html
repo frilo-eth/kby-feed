@@ -1398,6 +1398,36 @@ html.dark .act-bubble.is-rx-open .act-hit-rx{
 .tip-float{position:fixed;font-weight:800;font-size:14px;color:var(--orange);pointer-events:none;animation:tipFloat 1s ease-out forwards;white-space:nowrap;z-index:80;}
 @keyframes tipFloat{0%{opacity:0;transform:translateY(0) scale(.7);}15%{opacity:1;transform:translateY(-6px) scale(1.1);}100%{opacity:0;transform:translateY(-52px) scale(1);}}
 
+/* Happy-path demo cursor + target pulse (GSAP moves the cursor) */
+.demo-cursor{
+  position:fixed;left:50%;top:60%;z-index:20000;width:28px;height:28px;
+  margin:-2px 0 0 -2px;pointer-events:none;opacity:0;
+  filter:drop-shadow(0 6px 12px rgba(40,30,20,.28));
+  transition:opacity .18s ease;
+  will-change:left,top,transform;
+}
+.demo-cursor.is-on{opacity:1;}
+.demo-cursor.is-click{animation:demoCursorClick .22s ease-out;}
+.demo-cursor svg{display:block;width:28px;height:28px;}
+@keyframes demoCursorClick{
+  0%{transform:scale(1)}
+  40%{transform:scale(.82)}
+  100%{transform:scale(1)}
+}
+.demo-guide-hit{
+  position:relative;z-index:5;
+  box-shadow:0 0 0 3px rgba(255,102,34,.55), 0 0 0 8px rgba(255,102,34,.16)!important;
+  animation:demoGuidePulse 1s ease-in-out infinite;
+}
+@keyframes demoGuidePulse{
+  0%,100%{box-shadow:0 0 0 3px rgba(255,102,34,.55), 0 0 0 8px rgba(255,102,34,.14)}
+  50%{box-shadow:0 0 0 4px rgba(255,102,34,.7), 0 0 0 12px rgba(255,102,34,.08)}
+}
+@media (prefers-reduced-motion:reduce){
+  .demo-cursor{transition:none}
+  .demo-cursor.is-click,.demo-guide-hit{animation:none}
+}
+
 .chevron-nav{position:absolute;right:16px;top:50%;transform:translateY(-50%);z-index:20;display:flex;flex-direction:column;gap:14px;pointer-events:none;}
 .chevron-nav .chev-btn{pointer-events:auto;}
 .chev-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink-soft);box-shadow:var(--shadow);transition:background .15s, color .15s;}
@@ -7033,11 +7063,6 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     if(state === 'amt' || state === 'empty') return;
     openSwapConfirm(side);
-    if(session.happyChain?.kind === 'buy' && session.happyChain.wallet !== 'eoa'){
-      setTimeout(()=>{
-        if(session.swap && session.swap.step === 'confirm') confirmSwap();
-      }, 700);
-    }
   }
 
   function requestSignature(label, then, opts){
@@ -10123,14 +10148,119 @@ html.dark .qhc-id{color:#6BA3FF;}
     };
     session.suppressFundsCelebrate = true;
     session.demoZeroBal = true;
+    armHappyChainGuides();
   }
   function clearHappyChain(){
     session.happyChain = null;
     session.suppressFundsCelebrate = false;
     session.demoZeroBal = false;
+    clearTimeout(session._happyGuideObs);
+    session._happyGuideObs = 0;
+    hideDemoCursor();
+  }
+  const DEMO_CURSOR_SVG = `<svg viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M6 3.5 21.5 14.2l-6.2 1.4 3.4 7.4-3.1 1.4-3.4-7.3-4.7 4.6V3.5Z" fill="#fff" stroke="#2A241C" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
+  function ensureDemoCursor(){
+    let el = document.getElementById('demoCursor');
+    if(el) return el;
+    el = document.createElement('div');
+    el.id = 'demoCursor';
+    el.className = 'demo-cursor';
+    el.setAttribute('aria-hidden', 'true');
+    el.innerHTML = DEMO_CURSOR_SVG;
+    document.body.appendChild(el);
+    return el;
+  }
+  function hideDemoCursor(){
+    const c = document.getElementById('demoCursor');
+    if(c){
+      c.classList.remove('is-on', 'is-click');
+      if(typeof gsap !== 'undefined') gsap.killTweensOf(c);
+    }
+    document.querySelectorAll('.demo-guide-hit').forEach(n => n.classList.remove('demo-guide-hit'));
+  }
+  function demoGuideTo(target, opts){
+    opts = opts || {};
+    return new Promise((resolve)=>{
+      const el = typeof target === 'string' ? document.querySelector(target) : target;
+      if(!el){ resolve(false); return; }
+      document.querySelectorAll('.demo-guide-hit').forEach(n => { if(n !== el) n.classList.remove('demo-guide-hit'); });
+      el.classList.add('demo-guide-hit');
+      try{ el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' }); }catch(_){}
+      const cursor = ensureDemoCursor();
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const r = el.getBoundingClientRect();
+      const x = r.left + Math.min(r.width * 0.62, r.width - 6);
+      const y = r.top + Math.min(r.height * 0.55, r.height - 4);
+      cursor.classList.add('is-on');
+      const finish = ()=>{
+        cursor.classList.add('is-click');
+        setTimeout(()=>{
+          cursor.classList.remove('is-click');
+          if(opts.click){
+            try{ el.click(); }catch(_){}
+          }
+          if(opts.hide) hideDemoCursor();
+          else el.classList.remove('demo-guide-hit');
+          resolve(true);
+        }, 160);
+      };
+      if(reduce || typeof gsap === 'undefined'){
+        cursor.style.left = x + 'px';
+        cursor.style.top = y + 'px';
+        setTimeout(finish, 220);
+        return;
+      }
+      gsap.to(cursor, {
+        duration: opts.dur || 0.52,
+        ease: 'power2.out',
+        left: x,
+        top: y,
+        onComplete: finish,
+      });
+    });
+  }
+  function armHappyChainGuides(){
+    clearTimeout(session._happyGuideObs);
+    const tick = ()=>{
+      if(!session.happyChain) return;
+      const ext = document.getElementById('walletExt');
+      const yes = document.getElementById('walletExtConfirm');
+      if(ext?.classList.contains('show') && yes && !yes.dataset.demoGuided){
+        yes.dataset.demoGuided = '1';
+        demoGuideTo(yes, { hide: false });
+      }
+      const go = document.querySelector('#swapBody [data-swap="go"]');
+      if(go && session.swap?.step === 'confirm' && !go.dataset.demoGuided){
+        go.dataset.demoGuided = '1';
+        demoGuideTo(go, {
+          click: session.happyChain.wallet !== 'eoa',
+          hide: session.happyChain.wallet !== 'eoa',
+        });
+      }
+      const cont = document.querySelector('[data-flow-continue]:not(.is-blocked)');
+      if(session.flow?.kind === 'deposit' && session.flow.step === 'cash' && cont && !cont.dataset.demoGuided){
+        cont.dataset.demoGuided = '1';
+        demoGuideTo(cont, { click: true, hide: false });
+      }
+      const send = document.getElementById('minimodalSend');
+      const tipOuter = document.getElementById('tipMinimodalOuter');
+      const tipModal = document.getElementById('tipMinimodal');
+      if(
+        session.happyChain.kind === 'tip' &&
+        send && tipOuter?.classList.contains('visible') &&
+        tipModal && !tipModal.classList.contains('tip-minimodal--no-balance') &&
+        !send.dataset.demoGuided
+      ){
+        send.dataset.demoGuided = '1';
+        demoGuideTo(send, { click: true, hide: true });
+      }
+      session._happyGuideObs = setTimeout(tick, 380);
+    };
+    tick();
   }
   function scheduleHappyChainDeposit(){
     clearTimeout(session._happyDepTimer);
+    // Continue CTA is guided+clicked by armHappyChainGuides; fallback if paint lags.
     session._happyDepTimer = setTimeout(()=>{
       if(!session.happyChain || !session.flow || session.flow.kind !== 'deposit') return;
       if(session.flow.step === 'cashWait' || session.flow.step === 'confirm') return;
@@ -10138,8 +10268,14 @@ html.dark .qhc-id{color:#6BA3FF;}
       session.flow.method = 'MoonPay';
       session.flow.payMethod = session.flow.payMethod || 'apple';
       session.flow.creditLabel = 'MoonPay';
-      if(typeof startMoonPayWait === 'function') startMoonPayWait();
-    }, 720);
+      const cont = document.querySelector('[data-flow-continue]');
+      if(cont && !cont.dataset.demoGuided){
+        cont.dataset.demoGuided = '1';
+        demoGuideTo(cont, { click: true, hide: false });
+        return;
+      }
+      if(!cont && typeof startMoonPayWait === 'function') startMoonPayWait();
+    }, 900);
   }
   function resetDemoGuest(){
     session.auth = null;
@@ -10157,6 +10293,24 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.flow = null;
     paintAuthChrome();
   }
+  function demoGuideLogin(wallet){
+    if(wallet === 'eoa'){
+      const openWallets = document.querySelector('[data-auth-panel="wallets"]');
+      if(openWallets){
+        demoGuideTo(openWallets, { click: true, hide: false }).then(()=>{
+          setTimeout(()=>{
+            const mm = document.querySelector('#authPanelWallets [data-wallet="mm"]') || document.querySelector('[data-wallet="mm"]');
+            if(mm) demoGuideTo(mm, { click: true, hide: false });
+            else demoAutoLogin('eoa');
+          }, 420);
+        });
+      } else demoAutoLogin('eoa');
+      return;
+    }
+    const google = document.querySelector('[data-login="social"][data-provider="Google"]');
+    if(google) demoGuideTo(google, { click: true, hide: false });
+    else demoAutoLogin('social');
+  }
   function demoAutoLogin(wallet){
     if(wallet === 'eoa') completeLogin('eoa', 'mm');
     else completeLogin('social', 'Google');
@@ -10173,13 +10327,16 @@ html.dark .qhc-id{color:#6BA3FF;}
         if(input) input.value = '25';
         paintTradeCta();
         const cta = document.getElementById('tradeBuyBtn');
-        if(cta) cta.click();
-        else {
+        if(cta){
+          demoGuideTo(cta, { click: true, hide: false }).then(()=>{
+            setTimeout(()=> demoGuideLogin(eoa ? 'eoa' : 'social'), 700);
+          });
+        } else {
           session.pending = ()=> resumeTrade('buy', false);
           session.pendingNeed = 25;
           openLogin();
+          setTimeout(()=> demoGuideLogin(eoa ? 'eoa' : 'social'), 700);
         }
-        setTimeout(()=> demoAutoLogin(eoa ? 'eoa' : 'social'), 900);
       }, 480);
     }, 360);
   }
@@ -10198,8 +10355,10 @@ html.dark .qhc-id{color:#6BA3FF;}
         const tipCountEl = item.querySelector('.tip-count');
         const ctx = makeFeedTipCtx(tipBtn, { kind: 'post', commentId: 'post-' + tipIdx, tipCountEl, item });
         wireFeedTipBtn(tipBtn, ctx);
-        if(window.KbyTipping?.simulateTap) window.KbyTipping.simulateTap(tipBtn, ctx);
-        setTimeout(()=>{ if(!isAuthed()) demoAutoLogin(eoa ? 'eoa' : 'social'); }, 900);
+        demoGuideTo(tipBtn, { hide: false }).then(()=>{
+          if(window.KbyTipping?.simulateTap) window.KbyTipping.simulateTap(tipBtn, ctx);
+          setTimeout(()=>{ if(!isAuthed()) demoGuideLogin(eoa ? 'eoa' : 'social'); }, 700);
+        });
       };
       if(lastActiveIdx !== tipIdx){ springTo(tipIdx, 0.95); setTimeout(run, 720); }
       else run();
@@ -17978,9 +18137,6 @@ html.dark .qhc-id{color:#6BA3FF;}
             openTopUp(need, ()=>{
               if(ctx?.resumeTap) ctx.resumeTap();
               else if(ctx?.resumeHold) ctx.resumeHold();
-              if(session.happyChain?.kind === 'tip'){
-                setTimeout(()=> document.getElementById('minimodalSend')?.click(), 900);
-              }
             });
           }, 960);
         });
