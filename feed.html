@@ -6802,6 +6802,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     session._extReject = opts && opts.onReject;
     session._extKind = (opts && opts.intent) || 'spend';
     session._extLast = opts;
+    if(yes) delete yes.dataset.demoGuided;
     el.hidden = false;
     el.setAttribute('aria-hidden', 'false');
     requestAnimationFrame(()=> el.classList.add('show'));
@@ -10225,17 +10226,15 @@ html.dark .qhc-id{color:#6BA3FF;}
       if(!session.happyChain) return;
       const ext = document.getElementById('walletExt');
       const yes = document.getElementById('walletExtConfirm');
-      if(ext?.classList.contains('show') && yes && !yes.dataset.demoGuided){
+      if(ext && !ext.hidden && yes && !yes.dataset.demoGuided){
         yes.dataset.demoGuided = '1';
-        demoGuideTo(yes, { hide: false });
+        // Slight delay so the fake extension paint/show finishes before we click.
+        setTimeout(()=> demoGuideTo(yes, { click: true, hide: false }), 120);
       }
       const go = document.querySelector('#swapBody [data-swap="go"]');
       if(go && session.swap?.step === 'confirm' && !go.dataset.demoGuided){
         go.dataset.demoGuided = '1';
-        demoGuideTo(go, {
-          click: session.happyChain.wallet !== 'eoa',
-          hide: session.happyChain.wallet !== 'eoa',
-        });
+        demoGuideTo(go, { click: true, hide: false });
       }
       const cont = document.querySelector('[data-flow-continue]:not(.is-blocked)');
       if(session.flow?.kind === 'deposit' && session.flow.step === 'cash' && cont && !cont.dataset.demoGuided){
