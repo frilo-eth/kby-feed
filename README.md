@@ -14,6 +14,7 @@ Porting / review: open the heading, not the whole README. Production: [https://k
 |-------|--------|
 | [`$SAUCE` Dare](#sauce-token) — OP first, then entries | [README.md#sauce-token](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sauce-token) |
 | [Token vs yap](#token-vs-yap) (tip, menu, token art) | [README.md#token-vs-yap](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-vs-yap) |
+| [Tipping](#tipping) — bought token, Buy to tip, orange until bag empty | [README.md#tipping](https://github.com/frilo-eth/kby-feed/blob/main/README.md#tipping) |
 | [Yap thread](#yap-thread) (entries wire into OP comments) | [README.md#yap-thread](https://github.com/frilo-eth/kby-feed/blob/main/README.md#yap-thread) |
 | [Morphing pill](#dare-role-badge) (Dare/Meme → OP / Entry / Content) | [README.md#dare-role-badge](https://github.com/frilo-eth/kby-feed/blob/main/README.md#dare-role-badge) · [#morphing-pill](https://github.com/frilo-eth/kby-feed/blob/main/README.md#morphing-pill) |
 | [Info tip](#info-hover-tip) (Image vs Video copy) | [README.md#info-hover-tip](https://github.com/frilo-eth/kby-feed/blob/main/README.md#info-hover-tip) |
@@ -272,7 +273,7 @@ Non-token `.avatar-plus:hover .plus-badge` still uses the soft pop (`scale(1.12)
 | Click pulse (icon) | `@keyframes reactIconPop` | same — opacity dip |
 | Tip float `+$1.00` | `@keyframes tipFloat` | `1s ease-out` — rise `−52px`, fade |
 | Active fill | tip `orange` / like `green` / dislike `red` | bg/color `.22s`, glow shadow |
-| Tip lock | once tipped, no hover brighten | cursor `default` |
+| Tip active | stays orange after the first tip; more tips until the bag is empty | bg/color `.22s`, glow shadow |
 
 ---
 
@@ -304,6 +305,25 @@ Floating IG-style avatars for ambient / live tip · comment · like · dislike. 
   86%,100%{ transform: translateX(var(--marquee-x, 0px)); }
 }
 ```
+
+---
+
+<a id="tipping"></a>
+
+### 2c. Tipping
+
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#tipping](https://github.com/frilo-eth/kby-feed/blob/main/README.md#tipping)
+
+Tips spend a **bought** position in that creator token. Seeded demo bags do not count. No holding → **Buy to tip** (top up first when cash is short). Keep portion (off by default) splits the buy: tip some, keep some.
+
+| Rule | Behavior |
+|------|----------|
+| First tip | Button goes orange (`.react-btn.tip.active`) |
+| More tips | Same post, same orange. Each add bumps the `$` total until the bag is empty |
+| Empty after a tip | Stays orange. No “Hold your horses” tooltip. Cash still opens Buy to tip |
+| OP | No tip control — see [token vs yap](#token-vs-yap) |
+
+Happy-path tip (`?flow=tip-chain`) is land → tip → auth → top up → **Buy to tip** → tip. Fake cursor + friction counter run until the path ends, then both hide so you can take over. See [stakeholder flows](#stakeholder-flows).
 
 ---
 
@@ -1264,7 +1284,7 @@ Gate: `width > 860` and `(hover:hover) and (pointer:fine)` · mouse `pointerente
 
 | Surface | Original Post | Entry / Content |
 |---------|---------------|-----------------|
-| Rail tip | **hidden** — you cannot tip an OP | `$` tip + `usdLabel` total (immutable +$1.00) |
+| Rail tip | **hidden** — you cannot tip an OP | `$` tip + `usdLabel` total (orange after first; add until bag empty) |
 | Rail like / dislike | **hidden** — same as tip (`canVote = canTip`) | like ↔ dislike exclusive |
 | `…` menu | **View token** (origin icon) → [token page](#token-page) | **View in thread** (list icon) → parent token comments |
 | Token mini + plus rail + drawer av | Token art = this media | Token art from the parent OP (`tokenArtOf`) — **not** the yap frame |
@@ -1496,7 +1516,7 @@ Do not invent rounded substitutes. If a mark is missing from Central (or the pro
 
 **Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#stakeholder-flows](https://github.com/frilo-eth/kby-feed/blob/main/README.md#stakeholder-flows)
 
-Click-through for design reviews: [https://kby-feed.vercel.app/flows](https://kby-feed.vercel.app/flows) · local [http://localhost:3000/flows](http://localhost:3000/flows). Auth, Funds, Others. Each row shows the shortened path; **Local** / **Here** opens this host, **Prod** opens production. Rewrite: `/flows` → `flows.html` (`vercel.json`, `dev-server.py`).
+Click-through for design reviews: [https://kby-feed.vercel.app/flows](https://kby-feed.vercel.app/flows) · local [http://localhost:3000/flows](http://localhost:3000/flows). Happy paths first, then Auth, Buy, Tip, Everything else. Each row shows the shortened path; **Local** / **Here** opens this host, **Prod** opens production. Rewrite: `/flows` → `flows.html` (`vercel.json`, `dev-server.py`). Happy paths show a floating **Friction** counter, then hide it when the path ends.
 
 | Flow | URL |
 |------|-----|
@@ -1505,8 +1525,8 @@ Click-through for design reviews: [https://kby-feed.vercel.app/flows](https://kb
 | Tip with $0 → Top up → auto-resume | [`/feed?flow=tip-topup`](https://kby-feed.vercel.app/feed?flow=tip-topup) (lands on first **entry** yap, not OP) |
 | **Happy path · Buy** (embedded) | [`/feed?flow=buy-chain`](https://kby-feed.vercel.app/feed?flow=buy-chain) — land → buy → auth → top up → buy · **one confetti** at buy |
 | **Happy path · Buy** (EOA) | [`/feed?flow=buy-chain-eoa`](https://kby-feed.vercel.app/feed?flow=buy-chain-eoa) — same + Connect / Confirm |
-| **Happy path · Tip** (embedded) | [`/feed?flow=tip-chain`](https://kby-feed.vercel.app/feed?flow=tip-chain) — land → tip → auth → top up → tip · **one confetti** at tip |
-| **Happy path · Tip** (EOA) | [`/feed?flow=tip-chain-eoa`](https://kby-feed.vercel.app/feed?flow=tip-chain-eoa) — same + Connect / Confirm |
+| **Happy path · Tip** (embedded) | [`/feed?flow=tip-chain`](https://kby-feed.vercel.app/feed?flow=tip-chain) — land → tip → auth → top up → **buy to tip** → tip · **one confetti** at tip |
+| **Happy path · Tip** (EOA) | [`/feed?flow=tip-chain-eoa`](https://kby-feed.vercel.app/feed?flow=tip-chain-eoa) — same + Connect / Confirm · buy to tip |
 | Login · More options / cancelled | [`?flow=more`](https://kby-feed.vercel.app/feed?flow=more) · [`?flow=login-error`](https://kby-feed.vercel.app/feed?flow=login-error) |
 | Wallet catalog | [`/feed?flow=wallets`](https://kby-feed.vercel.app/feed?flow=wallets) (pick MetaMask → Connect) |
 | Top up to continue | [`/feed?flow=topup`](https://kby-feed.vercel.app/feed?flow=topup) |
@@ -1622,6 +1642,7 @@ Hub is two jobs. One back chevron + [`morphSheet`](#sheet-morph). No stacked bre
 | `cwBalances` | Loading → empty. Disconnect. **Transfer to account** → watch |
 | `exList` → `exWait` | Exchange list. Waiting: *Complete authorization in the Coinbase tab…* |
 | `confirm` | “Adding funds” → `Added $25.00` (`is-confirming`, close locked) |
+| `buyToTip` | Tip-intent only: amount + USDm / ETH / WETH + Keep portion. Morphs from top-up success when the user does not hold the token |
 
 **Cash** is a MoonPay stand-in. Currency pill (USD / EUR / GBP) matches the trade chip. Warning sits **below Continue**: title *A Solana wallet may appear*; body *Your purchase lands in your USD balance* (ETH/USDm on MegaETH under the hood). Accordion chevron expands the body on tap/click (same at every breakpoint — no hover-open). Neutral (`--coffee`), not red. Opening the method list exits the note then [`morphSheet`](#sheet-morph).
 
@@ -1730,7 +1751,7 @@ Same chrome as comments (desktop 360 / mobile sheet). Buy / Sell tabs. Amount is
 
 **Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-cta)
 
-`tradeCtaState()` → `{ state, enabled }` where `state` is `'auth'` \| `'amt'` \| `'empty'` \| `'deposit'` \| `'go'`. `'deposit'` is **buy only** — sell never prompts Top up. Fees come out of leftover cash on buy, or out of sale proceeds on sell. Login resumes the drawer on the confirm sheet. Top up prefills the USD shortfall and, when MoonPay clears, completes the buy (`resumeTrade(side, true)`). Tips still auto-resume via `requireSpend` pending.
+`tradeCtaState()` → `{ state, enabled }` where `state` is `'auth'` \| `'amt'` \| `'empty'` \| `'deposit'` \| `'go'`. `'deposit'` is **buy only** — sell never prompts Top up. Fees come out of leftover cash on buy, or out of sale proceeds on sell. Login resumes the drawer on the confirm sheet. Top up prefills the USD shortfall and, when MoonPay clears, completes the buy (`resumeTrade(side, true)`). A tip with no bought position opens **Buy to tip** (or Top up first) — see [Tipping](#tipping).
 
 | State | Label | Paint | Click |
 |-------|-------|-------|-------|
@@ -1740,7 +1761,7 @@ Same chrome as comments (desktop 360 / mobile sheet). Buy / Sell tabs. Amount is
 | `'deposit'` | Top up to buy | `.is-short` ink | `openTopUp(shortfall, () => resumeTrade(side, true))` |
 | `'go'` | **Buy** / Sell | green `#3DDC97` / `--red` | confirm sheet / sell |
 
-After deposit, `creditFunds` runs `celebrateFunds()` (rich haptic + tip-scale confetti), then `pendingFunds` if set. Social buys reopen the **Confirm purchase** summary (they must tap Buy). Wallet-login buys open the fake signature popup. Tips auto-resume via `requireSpend` (`?flow=tip-topup` on [`/flows`](https://kby-feed.vercel.app/flows)). A leftover `$0` shortfall does not reopen the hub. Login alone does not.
+After deposit, `creditFunds` runs `celebrateFunds()` (rich haptic + tip-scale confetti), then `pendingFunds` if set. A **pending tip** morphs the sheet into **Buy to tip** instead of resuming the minimodal. Social buys reopen the **Confirm purchase** summary (they must tap Buy). Wallet-login buys open the fake signature popup. A leftover `$0` shortfall does not reopen the hub. Login alone does not.
 
 <a id="slippage"></a>
 

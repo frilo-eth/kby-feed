@@ -1202,10 +1202,6 @@ html.dark .react-btn{
   background:var(--red)!important;color:#fff!important;
   box-shadow:0 6px 18px rgba(229,69,63,.35)!important;
 }
-.react-btn.tip.active{cursor:default;}
-.react-btn.tip.active:hover{filter:none;}
-
-
 /* Fresh comment enter — springier than list stagger */
 .comment-item.comment-enter-fresh{
   opacity:0;transform:translateY(16px) scale(.97);
@@ -9756,12 +9752,12 @@ html.dark .qhc-id{color:#6BA3FF;}
     return !!(post && post.tipped);
   }
   function continueTipOrBuy(ctx, amt){
-    if(alreadyTipped(ctx)) return;
+    const tipAmt = roundUsd(Math.max(0.01, amt || TIP_USD));
+    if(alreadyTipped(ctx) && needsBuyToTip(ctx, tipAmt) && spendShortfall(tipAmt) > 0) return;
     armPendingTip(ctx, amt);
     window.KbyTipping?.hide?.();
     const send = document.getElementById('minimodalSend');
     if(send) delete send.dataset.demoGuided;
-    const tipAmt = roundUsd(Math.max(0.01, amt || session.pendingTip?.tipUsd || TIP_USD));
     if(!needsBuyToTip(ctx, tipAmt)){
       if(ctx?.resumeTap) ctx.resumeTap();
       else if(ctx?.resumeHold) ctx.resumeHold();
@@ -10511,6 +10507,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     };
     session.suppressFundsCelebrate = true;
     session.demoZeroBal = true;
+    session.demoGuideGen = (session.demoGuideGen || 0) + 1;
     resetFrictionMeter(session.happyChain.kind);
     armHappyChainGuides();
   }
@@ -10519,8 +10516,11 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.happyChain = null;
     session.suppressFundsCelebrate = false;
     session.demoZeroBal = false;
+    session.demoGuideGen = (session.demoGuideGen || 0) + 1;
     clearTimeout(session._happyGuideObs);
     session._happyGuideObs = 0;
+    clearTimeout(session._happyDepTimer);
+    session._happyDepTimer = 0;
     hideDemoCursor();
     if(finishing) completeFrictionMeter();
   }
@@ -10563,6 +10563,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     return el;
   }
   function resetFrictionMeter(kind){
+    clearTimeout(session._frictionHide);
+    session._frictionHide = 0;
     session.frictionCount = 0;
     session.frictionActive = true;
     session.frictionKind = kind || 'path';
@@ -10598,8 +10600,16 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(unit) unit.textContent = n === 1 ? 'action' : 'actions';
     if(last) last.textContent = label || 'Action';
   }
+  function hideFrictionMeter(){
+    session.frictionActive = false;
+    const el = document.getElementById('frictionMeter');
+    if(el) el.classList.remove('is-on', 'is-done');
+  }
   function completeFrictionMeter(){
-    if(!session.frictionActive && !(session.frictionCount > 0)) return;
+    if(!session.frictionActive && !(session.frictionCount > 0)){
+      hideFrictionMeter();
+      return;
+    }
     session.frictionActive = false;
     const el = document.getElementById('frictionMeter');
     if(!el) return;
@@ -10609,6 +10619,12 @@ html.dark .qhc-id{color:#6BA3FF;}
     const last = document.getElementById('frictionMeterLast');
     if(unit) unit.textContent = n === 1 ? 'action' : 'actions';
     if(last) last.textContent = n ? `Done · ${n} total` : 'Done';
+    clearTimeout(session._frictionHide);
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    session._frictionHide = setTimeout(()=>{
+      session._frictionHide = 0;
+      hideFrictionMeter();
+    }, reduce ? 0 : 1100);
   }
   function ensureDemoCursor(){
     let el = document.getElementById('demoCursor');
@@ -10634,6 +10650,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     return new Promise((resolve)=>{
       const el = typeof target === 'string' ? document.querySelector(target) : target;
       if(!el){ resolve(false); return; }
+      const gen = session.demoGuideGen || 0;
       document.querySelectorAll('.demo-guide-hit').forEach(n => { if(n !== el) n.classList.remove('demo-guide-hit'); });
       el.classList.add('demo-guide-hit');
       try{ el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' }); }catch(_){}
@@ -10643,10 +10660,21 @@ html.dark .qhc-id{color:#6BA3FF;}
       const x = r.left + Math.min(r.width * 0.62, r.width - 6);
       const y = r.top + Math.min(r.height * 0.55, r.height - 4);
       cursor.classList.add('is-on');
+      const stale = ()=> (session.demoGuideGen || 0) !== gen;
       const finish = ()=>{
+        if(stale()){
+          hideDemoCursor();
+          resolve(false);
+          return;
+        }
         cursor.classList.add('is-click');
         setTimeout(()=>{
           cursor.classList.remove('is-click');
+          if(stale()){
+            hideDemoCursor();
+            resolve(false);
+            return;
+          }
           if(opts.click){
             try{ el.click(); }catch(_){}
           }
@@ -13654,7 +13682,7 @@ html.dark .qhc-id{color:#6BA3FF;}
           }));
         } else {
         tipBtn.addEventListener('click',(e)=>{
-          e.stopPropagation(); if(tipBtn.classList.contains('active')) return;
+          e.stopPropagation();
           requireSpend(TIP_USD, ()=>{
             tipBtn.classList.add('active','pulse'); setTimeout(()=>tipBtn.classList.remove('pulse'),450);
             let val=parseInt(tipBtn.dataset.tips,10)+TIP_USD; tipBtn.dataset.tips=val; tipCountEl.textContent=usdLabel(val);
@@ -13824,7 +13852,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     const tipBtn = ctx.tipBtn;
     if(ctx.kind === 'comment'){
       const c = ctx.comment;
-      if(!c || c.tipped) return;
+      if(!c) return;
       c.tipped = true;
       c.tips = (c.tips || 0) + amt;
       writeCommentReactCounts(c);
@@ -13836,7 +13864,6 @@ html.dark .qhc-id{color:#6BA3FF;}
       logActivity('tip', 'Tip', amt);
       return;
     }
-    if(tipBtn.classList.contains('active')) return;
     const { tipCountEl, item } = ctx;
     const post = tipPostFromCtx(ctx);
     if(post){
@@ -17274,7 +17301,6 @@ html.dark .qhc-id{color:#6BA3FF;}
     const pulse = (el)=>{ if(!el) return; el.classList.add('pulse'); setTimeout(()=>el.classList.remove('pulse'),450); };
 
     if(kind === 'tip'){
-      if(c.tipped) return; // immutable once tipped
       requireSpend(TIP_USD, ()=>{
         c.tipped = true;
         c.tips = (c.tips || 0) + TIP_USD;
@@ -18585,7 +18611,6 @@ html.dark .qhc-id{color:#6BA3FF;}
         return { walletUsd: w?.bal || 0, jarUsd: 0 };
       },
       onBeforeInteract(ctx){
-        if(alreadyTipped(ctx)) return false;
         if(!isAuthed()){
           requireAuth(()=> continueTipOrBuy(ctx));
           return false;
@@ -18598,7 +18623,6 @@ html.dark .qhc-id{color:#6BA3FF;}
       },
       onCommit(amt, meta, ctx){
         if(!ctx?.tipBtn) return;
-        if(alreadyTipped(ctx)) return;
         const tipAmt = Math.max(0, Math.round((amt || 0) * 100) / 100);
         if(tipAmt <= 0) return;
         if(needsBuyToTip(ctx, tipAmt)){

@@ -269,7 +269,7 @@
 | **First visit → Buy** | Feed → tap Buy → Sign in to buy → provider → wait → logged in → trade drawer (gated removed) → enter amount → Top up to buy → MoonPay → funded → confirm sheet → done |
 | **Social login** | Sheet → email or social icon → wait → complete → auto-close overlay |
 | **Wallet login** | Sheet → "Crypto wallets" → pick wallet → extension popup (Connect → Sign) → complete |
-| **Tip** | Tap tip → `requireAuth` if needed → `requireSpend` if short → amount picker → confirm |
+| **Tip** | Tap tip → auth if needed → Buy to tip if no bought token (top up if cash is short) → otherwise spend the holding. Button stays orange; keep tipping until the bag is empty |
 | **Buy (social)** | Amount → "Buy" → confirm summary → executing → success |
 | **Buy (wallet)** | Amount → "Buy" → extension popup (approve) → executing → success |
 | **Sell** | Amount → "Sell" → confirm → success. No top-up gate. Fees from proceeds |
