@@ -3917,6 +3917,59 @@ html.dark .flow-note.is-danger{
 }
 .flow-cta.is-blocked{opacity:.4;cursor:not-allowed;filter:none;transform:none;}
 .flow-cta.is-blocked:hover{filter:none;}
+.b2t{display:flex;flex-direction:column;gap:14px;}
+.b2t-row{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:var(--card);
+}
+.b2t-amt{min-width:0;flex:1;}
+.b2t-amt label{display:block;cursor:text;}
+.b2t-amt input{
+  width:100%;border:none;background:transparent;outline:none;padding:0;
+  font-size:32px;font-weight:800;letter-spacing:-.04em;color:var(--ink);
+  font-variant-numeric:tabular-nums;caret-color:var(--orange);line-height:1.05;
+  appearance:none;-webkit-appearance:none;
+}
+.b2t-usd{margin-top:4px;font-size:13px;font-weight:600;color:var(--ink-soft);}
+.b2t-asset{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;padding-top:4px;}
+.b2t-asset .flow-select{
+  width:auto;gap:8px;padding:5px 10px 5px 6px;border-radius:999px;border-color:transparent;
+  background:var(--bg);font-size:13px;
+}
+.b2t-asset .flow-select-ic{width:22px;height:22px;}
+.b2t-asset .flow-select-ic svg{width:22px;height:22px;display:block;}
+.b2t-bal{font-size:12px;font-weight:600;color:var(--ink-faint);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.b2t-keep{
+  display:flex;align-items:center;gap:8px;min-height:24px;
+}
+.b2t-keep-lab{font-size:13px;font-weight:700;color:var(--ink);letter-spacing:-.01em;}
+.b2t-keep .anon-toggle{margin-left:auto;}
+.b2t-info{
+  display:grid;place-items:center;width:20px;height:20px;padding:0;border:none;
+  background:transparent;color:var(--ink-faint);cursor:pointer;border-radius:50%;
+  appearance:none;-webkit-appearance:none;
+}
+.b2t-info:hover{color:var(--ink);}
+.b2t-info svg{width:16px;height:16px;display:block;}
+.b2t-split{
+  padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--card);
+}
+.b2t-split-top{
+  display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px;
+}
+.b2t-split-top .send-lab{margin:0;}
+.b2t-split-pct{font-size:28px;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1;}
+.b2t-presets{display:flex;justify-content:flex-end;gap:6px;margin-bottom:10px;}
+.b2t-presets button{
+  border:1px solid var(--line);border-radius:999px;padding:5px 10px;
+  background:transparent;color:var(--ink-soft);font-size:11px;font-weight:700;cursor:pointer;
+  appearance:none;-webkit-appearance:none;
+}
+.b2t-presets button.is-on{background:var(--ink);color:var(--bg);border-color:transparent;}
+.b2t-range{
+  display:block;width:100%;margin:0;accent-color:var(--ink);height:18px;cursor:pointer;
+}
+.b2t .flow-cta{margin-top:2px;}
 @keyframes kbModalShake{
   0%,100%{translate:0 0}
   16%{translate:-8px 0}
@@ -6040,6 +6093,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.pending = null;
     session.pendingNeed = 0;
     session.pendingFunds = null;
+    session.pendingTip = null;
     session.pendingSpend = null;
     closeLogin();
   }
@@ -6343,12 +6397,12 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(!w || w.kind !== 'eoa') return w;
     if(bal != null) w.bal = roundUsd(bal);
     else if(!(w.bal > 0)) w.bal = roundUsd(90 + (walletBagHash(w.id) % 360));
-    if(!Array.isArray(w.imported) || !w.imported.length) w.imported = demoBagTokens(w.id);
+    if(!Array.isArray(w.imported) || !w.imported.length) w.imported = demoBagTokens(w.id).map(h => Object.assign({}, h, { seeded: true }));
     return w;
   }
   function seedAccountHoldings(){
     if(session.holdings && session.holdings.length) return;
-    session.holdings = demoBagTokens('emb').filter(h => !h.ic);
+    session.holdings = demoBagTokens('emb').filter(h => !h.ic).map(h => Object.assign({}, h, { seeded: true }));
   }
   function syncTradePayField(){
     const el = document.getElementById('tradePayWith');
@@ -6408,6 +6462,42 @@ html.dark .qhc-id{color:#6BA3FF;}
     const key = holdingKey(ticker);
     const hit = visibleHoldings().find(x => holdingKey(x.ticker) === key);
     return hit ? (hit.usd || 0) : 0;
+  }
+  function tipHoldingUsd(ctx){
+    const post = ctx && (ctx.post || tipPostFromCtx(ctx));
+    const key = holdingKey(post?.ticker);
+    if(!key) return 0;
+    let usd = 0;
+    const add = (h)=>{
+      if(!h || h.seeded) return;
+      if(holdingKey(h.ticker) !== key) return;
+      usd += Number(h.usd) || 0;
+    };
+    (session.holdings || []).forEach(add);
+    (session.wallets || []).forEach(w => (w.imported || []).forEach(add));
+    return usd;
+  }
+  function needsBuyToTip(ctx, amt){
+    if(session.happyChain?.kind === 'tip') return true;
+    const need = roundUsd(Math.max(0.01, amt || TIP_USD));
+    return tipHoldingUsd(ctx) + 1e-9 < need;
+  }
+  function reduceHolding(amt, ticker){
+    const want = String(ticker || '').replace(/^\$/, '');
+    const take = roundUsd(amt);
+    const apply = (list)=>{
+      if(!Array.isArray(list)) return;
+      list.forEach(h => {
+        if(String(h.ticker || '').replace(/^\$/, '') !== want) return;
+        h.usd = roundUsd(Math.max(0, (h.usd || 0) - take));
+      });
+    };
+    apply(session.holdings);
+    session.wallets.forEach(w => apply(w.imported));
+    session.holdings = (session.holdings || []).filter(h => (h.usd || 0) > 0.009);
+    session.wallets.forEach(w => {
+      if(Array.isArray(w.imported)) w.imported = w.imported.filter(h => (h.usd || 0) > 0.009);
+    });
   }
   const QUOTE_TICK_MS = 10000;
   let quoteTickAt = 0;
@@ -7049,13 +7139,6 @@ html.dark .qhc-id{color:#6BA3FF;}
     paintAuthChrome();
     if(walletOverlay?.classList.contains('show') && session.walletView === 'list') renderWalletBody();
     return true;
-  }
-  function reduceHolding(amt, ticker){
-    const want = String(ticker || '').replace(/^\$/, '');
-    const h = session.holdings.find(x => String(x.ticker || '').replace(/^\$/, '') === want);
-    if(!h) return;
-    h.usd = roundUsd(Math.max(0, (h.usd || 0) - amt));
-    if(h.usd <= 0.009) session.holdings = session.holdings.filter(x => x !== h);
   }
   function creditSale(amt, ticker){
     const a = cashWallet();
@@ -8526,6 +8609,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   function closeWalletModal(){
     clearFlowTimer();
     session.pendingFunds = null;
+    session.pendingTip = null;
     session.pendingSpend = null;
     session.walletView = 'list';
     session.walletDepth = 'top';
@@ -8990,6 +9074,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         cashWait: 'Top up',
         watch: 'Top up',
         confirm: 'Top up',
+        buyToTip: session.pendingTip?.ticker ? `Buy to tip ${session.pendingTip.ticker}` : 'Buy to tip',
         cwFamily: 'EVM or Solana',
         cwWallets: 'Connect wallet',
         cwWait: 'Connect wallet',
@@ -9224,8 +9309,16 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     const options = name === 'net' ? flowNetOptions(f)
       : name === 'token' ? flowTokenOptions(f)
+      : name === 'pay' ? [
+          { id:'usdm', label:'USDm', ic: PAY_USDM_ICON },
+          { id:'eth', label:'ETH', ic: PAY_ETH_ICON },
+          { id:'weth', label:'WETH', ic: PAY_WETH_ICON },
+        ]
       : FLOW_CCY.map(c => ({ id:c.id, label:c.tick, ic:'' }));
-    const value = name === 'net' ? f.net : name === 'token' ? tokenOf(f).id : flowCcy().id;
+    const value = name === 'net' ? f.net
+      : name === 'token' ? tokenOf(f).id
+      : name === 'pay' ? (session.payAsset || 'usdm')
+      : flowCcy().id;
     menu.setAttribute('aria-label', trigger.getAttribute('aria-label') || '');
     menu.innerHTML = options.map(o => `
       <button type="button" role="option" data-flow-opt="${o.id}" class="${o.id===value?'is-on':''}" aria-selected="${o.id===value}">
@@ -9239,6 +9332,10 @@ html.dark .qhc-id{color:#6BA3FF;}
         const id = btn.dataset.flowOpt;
         if(name === 'net') pickFlowNet(id);
         else if(name === 'token') pickFlowToken(id);
+        else if(name === 'pay'){
+          session.payAsset = id;
+          paintFlowSheet();
+        }
         else pickFlowCcy(id);
         closeFlowSelect();
       });
@@ -9246,7 +9343,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     flowBodyEl()?.querySelectorAll('[data-flow-trigger]').forEach(b => b.setAttribute('aria-expanded', String(b === trigger)));
     flowSelectOpen = name;
     const r = trigger.getBoundingClientRect();
-    menu.style.minWidth = Math.round(Math.max(r.width, name === 'ccy' ? 140 : name === 'token' ? 240 : r.width)) + 'px';
+    menu.style.minWidth = Math.round(Math.max(r.width, name === 'ccy' ? 140 : name === 'token' ? 240 : name === 'pay' ? 148 : r.width)) + 'px';
     menu.classList.add('show');
     const mw = menu.offsetWidth, mh = menu.offsetHeight;
     let left = r.left;
@@ -9632,6 +9729,127 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     paintFlowSheet();
   }
+  function tipPostFromCtx(ctx){
+    const item = ctx?.item;
+    const idx = item ? parseInt(item.dataset.index, 10) : NaN;
+    if(Number.isFinite(idx) && posts[idx]) return posts[idx];
+    return posts[typeof lastActiveIdx === 'number' ? lastActiveIdx : 0] || null;
+  }
+  function armPendingTip(ctx, amt){
+    const post = tipPostFromCtx(ctx);
+    session.pendingTip = {
+      ctx: ctx || null,
+      post: post || null,
+      ticker: String(post?.ticker || '$TOKEN'),
+      user: post?.user || '',
+      tipUsd: roundUsd(Math.max(0.01, amt || TIP_USD)),
+    };
+  }
+  function clearPendingTip(){
+    session.pendingTip = null;
+  }
+  function alreadyTipped(ctx){
+    if(!ctx) return false;
+    if(ctx.kind === 'comment') return !!ctx.comment?.tipped;
+    if(ctx.tipBtn?.classList.contains('active')) return true;
+    const post = tipPostFromCtx(ctx);
+    return !!(post && post.tipped);
+  }
+  function continueTipOrBuy(ctx, amt){
+    if(alreadyTipped(ctx)) return;
+    armPendingTip(ctx, amt);
+    window.KbyTipping?.hide?.();
+    const send = document.getElementById('minimodalSend');
+    if(send) delete send.dataset.demoGuided;
+    const tipAmt = roundUsd(Math.max(0.01, amt || session.pendingTip?.tipUsd || TIP_USD));
+    if(!needsBuyToTip(ctx, tipAmt)){
+      if(ctx?.resumeTap) ctx.resumeTap();
+      else if(ctx?.resumeHold) ctx.resumeHold();
+      return;
+    }
+    const need = spendShortfall(tipAmt);
+    if(need > 0){
+      if(typeof haptic === 'function') haptic('warning');
+      showToast('Top up to continue.');
+      openTopUp(need);
+      return;
+    }
+    beginBuyToTip();
+  }
+  function abortFundsFlow(){
+    clearFlowTimer();
+    session.pendingFunds = null;
+    session.pendingTip = null;
+    session.flow = null;
+  }
+  function buyToTipSplit(){
+    const f = session.flow;
+    const payUsd = roundUsd(Math.max(0, f?.buyAmt || 0));
+    const keepOn = !!f?.keepOn;
+    const keepPct = Math.min(100, Math.max(0, Number(f?.keepPct) || 0));
+    const keepUsd = keepOn ? roundUsd(payUsd * keepPct / 100) : 0;
+    const tipUsd = roundUsd(Math.max(0, payUsd - keepUsd));
+    return { payUsd, keepUsd, tipUsd, keepPct };
+  }
+  function buyToTipCtaText(){
+    const asset = payAssetOf();
+    const { tipUsd, keepUsd } = buyToTipSplit();
+    const tipAmt = formatPayAssetAmt(tipUsd);
+    const keepAmt = formatPayAssetAmt(keepUsd);
+    if(keepUsd <= 0) return `Tip ${tipAmt} ${asset.tick}`;
+    if(tipUsd <= 0) return `Keep ${keepAmt} ${asset.tick}`;
+    return `Tip ${tipAmt} ${asset.tick} and keep ${keepAmt} ${asset.tick}`;
+  }
+  function buyToTipOk(){
+    const { payUsd } = buyToTipSplit();
+    const bal = roundUsd(cashWallet()?.bal || 0);
+    return payUsd > 0 && payUsd <= bal + 1e-9;
+  }
+  function beginBuyToTip(){
+    const tip = session.pendingTip;
+    if(!tip) return;
+    session.payAsset = 'usdm';
+    if(!session.flow || session.flow.kind !== 'deposit'){
+      session.flow = defaultFlow('deposit', 0);
+    }
+    const f = session.flow;
+    f.step = 'buyToTip';
+    f.buyAmt = roundUsd(tip.tipUsd || TIP_USD);
+    f.keepOn = false;
+    f.keepPct = 50;
+    window.KbyTipping?.hide?.();
+    window.KbyTipping?.syncBalances?.();
+    const host = flowHost();
+    if(host === 'auth'){ setAuthPanel('funds'); }
+    else if(host === 'wallet'){ session.walletView = 'flow'; renderWalletBody(); }
+    else if(host === 'funds'){ paintFlowSheet(); }
+    else {
+      const title = document.getElementById('fundsTitle');
+      if(title) title.textContent = flowTitle();
+      paintFlowInto(document.getElementById('fundsBody'));
+      overlayOpen(fundsOverlay);
+    }
+  }
+  function settleBuyToTip(){
+    const tip = session.pendingTip;
+    const f = session.flow;
+    if(!tip || !f || f.step !== 'buyToTip') return;
+    const { payUsd, tipUsd } = buyToTipSplit();
+    if(payUsd <= 0 || !buyToTipOk()) return;
+    const finish = ()=>{
+      recordBuy(payUsd, tip.post);
+      if(tipUsd > 0 && tip.post?.ticker) reduceHolding(tipUsd, tip.post.ticker);
+      window.KbyTipping?.hide?.();
+      window.KbyTipping?.syncBalances?.();
+      const ctx = tip.ctx;
+      clearPendingTip();
+      finishFundsSheet();
+      if(tipUsd > 0 && ctx?.tipBtn) commitFeedTip(ctx, tipUsd);
+      else if(typeof haptic === 'function') haptic('success');
+    };
+    requireSpend(payUsd, finish, 'Buy to tip ' + usdLabel(payUsd));
+  }
+  const B2T_INFO_SVG = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.2" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.15v4.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="5.15" r=".95" fill="currentColor"/></svg>';
   function paintFlowInto(body){
     if(!body) return;
     if(typeof hideHoverCards === 'function') hideHoverCards(true);
@@ -9703,6 +9921,49 @@ html.dark .qhc-id{color:#6BA3FF;}
         <button type="button" class="wallet-profile-go" data-flow-cancel>Cancel</button>`;
     } else if(f.kind === 'deposit' && f.step === 'confirm'){
       html = flowStatusHtml('Adding funds', 'This usually takes a moment.');
+    } else if(f.kind === 'deposit' && f.step === 'buyToTip'){
+      const asset = payAssetOf();
+      const hold = isAuthed() ? (cashWallet()?.bal || 0) : 0;
+      const amtStr = formatPayAssetAmt(f.buyAmt || 0);
+      const ok = buyToTipOk();
+      const keepOn = !!f.keepOn;
+      const keepPct = Math.min(100, Math.max(0, Number(f.keepPct) || 0));
+      html = `
+        <div class="b2t">
+          <div class="b2t-row">
+            <div class="b2t-amt">
+              <label>
+                <input id="b2tAmt" inputmode="decimal" autocomplete="off" value="${escHtml(amtStr)}" aria-label="Amount in ${escHtml(asset.tick)}">
+              </label>
+              <div class="b2t-usd" id="b2tUsd">${usdLabel(f.buyAmt || 0)}</div>
+            </div>
+            <div class="b2t-asset">
+              <button type="button" class="flow-select" data-flow-trigger="pay" aria-haspopup="listbox" aria-expanded="false" aria-label="Pay with">
+                <span class="flow-select-ic" data-flow-ic>${asset.ic}</span>
+                <span data-flow-label>${escHtml(asset.tick)}</span>
+                <span class="flow-select-chev" aria-hidden="true"></span>
+              </button>
+              <div class="b2t-bal">Balance ${escHtml(formatPayAssetAmt(hold))} ${escHtml(asset.tick)}</div>
+            </div>
+          </div>
+          <div class="b2t-keep">
+            <button type="button" class="b2t-info" data-keep-info data-tip-title="Keep portion" data-tip-body="Send it all as a tip, keep it all on your wallet, or split it. You choose." aria-label="About Keep portion">${B2T_INFO_SVG}</button>
+            <span class="b2t-keep-lab">Keep portion</span>
+            <button type="button" class="anon-toggle${keepOn ? ' active' : ''}" data-keep-toggle role="switch" aria-checked="${keepOn ? 'true' : 'false'}" aria-label="Keep portion"><span class="anon-switch" aria-hidden="true"></span></button>
+          </div>
+          ${keepOn ? `
+          <div class="b2t-split">
+            <div class="b2t-split-top">
+              <span class="send-lab">Amount</span>
+              <span class="b2t-split-pct" data-keep-pct-lab>${keepPct}%</span>
+            </div>
+            <div class="b2t-presets">
+              ${[25,50,75,100].map(p => `<button type="button" data-keep-pct="${p}" class="${p===keepPct?'is-on':''}">${p===100?'MAX':p+'%'}</button>`).join('')}
+            </div>
+            <input class="b2t-range" type="range" min="0" max="100" step="1" value="${keepPct}" data-keep-range aria-label="Keep percentage">
+          </div>` : ''}
+          <button type="button" class="flow-cta${ok ? '' : ' is-blocked'}" data-buy-to-tip-go aria-disabled="${ok ? 'false' : 'true'}">${escHtml(buyToTipCtaText())}</button>
+        </div>`;
     } else if(f.kind === 'deposit' && f.step === 'cwFamily'){
       html = `
         ${flowMethodHtml('cw-evm', 'EVM', 'Ethereum, Base, and L2s', PAY_ETH_ICON, flowChipIcons(['eth','usdc','usdt','base']))}
@@ -9926,7 +10187,62 @@ html.dark .qhc-id{color:#6BA3FF;}
       f.amt = f.amt || 25;
       startInboundWatch();
     });
+    if(f.kind === 'deposit' && f.step === 'buyToTip') bindBuyToTip(body);
     if(f.kind === 'send' || (f.kind === 'deposit' && f.step === 'mega' && f.tab === 'between')) bindSendForm(body);
+  }
+  function bindBuyToTip(body){
+    const f = session.flow;
+    if(!f || !body) return;
+    const sync = ()=>{
+      const usdEl = body.querySelector('#b2tUsd');
+      const cta = body.querySelector('[data-buy-to-tip-go]');
+      const pctLab = body.querySelector('[data-keep-pct-lab]');
+      const ok = buyToTipOk();
+      if(usdEl) usdEl.textContent = usdLabel(f.buyAmt || 0);
+      if(pctLab) pctLab.textContent = `${Math.round(f.keepPct || 0)}%`;
+      body.querySelectorAll('[data-keep-pct]').forEach(b => b.classList.toggle('is-on', +b.dataset.keepPct === +f.keepPct));
+      if(cta){
+        cta.textContent = buyToTipCtaText();
+        cta.classList.toggle('is-blocked', !ok);
+        cta.setAttribute('aria-disabled', ok ? 'false' : 'true');
+      }
+    };
+    const amtIn = body.querySelector('#b2tAmt');
+    if(amtIn){
+      amtIn.addEventListener('input', ()=>{
+        f.buyAmt = roundUsd(payAmtToUsd(parseAmt(amtIn.value)));
+        sync();
+      });
+    }
+    body.querySelector('[data-keep-toggle]')?.addEventListener('click', ()=>{
+      f.keepOn = !f.keepOn;
+      if(f.keepPct == null) f.keepPct = 50;
+      paintFlowSheet();
+    });
+    body.querySelectorAll('[data-keep-pct]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        f.keepPct = +btn.dataset.keepPct;
+        const range = body.querySelector('[data-keep-range]');
+        if(range) range.value = String(f.keepPct);
+        sync();
+      });
+    });
+    body.querySelector('[data-keep-range]')?.addEventListener('input', (e)=>{
+      f.keepPct = +e.currentTarget.value;
+      sync();
+    });
+    body.querySelector('[data-buy-to-tip-go]')?.addEventListener('click', ()=>{
+      if(!buyToTipOk()) return;
+      settleBuyToTip();
+    });
+    const info = body.querySelector('[data-keep-info]');
+    if(info && typeof bindHoverCard === 'function'){
+      bindHoverCard(info, 'info', null, 180);
+      info.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        if(typeof showHoverCard === 'function') showHoverCard('info', null, info);
+      });
+    }
   }
   function sendBoxOpen(box, open){
     if(!box) return;
@@ -10219,6 +10535,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     if(el.classList?.contains('tip') && el.classList.contains('react-btn')) return 'Tip';
     if(el.matches?.('[data-flow-continue]')) return 'Top up';
+    if(el.matches?.('[data-buy-to-tip-go]')) return 'Buy to tip';
     if(el.dataset?.swap === 'go') return 'Confirm buy';
     if(el.dataset?.login) return 'Sign in';
     if(el.dataset?.wallet) return 'Wallet';
@@ -10377,17 +10694,14 @@ html.dark .qhc-id{color:#6BA3FF;}
         cont.dataset.demoGuided = '1';
         demoGuideTo(cont, { click: true, hide: false });
       }
-      const send = document.getElementById('minimodalSend');
-      const tipOuter = document.getElementById('tipMinimodalOuter');
-      const tipModal = document.getElementById('tipMinimodal');
+      const buyTipGo = document.querySelector('[data-buy-to-tip-go]');
       if(
         session.happyChain.kind === 'tip' &&
-        send && tipOuter?.classList.contains('visible') &&
-        tipModal && !tipModal.classList.contains('tip-minimodal--no-balance') &&
-        !send.dataset.demoGuided
+        session.flow?.step === 'buyToTip' &&
+        buyTipGo && !buyTipGo.dataset.demoGuided
       ){
-        send.dataset.demoGuided = '1';
-        demoGuideTo(send, { click: true, hide: true });
+        buyTipGo.dataset.demoGuided = '1';
+        demoGuideTo(buyTipGo, { click: true, hide: true });
       }
       session._happyGuideObs = setTimeout(tick, 380);
     };
@@ -10398,7 +10712,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     // Continue CTA is guided+clicked by armHappyChainGuides; fallback if paint lags.
     session._happyDepTimer = setTimeout(()=>{
       if(!session.happyChain || !session.flow || session.flow.kind !== 'deposit') return;
-      if(session.flow.step === 'cashWait' || session.flow.step === 'confirm') return;
+      if(session.flow.step === 'cashWait' || session.flow.step === 'confirm' || session.flow.step === 'buyToTip') return;
       session.flow.amt = session.flow.amt || Math.max(session.fundsNeed || 25, CASH_MIN || 10);
       session.flow.method = 'MoonPay';
       session.flow.payMethod = session.flow.payMethod || 'apple';
@@ -10424,6 +10738,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.pending = null;
     session.pendingNeed = 0;
     session.pendingFunds = null;
+    session.pendingTip = null;
     session.pendingSpend = null;
     session.flow = null;
     paintAuthChrome();
@@ -10810,7 +11125,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     clearFlowTimer();
     a.bal = Math.round((Math.max(0, a.bal || 0) + amt) * 100) / 100;
     logActivity('deposit', label ? `Top up · ${label}` : 'Top up', amt);
-    finishFundsSheet();
+    const resumeTipBuy = !!session.pendingTip;
+    if(!resumeTipBuy) finishFundsSheet();
     paintAuthChrome();
     const quiet = (opts && opts.silentCelebrate) || session.suppressFundsCelebrate;
     if(!quiet){
@@ -10823,6 +11139,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     const next = session.pendingFunds;
     session.pendingFunds = null;
     session.fundsNeed = 0;
+    if(resumeTipBuy){
+      beginBuyToTip();
+      return;
+    }
     if(next) setTimeout(()=>{
       try{ next(); }catch(_){}
     }, 280);
@@ -10883,16 +11203,24 @@ html.dark .qhc-id{color:#6BA3FF;}
     setTimeout(go, reduce ? 0 : 720);
   }
 
-  function recordBuy(amt){
-    const post = (typeof tokenDrawerPost !== 'undefined' && tokenDrawerPost) || posts[typeof lastActiveIdx === 'number' ? lastActiveIdx : 0];
+  function recordBuy(amt, postRef){
+    const post = postRef || (typeof tokenDrawerPost !== 'undefined' && tokenDrawerPost) || posts[typeof lastActiveIdx === 'number' ? lastActiveIdx : 0];
     if(!post) return;
     const ticker = post.ticker || '$TOKEN';
-    const existing = session.holdings.find(h => h.ticker === ticker);
+    const key = holdingKey(ticker);
     const tokens = formatTokenOut(amt);
-    if(existing){
-      existing.usd = Math.round((existing.usd + amt) * 100) / 100;
-    } else {
-      session.holdings.push({ ticker, amount: tokens, usd: amt, img: tokenArtOf(post) });
+    let found = false;
+    const bump = (h)=>{
+      if(holdingKey(h.ticker) !== key) return;
+      h.usd = Math.round(((h.usd || 0) + amt) * 100) / 100;
+      h.seeded = false;
+      h.amount = tokens;
+      found = true;
+    };
+    (session.holdings || []).forEach(bump);
+    (session.wallets || []).forEach(w => (w.imported || []).forEach(bump));
+    if(!found){
+      session.holdings.push({ ticker, amount: tokens, usd: amt, img: tokenArtOf(post), seeded: false });
     }
     logActivity('buy', ticker, amt);
     if(walletOverlay?.classList.contains('show') && session.walletView === 'list') fillWalletBody();
@@ -11198,8 +11526,8 @@ html.dark .qhc-id{color:#6BA3FF;}
   document.getElementById('walletBack')?.addEventListener('click', ()=> walletTopBack());
   walletOverlay?.addEventListener('click', (e)=>{ if(e.target === walletOverlay) closeWalletModal(); });
   document.getElementById('fundsBack')?.addEventListener('click', ()=> flowBack());
-  document.getElementById('fundsClose')?.addEventListener('click', ()=>{ clearFlowTimer(); session.pendingFunds = null; session.flow = null; overlayClose(fundsOverlay); });
-  fundsOverlay?.addEventListener('click', (e)=>{ if(e.target === fundsOverlay){ session.pendingFunds = null; session.flow = null; overlayClose(fundsOverlay); } });
+  document.getElementById('fundsClose')?.addEventListener('click', ()=>{ abortFundsFlow(); overlayClose(fundsOverlay); });
+  fundsOverlay?.addEventListener('click', (e)=>{ if(e.target === fundsOverlay){ abortFundsFlow(); overlayClose(fundsOverlay); } });
   document.addEventListener('click', (e)=>{
     if(!flowSelectOpen) return;
     if(e.target.closest?.('#flowSelectMenu, [data-flow-trigger]')) return;
@@ -13070,7 +13398,7 @@ html.dark .qhc-id{color:#6BA3FF;}
                 </span>
               </div>
             </div>
-            ${canTip ? `<div class="react-col"><button type="button" class="react-btn tip" data-tips="${p.tips}">${svgIcon('tip')}</button><div class="react-count tip-count">${usdLabel(p.tips)}</div></div>` : ''}
+            ${canTip ? `<div class="react-col"><button type="button" class="react-btn tip${p.tipped ? ' active' : ''}" data-tips="${p.tips}">${svgIcon('tip')}</button><div class="react-count tip-count">${usdLabel(p.tips)}</div></div>` : ''}
             <div class="react-col"><button type="button" class="react-btn comment">${svgIcon('comment')}</button><div class="react-count comment-count">${fmt(p.comments)}</div></div>
             ${canVote ? `<div class="react-col"><button type="button" class="react-btn like" data-likes="${p.likes}">${svgIcon('like')}</button><div class="react-count like-count">${fmt(p.likes)}</div></div>
             <div class="react-col"><button type="button" class="react-btn dislike">${svgIcon('dislike')}</button><div class="react-count dislike-count"></div></div>` : ''}
@@ -13315,6 +13643,8 @@ html.dark .qhc-id{color:#6BA3FF;}
       const tipBtn = item.querySelector('.react-btn.tip');
       const tipCountEl = item.querySelector('.tip-count');
       if(tipBtn){
+        const post = posts[+item.dataset.index];
+        if(post?.tipped) tipBtn.classList.add('active');
         if(window.KbyTipping){
           wireFeedTipBtn(tipBtn, makeFeedTipCtx(tipBtn, {
             kind: 'post',
@@ -13508,6 +13838,11 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     if(tipBtn.classList.contains('active')) return;
     const { tipCountEl, item } = ctx;
+    const post = tipPostFromCtx(ctx);
+    if(post){
+      post.tipped = true;
+      post.tips = (Number(post.tips) || 0) + amt;
+    }
     tipBtn.classList.add('active','pulse'); setTimeout(()=> tipBtn.classList.remove('pulse'), 450);
     const val = parseInt(tipBtn.dataset.tips, 10) + amt;
     tipBtn.dataset.tips = val;
@@ -17962,7 +18297,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     [walletOverlay, closeWalletModal],
     [notifOverlay, closeNotifs],
     [signalsOverlay, closeSignals],
-    [fundsOverlay, ()=>{ session.pendingFunds = null; overlayClose(fundsOverlay); }],
+    [fundsOverlay, ()=>{ abortFundsFlow(); overlayClose(fundsOverlay); }],
     [swapOverlay, closeSwap],
   ].forEach(([el, closeFn])=>{
     const modal = el?.querySelector('.modal');
@@ -18153,7 +18488,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       }
       return;
     }
-    if(fundsOverlay?.classList.contains('show')){ session.pendingFunds = null; overlayClose(fundsOverlay); return; }
+    if(fundsOverlay?.classList.contains('show')){ abortFundsFlow(); overlayClose(fundsOverlay); return; }
     if(notifOverlay?.classList.contains('show')){ closeNotifs(); return; }
     if(signalsOverlay?.classList.contains('show')){ closeSignals(); return; }
     if(walletOverlay?.classList.contains('show')){ closeWalletModal(); return; }
@@ -18243,75 +18578,47 @@ html.dark .qhc-id{color:#6BA3FF;}
   if(window.KbyTipping){
     KbyTipping.init({
       syncBalances(){
+        const ctx = window.KbyTipping?.activeCtx?.() || null;
+        const held = tipHoldingUsd(ctx);
+        if(held > 0) return { walletUsd: held, jarUsd: 0 };
         const w = cashWallet();
         return { walletUsd: w?.bal || 0, jarUsd: 0 };
       },
       onBeforeInteract(ctx){
-        if(isAuthed()) return true;
-        requireAuth(()=>{
-          // Happy tip chain: skip a second tip press — go top-up then resume the tip UI.
-          if(session.happyChain?.kind === 'tip'){
-            const need = spendShortfall(Math.max(0.01, TIP_USD));
-            if(need > 0){
-              window.KbyTipping?.hide?.();
-              const send = document.getElementById('minimodalSend');
-              if(send) delete send.dataset.demoGuided;
-              openTopUp(need, ()=>{
-                window.KbyTipping?.hide?.();
-                window.KbyTipping?.syncBalances?.();
-                if(send) delete send.dataset.demoGuided;
-                setTimeout(()=>{ if(ctx?.resumeTap) ctx.resumeTap(); }, 120);
-              });
-              return;
-            }
-          }
-          if(ctx?.resumeTap) ctx.resumeTap();
-          else if(ctx?.resumeHold) ctx.resumeHold();
-        });
-        return false;
+        if(alreadyTipped(ctx)) return false;
+        if(!isAuthed()){
+          requireAuth(()=> continueTipOrBuy(ctx));
+          return false;
+        }
+        if(needsBuyToTip(ctx)){
+          continueTipOrBuy(ctx);
+          return false;
+        }
+        return true;
       },
       onCommit(amt, meta, ctx){
         if(!ctx?.tipBtn) return;
-        if(ctx.kind === 'comment' && ctx.comment?.tipped) return;
-        if(ctx.kind !== 'comment' && ctx.tipBtn.classList.contains('active')) return;
+        if(alreadyTipped(ctx)) return;
         const tipAmt = Math.max(0, Math.round((amt || 0) * 100) / 100);
         if(tipAmt <= 0) return;
-        // Feed has no tip jar — always debit the account wallet for the full tip.
+        if(needsBuyToTip(ctx, tipAmt)){
+          continueTipOrBuy(ctx, tipAmt);
+          return;
+        }
         const finish = ()=>{
+          const post = tipPostFromCtx(ctx);
+          if(post?.ticker) reduceHolding(tipAmt, post.ticker);
           commitFeedTip(ctx, tipAmt);
           window.KbyTipping?.syncBalances?.();
+          paintAuthChrome();
         };
-        requireAuth(()=>{
-          requireSpend(tipAmt, finish, 'Tip ' + usdLabel(tipAmt));
-        }, tipAmt);
+        requireAuth(finish);
       },
       onNoBalance(ctx){
+        if(alreadyTipped(ctx)) return;
         requireAuth(()=>{
           const amt = Math.max(0.01, TIP_USD);
-          const need = spendShortfall(amt);
-          if(need <= 0){
-            // Funded while tooltip was up — resume tip UI, don't re-press tip.
-            setTimeout(()=>{ if(ctx?.resumeTap) ctx.resumeTap(); }, 80);
-            return;
-          }
-          setTimeout(()=>{
-            if(typeof haptic === 'function') haptic('warning');
-            showToast('Top up to continue.');
-            // Dismiss frozen "Hold your horses" tooltip before deposit UI.
-            window.KbyTipping?.hide?.();
-            const send = document.getElementById('minimodalSend');
-            if(send) delete send.dataset.demoGuided;
-            openTopUp(need, ()=>{
-              window.KbyTipping?.hide?.();
-              window.KbyTipping?.syncBalances?.();
-              if(send) delete send.dataset.demoGuided;
-              // Resume tip sheet in place; happy-path guide only clicks Send.
-              setTimeout(()=>{
-                if(ctx?.resumeTap) ctx.resumeTap();
-                else if(ctx?.resumeHold) ctx.resumeHold();
-              }, 120);
-            });
-          }, 960);
+          setTimeout(()=> continueTipOrBuy(ctx, amt), 960);
         });
       },
     });

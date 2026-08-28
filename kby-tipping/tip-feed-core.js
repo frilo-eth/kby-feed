@@ -1446,6 +1446,10 @@
     root.style.height = '130px';
   }
 
+  function tipBtnLocked(el) {
+    return !!(el && (el.classList.contains('active') || el.classList.contains('tipped')));
+  }
+
   function wireTipButton(btn) {
     if (!btn || btn.dataset.kbyTipBound) return;
     btn.dataset.kbyTipBound = '1';
@@ -1461,6 +1465,7 @@
     function onDown(e) {
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       e.stopPropagation();
+      if (tipBtnLocked(btn)) return;
       if (window.KbyTipping?.setActive) window.KbyTipping.setActive(btn);
       if (window.KbyTipping?.onBeforeInteract) {
         const ok = window.KbyTipping.onBeforeInteract(window.KbyTipping.activeCtx?.());
@@ -1510,6 +1515,10 @@
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       e.stopPropagation();
       clearHold();
+      if (tipBtnLocked(btn)) {
+        if (modalPhase === 'nobalance') hideMinimodal();
+        return;
+      }
       if (modalPhase === 'nobalance') {
         if (e.type === 'pointercancel') return;
         if (e.detail > 1) return;
