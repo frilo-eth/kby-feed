@@ -1571,7 +1571,7 @@ html.dark .sig-card{box-shadow:0 4px 10px rgba(0,0,0,.35);}
 .drawer.open{width:400px;}
 .drawer-inner,.token-drawer-inner{width:400px;height:100%;display:flex;flex-direction:column;padding:0;min-height:0;}
 .token-drawer-chrome{flex-shrink:0;padding:16px 16px 0;background:var(--card);position:relative;z-index:1;}
-.token-drawer-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;}
+.token-drawer-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
 .token-drawer-identity{
   display:flex;align-items:center;gap:10px;min-width:0;
   text-decoration:none;color:inherit;cursor:pointer;
@@ -1599,9 +1599,21 @@ html.dark .sig-card{box-shadow:0 4px 10px rgba(0,0,0,.35);}
   transition:color .15s,transform .15s;
 }
 .token-drawer-identity:hover .token-drawer-go{color:var(--ink);transform:translateX(2px);}
-.token-drawer-head-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.token-drawer-head-actions{display:flex;align-items:center;gap:2px;flex-shrink:0;}
+.token-drawer-share{
+  width:40px;height:40px;min-width:40px;min-height:40px;
+  background:transparent;border:none;border-radius:10px;
+  color:var(--ink-soft);cursor:pointer;padding:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:color .15s, background .15s, transform .1s;
+}
+.token-drawer-share:hover{color:var(--ink);background:var(--bg);}
+.token-drawer-share:active{transform:scale(.92);}
+.token-drawer-share svg{width:18px;height:18px;}
 
-/* chart shell — --collapse: 0 (full) → 1 (minimal sparkline) */
+/* chart shell — --collapse: 0 (full) → 1 (minimal sparkline).
+   Height is spring-driven in JS. Do not CSS-transition geometric props here:
+   they lag --collapse and the canvas resize, which reads as tremble. */
 .token-chart{
   --collapse:0;
   --chart-h: calc(168px - var(--collapse) * 118px);
@@ -1612,25 +1624,14 @@ html.dark .sig-card{box-shadow:0 4px 10px rgba(0,0,0,.35);}
   --canvas-pad: calc(8px - var(--collapse) * 4px);
   position:relative;overflow:hidden;flex-shrink:0;
   margin-bottom:calc(14px - var(--collapse) * 4px);
-  transition:margin .05s linear;
 }
-.token-chart-meta{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:var(--meta-gap);}
+.token-chart-meta{display:flex;align-items:flex-end;justify-content:space-between;gap:8px;margin-bottom:var(--meta-gap);}
 .token-chart-mcap-label{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:var(--ink-faint);}
 .token-chart-mcap-label svg{width:14px;height:14px;opacity:.7;}
-.token-chart-mcap{font-size:var(--mcap-size);font-weight:800;color:var(--green);letter-spacing:-.03em;line-height:1.15;transition:font-size .05s linear;}
-.token-chart-share{
-  width:32px;height:32px;border:none;border-radius:9px;background:transparent;color:var(--ink-faint);
-  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
-  opacity:calc(1 - var(--collapse) * .85);pointer-events:auto;
-  transition:background .15s,color .15s,opacity .05s linear;
-}
-.token-chart-share:hover{background:var(--bg);color:var(--ink);}
-.token-chart-share svg{width:16px;height:16px;}
-.token-chart[style*="--collapse: 1"],.token-chart.is-min .token-chart-share{pointer-events:none;}
+.token-chart-mcap{font-size:var(--mcap-size);font-weight:800;color:var(--green);letter-spacing:-.03em;line-height:1.15;}
 .token-chart-canvas-wrap{
   position:relative;height:var(--chart-h);border-radius:12px;overflow:hidden;
   background:transparent;margin:0 calc(var(--canvas-pad) * -1);
-  transition:height .05s linear;
 }
 .token-chart-canvas-wrap canvas{display:block;width:100%;height:100%;}
 .token-chart-badge{
@@ -1647,10 +1648,9 @@ html.dark .sig-card{box-shadow:0 4px 10px rgba(0,0,0,.35);}
 }
 html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255,255,255,.08);color:#f5f5f7;}
 .token-chart-controls{
-  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  display:flex;align-items:center;justify-content:flex-end;gap:6px;
   height:var(--ctrl-h);opacity:var(--ctrl-op);overflow:hidden;
-  margin-top:calc(6px - var(--collapse) * 6px);
-  transition:height .05s linear,opacity .05s linear,margin .05s linear;
+  margin:0;flex-shrink:0;
 }
 .token-chart.is-min .token-chart-controls{pointer-events:none;}
 .token-chart-windows,.token-chart-modes{
@@ -1669,7 +1669,7 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
   background:var(--card);color:var(--ink);border-color:var(--ink);box-shadow:none;
 }
 
-/* Section tabs: Trade | Comments — text + rule (under header, above chart) */
+/* Section tabs: Trade | Comments — text + rule (below chart, above panels) */
 .token-section-tabs{
   display:flex;gap:18px;align-items:flex-end;
   background:transparent;border-radius:0;padding:0;
@@ -1702,7 +1702,6 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
 .token-drawer-scroll:has(#tokenPanelComments:not([hidden])){
   display:flex;flex-direction:column;padding-bottom:0;overflow:hidden;
 }
-.token-drawer-scroll:has(#tokenPanelComments:not([hidden])) .token-chart{display:none !important;}
 .token-panel-comments.token-panel{
   min-height:0;flex:1;display:flex;flex-direction:column;
   margin:0;padding:0;width:auto;
@@ -2383,6 +2382,10 @@ body.cfx-on #drawer{z-index:50;}
   .share-close{
     width:44px;height:44px;min-width:44px;min-height:44px;
     border-radius:12px;font-size:22px;
+  }
+  .token-drawer-share{
+    width:44px;height:44px;min-width:44px;min-height:44px;
+    border-radius:12px;
   }
 }
 .share-body{padding:18px;}
@@ -5043,7 +5046,41 @@ html.dark .qhc-id{color:#6BA3FF;}
             <svg class="token-drawer-go" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </a>
           <div class="token-drawer-head-actions">
+            <button type="button" class="token-drawer-share" id="drawerShare" aria-label="Share" title="Share">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M10 5H6.5A2.5 2.5 0 0 0 4 7.5v10A2.5 2.5 0 0 0 6.5 20h10a2.5 2.5 0 0 0 2.5-2.5V14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
             <button type="button" class="share-close" id="drawerClose" aria-label="Close">✕</button>
+          </div>
+        </div>
+
+        <div class="token-chart" id="tokenChart" style="--collapse:0">
+          <div class="token-chart-meta">
+            <div class="token-chart-mcap-block">
+              <div class="token-chart-mcap-label">
+                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 10.5c0-1.4 1.8-2.5 4-2.5s4 1.1 4 2.5-1.8 2.5-4 2.5-4-1.1-4-2.5Z" stroke="currentColor" stroke-width="1.6"/><path d="M8 8.2V16M12 12.5c0-1.4 1.8-2.5 4-2.5s4 1.1 4 2.5-1.8 2.5-4 2.5-4-1.1-4-2.5Z" stroke="currentColor" stroke-width="1.6"/><path d="M16 10.2V16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                Market Cap
+              </div>
+              <div class="token-chart-mcap" id="drawerMcap">$356.32K</div>
+            </div>
+            <div class="token-chart-controls">
+              <div class="token-chart-windows" id="tokenChartWindows" role="tablist" aria-label="Chart timeframe">
+                <button type="button" class="active" data-secs="60">1M</button>
+                <button type="button" data-secs="300">5M</button>
+                <button type="button" data-secs="3600">1H</button>
+              </div>
+              <div class="token-chart-modes" id="tokenChartModes" role="tablist" aria-label="Chart style">
+                <button type="button" class="active" data-mode="line" aria-label="Line chart" title="Line">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 16l5-5 3.5 3.5L20 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <button type="button" data-mode="candle" aria-label="Candlestick chart" title="Candles">
+                  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 4v4M8 14v6M16 6v4M16 16v2M6 8h4v6H6V8Zm8 4h4v4h-4v-4Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="token-chart-canvas-wrap">
+            <canvas id="tokenLiveline" width="760" height="280" aria-label="Token price chart"></canvas>
+            <div class="token-chart-badge" id="tokenChartBadge">$0.00</div>
           </div>
         </div>
 
@@ -5054,39 +5091,6 @@ html.dark .qhc-id{color:#6BA3FF;}
       </div>
 
       <div class="token-drawer-scroll" id="tokenDrawerScroll">
-        <div class="token-chart" id="tokenChart" style="--collapse:0">
-          <div class="token-chart-meta">
-            <div class="token-chart-mcap-block">
-              <div class="token-chart-mcap-label">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 10.5c0-1.4 1.8-2.5 4-2.5s4 1.1 4 2.5-1.8 2.5-4 2.5-4-1.1-4-2.5Z" stroke="currentColor" stroke-width="1.6"/><path d="M8 8.2V16M12 12.5c0-1.4 1.8-2.5 4-2.5s4 1.1 4 2.5-1.8 2.5-4 2.5-4-1.1-4-2.5Z" stroke="currentColor" stroke-width="1.6"/><path d="M16 10.2V16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-                Market Cap
-              </div>
-              <div class="token-chart-mcap" id="drawerMcap">$356.32K</div>
-            </div>
-            <button type="button" class="token-chart-share" id="tokenChartShare" aria-label="Share chart" title="Share">
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M10 5H6.5A2.5 2.5 0 0 0 4 7.5v10A2.5 2.5 0 0 0 6.5 20h10a2.5 2.5 0 0 0 2.5-2.5V14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-          </div>
-          <div class="token-chart-canvas-wrap">
-            <canvas id="tokenLiveline" width="760" height="280" aria-label="Token price chart"></canvas>
-            <div class="token-chart-badge" id="tokenChartBadge">$0.00</div>
-          </div>
-          <div class="token-chart-controls">
-            <div class="token-chart-windows" id="tokenChartWindows" role="tablist" aria-label="Chart timeframe">
-              <button type="button" class="active" data-secs="60">1M</button>
-              <button type="button" data-secs="300">5M</button>
-              <button type="button" data-secs="3600">1H</button>
-            </div>
-            <div class="token-chart-modes" id="tokenChartModes" role="tablist" aria-label="Chart style">
-              <button type="button" class="active" data-mode="line" aria-label="Line chart" title="Line">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 16l5-5 3.5 3.5L20 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-              <button type="button" data-mode="candle" aria-label="Candlestick chart" title="Candles">
-                <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 4v4M8 14v6M16 6v4M16 16v2M6 8h4v6H6V8Zm8 4h4v4h-4v-4Z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-            </div>
-          </div>
-        </div>
         <div class="token-panel token-panel-trade" id="tokenPanelTrade" data-panel="trade">
           <div class="trade-side-row" id="tradeSideRow">
             <div class="trade-side-rest">
@@ -10793,6 +10797,32 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(wallet === 'eoa') completeLogin('eoa', 'mm');
     else completeLogin('social', 'Google');
   }
+  function tweenChartCollapse(to){
+    return new Promise((resolve)=>{
+      if(Math.abs(chartCollapseTarget - to) < 0.001 && Math.abs(chartCollapse - to) < 0.001){
+        resolve(true);
+        return;
+      }
+      (session._chartCollapseWaiters ||= []).push(resolve);
+      setChartCollapse(to);
+    });
+  }
+  function demoChartCollapseFlow(){
+    const wait = (ms)=> new Promise((r)=> setTimeout(r, ms));
+    seedDemoSocial(80);
+    if(typeof openDrawer === 'function') openDrawer(posts[0]);
+    (async ()=>{
+      await wait(280);
+      await demoGuideTo('#tokenChart', { click: false, hide: false, dur: 0.28 });
+      await tweenChartCollapse(1);
+      await wait(220);
+      await demoGuideTo('#tokenTabComments', { click: true, hide: false, dur: 0.28 });
+      await wait(520);
+      await demoGuideTo('#tokenTabTrade', { click: true, hide: false, dur: 0.28 });
+      await wait(180);
+      hideDemoCursor();
+    })();
+  }
   function demoChainBuy(wallet){
     const eoa = wallet === 'eoa';
     clearHappyChain();
@@ -11002,6 +11032,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(flow === 'buy'){
       seedDemoSocial(80);
       if(typeof openDrawer === 'function') openDrawer(posts[0]);
+      return;
+    }
+    if(flow === 'chart' || flow === 'chart-collapse' || flow === 'drawer-scroll'){
+      demoChartCollapseFlow();
       return;
     }
     if(flow === 'buy-wallet' || flow === 'buy-eoa'){
@@ -15674,8 +15708,14 @@ html.dark .qhc-id{color:#6BA3FF;}
   let tokenDrawerPost = null;
   let tokenDrawerTab = 'trade';
   let chartCollapse = 0;
-  let chartTouchY = 0;
+  let chartCollapseTarget = 0;
+  let chartCollapseVel = 0;
+  let chartSpringRaf = 0;
+  let chartSpringTs = 0;
   const CHART_COLLAPSE_PX = 160;
+  const CHART_SPRING_K = 380;
+  const CHART_SPRING_D = 30;
+  let chartTouchY = 0;
   let commentPendingMedia = null;
   let commentObjectUrl = null;
 
@@ -16027,25 +16067,31 @@ html.dark .qhc-id{color:#6BA3FF;}
       const plotW = Math.max(1, W - padL - padR);
       const plotH = Math.max(1, H - padT - padB);
 
-      // lerp display toward target
+      // lerp display toward target — freeze while the shell is collapsing so
+      // the line scales with height instead of independently drifting.
       const target = visiblePoints();
-      // rebuild display series length to match
+      const collapsing = collapse > 0.02 && collapse < 0.98;
+      const follow = collapsing ? 1 : lerpSpeed;
       if(display.length !== target.length){
         display = target.map(pt => ({ time: pt.time, value: pt.value }));
       } else {
         for(let i = 0; i < target.length; i++){
           display[i].time = target[i].time;
-          display[i].value += (target[i].value - display[i].value) * lerpSpeed;
+          display[i].value += (target[i].value - display[i].value) * follow;
         }
       }
       const vals = display.map(d => d.value);
       let tMin = Math.min(...vals), tMax = Math.max(...vals);
       const pad = Math.max((tMax - tMin) * 0.12, (tMax || 1) * 0.002);
-      // snap outward, lerp inward
-      if(tMin < yMin) yMin = tMin - pad * 0.2;
+      if(collapsing){
+        yMin = tMin - pad;
+        yMax = tMax + pad;
+      } else if(tMin < yMin) yMin = tMin - pad * 0.2;
       else yMin += ((tMin - pad) - yMin) * lerpSpeed;
-      if(tMax > yMax) yMax = tMax + pad * 0.2;
-      else yMax += ((tMax + pad) - yMax) * lerpSpeed;
+      if(!collapsing){
+        if(tMax > yMax) yMax = tMax + pad * 0.2;
+        else yMax += ((tMax + pad) - yMax) * lerpSpeed;
+      }
       if(yMax - yMin < 1e-12){ yMax = yMin + 1e-9; }
 
       badgeVal += (price - badgeVal) * lerpSpeed;
@@ -16221,8 +16267,44 @@ html.dark .qhc-id{color:#6BA3FF;}
     };
   }
   function syncChartScrollLock(){
-    if(!tokenDrawerScroll) return;
-    tokenDrawerScroll.style.touchAction = (tokenDrawerTab === 'trade' && chartCollapse < 1) ? 'none' : 'pan-y';
+    const lock = !tokenChartEl?.hidden && chartCollapseTarget < 1;
+    if(tokenDrawerScroll) tokenDrawerScroll.style.touchAction = lock ? 'none' : 'pan-y';
+    const commentsBody = document.querySelector('#tokenPanelComments .comments-body');
+    if(commentsBody) commentsBody.style.touchAction = lock ? 'none' : 'pan-y';
+  }
+  function flushChartCollapseWaiters(){
+    const waiters = session._chartCollapseWaiters;
+    if(!waiters || !waiters.length) return;
+    session._chartCollapseWaiters = [];
+    waiters.forEach(fn => { try{ fn(true); }catch(_){} });
+  }
+  function stopChartSpring(){
+    if(chartSpringRaf) cancelAnimationFrame(chartSpringRaf);
+    chartSpringRaf = 0;
+    chartSpringTs = 0;
+    chartCollapseVel = 0;
+  }
+  function stepChartSpring(now){
+    const last = chartSpringTs || now;
+    chartSpringTs = now;
+    let dt = (now - last) / 1000;
+    if(!(dt > 0) || dt > 0.032) dt = 1 / 60;
+    chartCollapseVel += (-CHART_SPRING_K * (chartCollapse - chartCollapseTarget) - CHART_SPRING_D * chartCollapseVel) * dt;
+    chartCollapse += chartCollapseVel * dt;
+    if(chartCollapse < 0 || chartCollapse > 1){
+      chartCollapse = Math.max(0, Math.min(1, chartCollapse));
+      chartCollapseVel *= 0.2;
+    }
+    syncTokenChartCollapse();
+    const settled = Math.abs(chartCollapse - chartCollapseTarget) < 0.0015 && Math.abs(chartCollapseVel) < 0.04;
+    if(settled){
+      chartCollapse = chartCollapseTarget;
+      stopChartSpring();
+      syncTokenChartCollapse();
+      flushChartCollapseWaiters();
+      return;
+    }
+    chartSpringRaf = requestAnimationFrame(stepChartSpring);
   }
   function syncTokenChartCollapse(){
     if(!tokenChartEl) return;
@@ -16233,57 +16315,71 @@ html.dark .qhc-id{color:#6BA3FF;}
     tokenLiveline?.setCollapse(collapse);
     syncChartScrollLock();
   }
-  function setChartCollapse(v){
-    chartCollapse = Math.max(0, Math.min(1, v));
-    syncTokenChartCollapse();
+  function setChartCollapse(v, immediate){
+    chartCollapseTarget = Math.max(0, Math.min(1, v));
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(immediate || reduce){
+      stopChartSpring();
+      chartCollapse = chartCollapseTarget;
+      syncTokenChartCollapse();
+      flushChartCollapseWaiters();
+      return;
+    }
+    if(!chartSpringRaf){
+      chartSpringTs = 0;
+      chartSpringRaf = requestAnimationFrame(stepChartSpring);
+    }
   }
-  function applyChartCollapseDelta(dy){
+  function applyChartCollapseDelta(dy, immediate){
     if(!dy) return 0;
-    const t = tokenDrawerScroll?.scrollTop || 0;
-    if(dy > 0 && chartCollapse < 1 && t <= 0){
-      const next = chartCollapse + dy / CHART_COLLAPSE_PX;
-      setChartCollapse(next);
+    const port = commentsScrollEl();
+    const t = port?.scrollTop || 0;
+    if(dy > 0 && chartCollapseTarget < 1 && t <= 0){
+      const next = chartCollapseTarget + dy / CHART_COLLAPSE_PX;
+      setChartCollapse(next, immediate);
       return next >= 1 ? (next - 1) * CHART_COLLAPSE_PX : 0;
     }
-    if(dy < 0 && t <= 0 && chartCollapse > 0){
-      setChartCollapse(chartCollapse + dy / CHART_COLLAPSE_PX);
+    if(dy < 0 && t <= 0 && chartCollapseTarget > 0){
+      setChartCollapse(chartCollapseTarget + dy / CHART_COLLAPSE_PX, immediate);
       return 0;
     }
     return dy;
   }
   function onDrawerChartWheel(e){
-    if(tokenDrawerTab !== 'trade' || tokenChartEl?.hidden || e.ctrlKey) return;
+    if(tokenChartEl?.hidden || e.ctrlKey) return;
     let dy = e.deltaY;
     if(e.deltaMode === 1) dy *= 16;
     if(e.deltaMode === 2) dy *= 140;
     if(!dy) return;
-    const t = tokenDrawerScroll?.scrollTop || 0;
-    const collapsing = dy > 0 && chartCollapse < 1 && t <= 0;
-    const expanding = dy < 0 && t <= 0 && chartCollapse > 0;
+    const port = commentsScrollEl();
+    const t = port?.scrollTop || 0;
+    const collapsing = dy > 0 && chartCollapseTarget < 1 && t <= 0;
+    const expanding = dy < 0 && t <= 0 && chartCollapseTarget > 0;
     if(!collapsing && !expanding) return;
     e.preventDefault();
     const leftover = applyChartCollapseDelta(dy);
-    if(leftover > 0 && tokenDrawerScroll) tokenDrawerScroll.scrollTop += leftover;
+    if(leftover > 0 && port) port.scrollTop += leftover;
   }
   function onDrawerChartTouchStart(e){
     if(!e.touches || !e.touches[0]) return;
     chartTouchY = e.touches[0].clientY;
   }
   function onDrawerChartTouchMove(e){
-    if(tokenDrawerTab !== 'trade' || tokenChartEl?.hidden) return;
+    if(tokenChartEl?.hidden) return;
     if(e.target?.closest?.('.token-drawer-head, .sheet-handle, .token-section-tabs')) return;
     if(!e.touches || !e.touches[0]) return;
     const y = e.touches[0].clientY;
     const dy = chartTouchY - y;
     chartTouchY = y;
     if(!dy) return;
-    const t = tokenDrawerScroll?.scrollTop || 0;
-    const collapsing = dy > 0 && chartCollapse < 1 && t <= 0;
-    const expanding = dy < 0 && t <= 0 && chartCollapse > 0;
+    const port = commentsScrollEl();
+    const t = port?.scrollTop || 0;
+    const collapsing = dy > 0 && chartCollapseTarget < 1 && t <= 0;
+    const expanding = dy < 0 && t <= 0 && chartCollapseTarget > 0;
     if(!collapsing && !expanding) return;
     e.preventDefault();
-    const leftover = applyChartCollapseDelta(dy);
-    if(leftover > 0 && tokenDrawerScroll) tokenDrawerScroll.scrollTop += leftover;
+    const leftover = applyChartCollapseDelta(dy, true);
+    if(leftover > 0 && port) port.scrollTop += leftover;
   }
   function fillTokenDrawerHeader(post){
     tokenDrawerPost = post;
@@ -16367,7 +16463,6 @@ html.dark .qhc-id{color:#6BA3FF;}
     const isTrade = tokenDrawerTab === 'trade';
     if(tradePanel) tradePanel.hidden = !isTrade;
     if(commentsPanel) commentsPanel.hidden = isTrade;
-    if(tokenChartEl) tokenChartEl.hidden = !isTrade;
     tabTrade?.classList.toggle('active', isTrade);
     tabComments?.classList.toggle('active', !isTrade);
     tabTrade?.setAttribute('aria-selected', String(isTrade));
@@ -16382,8 +16477,8 @@ html.dark .qhc-id{color:#6BA3FF;}
       clearCommentDropActive();
       syncCommentMediaDrag();
       syncCommentSendReady();
-      requestAnimationFrame(()=> tokenLiveline?.resize());
     }
+    requestAnimationFrame(()=> tokenLiveline?.resize());
     feedWrap?.classList.toggle('comments-open', state.commentsOpen && !!state.focusedComment);
     syncSheetScrim();
     reflowDuringChrome();
@@ -16394,7 +16489,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     drawer.classList.remove('open');
     state.tradeOpen = false;
     state.commentsOpen = false;
-    setChartCollapse(0);
+    setChartCollapse(0, true);
     hidePayPicker();
     stopTokenLiveline();
     clearQuoteTick();
@@ -16420,7 +16515,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     fillTokenDrawerHeader(post);
     drawer.classList.add('open');
     if(tokenDrawerScroll) tokenDrawerScroll.scrollTop = 0;
-    setChartCollapse(0);
+    setChartCollapse(0, true);
     startTokenLiveline(post);
     setTokenDrawerTab(tab || 'trade');
     paintTradeCta();
@@ -16951,6 +17046,10 @@ html.dark .qhc-id{color:#6BA3FF;}
   });
 
   document.getElementById('drawerClose').addEventListener('click', closeTokenDrawer);
+  document.getElementById('drawerShare')?.addEventListener('click', ()=>{
+    const post = tokenDrawerPost || posts[lastActiveIdx];
+    if(post) openShare(post);
+  });
   enableSheetDrag(drawer, drawer.querySelector('.sheet-handle'), closeTokenDrawer, sheetScrim);
   enableSheetDrag(drawer, drawer.querySelector('.token-drawer-head'), closeTokenDrawer, sheetScrim);
 

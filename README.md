@@ -1539,6 +1539,7 @@ Click-through for design reviews: [https://kby-feed.vercel.app/flows](https://kb
 | Signature pending / rejected | [`/feed?sig`](https://kby-feed.vercel.app/feed?sig) · [`?flow=sig-reject`](https://kby-feed.vercel.app/feed?flow=sig-reject) |
 | Onboarding hint | [`/feed?flow=onboard`](https://kby-feed.vercel.app/feed?flow=onboard) (auto-swipe) |
 | Buy in USD | [`/feed?flow=buy`](https://kby-feed.vercel.app/feed?flow=buy) |
+| Chart collapse | [`/feed?flow=chart`](https://kby-feed.vercel.app/feed?flow=chart) — trade drawer, chart shrinks on scroll, then Comments |
 | Buy (wallet) | [`/feed?flow=buy-wallet`](https://kby-feed.vercel.app/feed?flow=buy-wallet) |
 | Launch Token | [`/feed?flow=launch`](https://kby-feed.vercel.app/feed?flow=launch) |
 | Pull-to-refresh / notif badge | [`?refresh`](https://kby-feed.vercel.app/feed?refresh) · [`?notiff`](https://kby-feed.vercel.app/feed?notiff) |
@@ -1722,7 +1723,7 @@ Incomplete CTA is `.flow-cta.is-wait` (pale `--orange-dim`, `--orange` label). R
 
 **Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer](https://github.com/frilo-eth/kby-feed/blob/main/README.md#trade-drawer)
 
-Same chrome as comments (desktop 360 / mobile sheet). Buy / Sell tabs. Amount is always a **USD spend** under the hood (`tradeUsdAmt()`); the field can display tokens. **Chart lives inside `#tokenDrawerScroll`** (not sticky chrome) — wheel/touch collapses the chart first, then chart+form scroll together.
+Same chrome as comments (desktop 360 / mobile sheet). Buy / Sell tabs. Amount is always a **USD spend** under the hood (`tradeUsdAmt()`); the field can display tokens. **Chart sits in sticky chrome under the header, with Trade | Comments below it** — wheel/touch collapses the chart first, then the panel scrolls. Walkthrough: [`/feed?flow=chart`](https://kby-feed.vercel.app/feed?flow=chart).
 
 | Control | Buy | Sell |
 |---------|-----|------|
