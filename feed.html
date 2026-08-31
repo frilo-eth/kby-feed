@@ -17,7 +17,7 @@
 :root{
   --bg:#F2EEEA;--card:#ffffff;--ink:#2A241C;--ink-soft:#6D6153;--ink-faint:#948A7B;
   --orange:#FF6622;--orange-dim:#FFE4D6;--coffee:#A9906F;--coffee-hover:#8A7452;
-  --green:#1FA463;--red:#E5453F;--line:rgba(80,70,59,0.12);
+  --green:#1FA463;--green-deep:#0F2A1F;--red:#E5453F;--line:rgba(80,70,59,0.12);
   --glass-light:rgba(255,255,255,0.68);--glass-dark:rgba(30,26,20,0.55);
   --sidebar-w:220px;--sidebar-w-collapsed:76px;
   --radius-lg:20px;--radius-md:14px;--radius-sm:10px;
@@ -37,7 +37,7 @@
 html.dark{
   --bg:#070403;--card:#211D18;--ink:#F4EFE7;--ink-soft:#B3A895;--ink-faint:#7A7062;
   --orange:#FF7A3D;--orange-dim:#3A2418;--coffee:#C7B291;--coffee-hover:#E4D4B8;
-  --green:#33C285;--red:#FF6A63;--line:rgba(255,255,255,0.10);
+  --green:#33C285;--green-deep:#0F2A1F;--red:#FF6A63;--line:rgba(255,255,255,0.10);
   --glass-light:rgba(255,255,255,0.14);--glass-dark:rgba(10,8,6,0.55);
   --skel:#2A241C;--skel-shine:rgba(255,255,255,.08);
   --ix-buy:#33C285;--ix-sell:#FF6A63;--ix-tip:#FF7A3D;--ix-comment:#9AA3F0;
@@ -1860,7 +1860,7 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
   appearance:none;-webkit-appearance:none;
 }
 .trade-pay-menu{
-  position:fixed;z-index:50;min-width:132px;padding:6px;
+  position:fixed;z-index:86;min-width:132px;padding:6px;
   background:var(--card);border:1px solid var(--line);border-radius:14px;
   box-shadow:var(--shadow);
 }
@@ -1922,7 +1922,10 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
   .trade-usd.has-ticker input{color:var(--ink);}
   .trade-usd.has-ticker .quote-ticker{display:none;}
 }
-#tradeBuyField.is-token .trade-usd-sign{display:none;}
+#tradeBuyField.is-token .trade-usd-sign,
+#b2tField.is-token .trade-usd-sign{display:none;}
+.trade-field.is-over .trade-usd-sign,
+.trade-field.is-over .trade-usd input{color:var(--red);caret-color:var(--red);}
 .trade-meta{margin:12px 2px 0;}
 .trade-meta-sum{
   display:flex;align-items:center;justify-content:space-between;gap:12px;
@@ -2365,6 +2368,9 @@ body.cfx-on #drawer{z-index:50;}
 .modal-overlay.show{opacity:1;pointer-events:auto;}
 .modal{background:var(--card);border-radius:20px;width:320px;box-shadow:var(--shadow);transform:scale(.92) translateY(10px);transition:transform .25s cubic-bezier(.22,1.4,.36,1);overflow:hidden;}
 .modal-overlay.show .modal{transform:scale(1) translateY(0);}
+.modal.is-morphing{
+  transition:transform .25s cubic-bezier(.22,1.4,.36,1), height .32s cubic-bezier(.32,.72,0,1);
+}
 /* ---- share sheet: branded, dynamic card of the post being shared ---- */
 .share-modal{width:420px;max-width:calc(100vw - 32px);}
 .share-head{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--line);}
@@ -2549,6 +2555,9 @@ body.cfx-on #drawer{z-index:50;}
   .modal{position:relative;width:100%!important;max-width:none!important;margin:0;border-radius:20px 20px 0 0;transform:translateY(calc(100% + 24px));transition:transform .44s cubic-bezier(.32,.72,0,1);touch-action:none;will-change:transform;}
   .modal-overlay.show .modal{transform:translateY(0);}
   .modal.sheet-dragging{transition:none;}
+  .modal.is-morphing{
+    transition:transform .44s cubic-bezier(.32,.72,0,1), height .32s cubic-bezier(.32,.72,0,1);
+  }
   .share-modal,.auth-modal,.wallet-modal,.sig-modal,.funds-modal,.swap-modal{width:100%!important;max-width:none!important;}
   .share-head{padding-top:22px;}
   .share-body{padding-bottom:calc(env(safe-area-inset-bottom) + 18px);}
@@ -2589,7 +2598,7 @@ body.cfx-on #drawer{z-index:50;}
 }
 .sig-modal,.funds-modal{width:340px;max-width:calc(100vw - 32px);}
 .auth-modal.is-flow .auth-head h4{
-  visibility:visible;font-size:16px;font-weight:700;color:var(--ink);text-align:center;
+  visibility:visible;font-size:16px;font-weight:700;color:var(--ink);text-align:left;white-space:nowrap;
 }
 .auth-modal.is-flow .auth-back.show{
   width:40px;min-width:40px;overflow:visible;visibility:visible;pointer-events:auto;margin:0;
@@ -2612,6 +2621,26 @@ body.cfx-on #drawer{z-index:50;}
   margin:0;flex:1;text-align:center;font-size:13px;font-weight:600;color:var(--ink-faint);letter-spacing:-.01em;
 }
 .wallet-head h4,.sig-head h4,.funds-head h4{font-size:16px;font-weight:700;color:var(--ink);text-align:left;}
+.funds-head h4{white-space:nowrap;min-width:0;}
+.funds-head.is-tip h4{
+  display:flex;align-items:center;gap:8px;min-width:0;flex:1;
+  font-size:16px;font-weight:700;color:var(--ink);letter-spacing:-.02em;
+}
+.funds-head.is-tip .tip-head-who{
+  display:inline-flex;align-items:center;gap:6px;min-width:0;
+  font-size:16px;font-weight:700;color:var(--ink);
+}
+.funds-head.is-tip .tip-head-who img{
+  width:22px;height:22px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--line);
+}
+.funds-head.is-tip .tip-head-who b{font-weight:700;}
+.flow-to{
+  display:none;align-items:center;gap:5px;flex-shrink:0;margin-right:2px;
+  font-size:12.5px;font-weight:500;color:var(--ink-soft);letter-spacing:-.01em;white-space:nowrap;
+}
+.flow-to.is-on{display:inline-flex;}
+.flow-to b{color:var(--ink);font-weight:600;}
+.flow-to img{width:21px;height:21px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--line);}
 .wallet-head .auth-back,.funds-head .auth-back{
   width:0;min-width:0;padding:0;overflow:hidden;margin:0;
 }
@@ -3916,59 +3945,120 @@ html.dark .flow-note.is-danger{
 }
 .flow-cta.is-blocked{opacity:.4;cursor:not-allowed;filter:none;transform:none;}
 .flow-cta.is-blocked:hover{filter:none;}
-.b2t{display:flex;flex-direction:column;gap:14px;}
-.b2t-row{
-  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
-  padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:var(--card);
-}
-.b2t-amt{min-width:0;flex:1;}
-.b2t-amt label{display:block;cursor:text;}
-.b2t-amt input{
-  width:100%;border:none;background:transparent;outline:none;padding:0;
-  font-size:32px;font-weight:800;letter-spacing:-.04em;color:var(--ink);
-  font-variant-numeric:tabular-nums;caret-color:var(--orange);line-height:1.05;
-  appearance:none;-webkit-appearance:none;
-}
-.b2t-usd{margin-top:4px;font-size:13px;font-weight:600;color:var(--ink-soft);}
-.b2t-asset{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0;padding-top:4px;}
-.b2t-asset .flow-select{
-  width:auto;gap:8px;padding:5px 10px 5px 6px;border-radius:999px;border-color:transparent;
-  background:var(--bg);font-size:13px;
-}
-.b2t-asset .flow-select-ic{width:22px;height:22px;}
-.b2t-asset .flow-select-ic svg{width:22px;height:22px;display:block;}
-.b2t-bal{font-size:12px;font-weight:600;color:var(--ink-faint);font-variant-numeric:tabular-nums;white-space:nowrap;}
+.b2t{display:flex;flex-direction:column;gap:0;}
+.b2t .trade-field{margin-bottom:8px;}
+.b2t .trade-meta{margin:4px 2px 12px;}
 .b2t-keep{
-  display:flex;align-items:center;gap:8px;min-height:24px;
+  display:flex;align-items:center;gap:8px;
+  padding:2px 2px 14px;
 }
-.b2t-keep-lab{font-size:13px;font-weight:700;color:var(--ink);letter-spacing:-.01em;}
-.b2t-keep .anon-toggle{margin-left:auto;}
+.b2t-keep-lab{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--ink);}
 .b2t-info{
-  display:grid;place-items:center;width:20px;height:20px;padding:0;border:none;
-  background:transparent;color:var(--ink-faint);cursor:pointer;border-radius:50%;
+  width:15px;height:15px;padding:0;border:1.2px solid var(--ink-faint);border-radius:50%;
+  background:transparent;color:var(--ink-faint);cursor:pointer;flex-shrink:0;
+  display:grid;place-items:center;font-family:Georgia,serif;font-size:10px;font-weight:600;line-height:1;
   appearance:none;-webkit-appearance:none;
 }
-.b2t-info:hover{color:var(--ink);}
-.b2t-info svg{width:16px;height:16px;display:block;}
-.b2t-split{
-  padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--card);
+.b2t-info:hover{border-color:var(--ink-soft);color:var(--ink-soft);}
+.b2t-info:focus-visible{outline:2px solid var(--orange);outline-offset:2px;}
+.b2t-switch{
+  width:37px;height:21px;padding:0;border:none;border-radius:999px;flex-shrink:0;cursor:pointer;
+  background:rgba(80,70,59,.16);position:relative;transition:background .22s;
 }
-.b2t-split-top{
-  display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px;
+.b2t-switch::after{
+  content:'';position:absolute;top:2.5px;left:2.5px;width:16px;height:16px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.24);
+  transition:transform .22s cubic-bezier(.32,.72,0,1);
 }
-.b2t-split-top .send-lab{margin:0;}
-.b2t-split-pct{font-size:28px;font-weight:800;letter-spacing:-.04em;font-variant-numeric:tabular-nums;line-height:1;}
-.b2t-presets{display:flex;justify-content:flex-end;gap:6px;margin-bottom:10px;}
-.b2t-presets button{
-  border:1px solid var(--line);border-radius:999px;padding:5px 10px;
-  background:transparent;color:var(--ink-soft);font-size:11px;font-weight:700;cursor:pointer;
-  appearance:none;-webkit-appearance:none;
+.b2t-switch.on{background:var(--orange);}
+.b2t-switch.on::after{transform:translateX(16px);}
+.b2t-switch:focus-visible{outline:2px solid var(--orange);outline-offset:2px;}
+.b2t-keep-box{
+  border:1px solid var(--line);border-radius:12px;padding:12px 13px 13px;
+  background:var(--card);margin-bottom:14px;
 }
-.b2t-presets button.is-on{background:var(--ink);color:var(--bg);border-color:transparent;}
+.b2t-keep-box .b2t-keep{padding:0;margin-bottom:4px;}
+.b2t-slider{--b2t-mint:#3DDC97;position:relative;padding:30px 0 4px;touch-action:none;cursor:grab;user-select:none;pointer-events:auto;}
+.b2t-slider.is-drag{cursor:grabbing;}
+.b2t-bubble{
+  position:absolute;top:0;transform:translateX(-50%);background:#11100E;color:#fff;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;font-weight:600;
+  letter-spacing:.02em;padding:4px 9px;border-radius:7px;white-space:nowrap;pointer-events:none;
+  transition:left .08s cubic-bezier(.32,.72,0,1);
+}
+.b2t-bubble::after{
+  content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:#11100E;
+}
+.b2t-track{position:relative;height:6px;border-radius:3px;z-index:3;pointer-events:auto;}
+.b2t-track::before{
+  content:'';position:absolute;left:0;right:0;top:50%;height:28px;
+  transform:translateY(-50%);
+}
+.b2t-dot{
+  position:absolute;top:50%;width:8px;height:8px;border-radius:50%;
+  transform:translate(-50%,-50%);pointer-events:auto;cursor:pointer;z-index:4;
+  border:0;padding:0;margin:0;font-size:0;line-height:0;min-width:8px;min-height:8px;
+  appearance:none;-webkit-appearance:none;background:var(--green-deep);
+}
+.b2t-dot::after{
+  content:'';position:absolute;left:50%;top:50%;width:32px;height:32px;
+  transform:translate(-50%,-50%);border-radius:50%;
+}
+.b2t-dot:focus-visible{outline:2px solid var(--orange);outline-offset:6px;}
+.b2t-thumb{
+  position:absolute;top:50%;width:17px;height:17px;border-radius:50%;
+  background:var(--b2t-mint);border:3px solid var(--green-deep);
+  transform:translate(-50%,-50%);pointer-events:none;
+  box-shadow:0 2px 5px rgba(15,42,31,.35);
+  transition:left .08s cubic-bezier(.32,.72,0,1);
+}
+.b2t-slider.is-drag .b2t-bubble,
+.b2t-slider.is-drag .b2t-thumb{transition:none;}
 .b2t-range{
-  display:block;width:100%;margin:0;accent-color:var(--ink);height:18px;cursor:pointer;
+  position:absolute;left:-4px;right:-4px;top:22px;width:calc(100% + 8px);height:22px;
+  opacity:0;margin:0;-webkit-appearance:none;appearance:none;background:transparent;
+  z-index:1;pointer-events:none;touch-action:none;
 }
-.b2t .flow-cta{margin-top:2px;}
+.b2t-range:active{cursor:grabbing;}
+.b2t-range::-webkit-slider-runnable-track{background:transparent;border:none;height:22px;}
+.b2t-range::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:22px;height:22px;border:0;background:transparent;
+}
+.b2t-range::-moz-range-track{background:transparent;border:none;height:22px;}
+.b2t-range::-moz-range-thumb{width:22px;height:22px;border:0;background:transparent;}
+.b2t-range:focus-visible + .b2t-focus{
+  outline:2px solid var(--orange);outline-offset:4px;border-radius:6px;
+}
+.b2t-focus{position:absolute;left:0;right:0;top:28px;height:6px;pointer-events:none;}
+.b2t-legend{
+  display:flex;justify-content:space-between;margin-top:14px;
+  font-size:12.5px;color:var(--ink-soft);
+}
+.b2t-vals{display:flex;justify-content:space-between;gap:10px;margin-top:6px;}
+.b2t-val{
+  flex:1;min-width:0;padding:9px 11px;border-radius:9px;
+  background:rgba(80,70,59,.045);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;color:var(--ink-faint);
+  font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.b2t-val.is-keep{text-align:right;}
+.b2t .trade-field + .trade-field{margin-top:10px;}
+.b2t .flow-cta{
+  margin-top:2px;background:#3DDC97;color:#0D3326;
+  box-shadow:0 1px 0 rgba(255,255,255,.3) inset, 0 6px 16px -9px rgba(61,220,151,.9);
+}
+.b2t .flow-cta:hover{filter:brightness(1.05);}
+.b2t .flow-cta.is-short{
+  background:var(--ink);color:var(--bg);box-shadow:none;
+}
+.b2t .flow-cta.is-wait{opacity:.55;cursor:default;transform:none;filter:none;box-shadow:none;}
+html.dark .b2t-asset .trade-asset-chip.is-static{background:rgba(255,255,255,.06);}
+html.dark .b2t-val{background:rgba(255,255,255,.05);}
+html.dark .b2t-switch{background:rgba(255,255,255,.16);}
+html.dark .b2t-switch.on{background:var(--orange);}
+html.dark .b2t-bubble{background:#F4EFE7;color:#070403;}
+html.dark .b2t-bubble::after{border-top-color:#F4EFE7;}
 @keyframes kbModalShake{
   0%,100%{translate:0 0}
   16%{translate:-8px 0}
@@ -4275,6 +4365,7 @@ html.dark .flow-status-ok circle{fill:rgba(31,164,99,.22);}
   .flow-status.is-done .flow-status-ok{transition:none;transform:none;}
   .flow-status.is-done .flow-status-ok path{animation:none;stroke-dashoffset:0;}
   .flow-select-menu{transition:none;transform:none;}
+  .b2t-bubble,.b2t-thumb,.b2t-switch,.b2t-switch::after{transition:none;}
   .flow-note,.flow-note.is-in,.flow-note.is-out{
     transform:none;transition:opacity .08s;
   }
@@ -5148,11 +5239,10 @@ html.dark .qhc-id{color:#6BA3FF;}
             <div class="trade-field-top">
               <span class="trade-field-label" id="tradePayLbl">Pay with</span>
               <div class="trade-pay-select" id="tradePaySelect">
-                <button type="button" class="trade-asset-chip has-chev" id="tradePayChip" aria-haspopup="listbox" aria-expanded="false">
+                <button type="button" class="trade-asset-chip has-chev" id="tradePayChip" aria-haspopup="listbox" aria-expanded="false" aria-controls="tradePayMenu">
                   <span class="trade-pay-ic" id="tradePayAssetIcon" aria-hidden="true"></span>
                   <span id="tradePayAssetLabel">ETH</span>
                 </button>
-                <div class="trade-pay-menu" id="tradePayMenu" hidden role="listbox" aria-label="Pay with"></div>
               </div>
             </div>
             <div class="trade-pay-row">
@@ -5272,6 +5362,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <h4 id="authTitle">Sign up / Log in</h4>
+      <span class="flow-to" id="authTo" hidden></span>
       <button type="button" class="share-close" id="authClose" aria-label="Close">✕</button>
     </div>
     <div class="auth-brand">
@@ -5377,6 +5468,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <h4 id="walletTitle">Account</h4>
+      <span class="flow-to" id="walletTo" hidden></span>
       <div class="wallet-head-actions">
         <button type="button" class="share-close" id="walletClose" aria-label="Close">✕</button>
       </div>
@@ -5480,6 +5572,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
       <h4 id="fundsTitle">Top up</h4>
+      <span class="flow-to" id="fundsTo" hidden></span>
       <button type="button" class="share-close" id="fundsClose" aria-label="Close">✕</button>
     </div>
     <div class="funds-body" id="fundsBody"></div>
@@ -5497,6 +5590,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   </div>
 </div>
 
+<div class="trade-pay-menu" id="tradePayMenu" hidden role="listbox" aria-label="Pay with"></div>
 <div class="kb-toast" id="kbToast" role="status" aria-live="polite"></div>
 
 <div class="modal-overlay" id="shareOverlay">
@@ -5695,6 +5789,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     _authReset: 0,
     flowTimer: 0,
     payAsset: 'eth',
+    hasGas: false,
     tradeUnit: 'usd',
     slipMode: 'auto',
     slipCustom: '0',
@@ -6033,53 +6128,112 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   function overlayOpen(el){
     if(!el) return;
+    const wasOpen = el.classList.contains('show');
+    if(el === sigOverlay || el === authOverlay) session._fundsYield = true;
+    if(el === fundsOverlay) session._fundsYield = false;
     if(TRAY_FAMILY.includes(el)){
       TRAY_FAMILY.forEach(o => { if(o && o !== el) overlayClose(o); });
     }
     el.classList.add('show');
     el.setAttribute('aria-hidden', 'false');
+    if(!wasOpen){
+      el.dataset.openedAt = String(performance.now());
+      const modal = el.querySelector('.modal');
+      if(modal){
+        modal.classList.remove('sheet-dragging', 'is-morphing', 'is-shake');
+      }
+      clearTimeout(el._enterKick);
+      el._enterKick = setTimeout(()=>{
+        if(!el.classList.contains('show')) return;
+        if(getComputedStyle(el).opacity === '0') el.style.opacity = '1';
+        const m = el.querySelector('.modal');
+        if(m) m.style.transform = 'none';
+      }, 260);
+    }
   }
   function overlayClose(el){
     if(!el) return;
+    if(el === fundsOverlay && session.happyChain && !session._allowFundsClose && !session._fundsYield) return;
     if(el === sigOverlay || el === authOverlay) hideWalletExt();
     el.classList.remove('show');
     el.setAttribute('aria-hidden', 'true');
+    el.style.opacity = '';
+    const closedModal = el.querySelector('.modal');
+    if(closedModal) closedModal.style.transform = '';
+    if(el === fundsOverlay){
+      resetSheetMorph(el.querySelector('.funds-modal'));
+      session._b2tOverPulse = false;
+      if(typeof hidePayPicker === 'function') hidePayPicker();
+    }
     if(typeof closeFlowSelect === 'function') closeFlowSelect();
   }
   function anyAuthOverlayOpen(){
     return TRAY_FAMILY.some(el => el?.classList.contains('show'));
   }
+  function resetSheetMorph(modal){
+    if(!modal) return;
+    modal.style.height = '';
+    modal.style.overflow = '';
+    modal.style.transition = '';
+    modal.classList.remove('is-morphing');
+  }
+  function sheetEnterBusy(modal){
+    if(!modal) return false;
+    if(modal.classList.contains('sheet-dragging')) return true;
+    const ov = modal.closest('.modal-overlay');
+    if(!ov?.classList.contains('show')) return false;
+    const t = getComputedStyle(modal).transform;
+    if(!t || t === 'none') return false;
+    try{
+      const m = new DOMMatrixReadOnly(t);
+      const moving = Math.abs(m.a - 1) > 0.02 || Math.abs(m.d - 1) > 0.02
+        || Math.abs(m.e) > 3 || Math.abs(m.f) > 3;
+      if(!moving) return false;
+      const opened = Number(ov.dataset.openedAt || 0);
+      if(opened && (performance.now() - opened) > 420){
+        modal.style.transform = '';
+        return false;
+      }
+      return true;
+    }catch(_){ return false; }
+  }
   function morphSheet(modal, mutate){
     if(!modal){ mutate(); return; }
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const sideDrawer = modal.classList.contains('wallet-modal') && window.innerWidth > 860;
-    if(reduce || sideDrawer){ mutate(); return; }
-    const from = modal.getBoundingClientRect().height;
-    modal.style.transition = 'none';
-    mutate();
-    modal.style.height = 'auto';
-    modal.style.overflow = 'visible';
-    const to = Math.round(modal.getBoundingClientRect().height);
-    if(Math.abs(to - from) < 2){
-      modal.style.height = '';
-      modal.style.overflow = '';
-      modal.style.transition = '';
+    const shown = !!modal.closest('.show');
+    const from = modal.offsetHeight;
+    if(reduce || sideDrawer || !shown || from < 8 || sheetEnterBusy(modal)){
+      mutate();
+      resetSheetMorph(modal);
       return;
     }
+    const gen = (modal._morphGen = (modal._morphGen || 0) + 1);
+    clearTimeout(modal._morphT);
+    if(modal._morphClear){
+      modal.removeEventListener('transitionend', modal._morphClear);
+      modal._morphClear = null;
+    }
+    mutate();
+    const to = modal.offsetHeight;
+    if(Math.abs(to - from) < 2){
+      resetSheetMorph(modal);
+      return;
+    }
+    modal.classList.add('is-morphing');
     modal.style.height = from + 'px';
     modal.style.overflow = 'hidden';
     void modal.offsetHeight;
-    modal.style.transition = 'height .32s cubic-bezier(.32,.72,0,1)';
     modal.style.height = to + 'px';
     const clear = (e)=>{
+      if(gen !== modal._morphGen) return;
       if(e && e.propertyName && e.propertyName !== 'height') return;
-      modal.style.height = '';
-      modal.style.transition = '';
-      modal.style.overflow = '';
+      resetSheetMorph(modal);
       modal.removeEventListener('transitionend', clear);
+      modal._morphClear = null;
     };
+    modal._morphClear = clear;
     modal.addEventListener('transitionend', clear);
-    clearTimeout(modal._morphT);
     modal._morphT = setTimeout(()=> clear(), 400);
   }
   function flowHost(){
@@ -6677,14 +6831,39 @@ html.dark .qhc-id{color:#6BA3FF;}
       bal.textContent = formatPayAssetAmt(hold) + ' ' + asset.tick;
     }
   }
+  let payPickerChip = null;
+  let payPickerIds = null;
+  function pickPayAsset(id){
+    if(!id || !PAY_ASSETS[id]) return;
+    session.payAsset = id;
+    hidePayPicker();
+    paintTradeCta();
+    if(session.flow?.step === 'buyToTip'){
+      rememberBuyToTip();
+      paintB2tPay();
+      const cta = document.querySelector('[data-buy-to-tip-go]');
+      if(cta){
+        const st = buyToTipCtaState();
+        cta.textContent = st.label;
+        cta.classList.toggle('is-short', st.kind === 'deposit');
+        cta.classList.toggle('is-wait', st.kind === 'amt');
+        cta.setAttribute('aria-disabled', st.enabled ? 'false' : 'true');
+      }
+      paintB2tQuote();
+    }
+    haptic('selection');
+  }
   function hidePayPicker(){
     const menu = document.getElementById('tradePayMenu');
-    const chip = document.getElementById('tradePayChip');
+    const chip = payPickerChip || document.getElementById('tradePayChip');
     if(menu) menu.hidden = true;
     chip?.setAttribute('aria-expanded', 'false');
+    document.querySelectorAll('[data-b2t-pay]').forEach(c => c.setAttribute('aria-expanded', 'false'));
+    payPickerChip = null;
+    payPickerIds = null;
   }
   function placePayMenu(){
-    const chip = document.getElementById('tradePayChip');
+    const chip = payPickerChip || document.getElementById('tradePayChip');
     const menu = document.getElementById('tradePayMenu');
     if(!chip || !menu || menu.hidden) return;
     const r = chip.getBoundingClientRect();
@@ -6692,22 +6871,24 @@ html.dark .qhc-id{color:#6BA3FF;}
     menu.style.left = 'auto';
     menu.style.right = Math.round(window.innerWidth - r.right) + 'px';
   }
-  function showPayPicker(){
-    paintPayPicker();
+  function showPayPicker(chip, ids){
+    payPickerChip = chip || document.getElementById('tradePayChip');
+    payPickerIds = ids || null;
+    paintPayPicker(ids);
     const menu = document.getElementById('tradePayMenu');
-    const chip = document.getElementById('tradePayChip');
     if(menu) menu.hidden = false;
-    chip?.setAttribute('aria-expanded', 'true');
+    payPickerChip?.setAttribute('aria-expanded', 'true');
     placePayMenu();
   }
-  function paintPayPicker(){
+  function paintPayPicker(ids){
     const list = document.getElementById('tradePayMenu');
     if(!list) return;
-    const rows = [
+    const all = [
       { id:'eth', tick:'ETH', ic: PAY_ETH_ICON },
       { id:'weth', tick:'WETH', ic: PAY_WETH_ICON },
       { id:'usdm', tick:'USDm', ic: PAY_USDM_ICON },
     ];
+    const rows = ids && ids.length ? all.filter(r => ids.includes(r.id)) : all;
     list.innerHTML = rows.map(r => `
       <button type="button" role="option" data-pay="${r.id}" class="${session.payAsset===r.id?'is-on':''}" aria-selected="${session.payAsset===r.id}">
         <span class="trade-pay-ic">${r.ic}</span>
@@ -7094,10 +7275,12 @@ html.dark .qhc-id{color:#6BA3FF;}
       if(kind === 'social'){
         session.wallets = [mintWallet('emb', { bal: 0, active: true })];
         seedAccountHoldings();
+        session.hasGas = !session.demoZeroBal;
       } else {
         const funded = session.demoZeroBal ? 0
           : ((demoHas('sig') && !demoError()) ? 250 : null);
         session.wallets = [fillEoaBag(mintWallet(key || 'mm', { active: true }), funded)];
+        session.hasGas = !session.demoZeroBal;
       }
       afterAuth(pending, need);
     });
@@ -7106,7 +7289,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     paintAuthChrome();
     if(typeof haptic === 'function') haptic('like');
     closeLogin();
-    if(pending) setTimeout(()=>{ try{ pending(); }catch(_){} }, 280);
+    const wait = session.happyChain ? HAPPY_PACE.afterLogin : 280;
+    if(pending) setTimeout(()=>{ try{ pending(); }catch(_){} }, wait);
   }
 
   function requireAuth(then, need){
@@ -9074,7 +9258,7 @@ html.dark .qhc-id{color:#6BA3FF;}
         cashWait: 'Top up',
         watch: 'Top up',
         confirm: 'Top up',
-        buyToTip: session.pendingTip?.ticker ? `Buy to tip ${session.pendingTip.ticker}` : 'Buy to tip',
+        buyToTip: 'Tip',
         cwFamily: 'EVM or Solana',
         cwWallets: 'Connect wallet',
         cwWait: 'Connect wallet',
@@ -9108,7 +9292,8 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(f.kind === 'send' && f.step === 'form') return flowHost() === 'wallet';
     if(f.kind !== 'deposit') return false;
     if(f.step === 'home') return flowHost() === 'wallet';
-    if(f.step === 'confirm') return false;
+    if(f.step === 'confirm' || f.step === 'buyToTip') return false;
+    if(session.pendingTip && (f.step === 'cash' || f.step === 'cashPay')) return true;
     return !!FLOW_BACK[f.step] || f.step === 'watch';
   }
   function flowBack(){
@@ -9122,6 +9307,10 @@ html.dark .qhc-id{color:#6BA3FF;}
       return;
     }
     if(f.kind !== 'deposit') return;
+    if(session.pendingTip && (f.step === 'cash' || f.step === 'cashPay' || f.step === 'home')){
+      beginBuyToTip();
+      return;
+    }
     if(f.step === 'watch'){
       clearFlowTimer();
       f.step = f.entry === 'mega' ? 'mega' : f.entry === 'cw' ? 'cwBalances' : 'qr';
@@ -9137,7 +9326,26 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(prev === 'cwWallets' || prev === 'exList') f.listReady = true;
     paintFlowSheet();
   }
+  function presentTipFundsSheet(){
+    const modal = fundsOverlay?.querySelector('.funds-modal');
+    const live = fundsOverlay?.classList.contains('show');
+    overlayOpen(fundsOverlay);
+    const paint = ()=>{
+      const authFunds = document.getElementById('authPanelFunds');
+      if(authFunds) authFunds.innerHTML = '';
+      paintFlowInto(document.getElementById('fundsBody'));
+    };
+    if(live && !sheetEnterBusy(modal)) morphSheet(modal, paint);
+    else {
+      paint();
+      if(live) resetSheetMorph(modal);
+    }
+  }
   function paintFlowSheet(){
+    if(session.pendingTip && session.flow?.kind === 'deposit'){
+      presentTipFundsSheet();
+      return;
+    }
     const host = flowHost();
     if(host === 'auth'){
       morphSheet(authOverlay.querySelector('.auth-modal'), ()=> applyAuthPanel('funds'));
@@ -9448,15 +9656,41 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(host === 'auth') return authOverlay?.querySelector('.auth-modal');
     return fundsOverlay?.querySelector('.funds-modal');
   }
+  function shakeFlowModal(modal){
+    modal = modal || flowModalEl();
+    if(!modal) return;
+    modal.classList.remove('is-shake');
+    void modal.offsetWidth;
+    modal.classList.add('is-shake');
+    modal.addEventListener('animationend', ()=> modal.classList.remove('is-shake'), { once:true });
+    setTimeout(()=> modal.classList.remove('is-shake'), 520);
+  }
+  function whenSheetSettled(modal, fn){
+    if(!modal){ fn(); return; }
+    if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){ fn(); return; }
+    let done = false;
+    const finish = ()=>{
+      if(done) return;
+      done = true;
+      modal.removeEventListener('transitionend', onEnd);
+      fn();
+    };
+    const onEnd = (e)=>{
+      if(e && e.target === modal && (!e.propertyName || e.propertyName === 'transform')) finish();
+    };
+    modal.addEventListener('transitionend', onEnd);
+    const start = performance.now();
+    const tick = ()=>{
+      if(done) return;
+      if(!sheetEnterBusy(modal) && performance.now() - start > 80) finish();
+      else if(performance.now() - start > 560) finish();
+      else requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+    setTimeout(finish, 520);
+  }
   function rejectCashAmt(){
-    const modal = flowModalEl();
-    if(modal){
-      modal.classList.remove('is-shake');
-      void modal.offsetWidth;
-      modal.classList.add('is-shake');
-      const done = ()=> modal.classList.remove('is-shake');
-      modal.addEventListener('animationend', done, { once:true });
-    }
+    shakeFlowModal();
     if(typeof haptic === 'function') haptic('error');
     const f = session.flow;
     const note = flowBodyEl()?.querySelector('[data-flow-note]');
@@ -9757,7 +9991,7 @@ html.dark .qhc-id{color:#6BA3FF;}
   }
   function continueTipOrBuy(ctx, amt){
     const tipAmt = roundUsd(Math.max(0.01, amt || TIP_USD));
-    if(alreadyTipped(ctx) && needsBuyToTip(ctx, tipAmt) && spendShortfall(tipAmt) > 0) return;
+    if(alreadyTipped(ctx) && needsBuyToTip(ctx, tipAmt) && (!session.hasGas || spendShortfall(tipAmt) > 0)) return;
     armPendingTip(ctx, amt);
     window.KbyTipping?.hide?.();
     const send = document.getElementById('minimodalSend');
@@ -9767,13 +10001,6 @@ html.dark .qhc-id{color:#6BA3FF;}
       else if(ctx?.resumeHold) ctx.resumeHold();
       return;
     }
-    const need = spendShortfall(tipAmt);
-    if(need > 0){
-      if(typeof haptic === 'function') haptic('warning');
-      showToast('Top up to continue.');
-      openTopUp(need);
-      return;
-    }
     beginBuyToTip();
   }
   function abortFundsFlow(){
@@ -9781,61 +10008,155 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.pendingFunds = null;
     session.pendingTip = null;
     session.flow = null;
+    session._b2tOverPulse = false;
+    syncFlowHead();
+  }
+  function tipPayTick(){
+    return session.auth === 'eoa' ? payAssetOf().tick : 'USD';
+  }
+  function tipPayFmt(usd){
+    if(session.auth !== 'eoa' || session.payAsset === 'usdm'){
+      const n = roundUsd(usd);
+      return Number.isInteger(n) ? String(n) : n.toFixed(2);
+    }
+    return formatPayAssetAmt(usd);
+  }
+  function tipPayLabel(usd){
+    const n = roundUsd(usd);
+    if(session.auth !== 'eoa'){
+      return Number.isInteger(n) ? '$' + Math.round(n) : usdLabel(n);
+    }
+    const tick = payAssetOf().tick;
+    const amt = usdToPayAmt(n);
+    const shown = tick === 'USDm'
+      ? (Number.isInteger(amt) ? String(amt) : amt.toFixed(2))
+      : formatPayAssetAmt(n);
+    return `${shown} ${tick}`;
+  }
+  function tipInputToUsd(raw){
+    if(session.auth !== 'eoa' || session.payAsset === 'usdm') return roundUsd(parseAmt(raw));
+    return roundUsd(payAmtToUsd(parseAmt(raw)));
+  }
+  function b2tToks(usd){
+    const raw = Math.max(0, Number(usd) || 0) * tokenPerUsd();
+    return raw.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function keepPctOf(v, fallback){
+    const n = Number(v);
+    if(!Number.isFinite(n)) return fallback == null ? 50 : fallback;
+    return Math.min(100, Math.max(0, Math.round(n)));
+  }
+  const B2T_STOPS = [0, 25, 50, 75, 100];
+  const B2T_SNAP = 4;
+  function snapKeepPct(v, fallback){
+    const n = keepPctOf(v, fallback);
+    let best = n, dist = B2T_SNAP;
+    B2T_STOPS.forEach(s => {
+      const d = Math.abs(s - n);
+      if(d <= dist){ dist = d; best = s; }
+    });
+    return best;
+  }
+  function rememberBuyToTip(){
+    const tip = session.pendingTip;
+    const f = session.flow;
+    if(!tip || !f) return;
+    tip.tipUsd = roundUsd(f.buyAmt || tip.tipUsd || TIP_USD);
+    tip.keepOn = !!f.keepOn;
+    tip.keepPct = snapKeepPct(f.keepPct);
+    tip.payAsset = session.payAsset;
   }
   function buyToTipSplit(){
     const f = session.flow;
     const payUsd = roundUsd(Math.max(0, f?.buyAmt || 0));
     const keepOn = !!f?.keepOn;
-    const keepPct = Math.min(100, Math.max(0, Number(f?.keepPct) || 0));
-    const keepUsd = keepOn ? roundUsd(payUsd * keepPct / 100) : 0;
-    const tipUsd = roundUsd(Math.max(0, payUsd - keepUsd));
+    const keepPct = snapKeepPct(f?.keepPct);
+    const tipUsd = keepOn ? roundUsd(payUsd * keepPct / 100) : payUsd;
+    const keepUsd = keepOn ? roundUsd(Math.max(0, payUsd - tipUsd)) : 0;
     return { payUsd, keepUsd, tipUsd, keepPct };
   }
   function buyToTipCtaText(){
-    const asset = payAssetOf();
-    const { tipUsd, keepUsd } = buyToTipSplit();
-    const tipAmt = formatPayAssetAmt(tipUsd);
-    const keepAmt = formatPayAssetAmt(keepUsd);
-    if(keepUsd <= 0) return `Tip ${tipAmt} ${asset.tick}`;
-    if(tipUsd <= 0) return `Keep ${keepAmt} ${asset.tick}`;
-    return `Tip ${tipAmt} ${asset.tick} and keep ${keepAmt} ${asset.tick}`;
+    const { tipUsd, keepUsd, keepPct } = buyToTipSplit();
+    const f = session.flow;
+    if(f?.keepOn){
+      if(keepPct <= 0) return `Keep ${tipPayLabel(keepUsd || (f.buyAmt || 0))}`;
+      if(keepPct >= 100) return `Tip ${tipPayLabel(tipUsd)}`;
+      return `Tip ${tipPayLabel(tipUsd)} and keep ${tipPayLabel(keepUsd)}`;
+    }
+    return `Tip ${tipPayLabel(tipUsd)}`;
   }
   function buyToTipOk(){
     const { payUsd } = buyToTipSplit();
     const bal = roundUsd(cashWallet()?.bal || 0);
-    return payUsd > 0 && payUsd <= bal + 1e-9;
+    return payUsd > 0 && !!session.hasGas && payUsd <= bal + 1e-9;
+  }
+  function buyToTipAmtOver(){
+    const { payUsd } = buyToTipSplit();
+    return payUsd > 0 && spendShortfall(payUsd) > 0;
+  }
+  function markBuyToTipOver(){
+    const over = buyToTipAmtOver();
+    const row = document.querySelector('#b2tField');
+    const amt = document.getElementById('b2tAmt');
+    row?.classList.toggle('is-over', over);
+    if(amt) amt.setAttribute('aria-invalid', over ? 'true' : 'false');
+    if(!over) session._b2tOverPulse = false;
+    return over;
+  }
+  function pulseBuyToTipOver(){
+    if(!markBuyToTipOver()) return;
+    if(session._b2tOverPulse) return;
+    session._b2tOverPulse = true;
+    const modal = fundsOverlay?.querySelector('.funds-modal') || flowModalEl();
+    const run = ()=>{
+      if(!fundsOverlay?.classList.contains('show')) return;
+      if(session.flow?.step !== 'buyToTip') return;
+      shakeFlowModal(modal);
+      if(typeof haptic === 'function') haptic('error');
+    };
+    whenSheetSettled(modal, run);
+  }
+  function buyToTipCtaState(){
+    const { payUsd } = buyToTipSplit();
+    if(payUsd <= 0) return { kind: 'amt', enabled: false, label: 'Enter amount' };
+    if(!session.hasGas || spendShortfall(payUsd) > 0) return { kind: 'deposit', enabled: true, label: 'Top up to tip' };
+    return { kind: 'go', enabled: true, label: buyToTipCtaText() };
   }
   function beginBuyToTip(){
     const tip = session.pendingTip;
     if(!tip) return;
-    session.payAsset = 'usdm';
+    const okPay = (id)=> id === 'eth' || id === 'weth' || id === 'usdm';
+    if(session.auth === 'eoa') session.payAsset = okPay(tip.payAsset) ? tip.payAsset : 'usdm';
+    else session.payAsset = 'usdm';
     if(!session.flow || session.flow.kind !== 'deposit'){
       session.flow = defaultFlow('deposit', 0);
     }
     const f = session.flow;
     f.step = 'buyToTip';
-    f.buyAmt = roundUsd(tip.tipUsd || TIP_USD);
-    f.keepOn = false;
-    f.keepPct = 50;
+    f.buyAmt = roundUsd(tip.tipUsd || f.buyAmt || TIP_USD);
+    f.keepOn = !!tip.keepOn;
+    f.keepPct = snapKeepPct(tip.keepPct);
+    session.b2tUnit = 'usd';
     window.KbyTipping?.hide?.();
     window.KbyTipping?.syncBalances?.();
-    const host = flowHost();
-    if(host === 'auth'){ setAuthPanel('funds'); }
-    else if(host === 'wallet'){ session.walletView = 'flow'; renderWalletBody(); }
-    else if(host === 'funds'){ paintFlowSheet(); }
-    else {
-      const title = document.getElementById('fundsTitle');
-      if(title) title.textContent = flowTitle();
-      paintFlowInto(document.getElementById('fundsBody'));
-      overlayOpen(fundsOverlay);
-    }
+    presentTipFundsSheet();
+  }
+  function openBuyToTipTopUp(){
+    const { payUsd } = buyToTipSplit();
+    rememberBuyToTip();
+    const need = Math.max(spendShortfall(payUsd), payUsd || TIP_USD);
+    if(typeof haptic === 'function') haptic('warning');
+    openTopUp(need);
   }
   function settleBuyToTip(){
     const tip = session.pendingTip;
     const f = session.flow;
-    if(!tip || !f || f.step !== 'buyToTip') return;
+    if(!tip || !f) return;
+    if(f.step !== 'buyToTip') return;
+    const st = buyToTipCtaState();
+    if(st.kind === 'deposit'){ openBuyToTipTopUp(); return; }
+    if(st.kind !== 'go') return;
     const { payUsd, tipUsd } = buyToTipSplit();
-    if(payUsd <= 0 || !buyToTipOk()) return;
     const finish = ()=>{
       recordBuy(payUsd, tip.post);
       if(tipUsd > 0 && tip.post?.ticker) reduceHolding(tipUsd, tip.post.ticker);
@@ -9847,9 +10168,165 @@ html.dark .qhc-id{color:#6BA3FF;}
       if(tipUsd > 0 && ctx?.tipBtn) commitFeedTip(ctx, tipUsd);
       else if(typeof haptic === 'function') haptic('success');
     };
-    requireSpend(payUsd, finish, 'Buy to tip ' + usdLabel(payUsd));
+    requireSpend(payUsd, finish, buyToTipCtaText());
   }
-  const B2T_INFO_SVG = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="6.2" stroke="currentColor" stroke-width="1.4"/><path d="M8 7.15v4.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="5.15" r=".95" fill="currentColor"/></svg>';
+  function tipHeadHtml(){
+    const post = session.pendingTip?.post;
+    if(!post) return 'Tip';
+    const handle = String(post.user || '').replace(/^@/, '');
+    const av = post.avatar || userAvatar(handle);
+    return `Tip <span class="tip-head-who"><img src="${escHtml(av)}" alt=""><b>@${escHtml(handle)}</b></span>`;
+  }
+  function syncFlowHead(){
+    const on = session.flow?.kind === 'deposit' && session.flow.step === 'buyToTip' && !!session.pendingTip;
+    document.querySelector('.funds-head')?.classList.toggle('is-tip', on);
+    const title = document.getElementById('fundsTitle');
+    const to = document.getElementById('fundsTo');
+    if(on){
+      if(title) title.innerHTML = tipHeadHtml();
+      if(to){
+        to.hidden = true;
+        to.classList.remove('is-on');
+        to.innerHTML = '';
+      }
+      document.getElementById('fundsBack')?.classList.remove('show');
+      return;
+    }
+    ['authTo','walletTo','fundsTo'].forEach(id => {
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.innerHTML = '';
+      el.hidden = true;
+      el.classList.remove('is-on');
+    });
+  }
+  const B2T_MINT = '#3DDC97';
+  const B2T_PRESETS = [1, 5, 25];
+  const B2T_KEEP_TITLE = 'Keep a portion of your tip';
+  const B2T_KEEP_BODY = 'Send it all as a tip, keep it all in your wallet, or split it. You choose.';
+  function b2tTokenName(){
+    const t = session.pendingTip?.ticker || session.pendingTip?.post?.ticker || 'SAUCE';
+    return String(t).replace(/^\$/, '') || 'SAUCE';
+  }
+  function b2tTokenImg(){
+    const post = session.pendingTip?.post;
+    if(typeof tokenArtOf === 'function' && post) return tokenArtOf(post);
+    return `${M}/${b2tTokenName()}.webp`;
+  }
+  function b2tAmtStr(){
+    const usd = roundUsd(session.flow?.buyAmt || 0);
+    if(session.b2tUnit === 'token') return formatTokenInput(usd);
+    return Number.isInteger(usd) ? String(usd) : money(usd);
+  }
+  function b2tOutText(){
+    const usd = roundUsd(session.flow?.buyAmt || 0);
+    const tick = b2tTokenName();
+    if(session.b2tUnit === 'token') return usdLabel(usd);
+    return `${formatTokenOut(usd)} ${tick}`;
+  }
+  function b2tPayHtml(usd){
+    if(session.auth !== 'eoa') return '';
+    const asset = payAssetOf();
+    const hold = isAuthed() ? (cashWallet()?.bal || 0) : 0;
+    const amt = formatPayAssetAmt(usd);
+    return `<div class="trade-field" id="b2tPayWith">
+      <div class="trade-field-top">
+        <span class="trade-field-label">Pay with</span>
+        <div class="trade-pay-select">
+          <button type="button" class="trade-asset-chip has-chev" data-b2t-pay id="b2tPayChip" aria-haspopup="listbox" aria-expanded="false" aria-controls="tradePayMenu" aria-label="Pay with">
+            <span class="trade-pay-ic" id="b2tPayIcon">${asset.ic}</span>
+            <span id="b2tPayLabel">${escHtml(asset.tick)}</span>
+          </button>
+        </div>
+      </div>
+      <div class="trade-pay-row">
+        <label class="trade-usd has-ticker" id="b2tPayAmtWrap">
+          <input id="b2tPayAmt" inputmode="decimal" autocomplete="off" value="${escHtml(amt)}" aria-label="Amount in ${escHtml(asset.tick)}">
+          <span class="quote-ticker" id="b2tPayTicker" aria-hidden="true">${escHtml(amt)}</span>
+        </label>
+        <span class="trade-pay-bal" id="b2tPayBal">${escHtml(formatPayAssetAmt(hold))} ${escHtml(asset.tick)}</span>
+      </div>
+    </div>`;
+  }
+  function paintB2tPay(){
+    if(session.auth !== 'eoa') return;
+    const usd = roundUsd(session.flow?.buyAmt || 0);
+    const asset = payAssetOf();
+    const lab = document.getElementById('b2tPayLabel');
+    const ic = document.getElementById('b2tPayIcon');
+    if(lab) lab.textContent = asset.tick;
+    if(ic) ic.innerHTML = asset.ic;
+    const input = document.getElementById('b2tPayAmt');
+    if(input && document.activeElement !== input){
+      const next = formatPayAssetAmt(usd);
+      input.value = next;
+      input.setAttribute('aria-label', 'Amount in ' + asset.tick);
+      if(typeof setQuoteTicker === 'function') setQuoteTicker(document.getElementById('b2tPayTicker'), next, { animate: true });
+    }
+    const bal = document.getElementById('b2tPayBal');
+    if(bal){
+      const hold = isAuthed() ? (cashWallet()?.bal || 0) : 0;
+      bal.textContent = formatPayAssetAmt(hold) + ' ' + asset.tick;
+    }
+  }
+  function paintB2tQuote(){
+    const usd = roundUsd(session.flow?.buyAmt || 0);
+    const fee = protocolFee(usd);
+    const { tipUsd, keepUsd } = buyToTipSplit();
+    const out = document.getElementById('b2tOutVal');
+    if(out) out.textContent = b2tOutText();
+    const field = document.getElementById('b2tField');
+    field?.classList.toggle('is-token', session.b2tUnit === 'token');
+    const sign = document.getElementById('b2tUsdSign');
+    if(sign) sign.hidden = session.b2tUnit === 'token';
+    const sum = document.getElementById('b2tMetaSumVal');
+    if(sum) sum.textContent = usdLabel(tipUsd + fee);
+    const tipEl = document.getElementById('b2tMetaTip');
+    if(tipEl) tipEl.textContent = usdLabel(tipUsd);
+    const keepRow = document.getElementById('b2tMetaKeepRow');
+    if(keepRow){
+      const on = !!session.flow?.keepOn && keepUsd > 0;
+      keepRow.hidden = !on;
+      const keepEl = document.getElementById('b2tMetaKeep');
+      if(keepEl) keepEl.textContent = usdLabel(keepUsd);
+    }
+    const feeEl = document.getElementById('b2tMetaFee');
+    if(feeEl) feeEl.textContent = usdLabel(fee);
+    document.querySelectorAll('#b2tHelpers [data-usd]').forEach(btn => {
+      btn.classList.toggle('is-on', Math.abs(+btn.dataset.usd - usd) < 0.005);
+    });
+    markBuyToTipOver();
+    paintB2tPay();
+  }
+  function b2tKeepHtml(f, hold){
+    if(!(hold > 0)) return '';
+    const keepOn = !!f.keepOn;
+    const p = snapKeepPct(f.keepPct);
+    const info = `<button type="button" class="b2t-info" data-keep-info data-tip-title="${escHtml(B2T_KEEP_TITLE)}" data-tip-body="${escHtml(B2T_KEEP_BODY)}" aria-label="About Keep portion">i</button>`;
+    const lab = `<span class="b2t-keep-lab">${info}Keep portion</span>`;
+    const sw = `<button type="button" class="b2t-switch${keepOn ? ' on' : ''}" data-keep-toggle role="switch" aria-checked="${keepOn ? 'true' : 'false'}" aria-label="Keep portion"></button>`;
+    if(!keepOn) return `<div class="b2t-keep">${lab}${sw}</div>`;
+    const { tipUsd, keepUsd } = buyToTipSplit();
+    const dots = B2T_STOPS.map(v =>
+      `<button type="button" class="b2t-dot" data-dot="${v}" style="left:${v}%;background:${v<=p?B2T_MINT:'var(--green-deep)'}" aria-label="Tip ${v} percent, keep ${100-v} percent"></button>`
+    ).join('');
+    return `<div class="b2t-keep-box">
+      <div class="b2t-keep">${lab}${sw}</div>
+      <div class="b2t-slider">
+        <div class="b2t-bubble" id="b2tBubble" style="left:${p}%">${p}/${100 - p}</div>
+        <div class="b2t-track" id="b2tTrack" style="background:linear-gradient(90deg,${B2T_MINT} 0 ${p}%,var(--green-deep) ${p}% 100%)">${dots}
+          <span class="b2t-thumb" id="b2tThumb" style="left:${p}%"></span>
+        </div>
+        <input class="b2t-range" type="range" min="0" max="100" step="1" value="${p}" data-keep-range aria-label="Tip and keep split">
+        <span class="b2t-focus"></span>
+      </div>
+      <div class="b2t-legend"><span>Tipping</span><span>Keeping</span></div>
+      <div class="b2t-vals">
+        <span class="b2t-val" id="b2tTipTok">${escHtml(b2tToks(tipUsd))}</span>
+        <span class="b2t-val is-keep" id="b2tKeepTok">${escHtml(b2tToks(keepUsd))}</span>
+      </div>
+    </div>`;
+  }
   function paintFlowInto(body){
     if(!body) return;
     if(typeof hideHoverCards === 'function') hideHoverCards(true);
@@ -9922,47 +10399,53 @@ html.dark .qhc-id{color:#6BA3FF;}
     } else if(f.kind === 'deposit' && f.step === 'confirm'){
       html = flowStatusHtml('Adding funds', 'This usually takes a moment.');
     } else if(f.kind === 'deposit' && f.step === 'buyToTip'){
-      const asset = payAssetOf();
+      const tick = b2tTokenName();
       const hold = isAuthed() ? (cashWallet()?.bal || 0) : 0;
-      const amtStr = formatPayAssetAmt(f.buyAmt || 0);
-      const ok = buyToTipOk();
-      const keepOn = !!f.keepOn;
-      const keepPct = Math.min(100, Math.max(0, Number(f.keepPct) || 0));
+      const st = buyToTipCtaState();
+      const over = buyToTipAmtOver();
+      const usd = roundUsd(f.buyAmt || 0);
+      const fee = protocolFee(usd);
+      const { tipUsd, keepUsd } = buyToTipSplit();
+      const keepOn = !!f.keepOn && keepUsd > 0;
+      const chev = `<svg class="trade-meta-chev" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.4 4.2L6 7.8L9.6 4.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
       html = `
         <div class="b2t">
-          <div class="b2t-row">
-            <div class="b2t-amt">
-              <label>
-                <input id="b2tAmt" inputmode="decimal" autocomplete="off" value="${escHtml(amtStr)}" aria-label="Amount in ${escHtml(asset.tick)}">
+          <div class="trade-field${over ? ' is-over' : ''}${session.b2tUnit === 'token' ? ' is-token' : ''}" id="b2tField">
+            <div class="trade-field-top">
+              <span class="trade-field-label">Buy ${escHtml(tick)}</span>
+              <div class="trade-helpers" id="b2tHelpers">${B2T_PRESETS.map(v => `<button type="button" data-usd="${v}" class="${Math.abs(usd - v) < 0.005 ? 'is-on' : ''}">$${v}</button>`).join('')}</div>
+            </div>
+            <div class="trade-usd-row">
+              <label class="trade-usd">
+                <span class="trade-usd-sign" id="b2tUsdSign">$</span>
+                <input id="b2tAmt" inputmode="decimal" autocomplete="off" value="${escHtml(b2tAmtStr())}" aria-label="${session.b2tUnit === 'token' ? 'Amount in tokens' : 'Amount in USD'}" aria-invalid="${over ? 'true' : 'false'}">
               </label>
-              <div class="b2t-usd" id="b2tUsd">${usdLabel(f.buyAmt || 0)}</div>
+              <span class="trade-asset-chip" aria-hidden="true"><span class="trade-token-av squircle"><img src="${escHtml(b2tTokenImg())}" alt=""></span><span>${escHtml(tick)}</span></span>
             </div>
-            <div class="b2t-asset">
-              <button type="button" class="flow-select" data-flow-trigger="pay" aria-haspopup="listbox" aria-expanded="false" aria-label="Pay with">
-                <span class="flow-select-ic" data-flow-ic>${asset.ic}</span>
-                <span data-flow-label>${escHtml(asset.tick)}</span>
-                <span class="flow-select-chev" aria-hidden="true"></span>
-              </button>
-              <div class="b2t-bal">Balance ${escHtml(formatPayAssetAmt(hold))} ${escHtml(asset.tick)}</div>
+            <button type="button" class="trade-out" id="b2tOut" aria-label="Swap USD and token">
+              <span class="trade-out-swap" aria-hidden="true">⇅</span>
+              <span id="b2tOutVal">${escHtml(b2tOutText())}</span>
+            </button>
+          </div>
+          ${b2tPayHtml(usd)}
+          <div class="trade-meta" id="b2tMeta">
+            <button type="button" class="trade-meta-sum" id="b2tMetaSum" aria-expanded="false" aria-controls="b2tMetaBody">
+              <span>You’ll tip</span>
+              <span class="trade-meta-sum-end">
+                <b id="b2tMetaSumVal">${usdLabel(tipUsd + fee)}</b>
+                ${chev}
+              </span>
+            </button>
+            <div class="trade-meta-body" id="b2tMetaBody" aria-hidden="true">
+              <div class="trade-meta-inner">
+                <div><span>Tip</span><b id="b2tMetaTip">${usdLabel(tipUsd)}</b></div>
+                <div id="b2tMetaKeepRow"${keepOn ? '' : ' hidden'}><span>Keep</span><b id="b2tMetaKeep">${usdLabel(keepUsd)}</b></div>
+                <div><span>Fee (${escHtml(fmtSlipPct(PROTOCOL_FEE_PCT))})</span><b id="b2tMetaFee">${usdLabel(fee)}</b></div>
+              </div>
             </div>
           </div>
-          <div class="b2t-keep">
-            <button type="button" class="b2t-info" data-keep-info data-tip-title="Keep portion" data-tip-body="Send it all as a tip, keep it all on your wallet, or split it. You choose." aria-label="About Keep portion">${B2T_INFO_SVG}</button>
-            <span class="b2t-keep-lab">Keep portion</span>
-            <button type="button" class="anon-toggle${keepOn ? ' active' : ''}" data-keep-toggle role="switch" aria-checked="${keepOn ? 'true' : 'false'}" aria-label="Keep portion"><span class="anon-switch" aria-hidden="true"></span></button>
-          </div>
-          ${keepOn ? `
-          <div class="b2t-split">
-            <div class="b2t-split-top">
-              <span class="send-lab">Amount</span>
-              <span class="b2t-split-pct" data-keep-pct-lab>${keepPct}%</span>
-            </div>
-            <div class="b2t-presets">
-              ${[25,50,75,100].map(p => `<button type="button" data-keep-pct="${p}" class="${p===keepPct?'is-on':''}">${p===100?'MAX':p+'%'}</button>`).join('')}
-            </div>
-            <input class="b2t-range" type="range" min="0" max="100" step="1" value="${keepPct}" data-keep-range aria-label="Keep percentage">
-          </div>` : ''}
-          <button type="button" class="flow-cta${ok ? '' : ' is-blocked'}" data-buy-to-tip-go aria-disabled="${ok ? 'false' : 'true'}">${escHtml(buyToTipCtaText())}</button>
+          ${b2tKeepHtml(f, hold)}
+          <button type="button" class="flow-cta${st.kind === 'go' ? '' : st.kind === 'deposit' ? ' is-short' : ' is-wait'}" data-buy-to-tip-go aria-disabled="${st.enabled ? 'false' : 'true'}">${escHtml(st.label)}</button>
         </div>`;
     } else if(f.kind === 'deposit' && f.step === 'cwFamily'){
       html = `
@@ -10044,9 +10527,16 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     body.innerHTML = html;
     body.closest('.modal')?.classList.toggle('is-confirming', f.kind === 'deposit' && f.step === 'confirm');
-    const ft = document.getElementById('fundsTitle');
-    if(ft && flowHost() === 'funds') ft.textContent = flowTitle();
-    document.getElementById('fundsBack')?.classList.toggle('show', flowHost() === 'funds' && flowCanBack());
+    if(body.id === 'fundsBody'){
+      const ft = document.getElementById('fundsTitle');
+      if(ft && !(f.kind === 'deposit' && f.step === 'buyToTip')) ft.textContent = flowTitle();
+      document.getElementById('fundsBack')?.classList.toggle('show', flowCanBack());
+    } else {
+      const ft = document.getElementById('fundsTitle');
+      if(ft && flowHost() === 'funds' && !(f.kind === 'deposit' && f.step === 'buyToTip')) ft.textContent = flowTitle();
+      document.getElementById('fundsBack')?.classList.toggle('show', flowHost() === 'funds' && flowCanBack());
+    }
+    syncFlowHead();
     bindFlow(body);
     armCashNote(body);
   }
@@ -10193,46 +10683,178 @@ html.dark .qhc-id{color:#6BA3FF;}
   function bindBuyToTip(body){
     const f = session.flow;
     if(!f || !body) return;
-    const sync = ()=>{
-      const usdEl = body.querySelector('#b2tUsd');
+    const patchSplit = ()=>{
+      const p = snapKeepPct(f.keepPct, 0);
+      const { tipUsd, keepUsd } = buyToTipSplit();
+      const b = body.querySelector('#b2tBubble');
+      const tr = body.querySelector('#b2tTrack');
+      const th = body.querySelector('#b2tThumb');
+      const kt = body.querySelector('#b2tTipTok');
+      const kk = body.querySelector('#b2tKeepTok');
       const cta = body.querySelector('[data-buy-to-tip-go]');
-      const pctLab = body.querySelector('[data-keep-pct-lab]');
-      const ok = buyToTipOk();
-      if(usdEl) usdEl.textContent = usdLabel(f.buyAmt || 0);
-      if(pctLab) pctLab.textContent = `${Math.round(f.keepPct || 0)}%`;
-      body.querySelectorAll('[data-keep-pct]').forEach(b => b.classList.toggle('is-on', +b.dataset.keepPct === +f.keepPct));
-      if(cta){
-        cta.textContent = buyToTipCtaText();
-        cta.classList.toggle('is-blocked', !ok);
-        cta.setAttribute('aria-disabled', ok ? 'false' : 'true');
+      const range = body.querySelector('[data-keep-range]');
+      if(b){ b.style.left = p + '%'; b.textContent = p + '/' + (100 - p); }
+      if(tr){
+        tr.style.background = `linear-gradient(90deg,${B2T_MINT} 0 ${p}%,var(--green-deep) ${p}% 100%)`;
+        tr.querySelectorAll('.b2t-dot').forEach(d => {
+          const v = +d.dataset.dot;
+          d.style.background = v <= p ? B2T_MINT : 'var(--green-deep)';
+        });
       }
+      if(th) th.style.left = p + '%';
+      if(range && +range.value !== p) range.value = p;
+      if(kt) kt.textContent = b2tToks(tipUsd);
+      if(kk) kk.textContent = b2tToks(keepUsd);
+      if(cta){
+        const st = buyToTipCtaState();
+        cta.textContent = st.label;
+        cta.classList.toggle('is-short', st.kind === 'deposit');
+        cta.classList.toggle('is-wait', st.kind === 'amt');
+        cta.setAttribute('aria-disabled', st.enabled ? 'false' : 'true');
+      }
+      paintB2tQuote();
     };
     const amtIn = body.querySelector('#b2tAmt');
     if(amtIn){
       amtIn.addEventListener('input', ()=>{
-        f.buyAmt = roundUsd(payAmtToUsd(parseAmt(amtIn.value)));
-        sync();
+        const before = buyToTipAmtOver();
+        const raw = parseAmt(amtIn.value);
+        f.buyAmt = session.b2tUnit === 'token' ? roundUsd(raw / tokenPerUsd()) : roundUsd(raw);
+        rememberBuyToTip();
+        patchSplit();
+        if(buyToTipAmtOver() && !before && typeof haptic === 'function') haptic('error');
       });
     }
+    body.querySelectorAll('#b2tHelpers [data-usd]').forEach(btn => {
+      btn.addEventListener('click', ()=>{
+        f.buyAmt = roundUsd(+btn.dataset.usd);
+        session.b2tUnit = 'usd';
+        if(amtIn) amtIn.value = b2tAmtStr();
+        rememberBuyToTip();
+        patchSplit();
+        haptic('selection');
+      });
+    });
+    body.querySelector('#b2tOut')?.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const usd = roundUsd(f.buyAmt || 0);
+      session.b2tUnit = session.b2tUnit === 'token' ? 'usd' : 'token';
+      f.buyAmt = usd;
+      if(amtIn){
+        amtIn.value = session.b2tUnit === 'token' ? formatTokenInput(usd) : (Number.isInteger(usd) ? String(usd) : money(usd));
+        amtIn.setAttribute('aria-label', session.b2tUnit === 'token' ? 'Amount in tokens' : 'Amount in USD');
+      }
+      rememberBuyToTip();
+      patchSplit();
+      haptic('selection');
+    });
+    body.querySelector('#b2tField')?.addEventListener('click', (e)=>{
+      if(e.target.closest('#b2tOut, #b2tHelpers, .trade-asset-chip')) return;
+      amtIn?.focus();
+    });
+    body.querySelector('[data-b2t-pay]')?.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const chip = e.currentTarget;
+      const menu = document.getElementById('tradePayMenu');
+      if(menu && !menu.hidden && payPickerChip === chip) hidePayPicker();
+      else {
+        showPayPicker(chip);
+        haptic('selection');
+      }
+    });
+    const payAmt = body.querySelector('#b2tPayAmt');
+    const payWrap = body.querySelector('#b2tPayAmtWrap');
+    if(payAmt){
+      payAmt.addEventListener('input', ()=>{
+        const before = buyToTipAmtOver();
+        f.buyAmt = roundUsd(payAmtToUsd(parseAmt(payAmt.value)));
+        if(amtIn) amtIn.value = b2tAmtStr();
+        rememberBuyToTip();
+        patchSplit();
+        if(buyToTipAmtOver() && !before && typeof haptic === 'function') haptic('error');
+      });
+      payAmt.addEventListener('focus', ()=> payWrap?.classList.add('is-edit'));
+      payAmt.addEventListener('blur', ()=>{
+        payWrap?.classList.remove('is-edit');
+        setQuoteTicker(document.getElementById('b2tPayTicker'), payAmt.value, { animate: false });
+      });
+    }
+    body.querySelector('#b2tPayWith')?.addEventListener('click', (e)=>{
+      if(e.target.closest('[data-b2t-pay], #tradePayMenu, button')) return;
+      payAmt?.focus();
+    });
+    body.querySelector('#b2tMetaSum')?.addEventListener('click', ()=>{
+      const meta = body.querySelector('#b2tMeta');
+      const open = !meta?.classList.contains('is-open');
+      meta?.classList.toggle('is-open', open);
+      body.querySelector('#b2tMetaSum')?.setAttribute('aria-expanded', open ? 'true' : 'false');
+      body.querySelector('#b2tMetaBody')?.setAttribute('aria-hidden', open ? 'false' : 'true');
+      haptic('selection');
+    });
     body.querySelector('[data-keep-toggle]')?.addEventListener('click', ()=>{
       f.keepOn = !f.keepOn;
       if(f.keepPct == null) f.keepPct = 50;
+      else f.keepPct = snapKeepPct(f.keepPct);
+      rememberBuyToTip();
+      if(typeof haptic === 'function') haptic('toggle');
       paintFlowSheet();
     });
-    body.querySelectorAll('[data-keep-pct]').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        f.keepPct = +btn.dataset.keepPct;
-        const range = body.querySelector('[data-keep-range]');
-        if(range) range.value = String(f.keepPct);
-        sync();
+    const range = body.querySelector('[data-keep-range]');
+    const slider = body.querySelector('.b2t-slider');
+    const setKeep = (raw, { hapticStop, exact } = {})=>{
+      const next = exact ? keepPctOf(raw, f.keepPct) : snapKeepPct(raw);
+      if(next === f.keepPct){
+        if(range) range.value = next;
+        return false;
+      }
+      const hitStop = B2T_STOPS.includes(next);
+      f.keepPct = next;
+      if(range) range.value = next;
+      rememberBuyToTip();
+      patchSplit();
+      if(hapticStop && hitStop && typeof haptic === 'function') haptic('dragtick');
+      return true;
+    };
+    const pctAt = (clientX)=>{
+      const tr = slider?.querySelector('#b2tTrack') || slider;
+      const r = tr.getBoundingClientRect();
+      if(r.width < 1) return f.keepPct || 0;
+      return keepPctOf(((clientX - r.left) / r.width) * 100);
+    };
+    const endKeepDrag = ()=> slider?.classList.remove('is-drag');
+    if(slider){
+      slider.addEventListener('pointerdown', (e)=>{
+        if(e.pointerType === 'mouse' && e.button !== 0) return;
+        const dot = e.target.closest('[data-dot]');
+        if(dot) setKeep(+dot.dataset.dot, { hapticStop: true, exact: true });
+        else setKeep(pctAt(e.clientX), { hapticStop: true });
+        slider.classList.add('is-drag');
+        try{ slider.setPointerCapture(e.pointerId); }catch(_){}
+        e.preventDefault();
+      });
+      slider.addEventListener('pointermove', (e)=>{
+        if(!slider.classList.contains('is-drag')) return;
+        setKeep(pctAt(e.clientX), { hapticStop: true });
+      });
+      slider.addEventListener('pointerup', endKeepDrag);
+      slider.addEventListener('pointercancel', endKeepDrag);
+      slider.addEventListener('lostpointercapture', endKeepDrag);
+    }
+    if(range){
+      range.addEventListener('input', (e)=> setKeep(+e.currentTarget.value, { hapticStop: true }));
+    }
+    body.querySelectorAll('[data-dot]').forEach(d => {
+      d.addEventListener('click', (e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        setKeep(+d.dataset.dot, { hapticStop: true, exact: true });
       });
     });
-    body.querySelector('[data-keep-range]')?.addEventListener('input', (e)=>{
-      f.keepPct = +e.currentTarget.value;
-      sync();
-    });
-    body.querySelector('[data-buy-to-tip-go]')?.addEventListener('click', ()=>{
-      if(!buyToTipOk()) return;
+    body.querySelector('[data-buy-to-tip-go]')?.addEventListener('click', (e)=>{
+      e.preventDefault();
+      e.stopPropagation();
+      const st = buyToTipCtaState();
+      if(st.kind === 'amt') return;
       settleBuyToTip();
     });
     const info = body.querySelector('[data-keep-info]');
@@ -10243,6 +10865,8 @@ html.dark .qhc-id{color:#6BA3FF;}
         if(typeof showHoverCard === 'function') showHoverCard('info', null, info);
       });
     }
+    paintB2tPay();
+    pulseBuyToTipOver();
   }
   function sendBoxOpen(box, open){
     if(!box) return;
@@ -10491,26 +11115,69 @@ html.dark .qhc-id{color:#6BA3FF;}
       session.flow.step = 'cash';
       session.flow.amt = cashAmt;
     }
-    const host = flowHost();
-    if(host === 'auth'){ setAuthPanel('funds'); }
-    else if(host === 'wallet'){ session.walletView = 'flow'; renderWalletBody(); }
-    else {
+    if(session.pendingTip){
+      const modal = fundsOverlay?.querySelector('.funds-modal');
+      resetSheetMorph(modal);
+      overlayOpen(fundsOverlay);
       const title = document.getElementById('fundsTitle');
       if(title) title.textContent = flowTitle();
+      const authFunds = document.getElementById('authPanelFunds');
+      if(authFunds) authFunds.innerHTML = '';
       paintFlowInto(document.getElementById('fundsBody'));
-      overlayOpen(fundsOverlay);
+      resetSheetMorph(modal);
+    } else {
+      const host = flowHost();
+      if(host === 'auth'){ setAuthPanel('funds'); }
+      else if(host === 'wallet'){ session.walletView = 'flow'; paintFlowSheet(); }
+      else if(host === 'funds'){ paintFlowSheet(); }
+      else {
+        const title = document.getElementById('fundsTitle');
+        if(title) title.textContent = flowTitle();
+        paintFlowInto(document.getElementById('fundsBody'));
+        overlayOpen(fundsOverlay);
+      }
     }
     if(session.happyChain) scheduleHappyChainDeposit();
   }
   function openTopUp(need, then){ openDeposit(need, then); }
   function wantsDepositDemo(){ return demoHas('deposit'); }
+  const HAPPY_PACE = {
+    cursorDur: 0.86,
+    clickHold: 280,
+    reduceWait: 360,
+    dwell: 640,
+    sheet: 1400,
+    confirm: 840,
+    afterLogin: 980,
+    loginAfterTap: 1250,
+    startIntent: 720,
+    afterOpen: 800,
+    mmAfterWallets: 680,
+    depFallback: 1900,
+    poll: 500,
+    extDelay: 300,
+  };
+  function queueHappyGuide(el, opts){
+    opts = opts || {};
+    const dwell = opts.dwell != null ? opts.dwell : HAPPY_PACE.dwell;
+    const gen = session.demoGuideGen || 0;
+    setTimeout(()=>{
+      if((session.demoGuideGen || 0) !== gen) return;
+      if(!session.happyChain) return;
+      demoGuideTo(el, opts);
+    }, dwell);
+  }
   function armHappyChain(opts){
     session.happyChain = {
       kind: opts.kind || 'buy',
       wallet: opts.wallet || 'social',
+      path: opts.path || null,
     };
     session.suppressFundsCelebrate = true;
-    session.demoZeroBal = true;
+    if(!opts.keepFunds){
+      session.demoZeroBal = true;
+      session.hasGas = false;
+    }
     session.demoGuideGen = (session.demoGuideGen || 0) + 1;
     resetFrictionMeter(session.happyChain.kind);
     armHappyChainGuides();
@@ -10539,7 +11206,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     if(el.classList?.contains('tip') && el.classList.contains('react-btn')) return 'Tip';
     if(el.matches?.('[data-flow-continue]')) return 'Top up';
-    if(el.matches?.('[data-buy-to-tip-go]')) return 'Buy to tip';
+    if(el.matches?.('[data-buy-to-tip-go]')){
+      const t = (el.textContent || '').replace(/\s+/g, ' ').trim();
+      return (t || 'Tip').slice(0, 28);
+    }
     if(el.dataset?.swap === 'go') return 'Confirm buy';
     if(el.dataset?.login) return 'Sign in';
     if(el.dataset?.wallet) return 'Wallet';
@@ -10665,7 +11335,10 @@ html.dark .qhc-id{color:#6BA3FF;}
       const y = r.top + Math.min(r.height * 0.55, r.height - 4);
       cursor.classList.add('is-on');
       const stale = ()=> (session.demoGuideGen || 0) !== gen;
+      let started = false;
       const finish = ()=>{
+        if(started) return;
+        started = true;
         if(stale()){
           hideDemoCursor();
           resolve(false);
@@ -10679,30 +11352,32 @@ html.dark .qhc-id{color:#6BA3FF;}
             resolve(false);
             return;
           }
-          if(opts.click){
-            try{ el.click(); }catch(_){}
-          }
           if(session.happyChain || session.frictionActive){
             bumpFriction(frictionLabelFromEl(el));
+          }
+          if(opts.click){
+            try{ el.click(); }catch(_){}
           }
           if(opts.hide) hideDemoCursor();
           else el.classList.remove('demo-guide-hit');
           resolve(true);
-        }, 160);
+        }, session.happyChain ? HAPPY_PACE.clickHold : 160);
       };
+      const moveMs = (opts.dur || (session.happyChain ? HAPPY_PACE.cursorDur : 0.52)) * 1000;
       if(reduce || typeof gsap === 'undefined'){
         cursor.style.left = x + 'px';
         cursor.style.top = y + 'px';
-        setTimeout(finish, 220);
+        setTimeout(finish, session.happyChain ? HAPPY_PACE.reduceWait : 220);
         return;
       }
       gsap.to(cursor, {
-        duration: opts.dur || 0.52,
+        duration: opts.dur || (session.happyChain ? HAPPY_PACE.cursorDur : 0.52),
         ease: 'power2.out',
         left: x,
         top: y,
         onComplete: finish,
       });
+      setTimeout(finish, moveMs + 120);
     });
   }
   function armHappyChainGuides(){
@@ -10713,29 +11388,56 @@ html.dark .qhc-id{color:#6BA3FF;}
       const yes = document.getElementById('walletExtConfirm');
       if(ext && !ext.hidden && yes && !yes.dataset.demoGuided){
         yes.dataset.demoGuided = '1';
-        // Slight delay so the fake extension paint/show finishes before we click.
-        setTimeout(()=> demoGuideTo(yes, { click: true, hide: false }), 120);
+        queueHappyGuide(yes, { click: true, hide: false, dwell: HAPPY_PACE.extDelay });
       }
       const go = document.querySelector('#swapBody [data-swap="go"]');
       if(go && session.swap?.step === 'confirm' && !go.dataset.demoGuided){
         go.dataset.demoGuided = '1';
-        demoGuideTo(go, { click: true, hide: false });
+        queueHappyGuide(go, { click: true, hide: false, dwell: HAPPY_PACE.confirm });
       }
-      const cont = document.querySelector('[data-flow-continue]:not(.is-blocked)');
+      const flowBody = typeof flowBodyEl === 'function' ? flowBodyEl() : null;
+      const cont = flowBody?.querySelector('[data-flow-continue]:not(.is-blocked)');
       if(session.flow?.kind === 'deposit' && session.flow.step === 'cash' && cont && !cont.dataset.demoGuided){
         cont.dataset.demoGuided = '1';
-        demoGuideTo(cont, { click: true, hide: false });
+        queueHappyGuide(cont, { click: true, hide: false });
       }
-      const buyTipGo = document.querySelector('[data-buy-to-tip-go]');
+      const buyTipGo = flowBody?.querySelector('[data-buy-to-tip-go]');
+      const buyTipKind = typeof buyToTipCtaState === 'function' ? buyToTipCtaState().kind : '';
+      const fundsModal = fundsOverlay?.querySelector('.funds-modal');
       if(
         session.happyChain.kind === 'tip' &&
         session.flow?.step === 'buyToTip' &&
-        buyTipGo && !buyTipGo.dataset.demoGuided
+        fundsOverlay &&
+        !fundsOverlay.classList.contains('show') &&
+        !session._allowFundsClose &&
+        !session._fundsYield
+      ){
+        overlayOpen(fundsOverlay);
+      }
+      const overlayLive = !!fundsOverlay?.classList.contains('show');
+      if(overlayLive && parseFloat(getComputedStyle(fundsOverlay).opacity) < 0.4){
+        fundsOverlay.style.opacity = '1';
+        const m = fundsOverlay.querySelector('.modal');
+        if(m) m.style.transform = 'none';
+      }
+      const openedAt = Number(fundsOverlay?.dataset.openedAt || 0);
+      const enterWait = overlayLive && openedAt && (performance.now() - openedAt) < 420;
+      const sheetBusy = enterWait || (overlayLive && typeof sheetEnterBusy === 'function' && sheetEnterBusy(fundsModal));
+      const shaking = fundsModal?.classList.contains('is-shake') && (!openedAt || (performance.now() - openedAt) < 900);
+      const overlayReady = overlayLive && parseFloat(getComputedStyle(fundsOverlay).opacity) > 0.4;
+      if(
+        session.happyChain.kind === 'tip' &&
+        session.flow?.step === 'buyToTip' &&
+        overlayReady &&
+        buyTipGo && !buyTipGo.dataset.demoGuided &&
+        (buyTipKind === 'go' || buyTipKind === 'deposit') &&
+        buyTipGo.getAttribute('aria-disabled') !== 'true' &&
+        !sheetBusy && !shaking
       ){
         buyTipGo.dataset.demoGuided = '1';
-        demoGuideTo(buyTipGo, { click: true, hide: true });
+        queueHappyGuide(buyTipGo, { click: true, hide: buyTipKind === 'go', dwell: HAPPY_PACE.sheet });
       }
-      session._happyGuideObs = setTimeout(tick, 380);
+      session._happyGuideObs = setTimeout(tick, HAPPY_PACE.poll);
     };
     tick();
   }
@@ -10749,14 +11451,14 @@ html.dark .qhc-id{color:#6BA3FF;}
       session.flow.method = 'MoonPay';
       session.flow.payMethod = session.flow.payMethod || 'apple';
       session.flow.creditLabel = 'MoonPay';
-      const cont = document.querySelector('[data-flow-continue]');
+      const cont = (typeof flowBodyEl === 'function' ? flowBodyEl() : document)?.querySelector?.('[data-flow-continue]');
       if(cont && !cont.dataset.demoGuided){
         cont.dataset.demoGuided = '1';
         demoGuideTo(cont, { click: true, hide: false });
         return;
       }
       if(!cont && typeof startMoonPayWait === 'function') startMoonPayWait();
-    }, 900);
+    }, HAPPY_PACE.depFallback);
   }
   function resetDemoGuest(){
     session.auth = null;
@@ -10773,6 +11475,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.pendingTip = null;
     session.pendingSpend = null;
     session.flow = null;
+    session.hasGas = false;
     paintAuthChrome();
   }
   function demoGuideLogin(wallet){
@@ -10784,7 +11487,7 @@ html.dark .qhc-id{color:#6BA3FF;}
             const mm = document.querySelector('#authPanelWallets [data-wallet="mm"]') || document.querySelector('[data-wallet="mm"]');
             if(mm) demoGuideTo(mm, { click: true, hide: false });
             else demoAutoLogin('eoa');
-          }, 420);
+          }, session.happyChain ? HAPPY_PACE.mmAfterWallets : 420);
         });
       } else demoAutoLogin('eoa');
       return;
@@ -10837,16 +11540,16 @@ html.dark .qhc-id{color:#6BA3FF;}
         const cta = document.getElementById('tradeBuyBtn');
         if(cta){
           demoGuideTo(cta, { click: true, hide: false }).then(()=>{
-            setTimeout(()=> demoGuideLogin(eoa ? 'eoa' : 'social'), 700);
+            setTimeout(()=> demoGuideLogin(eoa ? 'eoa' : 'social'), HAPPY_PACE.loginAfterTap);
           });
         } else {
           session.pending = ()=> resumeTrade('buy', false);
           session.pendingNeed = 25;
           openLogin();
-          setTimeout(()=> demoGuideLogin(eoa ? 'eoa' : 'social'), 700);
+          setTimeout(()=> demoGuideLogin(eoa ? 'eoa' : 'social'), HAPPY_PACE.loginAfterTap);
         }
-      }, 480);
-    }, 360);
+      }, HAPPY_PACE.afterOpen);
+    }, HAPPY_PACE.startIntent);
   }
   function demoChainTip(wallet){
     const eoa = wallet === 'eoa';
@@ -10856,21 +11559,25 @@ html.dark .qhc-id{color:#6BA3FF;}
     setTimeout(()=>{
       const tipIdx = typeof firstTipablePostIndex === 'function' ? firstTipablePostIndex() : posts.findIndex(p => p && p.role !== 'op');
       if(tipIdx < 0) return;
-      const run = ()=>{
+      const run = (tries)=>{
         const item = itemEls()[tipIdx];
         const tipBtn = item?.querySelector('.react-btn.tip');
-        if(!tipBtn) return;
+        if(!tipBtn){
+          if((tries || 0) < 10) setTimeout(()=> run((tries || 0) + 1), 140);
+          return;
+        }
         const tipCountEl = item.querySelector('.tip-count');
         const ctx = makeFeedTipCtx(tipBtn, { kind: 'post', commentId: 'post-' + tipIdx, tipCountEl, item });
         wireFeedTipBtn(tipBtn, ctx);
+        if(window.KbyTipping?.setActive) window.KbyTipping.setActive(tipBtn, ctx);
         demoGuideTo(tipBtn, { hide: false }).then(()=>{
           if(window.KbyTipping?.simulateTap) window.KbyTipping.simulateTap(tipBtn, ctx);
-          setTimeout(()=>{ if(!isAuthed()) demoGuideLogin(eoa ? 'eoa' : 'social'); }, 700);
+          setTimeout(()=>{ if(!isAuthed()) demoGuideLogin(eoa ? 'eoa' : 'social'); }, HAPPY_PACE.loginAfterTap);
         });
       };
-      if(lastActiveIdx !== tipIdx){ springTo(tipIdx, 0.95); setTimeout(run, 720); }
+      if(lastActiveIdx !== tipIdx){ springTo(tipIdx, 0.95); setTimeout(run, 900); }
       else run();
-    }, 420);
+    }, HAPPY_PACE.startIntent);
   }
   function seedDemoEoa(bal){
     session.auth = 'eoa';
@@ -10879,6 +11586,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.anonName = session.displayName;
     session.personaIndex = null;
     session.wallets = [fillEoaBag(mintWallet('mm', { active: true }), bal || 0)];
+    session.hasGas = true;
     paintAuthChrome();
   }
   function seedDemoSocial(bal){
@@ -10889,6 +11597,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     session.personaIndex = null;
     session.wallets = [mintWallet('emb', { bal: bal || 0, active: true })];
     seedAccountHoldings();
+    session.hasGas = true;
     paintAuthChrome();
   }
   function seedDemoHoldings(){
@@ -10903,6 +11612,65 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(extra) Object.assign(session.flow, extra);
     if(step) session.flow.step = step;
     if(typeof paintFlowSheet === 'function') paintFlowSheet();
+  }
+  function demoClearCreatorBags(){
+    session.holdings = [];
+    (session.wallets || []).forEach(w => { if(Array.isArray(w.imported)) w.imported = []; });
+  }
+  function demoArmFirstTip(){
+    const tipIdx = typeof firstTipablePostIndex === 'function' ? firstTipablePostIndex() : posts.findIndex(p => p && p.role !== 'op');
+    if(tipIdx < 0) return null;
+    const item = itemEls()[tipIdx];
+    const tipBtn = item?.querySelector('.react-btn.tip');
+    if(!tipBtn) return null;
+    const tipCountEl = item.querySelector('.tip-count');
+    const ctx = makeFeedTipCtx(tipBtn, { kind: 'post', commentId: 'post-' + tipIdx, tipCountEl, item });
+    if(!tipBtn.dataset.kbyTipBound) wireFeedTipBtn(tipBtn, ctx);
+    if(window.KbyTipping?.setActive) window.KbyTipping.setActive(tipBtn, ctx);
+    return { tipIdx, tipBtn, ctx };
+  }
+  function demoOpenBuyToTip(attempt){
+    const armed = demoArmFirstTip();
+    if(!armed){
+      if((attempt || 0) < 12) setTimeout(()=> demoOpenBuyToTip((attempt || 0) + 1), 80);
+      return;
+    }
+    armPendingTip(armed.ctx, TIP_USD);
+    beginBuyToTip();
+    overlayOpen(fundsOverlay);
+  }
+  function bootTipIsolatable(path, wallet){
+    const eoa = wallet === 'eoa';
+    const broke = path === 'p2';
+    if(eoa) seedDemoEoa(broke ? 0 : 42.10);
+    else seedDemoSocial(broke ? 0 : 42.10);
+    demoClearCreatorBags();
+    session.hasGas = path !== 'p2';
+    armHappyChain({ kind: 'tip', wallet: eoa ? 'eoa' : 'social', path, keepFunds: true });
+    session.hasGas = path !== 'p2';
+    if(path === 'p3'){
+      const tipIdx = typeof firstTipablePostIndex === 'function' ? firstTipablePostIndex() : 1;
+      const post = posts[tipIdx] || posts[1];
+      session.holdings = [{
+        ticker: post?.ticker || '$SAUCE',
+        amount: formatTokenOut(8.40),
+        usd: 8.40,
+        img: (typeof tokenArtOf === 'function' && post) ? tokenArtOf(post) : `${M}/SAUCE.webp`,
+        seeded: false,
+      }];
+      paintAuthChrome();
+      setTimeout(()=>{
+        const armed = demoArmFirstTip();
+        if(!armed) return;
+        if(lastActiveIdx !== armed.tipIdx) springTo(armed.tipIdx, 0.95);
+        setTimeout(()=> demoGuideTo(armed.tipBtn, { click: false, hide: false }).then(()=>{
+          if(window.KbyTipping?.simulateTap) window.KbyTipping.simulateTap(armed.tipBtn, armed.ctx);
+        }), lastActiveIdx !== armed.tipIdx ? 720 : 80);
+      }, 780);
+      return;
+    }
+    paintAuthChrome();
+    setTimeout(()=> demoOpenBuyToTip(), 280);
   }
   function playDemoBoot(){
     const flow = demoFlow();
@@ -10933,10 +11701,16 @@ html.dark .qhc-id{color:#6BA3FF;}
       showToast('Sign-in cancelled.');
       return;
     }
-    if(flow === 'tip-topup'){
-      seedDemoSocial(0);
-      paintAuthChrome();
-      setTimeout(()=> demoEntryTip('tap'), 520);
+    if(flow === 'tip-p1' || flow === 'tip-p1-eoa'){
+      bootTipIsolatable('p1', flow.endsWith('-eoa') ? 'eoa' : 'social');
+      return;
+    }
+    if(flow === 'tip-p2' || flow === 'tip-p2-eoa' || flow === 'tip-topup'){
+      bootTipIsolatable('p2', flow.endsWith('-eoa') ? 'eoa' : 'social');
+      return;
+    }
+    if(flow === 'tip-p3' || flow === 'tip-p3-eoa'){
+      bootTipIsolatable('p3', flow.endsWith('-eoa') ? 'eoa' : 'social');
       return;
     }
     if(flow === 'tip-tap'){
@@ -11174,27 +11948,31 @@ html.dark .qhc-id{color:#6BA3FF;}
   function openWithdraw(){ openSend(); }
   function finishFundsSheet(){
     session.flow = null;
+    syncFlowHead();
     const host = flowHost();
+    session._allowFundsClose = true;
     if(host === 'auth') closeLogin();
     else if(host === 'wallet'){
       session.walletView = 'list';
       renderWalletBody();
     } else overlayClose(fundsOverlay);
+    session._allowFundsClose = false;
   }
   function creditFunds(amt, label, opts){
     const a = cashWallet() || activeWallet();
     if(!a) return;
     clearFlowTimer();
     a.bal = Math.round((Math.max(0, a.bal || 0) + amt) * 100) / 100;
+    session.hasGas = true;
     logActivity('deposit', label ? `Top up · ${label}` : 'Top up', amt);
     const resumeTipBuy = !!session.pendingTip;
     if(!resumeTipBuy) finishFundsSheet();
     paintAuthChrome();
-    const quiet = (opts && opts.silentCelebrate) || session.suppressFundsCelebrate;
+    const quiet = (opts && opts.silentCelebrate) || session.suppressFundsCelebrate || !!session.happyChain;
     if(!quiet){
       if(typeof celebrateFunds === 'function') celebrateFunds();
       else if(typeof haptic === 'function') celebrateSuccess('funds');
-    } else if(typeof haptic === 'function'){
+    } else if(typeof haptic === 'function' && !session.happyChain){
       haptic('funds');
     }
     if(!(opts && opts.silent)) showToast(`Added ${usdLabel(amt)}${label ? ' via '+label : ''}.`);
@@ -11207,7 +11985,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     if(next) setTimeout(()=>{
       try{ next(); }catch(_){}
-    }, 280);
+    }, session.happyChain ? HAPPY_PACE.afterLogin : 280);
   }
   function applySend(from, toWallet, amt){
     const n = Math.round((amt || 0) * 100) / 100;
@@ -11588,8 +12366,29 @@ html.dark .qhc-id{color:#6BA3FF;}
   document.getElementById('walletBack')?.addEventListener('click', ()=> walletTopBack());
   walletOverlay?.addEventListener('click', (e)=>{ if(e.target === walletOverlay) closeWalletModal(); });
   document.getElementById('fundsBack')?.addEventListener('click', ()=> flowBack());
-  document.getElementById('fundsClose')?.addEventListener('click', ()=>{ abortFundsFlow(); overlayClose(fundsOverlay); });
-  fundsOverlay?.addEventListener('click', (e)=>{ if(e.target === fundsOverlay){ abortFundsFlow(); overlayClose(fundsOverlay); } });
+  document.getElementById('fundsClose')?.addEventListener('click', ()=>{
+    if(session.happyChain) return;
+    session._allowFundsClose = true;
+    abortFundsFlow();
+    overlayClose(fundsOverlay);
+    session._allowFundsClose = false;
+  });
+  fundsOverlay?.addEventListener('click', (e)=>{
+    if(e.target === fundsOverlay){
+      if(session.happyChain) return;
+      const modal = fundsOverlay.querySelector('.funds-modal');
+      if(typeof sheetEnterBusy === 'function' && sheetEnterBusy(modal)) return;
+      session._allowFundsClose = true;
+      abortFundsFlow(); overlayClose(fundsOverlay);
+      session._allowFundsClose = false;
+      return;
+    }
+    const go = e.target.closest?.('[data-buy-to-tip-go]');
+    if(!go || !fundsOverlay.contains(go)) return;
+    if(go.getAttribute('aria-disabled') === 'true' || go.classList.contains('is-wait')) return;
+    e.preventDefault();
+    settleBuyToTip();
+  });
   document.addEventListener('click', (e)=>{
     if(!flowSelectOpen) return;
     if(e.target.closest?.('#flowSelectMenu, [data-flow-trigger]')) return;
@@ -12332,6 +13131,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     };
   }
   function fireConfetti(opts){
+    if(session.happyChain && !opts?.allowDuringChain) return;
     if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const scale = opts?.scale || 'full';
     const profiles = {
@@ -12365,10 +13165,14 @@ html.dark .qhc-id{color:#6BA3FF;}
     const presets = { buy:'buySuccess', sell:'success', send:'success', funds:'funds', sent:'sent', tip:'tip', firstTip:'tipSuccess' };
     haptic(presets[kind] || 'success');
     if(opts && opts.confetti){
-      fireConfetti({ origin: opts.origin, scale: opts.confettiScale || 'full' });
+      fireConfetti({ origin: opts.origin, scale: opts.confettiScale || 'full', allowDuringChain: opts.allowDuringChain });
     }
   }
   function celebrateFunds(){
+    if(session.happyChain || session.suppressFundsCelebrate){
+      if(typeof haptic === 'function' && !session.happyChain) haptic('nudge');
+      return;
+    }
     const anchor = fundsOverlay?.querySelector('.funds-modal') || document.getElementById('walletBtn');
     celebrateSuccess('funds', {
       confetti: true,
@@ -12377,9 +13181,11 @@ html.dark .qhc-id{color:#6BA3FF;}
     });
   }
   function celebrateBuySuccess(){
+    const ending = session.happyChain?.kind === 'buy';
     const modal = swapOverlay?.querySelector('.swap-modal');
     celebrateSuccess('buy', {
-      confetti: true,
+      confetti: !session.happyChain || ending,
+      allowDuringChain: ending,
       origin: modal ? confettiOriginFromEl(modal, 0.32) : undefined,
       confettiScale: 'full',
     });
@@ -12388,8 +13194,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     const first = !hasTippedBefore();
     if(first) markFirstTip();
     const chainEnd = session.happyChain?.kind === 'tip';
+    const fire = chainEnd || (first && !session.happyChain);
     celebrateSuccess(first ? 'firstTip' : 'tip', {
-      confetti: first || chainEnd,
+      confetti: fire,
+      allowDuringChain: chainEnd,
       origin: confettiOriginFromEl(btn, 0.35),
       confettiScale: 'tip',
     });
@@ -13918,16 +14726,20 @@ html.dark .qhc-id{color:#6BA3FF;}
     KbyTipping.wire(tipBtn, ctx);
     return true;
   }
-  function demoEntryTip(sim){
+  function demoEntryTip(sim, attempt){
     const tipIdx = typeof firstTipablePostIndex === 'function' ? firstTipablePostIndex() : posts.findIndex(p => p && p.role !== 'op');
     if(tipIdx < 0) return;
     const run = ()=>{
       const item = itemEls()[tipIdx];
       const tipBtn = item?.querySelector('.react-btn.tip');
-      if(!tipBtn || tipBtn.classList.contains('active')) return;
+      if(!tipBtn){
+        if((attempt || 0) < 10) setTimeout(()=> demoEntryTip(sim, (attempt || 0) + 1), 140);
+        return;
+      }
       const tipCountEl = item.querySelector('.tip-count');
       const ctx = makeFeedTipCtx(tipBtn, { kind: 'post', commentId: 'post-' + tipIdx, tipCountEl, item });
       if(!tipBtn.dataset.kbyTipBound) wireFeedTipBtn(tipBtn, ctx);
+      if(window.KbyTipping?.setActive) window.KbyTipping.setActive(tipBtn, ctx);
       if(sim === 'hold') KbyTipping.simulateHold(tipBtn, ctx, 820);
       else KbyTipping.simulateTap(tipBtn, ctx);
     };
@@ -17226,13 +18038,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     e.stopPropagation();
     const row = e.target.closest('[data-pay]');
     if(!row) return;
-    session.payAsset = row.dataset.pay;
-    hidePayPicker();
-    paintTradeCta();
-    haptic('selection');
+    pickPayAsset(row.dataset.pay);
   });
   document.addEventListener('click', (e)=>{
-    if(!e.target.closest('#tradePaySelect')) hidePayPicker();
+    if(!e.target.closest('#tradePaySelect, [data-b2t-pay], #tradePayMenu')) hidePayPicker();
   });
   document.getElementById('tradeBuyBtn')?.addEventListener('click', ()=>{
     const isSell = document.getElementById('tradeBuyBtn')?.classList.contains('is-sell');
@@ -18422,7 +19231,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     [walletOverlay, closeWalletModal],
     [notifOverlay, closeNotifs],
     [signalsOverlay, closeSignals],
-    [fundsOverlay, ()=>{ abortFundsFlow(); overlayClose(fundsOverlay); }],
+    [fundsOverlay, ()=>{ if(session.happyChain) return; abortFundsFlow(); overlayClose(fundsOverlay); }],
     [swapOverlay, closeSwap],
   ].forEach(([el, closeFn])=>{
     const modal = el?.querySelector('.modal');
@@ -18613,7 +19422,10 @@ html.dark .qhc-id{color:#6BA3FF;}
       }
       return;
     }
-    if(fundsOverlay?.classList.contains('show')){ abortFundsFlow(); overlayClose(fundsOverlay); return; }
+    if(fundsOverlay?.classList.contains('show')){
+      if(session.happyChain) return;
+      abortFundsFlow(); overlayClose(fundsOverlay); return;
+    }
     if(notifOverlay?.classList.contains('show')){ closeNotifs(); return; }
     if(signalsOverlay?.classList.contains('show')){ closeSignals(); return; }
     if(walletOverlay?.classList.contains('show')){ closeWalletModal(); return; }
@@ -18735,7 +19547,8 @@ html.dark .qhc-id{color:#6BA3FF;}
           window.KbyTipping?.syncBalances?.();
           paintAuthChrome();
         };
-        requireAuth(finish);
+        if(needsSig()) requestSignature('Tip ' + usdLabel(tipAmt), finish);
+        else finish();
       },
       onNoBalance(ctx){
         if(alreadyTipped(ctx)) return;

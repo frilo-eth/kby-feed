@@ -26,7 +26,7 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
 .list{display:flex;flex-direction:column;border-top:1px solid var(--line);}
 .row{
   display:grid;
-  grid-template-columns:minmax(140px,0.9fr) minmax(0,1.4fr) minmax(200px,auto);
+  grid-template-columns:minmax(168px,1fr) minmax(0,1.5fr) minmax(220px,auto);
   align-items:center;gap:10px 20px;
   padding:11px 0;border-bottom:1px solid var(--line);
 }
@@ -53,10 +53,30 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
 }
 .open a:hover{color:var(--orange);border-color:color-mix(in srgb, var(--orange) 35%, var(--line));}
 .open a.is-here{color:var(--ink-soft);}
+.walk{
+  width:100%;border-collapse:collapse;margin:4px 0 0;
+}
+.walk th,.walk td{
+  text-align:left;padding:11px 0;border-bottom:1px solid var(--line);
+  vertical-align:baseline;
+}
+.walk thead th{
+  font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);
+  padding-top:0;
+}
+.walk th:first-child,.walk td:first-child{width:148px;padding-right:20px;white-space:nowrap;}
+.walk a{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:13px;font-weight:600;color:var(--ink);text-decoration:none;letter-spacing:-.02em;
+}
+.walk a:hover{color:var(--orange);}
+.walk td:last-child{font-size:13px;font-weight:500;color:var(--ink-soft);line-height:1.4;}
 @media (max-width:640px){
   .row{grid-template-columns:1fr;gap:4px;padding:12px 0;}
   .url{justify-content:flex-start;flex-wrap:wrap;}
   .path{max-width:none;}
+  .walk th:first-child,.walk td:first-child{display:block;width:auto;padding-right:0;padding-bottom:2px;}
+  .walk td:last-child{display:block;padding-top:0;}
 }
 </style>
 </head>
@@ -70,13 +90,47 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
   <p class="lede">Stakeholder click-throughs. Happy paths first.</p>
 
   <h2>Happy paths</h2>
-  <p class="lede">Friction counter until the path ends, then you take over.</p>
+  <p class="lede">Friction counter until the path ends, then you take over. Confetti only at the end.</p>
   <div class="list" data-group>
     <div class="row" data-path="/feed?flow=buy-chain"><span class="name">Buy</span><span class="desc">Land → buy → auth → top up → buy · confetti once</span></div>
     <div class="row" data-path="/feed?flow=buy-chain-eoa"><span class="name">Buy (EOA)</span><span class="desc">Same · Connect + Confirm wallet steps</span></div>
-    <div class="row" data-path="/feed?flow=tip-chain"><span class="name">Tip</span><span class="desc">Land → tip → auth → top up → buy to tip → tip · confetti once</span></div>
-    <div class="row" data-path="/feed?flow=tip-chain-eoa"><span class="name">Tip (EOA)</span><span class="desc">Same · Connect + Confirm · buy to tip</span></div>
+    <div class="row" data-path="/feed?flow=tip-chain"><span class="name">Tip</span><span class="desc">Land → tip → auth → buy to tip → top up if needed → tip · confetti once</span></div>
+    <div class="row" data-path="/feed?flow=tip-chain-eoa"><span class="name">Tip (EOA)</span><span class="desc">Same · Connect + Confirm · Buy to tip</span></div>
   </div>
+
+  <h2>Buy to tip</h2>
+  <p class="lede">1 and 2 are the same sheet. Wallet rows add Pay with (USDm / ETH / WETH) and a signature. Each flow name opens production.</p>
+  <table class="walk">
+    <thead>
+      <tr><th>Flow</th><th>Walks through</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a href="https://kby-feed.vercel.app/feed?flow=tip-p1">tip-p1</a></td>
+        <td>Sheet → Tip $1</td>
+      </tr>
+      <tr>
+        <td><a href="https://kby-feed.vercel.app/feed?flow=tip-p1-eoa">tip-p1-eoa</a></td>
+        <td>Sheet → Tip 1 USDm → MetaMask</td>
+      </tr>
+      <tr>
+        <td><a href="https://kby-feed.vercel.app/feed?flow=tip-p2">tip-p2</a></td>
+        <td>Sheet → Top up to tip → $10 Continue → Tip $1</td>
+      </tr>
+      <tr>
+        <td><a href="https://kby-feed.vercel.app/feed?flow=tip-p2-eoa">tip-p2-eoa</a></td>
+        <td>Same, then MetaMask</td>
+      </tr>
+      <tr>
+        <td><a href="https://kby-feed.vercel.app/feed?flow=tip-p3">tip-p3</a></td>
+        <td>Tap sends (no sheet)</td>
+      </tr>
+      <tr>
+        <td><a href="https://kby-feed.vercel.app/feed?flow=tip-p3-eoa">tip-p3-eoa</a></td>
+        <td>Tap → MetaMask</td>
+      </tr>
+    </tbody>
+  </table>
 
   <h2>Auth</h2>
   <div class="list" data-group>
@@ -100,9 +154,8 @@ h2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
 
   <h2>Tip</h2>
   <div class="list" data-group>
-    <div class="row" data-path="/feed?flow=tip-tap"><span class="name">Tip · tap</span><span class="desc">Entry yap · minimodal · default unit · auto-send</span></div>
+    <div class="row" data-path="/feed?flow=tip-tap"><span class="name">Tip · tap</span><span class="desc">Minimodal auto-send (already had a bag)</span></div>
     <div class="row" data-path="/feed?flow=tip-hold"><span class="name">Tip · hold</span><span class="desc">Entry yap · fast burner ramp · countdown burst</span></div>
-    <div class="row" data-path="/feed?flow=tip-topup"><span class="name">Tip → Top up</span><span class="desc">Logged in $0 · broke tooltip · top up · resume</span></div>
   </div>
 
   <h2>Everything else</h2>
