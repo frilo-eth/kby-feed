@@ -3958,10 +3958,10 @@ html.dark .flow-note.is-danger{
 .flow-cta.is-blocked:hover{filter:none;}
 .b2t{display:flex;flex-direction:column;gap:0;}
 .b2t .trade-field{margin-bottom:8px;}
-.b2t .trade-meta{margin:4px 2px 12px;}
+.b2t .trade-meta{margin:2px 2px 12px;}
 .b2t-keep{
-  display:flex;align-items:center;gap:8px;
-  padding:2px 2px 14px;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:4px 2px 10px;
 }
 .b2t-keep-lab{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:var(--ink);}
 .b2t-info{
@@ -3986,7 +3986,7 @@ html.dark .flow-note.is-danger{
 .b2t-switch:focus-visible{outline:2px solid var(--orange);outline-offset:2px;}
 .b2t-keep-box{
   border:1px solid var(--line);border-radius:12px;padding:12px 13px 13px;
-  background:var(--card);margin-bottom:14px;
+  background:var(--card);margin:2px 0 10px;
 }
 .b2t-keep-box .b2t-keep{padding:0;margin-bottom:4px;}
 .b2t-slider{--b2t-mint:#3DDC97;position:relative;padding:30px 0 4px;touch-action:none;cursor:grab;user-select:none;pointer-events:auto;}
@@ -10465,6 +10465,7 @@ html.dark .qhc-id{color:#6BA3FF;}
             </div>
           </div>
           ${b2tPayHtml(usd)}
+          ${b2tKeepHtml(f, hold)}
           <div class="trade-meta" id="b2tMeta">
             <button type="button" class="trade-meta-sum" id="b2tMetaSum" aria-expanded="false" aria-controls="b2tMetaBody">
               <span>You’ll tip</span>
@@ -10481,7 +10482,6 @@ html.dark .qhc-id{color:#6BA3FF;}
               </div>
             </div>
           </div>
-          ${b2tKeepHtml(f, hold)}
           <button type="button" class="flow-cta${st.kind === 'go' ? '' : st.kind === 'deposit' ? ' is-short' : ' is-wait'}" data-buy-to-tip-go aria-disabled="${st.enabled ? 'false' : 'true'}">${escHtml(st.label)}</button>
         </div>`;
     } else if(f.kind === 'deposit' && f.step === 'cwFamily'){

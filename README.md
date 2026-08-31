@@ -318,13 +318,13 @@ Tips spend a **bought** position in that creator token. Seeded demo bags do not 
 
 | Pathway | State | What happens |
 |---------|--------|----------------|
-| **1** | No token, **has gas** | Same **Buy to tip** sheet as 2. Header is **Tip** + `@handle` (close on the right). Composer is the dollarized trade field: **Buy SAUCE**, `$1 / $5 / $25` helpers, **⇅** for the token equivalent, bag balance under the token chip. Wallet login adds **Pay with** (USDm / ETH / WETH). **You’ll tip** is a short fee breakdown. CTA is green `#3DDC97`: `Tip $1` / `Tip 1 USDm`. Keep portion off by default. |
+| **1** | No token, **has gas** | Same **Buy to tip** sheet as 2. Header is **Tip** + `@handle` (close on the right). Stack: composer (`Buy SAUCE`, helpers, ⇅, bag under the chip) → Keep portion → **You’ll tip** accordion → CTA. Wallet login adds **Pay with** (USDm / ETH / WETH) between the composer and Keep portion. CTA is green `#3DDC97`: `Tip $1` / `Tip 1 USDm`. Keep portion off by default. |
 | **2** | No token, **no gas** | **Same sheet** as 1. Amount goes red, the sheet shakes, and `haptic('error')` fires — same as cash under-$10. CTA is `Top up to tip`. Clicking it runs the real deposit (`openTopUp` / `$10` min), then the sheet is confirmable — does **not** auto-fire. Keep portion is hidden at `$0` and appears once funded. |
 | **3** | Holds the token | Tap sends. No sheet, so no keep portion. |
 
 1 and 2 are one sheet. Only the amount state and the CTA differ (`Top up to tip` when cash/gas is short). 2 is 1 with a deposit in front.
 
-**Keep portion** (pathways 1–2 only): off = bare ⓘ + Keep portion + switch. On = bordered box, sheet height morphs (`morphSheet` ~320ms). Slider is continuous (e.g. `43/57`); 0 / 25 / 50 / 75 / 100 are magnetic (~4%) and the ticks are clickable. Bubble `50/50`, track green / `--green-deep`, readouts **Tipping** / **Keeping**. CTA restates the split (`Tip 0.50 USDm and keep 0.50 USDm`; slider at 0 is `Keep 1 USDm`). ⓘ: *Keep a portion of your tip* / *Send it all as a tip, keep it all in your wallet, or split it. You choose.*
+**Keep portion** (pathways 1–2 only): sits above **You’ll tip**. Off = bare ⓘ + Keep portion + switch. On = bordered box, sheet height morphs (`morphSheet` ~320ms). Slider is continuous (e.g. `43/57`); 0 / 25 / 50 / 75 / 100 are magnetic (~4%) and the ticks are clickable. Bubble `50/50`, track green / `--green-deep`, readouts **Tipping** / **Keeping**. CTA restates the split (`Tip 0.50 USDm and keep 0.50 USDm`; slider at 0 is `Keep 1 USDm`). ⓘ: *Keep a portion of your tip* / *Send it all as a tip, keep it all in your wallet, or split it. You choose.*
 
 | Rule | Behavior |
 |------|----------|
@@ -333,7 +333,7 @@ Tips spend a **bought** position in that creator token. Seeded demo bags do not 
 | Empty after a tip | Stays orange. No “Hold your horses” tooltip. Cash still opens Buy to tip |
 | OP | No tip control — see [token vs yap](#token-vs-yap) |
 
-Isolatable (sponsored / wallet): [`tip-p1`](https://kby-feed.vercel.app/feed?flow=tip-p1) · [`tip-p1-eoa`](https://kby-feed.vercel.app/feed?flow=tip-p1-eoa) · [`tip-split`](https://kby-feed.vercel.app/feed?flow=tip-split) · [`tip-p2`](https://kby-feed.vercel.app/feed?flow=tip-p2) · [`tip-p2-eoa`](https://kby-feed.vercel.app/feed?flow=tip-p2-eoa) · [`tip-p3`](https://kby-feed.vercel.app/feed?flow=tip-p3) · [`tip-p3-eoa`](https://kby-feed.vercel.app/feed?flow=tip-p3-eoa). Fake cursor walks each path to the end (p1 confirm tip · split turns Keep portion on at 50/50 · p2 top up then tip · p3 tap send; wallet rows confirm in MetaMask). Happy-path tip (`?flow=tip-chain`) is land → tip → auth → **Buy to tip** → top up if needed → tip. Mid-chain confetti is suppressed; one fire at the end. Guided slower so each sheet can be read. See [stakeholder flows](#stakeholder-flows).
+Isolatable (sponsored / wallet): [`tip-p1`](https://kby-feed.vercel.app/feed?flow=tip-p1) · [`tip-p1-eoa`](https://kby-feed.vercel.app/feed?flow=tip-p1-eoa) · [`tip-p2`](https://kby-feed.vercel.app/feed?flow=tip-p2) · [`tip-p2-eoa`](https://kby-feed.vercel.app/feed?flow=tip-p2-eoa) · [`tip-p3`](https://kby-feed.vercel.app/feed?flow=tip-p3) · [`tip-p3-eoa`](https://kby-feed.vercel.app/feed?flow=tip-p3-eoa) · [`tip-split`](https://kby-feed.vercel.app/feed?flow=tip-split). Fake cursor walks each path to the end (p1 confirm tip · p2 top up then tip · p3 tap send · split is Sheet → Tip $1 → Split tip; wallet rows confirm in MetaMask). Happy-path tip (`?flow=tip-chain`) is land → tip → auth → **Buy to tip** → top up if needed → tip. Mid-chain confetti is suppressed; one fire at the end. Guided slower so each sheet can be read. See [stakeholder flows](#stakeholder-flows).
 
 ---
 
@@ -1534,9 +1534,9 @@ Click-through for design reviews: [https://kby-feed.vercel.app/flows](https://kb
 | Land and browse | [`/feed`](https://kby-feed.vercel.app/feed) |
 | First action (login + pending tip) | [`/feed?flow=first`](https://kby-feed.vercel.app/feed?flow=first) |
 | Tip · pathway 1 | [`/feed?flow=tip-p1`](https://kby-feed.vercel.app/feed?flow=tip-p1) — no token, has gas → Buy to tip sheet |
-| Tip · Keep portion split | [`/feed?flow=tip-split`](https://kby-feed.vercel.app/feed?flow=tip-split) — same sheet as p1, then Keep portion on at 50/50 → `Tip $0.50 and keep $0.50` |
 | Tip · pathway 2 | [`/feed?flow=tip-p2`](https://kby-feed.vercel.app/feed?flow=tip-p2) — no token, no gas → real top up → same sheet |
 | Tip · pathway 3 | [`/feed?flow=tip-p3`](https://kby-feed.vercel.app/feed?flow=tip-p3) — holds token → tap sends, no sheet |
+| Tip · split | [`/feed?flow=tip-split`](https://kby-feed.vercel.app/feed?flow=tip-split) — Sheet → Tip $1 → Split tip (Keep portion above You’ll tip) |
 | Tip → Top up | [`/feed?flow=tip-topup`](https://kby-feed.vercel.app/feed?flow=tip-topup) — alias of pathway 2, not a second demo |
 | Tip · tap | [`/feed?flow=tip-tap`](https://kby-feed.vercel.app/feed?flow=tip-tap) — minimodal auto-send (already had a bag) |
 | Tip · hold | [`/feed?flow=tip-hold`](https://kby-feed.vercel.app/feed?flow=tip-hold) — entry yap · fast burner ramp · countdown burst |
@@ -1661,7 +1661,7 @@ Hub is two jobs. One back chevron + [`morphSheet`](#sheet-morph). No stacked bre
 | `cwBalances` | Loading → empty. Disconnect. **Transfer to account** → watch |
 | `exList` → `exWait` | Exchange list. Waiting: *Complete authorization in the Coinbase tab…* |
 | `confirm` | “Adding funds” → `Added $25.00` (`is-confirming`, close locked) |
-| `buyToTip` | Tip-intent: dollarized trade composer (`Buy SAUCE` + ⇅ + bag under the chip + You’ll tip). Wallet login adds Pay with (USDm / ETH / WETH). Morphs from top-up success. Does not auto-fire. |
+| `buyToTip` | Tip-intent: composer → Keep portion → You’ll tip → CTA (`Buy SAUCE` + ⇅ + bag under the chip). Wallet login adds Pay with (USDm / ETH / WETH) above Keep portion. Morphs from top-up success. Does not auto-fire. |
 
 **Cash** is a MoonPay stand-in. Currency pill (USD / EUR / GBP) matches the trade chip. Warning sits **below Continue**: title *A Solana wallet may appear*; body *Your purchase lands in your USD balance* (ETH/USDm on MegaETH under the hood). Accordion chevron expands the body on tap/click (same at every breakpoint — no hover-open). Neutral (`--coffee`), not red. Opening the method list exits the note then [`morphSheet`](#sheet-morph).
 
