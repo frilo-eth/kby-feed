@@ -3,6 +3,8 @@
 ## Unreleased
 
 ### Feedback
+- Trade and Buy to tip composers show the current bag balance under the token chip (`#tradeBagBal` / `#b2tBagBal`, exact token amount, `0` when empty).
+- `/flows` **Buy to tip** adds [`tip-split`](https://kby-feed.vercel.app/feed?flow=tip-split) — Keep portion on at 50/50, then `Tip $0.50 and keep $0.50`.
 - Dedicated **`warning`** and **`error`** sound recipes (no longer reuse `dislike` for flow failures).
 - Flow failures fire haptics: hard rejects (`error`) for checkout / connect / auth cancel, signature reject, under-$10 cash, sign-in cancelled; soft gates (`warning`) for top-up shortfalls, short wallet, and empty trade amount.
 - All UI audio unified on [procedural-sounds](https://procedural-sounds.vercel.app/) recipes — former custom oscillators (`mute` / `unmute` / `lock` / `unlock` / `toggle` / `settle` / `dragtick`) are now `SOUND_RECIPES`. `/sounds` is recipe-only (Play + Copy).
@@ -14,13 +16,13 @@
 - Top-up success fires tip-scale confetti via `celebrateFunds()`.
 - `/flows`: **Tip → Top up** is now pathway 2 (`?flow=tip-p2`, alias `tip-topup`) — same Buy to tip sheet, CTA `Top up to tip`. Isolatable `tip-p1` / `tip-p2` / `tip-p3` each have a **sponsored** and **wallet** (`-eoa`) row.
 - `/flows` **Happy paths**: `buy-chain` / `buy-chain-eoa` / `tip-chain` / `tip-chain-eoa` — land → intent → auth → top up → complete. Tip chain morphs top-up success into **Buy to tip** (green `Tip 1 USDm`, keep portion, USDm/ETH for wallet / USD-only social) before the user confirms. Mid-chain confetti and the funds celebration haptic are suppressed; one fire at tip/buy end. Guided slower so each sheet can be read. Fake cursor + **Friction** counter, then both hide so you can take over.
-- `/flows` **Buy to tip** is a walkthrough table (`tip-p1` … `tip-p3-eoa`); each flow name opens production. Alias `tip-topup` is still pathway 2.
+- `/flows` **Buy to tip** is a walkthrough table (`tip-p1` … `tip-split` … `tip-p3-eoa`); each flow name opens production. Alias `tip-topup` is still pathway 2.
 - Buy to tip reuses the dollarized trade composer (`Buy SAUCE`, ⇅ token equivalent, **You’ll tip** breakdown). Wallet login adds the same **Pay with** chip as trade (USDm / ETH / WETH). Header is **Tip** + `@handle`. Isolatable `tip-p1` / `p2` / `p3` (sponsored + wallet) walk the full path with the fake cursor instead of stopping on the first sheet.
 - Keep portion slider is continuous (any percent). 0 / 25 / 50 / 75 / 100 are magnetic and the tick balls are clickable.
 - Tips require a **bought** position in the creator token. Seeded demo bags don't count. `session.hasGas` is independent of cash balance: no token + gas → Buy to tip sheet; no token + no gas → **same sheet** with `Top up to tip`; has token → tip fires on tap (wallet login confirms in MetaMask). Keep portion is off by default, hidden at $0, and morphs the sheet height when on. CTA is green `#3DDC97` (`Tip 1 USDm`), not orange. After a buy, later tips spend that holding. The button stays orange after the first tip; you can keep tipping until the bag is empty. Empty after a tip stays orange — no broke tooltip.
 
 ### Docs
-- README [#tipping](https://github.com/frilo-eth/kby-feed/blob/main/README.md#tipping): three pathways, `session.hasGas`, Buy to tip sheet, keep portion slider, `tip-p1` / `tip-p2` / `tip-p3`. Happy-path tip chain and friction hide. Stakeholder flows + deposit `buyToTip` step.
+- README [#tipping](https://github.com/frilo-eth/kby-feed/blob/main/README.md#tipping): three pathways, `session.hasGas`, Buy to tip sheet, keep portion slider, `tip-p1` / `tip-split` / `tip-p2` / `tip-p3`. Happy-path tip chain and friction hide. Stakeholder flows + deposit `buyToTip` step.
 - README [#haptic-sound-map](https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map): full preset → WebHaptics → sound recipe catalog; curated export IDs; recipe-only audio + haptic-only swipe/pull rules.
 - Playable samples at [`/sounds`](https://kby-feed.vercel.app/sounds) — **Play** + **Copy** recipe; README tables link **▶** to each cue.
 

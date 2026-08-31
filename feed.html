@@ -1836,8 +1836,14 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
 .trade-helpers button:hover{background:color-mix(in srgb, var(--ink) 12%, var(--card));}
 .trade-helpers button.is-on{background:color-mix(in srgb, var(--ink) 16%, var(--card));}
 .trade-helpers button:active{transform:scale(.97);}
-.trade-usd-row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
-.trade-usd{display:flex;align-items:baseline;gap:2px;min-width:0;flex:1;cursor:text;}
+.trade-usd-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.trade-usd-col{
+  display:flex;flex-direction:column;align-items:flex-start;min-width:0;flex:1;gap:8px;
+}
+.trade-asset-col{
+  display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0;gap:8px;
+}
+.trade-usd{display:flex;align-items:baseline;gap:2px;min-width:0;width:100%;cursor:text;}
 .trade-usd-sign{font-size:32px;font-weight:800;letter-spacing:-.04em;color:var(--ink);line-height:1;}
 .trade-usd input{
   width:100%;min-width:0;border:none;background:transparent;outline:none;
@@ -1886,11 +1892,16 @@ html.dark .token-chart-badge{background:rgba(28,28,30,.78);border-color:rgba(255
 .trade-pay-ic svg{width:22px;height:22px;display:block;}
 .trade-out{
   display:inline-flex;align-items:center;gap:6px;border:none;background:transparent;
-  padding:0;margin:8px 0 0;font-size:13px;font-weight:600;color:var(--ink-soft);
+  padding:0;margin:0;font-size:13px;font-weight:600;color:var(--ink-soft);
   cursor:pointer;font-variant-numeric:tabular-nums;appearance:none;-webkit-appearance:none;
 }
 .trade-out:hover{color:var(--ink);}
 .trade-out-swap{font-size:14px;line-height:1;}
+.trade-bag{
+  font-size:13px;font-weight:600;color:var(--ink-soft);
+  font-variant-numeric:tabular-nums;text-align:right;line-height:1.2;
+  max-width:16ch;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
 .trade-usd.has-ticker{position:relative;}
 .trade-usd.has-ticker .quote-ticker{
   position:absolute;left:0;top:0;right:0;bottom:0;
@@ -5224,16 +5235,21 @@ html.dark .qhc-id{color:#6BA3FF;}
               <div class="trade-helpers" id="tradeHelpers"></div>
             </div>
             <div class="trade-usd-row">
-              <label class="trade-usd">
-                <span class="trade-usd-sign" id="tradeUsdSign">$</span>
-                <input id="tradePayInput" value="25" inputmode="decimal" autocomplete="off" aria-label="Amount in USD">
-              </label>
-              <span class="trade-asset-chip" id="tradeGetAsset"><span class="trade-token-av squircle"><img src="" alt="" id="tradeGetAssetImg"></span><span id="tradeGetAssetLabel">TOKEN</span></span>
+              <div class="trade-usd-col">
+                <label class="trade-usd">
+                  <span class="trade-usd-sign" id="tradeUsdSign">$</span>
+                  <input id="tradePayInput" value="25" inputmode="decimal" autocomplete="off" aria-label="Amount in USD">
+                </label>
+                <button type="button" class="trade-out" id="tradeOut" aria-label="Swap USD and token">
+                  <span class="trade-out-swap" aria-hidden="true">⇅</span>
+                  <span class="quote-ticker" id="tradeOutVal">653.0K TOKEN</span>
+                </button>
+              </div>
+              <div class="trade-asset-col">
+                <span class="trade-asset-chip" id="tradeGetAsset"><span class="trade-token-av squircle"><img src="" alt="" id="tradeGetAssetImg"></span><span id="tradeGetAssetLabel">TOKEN</span></span>
+                <span class="trade-bag" id="tradeBagBal">0</span>
+              </div>
             </div>
-            <button type="button" class="trade-out" id="tradeOut" aria-label="Swap USD and token">
-              <span class="trade-out-swap" aria-hidden="true">⇅</span>
-              <span class="quote-ticker" id="tradeOutVal">653.0K TOKEN</span>
-            </button>
           </div>
           <div class="trade-field" id="tradePayWith" hidden aria-hidden="true">
             <div class="trade-field-top">
@@ -6617,6 +6633,20 @@ html.dark .qhc-id{color:#6BA3FF;}
     const hit = visibleHoldings().find(x => holdingKey(x.ticker) === key);
     return hit ? (hit.usd || 0) : 0;
   }
+  function bagTokenAmt(ticker){
+    const usd = holdingUsdFor(ticker);
+    if(!(usd > 0)) return '0';
+    const raw = Math.max(0, Number(usd) || 0) * TOKEN_PER_USD;
+    if(raw >= 1e6) return raw.toLocaleString(undefined, { maximumFractionDigits: 2 });
+    if(raw >= 1) return raw.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+    return String(+raw.toFixed(4));
+  }
+  function paintBagBal(el, ticker){
+    if(!el) return;
+    const tick = holdingKey(ticker) || 'TOKEN';
+    el.textContent = bagTokenAmt(tick);
+    el.setAttribute('aria-label', tick + ' balance');
+  }
   function tipHoldingUsd(ctx){
     const post = ctx && (ctx.post || tipPostFromCtx(ctx));
     const key = holdingKey(post?.ticker);
@@ -6717,6 +6747,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     if(slipMeta) slipMeta.textContent = slipMetaLabel();
     paintSlipAutoTag();
     paintPayAssetField(isSell ? guarded : amt);
+    paintBagBal(document.getElementById('tradeBagBal'), ticker);
     const helpers = document.getElementById('tradeHelpers');
     if(helpers){
       if(isSell){
@@ -10297,6 +10328,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     });
     markBuyToTipOver();
     paintB2tPay();
+    paintBagBal(document.getElementById('b2tBagBal'), b2tTokenName());
   }
   function b2tKeepHtml(f, hold){
     if(!(hold > 0)) return '';
@@ -10416,16 +10448,21 @@ html.dark .qhc-id{color:#6BA3FF;}
               <div class="trade-helpers" id="b2tHelpers">${B2T_PRESETS.map(v => `<button type="button" data-usd="${v}" class="${Math.abs(usd - v) < 0.005 ? 'is-on' : ''}">$${v}</button>`).join('')}</div>
             </div>
             <div class="trade-usd-row">
-              <label class="trade-usd">
-                <span class="trade-usd-sign" id="b2tUsdSign">$</span>
-                <input id="b2tAmt" inputmode="decimal" autocomplete="off" value="${escHtml(b2tAmtStr())}" aria-label="${session.b2tUnit === 'token' ? 'Amount in tokens' : 'Amount in USD'}" aria-invalid="${over ? 'true' : 'false'}">
-              </label>
-              <span class="trade-asset-chip" aria-hidden="true"><span class="trade-token-av squircle"><img src="${escHtml(b2tTokenImg())}" alt=""></span><span>${escHtml(tick)}</span></span>
+              <div class="trade-usd-col">
+                <label class="trade-usd">
+                  <span class="trade-usd-sign" id="b2tUsdSign">$</span>
+                  <input id="b2tAmt" inputmode="decimal" autocomplete="off" value="${escHtml(b2tAmtStr())}" aria-label="${session.b2tUnit === 'token' ? 'Amount in tokens' : 'Amount in USD'}" aria-invalid="${over ? 'true' : 'false'}">
+                </label>
+                <button type="button" class="trade-out" id="b2tOut" aria-label="Swap USD and token">
+                  <span class="trade-out-swap" aria-hidden="true">⇅</span>
+                  <span id="b2tOutVal">${escHtml(b2tOutText())}</span>
+                </button>
+              </div>
+              <div class="trade-asset-col">
+                <span class="trade-asset-chip" aria-hidden="true"><span class="trade-token-av squircle"><img src="${escHtml(b2tTokenImg())}" alt=""></span><span>${escHtml(tick)}</span></span>
+                <span class="trade-bag" id="b2tBagBal">${escHtml(bagTokenAmt(tick))}</span>
+              </div>
             </div>
-            <button type="button" class="trade-out" id="b2tOut" aria-label="Swap USD and token">
-              <span class="trade-out-swap" aria-hidden="true">⇅</span>
-              <span id="b2tOutVal">${escHtml(b2tOutText())}</span>
-            </button>
           </div>
           ${b2tPayHtml(usd)}
           <div class="trade-meta" id="b2tMeta">
@@ -10749,7 +10786,7 @@ html.dark .qhc-id{color:#6BA3FF;}
       haptic('selection');
     });
     body.querySelector('#b2tField')?.addEventListener('click', (e)=>{
-      if(e.target.closest('#b2tOut, #b2tHelpers, .trade-asset-chip')) return;
+      if(e.target.closest('#b2tOut, #b2tHelpers, .trade-asset-chip, .trade-bag, #b2tBagBal')) return;
       amtIn?.focus();
     });
     body.querySelector('[data-b2t-pay]')?.addEventListener('click', (e)=>{
@@ -11206,6 +11243,11 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     if(el.classList?.contains('tip') && el.classList.contains('react-btn')) return 'Tip';
     if(el.matches?.('[data-flow-continue]')) return 'Top up';
+    if(el.matches?.('[data-keep-toggle]')) return 'Keep portion';
+    if(el.matches?.('[data-dot]')){
+      const v = parseInt(el.dataset.dot, 10);
+      if(Number.isFinite(v)) return v + '/' + (100 - v) + ' split';
+    }
     if(el.matches?.('[data-buy-to-tip-go]')){
       const t = (el.textContent || '').replace(/\s+/g, ' ').trim();
       return (t || 'Tip').slice(0, 28);
@@ -11404,6 +11446,9 @@ html.dark .qhc-id{color:#6BA3FF;}
       const buyTipGo = flowBody?.querySelector('[data-buy-to-tip-go]');
       const buyTipKind = typeof buyToTipCtaState === 'function' ? buyToTipCtaState().kind : '';
       const fundsModal = fundsOverlay?.querySelector('.funds-modal');
+      const wantsSplit = session.happyChain.path === 'split';
+      const keepToggle = flowBody?.querySelector('[data-keep-toggle]');
+      const keepOn = !!session.flow?.keepOn;
       if(
         session.happyChain.kind === 'tip' &&
         session.flow?.step === 'buyToTip' &&
@@ -11426,13 +11471,24 @@ html.dark .qhc-id{color:#6BA3FF;}
       const shaking = fundsModal?.classList.contains('is-shake') && (!openedAt || (performance.now() - openedAt) < 900);
       const overlayReady = overlayLive && parseFloat(getComputedStyle(fundsOverlay).opacity) > 0.4;
       if(
+        wantsSplit &&
+        overlayReady &&
+        keepToggle && !keepOn && !keepToggle.dataset.demoGuided &&
+        !sheetBusy && !shaking
+      ){
+        keepToggle.dataset.demoGuided = '1';
+        queueHappyGuide(keepToggle, { click: true, hide: false, dwell: HAPPY_PACE.sheet });
+      }
+      const splitReady = !wantsSplit || keepOn;
+      if(
         session.happyChain.kind === 'tip' &&
         session.flow?.step === 'buyToTip' &&
         overlayReady &&
         buyTipGo && !buyTipGo.dataset.demoGuided &&
         (buyTipKind === 'go' || buyTipKind === 'deposit') &&
         buyTipGo.getAttribute('aria-disabled') !== 'true' &&
-        !sheetBusy && !shaking
+        !sheetBusy && !shaking &&
+        splitReady
       ){
         buyTipGo.dataset.demoGuided = '1';
         queueHappyGuide(buyTipGo, { click: true, hide: buyTipKind === 'go', dwell: HAPPY_PACE.sheet });
@@ -11703,6 +11759,10 @@ html.dark .qhc-id{color:#6BA3FF;}
     }
     if(flow === 'tip-p1' || flow === 'tip-p1-eoa'){
       bootTipIsolatable('p1', flow.endsWith('-eoa') ? 'eoa' : 'social');
+      return;
+    }
+    if(flow === 'tip-split' || flow === 'tip-keep'){
+      bootTipIsolatable('split', 'social');
       return;
     }
     if(flow === 'tip-p2' || flow === 'tip-p2-eoa' || flow === 'tip-topup'){
@@ -18004,7 +18064,7 @@ html.dark .qhc-id{color:#6BA3FF;}
     toggleTradeUnit();
   });
   document.getElementById('tradeBuyField')?.addEventListener('click', (e)=>{
-    if(e.target.closest('#tradeHelpers, #tradeGetAsset, button')) return;
+    if(e.target.closest('#tradeHelpers, #tradeGetAsset, .trade-bag, #tradeBagBal, button')) return;
     document.getElementById('tradePayInput')?.focus();
   });
   document.getElementById('tradeHelpers')?.addEventListener('click', (e)=>{

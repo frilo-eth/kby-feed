@@ -133,7 +133,7 @@ Use this as the checklist when reimplementing — these are the UX details that 
 
 | Feature | Behavior |
 |---------|----------|
-| [Buy field](#trade-drawer) | **Buy $TICKER** + pill helpers `$25 / $100 / $500`. Amount row: `$` + input + token chip (chip aligns with the dollar, not the label). Spend always uses `tradeUsdAmt()` |
+| [Buy field](#trade-drawer) | **Buy $TICKER** + pill helpers `$25 / $100 / $500`. Amount row: `$` + input + token chip (chip aligns with the dollar, not the label). Bag balance `#tradeBagBal` sits under the chip (`formatTokenExact`, no ticker). Spend always uses `tradeUsdAmt()` |
 | Sell helpers | `25% / 50% / All` of holdings (dollarized spend) |
 | Unit swap | `#tradeOut` **⇅** toggles `session.tradeUnit` `'usd'` \| `'token'`. Rate `TOKEN_PER_USD = 26120`. Token mode hides `$` via `#tradeBuyField.is-token` |
 | [Pay with](#pay-with) | Hidden on launchpad Buy (USD only). ETH / WETH / USDm still price the quote |
@@ -318,7 +318,7 @@ Tips spend a **bought** position in that creator token. Seeded demo bags do not 
 
 | Pathway | State | What happens |
 |---------|--------|----------------|
-| **1** | No token, **has gas** | Same **Buy to tip** sheet as 2. Header is **Tip** + `@handle` (close on the right). Composer is the dollarized trade field: **Buy SAUCE**, `$1 / $5 / $25` helpers, **⇅** for the token equivalent. Wallet login adds **Pay with** (USDm / ETH / WETH). **You’ll tip** is a short fee breakdown. CTA is green `#3DDC97`: `Tip $1` / `Tip 1 USDm`. Keep portion off by default. |
+| **1** | No token, **has gas** | Same **Buy to tip** sheet as 2. Header is **Tip** + `@handle` (close on the right). Composer is the dollarized trade field: **Buy SAUCE**, `$1 / $5 / $25` helpers, **⇅** for the token equivalent, bag balance under the token chip. Wallet login adds **Pay with** (USDm / ETH / WETH). **You’ll tip** is a short fee breakdown. CTA is green `#3DDC97`: `Tip $1` / `Tip 1 USDm`. Keep portion off by default. |
 | **2** | No token, **no gas** | **Same sheet** as 1. Amount goes red, the sheet shakes, and `haptic('error')` fires — same as cash under-$10. CTA is `Top up to tip`. Clicking it runs the real deposit (`openTopUp` / `$10` min), then the sheet is confirmable — does **not** auto-fire. Keep portion is hidden at `$0` and appears once funded. |
 | **3** | Holds the token | Tap sends. No sheet, so no keep portion. |
 
@@ -333,7 +333,7 @@ Tips spend a **bought** position in that creator token. Seeded demo bags do not 
 | Empty after a tip | Stays orange. No “Hold your horses” tooltip. Cash still opens Buy to tip |
 | OP | No tip control — see [token vs yap](#token-vs-yap) |
 
-Isolatable (sponsored / wallet): [`tip-p1`](https://kby-feed.vercel.app/feed?flow=tip-p1) · [`tip-p1-eoa`](https://kby-feed.vercel.app/feed?flow=tip-p1-eoa) · [`tip-p2`](https://kby-feed.vercel.app/feed?flow=tip-p2) · [`tip-p2-eoa`](https://kby-feed.vercel.app/feed?flow=tip-p2-eoa) · [`tip-p3`](https://kby-feed.vercel.app/feed?flow=tip-p3) · [`tip-p3-eoa`](https://kby-feed.vercel.app/feed?flow=tip-p3-eoa). Fake cursor walks each path to the end (p1 confirm tip · p2 top up then tip · p3 tap send; wallet rows confirm in MetaMask). Happy-path tip (`?flow=tip-chain`) is land → tip → auth → **Buy to tip** → top up if needed → tip. Mid-chain confetti is suppressed; one fire at the end. Guided slower so each sheet can be read. See [stakeholder flows](#stakeholder-flows).
+Isolatable (sponsored / wallet): [`tip-p1`](https://kby-feed.vercel.app/feed?flow=tip-p1) · [`tip-p1-eoa`](https://kby-feed.vercel.app/feed?flow=tip-p1-eoa) · [`tip-split`](https://kby-feed.vercel.app/feed?flow=tip-split) · [`tip-p2`](https://kby-feed.vercel.app/feed?flow=tip-p2) · [`tip-p2-eoa`](https://kby-feed.vercel.app/feed?flow=tip-p2-eoa) · [`tip-p3`](https://kby-feed.vercel.app/feed?flow=tip-p3) · [`tip-p3-eoa`](https://kby-feed.vercel.app/feed?flow=tip-p3-eoa). Fake cursor walks each path to the end (p1 confirm tip · split turns Keep portion on at 50/50 · p2 top up then tip · p3 tap send; wallet rows confirm in MetaMask). Happy-path tip (`?flow=tip-chain`) is land → tip → auth → **Buy to tip** → top up if needed → tip. Mid-chain confetti is suppressed; one fire at the end. Guided slower so each sheet can be read. See [stakeholder flows](#stakeholder-flows).
 
 ---
 
@@ -1534,6 +1534,7 @@ Click-through for design reviews: [https://kby-feed.vercel.app/flows](https://kb
 | Land and browse | [`/feed`](https://kby-feed.vercel.app/feed) |
 | First action (login + pending tip) | [`/feed?flow=first`](https://kby-feed.vercel.app/feed?flow=first) |
 | Tip · pathway 1 | [`/feed?flow=tip-p1`](https://kby-feed.vercel.app/feed?flow=tip-p1) — no token, has gas → Buy to tip sheet |
+| Tip · Keep portion split | [`/feed?flow=tip-split`](https://kby-feed.vercel.app/feed?flow=tip-split) — same sheet as p1, then Keep portion on at 50/50 → `Tip $0.50 and keep $0.50` |
 | Tip · pathway 2 | [`/feed?flow=tip-p2`](https://kby-feed.vercel.app/feed?flow=tip-p2) — no token, no gas → real top up → same sheet |
 | Tip · pathway 3 | [`/feed?flow=tip-p3`](https://kby-feed.vercel.app/feed?flow=tip-p3) — holds token → tap sends, no sheet |
 | Tip → Top up | [`/feed?flow=tip-topup`](https://kby-feed.vercel.app/feed?flow=tip-topup) — alias of pathway 2, not a second demo |
@@ -1660,7 +1661,7 @@ Hub is two jobs. One back chevron + [`morphSheet`](#sheet-morph). No stacked bre
 | `cwBalances` | Loading → empty. Disconnect. **Transfer to account** → watch |
 | `exList` → `exWait` | Exchange list. Waiting: *Complete authorization in the Coinbase tab…* |
 | `confirm` | “Adding funds” → `Added $25.00` (`is-confirming`, close locked) |
-| `buyToTip` | Tip-intent: dollarized trade composer (`Buy SAUCE` + ⇅ + You’ll tip). Wallet login adds Pay with (USDm / ETH / WETH). Morphs from top-up success. Does not auto-fire. |
+| `buyToTip` | Tip-intent: dollarized trade composer (`Buy SAUCE` + ⇅ + bag under the chip + You’ll tip). Wallet login adds Pay with (USDm / ETH / WETH). Morphs from top-up success. Does not auto-fire. |
 
 **Cash** is a MoonPay stand-in. Currency pill (USD / EUR / GBP) matches the trade chip. Warning sits **below Continue**: title *A Solana wallet may appear*; body *Your purchase lands in your USD balance* (ETH/USDm on MegaETH under the hood). Accordion chevron expands the body on tap/click (same at every breakpoint — no hover-open). Neutral (`--coffee`), not red. Opening the method list exits the note then [`morphSheet`](#sheet-morph).
 
@@ -1749,7 +1750,7 @@ Same chrome as comments (desktop 360 / mobile sheet). Buy / Sell tabs. Amount is
 | `#tradePayWith` label | Pay with | Receive |
 | [CTA](#trade-cta) | Buy · Sign up / Log in · Top up to buy | Sell · Sign up / Log in · Sell (fees come out of proceeds; never Top up) |
 
-**Amount row:** `$` + `#tradePayInput` (32px / 800) + token chip `#tradeGetAsset` (aligned with the input, **not** the label row).
+**Amount row:** `$` + `#tradePayInput` (32px / 800) + token chip `#tradeGetAsset` (aligned with the input, **not** the label row). **⇅** conversion sits under the dollar; bag balance `#tradeBagBal` sits under the chip (right-aligned, `--ink-soft`, exact token amount from `holdingUsdFor` + `formatTokenExact` — empty is `0`). Same layout on Buy to tip (`#b2tBagBal`).
 
 **⇅ `#tradeOut`:** toggles `session.tradeUnit` `'usd'` ↔ `'token'`. Rate `TOKEN_PER_USD = 26120`. Token mode: `#tradeBuyField.is-token` hides `$`. Quote still converts through USD.
 
