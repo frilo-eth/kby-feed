@@ -3186,15 +3186,26 @@ button.wallet-id-method:active{transform:scale(.98);}
 }
 .wallet-quiet-add:hover{color:var(--ink);background:color-mix(in srgb, var(--ink) 4%, transparent);}
 .wallet-signout{
+  --signout:#B50023;
   width:36px;height:36px;flex-shrink:0;border:none;border-radius:10px;
   padding:0;gap:0;
-  background:transparent;color:var(--red);cursor:pointer;
+  background:transparent;color:var(--signout);cursor:pointer;
   display:grid;place-items:center;
-  transition:background .15s,transform .12s;
+  transition:background .16s var(--ease-out),color .16s var(--ease-out),transform .12s var(--ease-out);
 }
-.wallet-signout:hover{background:rgba(229,69,63,.1);}
+html.dark .wallet-signout{--signout:#FF6A63;}
+.wallet-signout:hover,
+.wallet-signout:focus-visible{
+  background:color-mix(in srgb, var(--signout) 12%, transparent);
+}
 .wallet-signout:active{transform:scale(.94);}
-.wallet-signout svg{width:16px;height:16px;display:block;}
+.wallet-signout svg{width:16px;height:16px;display:block;overflow:visible;}
+.wallet-signout-arrow{transform:translateX(0);}
+@media (prefers-reduced-motion: no-preference){
+  .wallet-signout-arrow{transition:transform .16s var(--ease-out);}
+  .wallet-signout:hover .wallet-signout-arrow,
+  .wallet-signout:focus-visible .wallet-signout-arrow{transform:translateX(2px);}
+}
 .wallet-net{
   height:32px;flex-shrink:0;border:1px solid var(--line);border-radius:99px;
   padding:0 8px 0 6px;gap:4px;
@@ -8542,8 +8553,14 @@ html.dark .qhc-id{color:#6BA3FF;}
             <div class="wallet-id-who-row">
               ${whoHtml}
             </div>
-            <button type="button" class="wallet-signout" id="signOutBtn" aria-label="Disconnect">
-              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 7V5.8A1.8 1.8 0 0 1 10.8 4h8.4A1.8 1.8 0 0 1 21 5.8v12.4a1.8 1.8 0 0 1-1.8 1.8h-8.4A1.8 1.8 0 0 1 9 18.2V17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3.5 12H15M11.5 8.2 15.3 12l-3.8 3.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <button type="button" class="wallet-signout" id="signOutBtn" aria-label="Disconnect" data-tip-title="Disconnect" data-tip-body="">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M6.33207 13.6663H2.33207V2.33301H6.33207" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
+                <g class="wallet-signout-arrow">
+                  <path d="M5.66541 8H13.3321" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
+                  <path d="M10.6654 11L13.6654 8L10.6654 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
+                </g>
+              </svg>
             </button>
           </div>
           <div class="wallet-id-tools">
@@ -8621,7 +8638,25 @@ html.dark .qhc-id{color:#6BA3FF;}
     });
     body.querySelector('#walletAddBtn')?.addEventListener('click', ()=> openDeposit(0, null));
     body.querySelector('#walletSendBtn')?.addEventListener('click', ()=> openSend());
-    body.querySelector('#signOutBtn')?.addEventListener('click', signOut);
+    const signOutBtn = body.querySelector('#signOutBtn');
+    if(signOutBtn){
+      signOutBtn.addEventListener('click', signOut);
+      signOutBtn.addEventListener('pointerenter', (e)=>{
+        if(e.pointerType && e.pointerType !== 'mouse') return;
+        if(!copyAddrFineHover()) return;
+        scheduleShowHover('info', null, signOutBtn, 120);
+      });
+      signOutBtn.addEventListener('pointerleave', (e)=>{
+        if(e.pointerType && e.pointerType !== 'mouse') return;
+        if(!copyAddrFineHover()) return;
+        clearTimeout(hoverShowTimer); hoverShowTimer = 0;
+        hideHoverCards(false);
+      });
+      signOutBtn.addEventListener('focus', ()=>{
+        if(typeof showHoverCard === 'function') showHoverCard('info', null, signOutBtn);
+      });
+      signOutBtn.addEventListener('blur', ()=> hideHoverCards(false));
+    }
     body.querySelector('#walletRefreshBtn')?.addEventListener('click', ()=>{
       refreshTokenBalances();
       fillWalletBody();

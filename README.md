@@ -22,6 +22,7 @@ Porting / review: open the heading, not the whole README. Production: [https://k
 | [Profile page](#profile-page) (`/profile` — handle + View my profile) | [README.md#profile-page](https://github.com/frilo-eth/kby-feed/blob/main/README.md#profile-page) |
 | [Auth (Option 4)](#auth) — social vs EOA · wallet popup / `?autosig` | [README.md#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth) |
 | [Wallet copy morph](#wallet-copy-morph) (Account identity · balance → copy → check) | [README.md#wallet-copy-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#wallet-copy-morph) |
+| [Disconnect icon](#disconnect-icon) (Account header · arrow slide + red tint) | [README.md#disconnect-icon](https://github.com/frilo-eth/kby-feed/blob/main/README.md#disconnect-icon) |
 | [Sheet morph](#sheet-morph) (`morphSheet` ~320ms) | [README.md#sheet-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sheet-morph) |
 | [Deposit](#deposit) (Cash vs Crypto, unified QR) | [README.md#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit) |
 | [Send](#send) | [README.md#send](https://github.com/frilo-eth/kby-feed/blob/main/README.md#send) |
@@ -166,7 +167,7 @@ Most motion reuses a small set of curves. Durations are wall-clock; doomscroll s
 
 ### 1. Hover / press (CSS)
 
-**Rule:** hover is **color-graded only** (background, color, brightness, shadow tint). No scale / translate on hover — except token chip + trade plus.
+**Rule:** hover is **color-graded only** (background, color, brightness, shadow tint). No scale / translate on hover — except token chip + trade plus + [Disconnect arrow](#disconnect-icon).
 
 | Target | Hover | Press | Transition |
 |--------|-------|-------|------------|
@@ -177,6 +178,7 @@ Most motion reuses a small set of curves. Durations are wall-clock; doomscroll s
 | Reaction count | ink / white | — | color `.2s` |
 | **Mute / unmute** | pathLength draw morph — see below | — | `.2s` ease-in-out (+`.1s` outer) |
 | **Wallet copy morph** | [Wallet copy morph](#wallet-copy-morph) — Account identity icon: wallet → copy → check | `scale(.94)` on the 32px hit | `320 / 280 / 340ms` cubic ease-in-out |
+| **Disconnect** | [Disconnect icon](#disconnect-icon) — 12% `#B50023` wash; arrow `translateX(2px)` | `scale(.94)` | `.16s` `var(--ease-out)` |
 | **Buy $ticker** (floating pill) | desktop + mobile; cadence show → tuck → re-engage (≤3× / post); shared enter/exit spring; `inset(… round 999px)` wipe; hotzone wake = pill only (`is-hover-wake`) | brightness | clip/transform spring |
 | **Hover cards** | user + token + **`>>` quote** portals (no Buy CTA); desktop `pointer:fine` only | — | show `.18s`, delay 180–280ms |
 | New posts pill | brightness `.98`; soft-dismiss after 2 settled swipes | `scale(.95)` | opacity `.28s`, transform `.34s` pop |
@@ -1572,7 +1574,7 @@ Copy in the prototype: header and login modal **Sign up / Log in**. Account **US
 
 ### 13. Auth (Option 4)
 
-**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth) · **Copy morph only:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#wallet-copy-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#wallet-copy-morph)
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth) · **Copy morph only:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#wallet-copy-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#wallet-copy-morph) · **Disconnect icon:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#disconnect-icon](https://github.com/frilo-eth/kby-feed/blob/main/README.md#disconnect-icon)
 
 One login, one paying wallet. Prototype only — no real keys.
 
@@ -1591,7 +1593,7 @@ Identity is three layers that must not be derived from each other:
 | **Login credential** | A realistic Google / Apple / email / social (e.g. `maya.chen.92@gmail.com`). Never `swiftsunnystoat@gmail.com` from the handle. | The EOA you connected. |
 | **Receive address** | Minted embedded **Account** (`kind:'embedded'`). Copy is the morphing icon next to the login method — not a later-linked MetaMask. | **That same EOA.** No second wallet is minted. The identity pill itself copies the address you signed in with. |
 
-Account opens with a large blockie (seeded from that receive address, classic blockies palette) and the animal name. Under the name: login icon + email / @handle on social, or the shortened EOA on wallet login. Social keeps a separate 32px copy control whose tip is **Your account address** — that control is the [wallet copy morph](#wallet-copy-morph) (wallet glyph → copy → check). Wallet login morphs the copy glyph in the pill’s tail on click. Changing the username does **not** retint the blockie. **USD Balance** is the dollar figure only — the address is tooltip-only on the identity copy control. Tabs are **Tokens**, **Activity**, **Tips**, **Profile**, **Settings**. Crypto wallets live on **Settings**, below **Login connections** and **Passkey** — not on the default Tokens view. Settings lists only what is already connected. Wallet settings rows are borderless (no divider lines). **Connect account** opens the same Sign up / Log in methods (email, Google / X / TikTok, More options — no Phone) and the same verifying / connected wait. **Connect wallet** is a full-row button that opens the picker (same pattern as Top up methods). Connect and Disconnect show on hover. Social users see the embedded wallet labeled **Account**; wallet-login users see only the wallet they signed in with (plus any they connect later). Linked wallets: **Rename**, **Copy address**, **Remove**. Account hero is **USD Balance**; the CTA is **Top up**. Send short uses **Top up to send** only from the social Account cash pot. Deposit hub title is **Top up**. **View my profile** is a ghost button to [`/profile`](#profile-page).
+Account opens with a large blockie (seeded from that receive address, classic blockies palette) and the animal name. The 36×36 [Disconnect](#disconnect-icon) control sits on the same row as the name (red logout glyph, arrow slides on hover). Under the name: login icon + email / @handle on social, or the shortened EOA on wallet login. Social keeps a separate 32px copy control whose tip is **Your account address** — that control is the [wallet copy morph](#wallet-copy-morph) (wallet glyph → copy → check). Wallet login morphs the copy glyph in the pill’s tail on click. Changing the username does **not** retint the blockie. **USD Balance** is the dollar figure only — the address is tooltip-only on the identity copy control. Tabs are **Tokens**, **Activity**, **Tips**, **Profile**, **Settings**. Crypto wallets live on **Settings**, below **Login connections** and **Passkey** — not on the default Tokens view. Settings lists only what is already connected. Wallet settings rows are borderless (no divider lines). **Connect account** opens the same Sign up / Log in methods (email, Google / X / TikTok, More options — no Phone) and the same verifying / connected wait. **Connect wallet** is a full-row button that opens the picker (same pattern as Top up methods). Connect and Disconnect show on hover. Social users see the embedded wallet labeled **Account**; wallet-login users see only the wallet they signed in with (plus any they connect later). Linked wallets: **Rename**, **Copy address**, **Remove**. Account hero is **USD Balance**; the CTA is **Top up**. Send short uses **Top up to send** only from the social Account cash pot. Deposit hub title is **Top up**. **View my profile** is a ghost button to [`/profile`](#profile-page).
 
 Default login sheet: email, Google / X / TikTok, Crypto wallet, Passkey, More options. Title **Sign up / Log in**. Wallet lives on the main sheet only — not under More. Present the stripped sheet with [`?minimal`](https://kby-feed.vercel.app/feed?minimal) (or `?flow=first&minimal`): icons first, email, Crypto wallet, More options (Passkey hidden). Click-through index: [`/flows`](https://kby-feed.vercel.app/flows).
 
@@ -1618,6 +1620,7 @@ Hash aliases: `#sig`, `#error-sig`, `#error-funds`, `#error-short`. Deposit erro
 | Panel switch (login ↔ wallets ↔ email ↔ funds) | [`morphSheet`](#sheet-morph) `.32s` |
 | Icon / row press | `scale(.97)` · `.12s` |
 | Identity copy icon | [Wallet copy morph](#wallet-copy-morph) · `scale(.94)` press on `.wallet-id-method-copy-icon` |
+| Disconnect | [Disconnect icon](#disconnect-icon) · 12% `#B50023` wash + arrow `translateX(2px)` · `.16s` `--ease-out` |
 | Hover on `--card` controls | `color-mix(in srgb, var(--card) 62%, white)` — not `--bg` |
 | Signed-in feedback | short “You’re signed in.” hold, then `afterAuth`. Overlay fades on the success sheet — does **not** reprint login while closing, does **not** auto-open funds |
 
@@ -1776,6 +1779,76 @@ Do **not** swap three SVGs. Do **not** use `pathLength` draw here — the glyphs
   100%{ transform:scale(1); }
 }
 ```
+
+#### Disconnect icon
+
+**Share this icon only:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#disconnect-icon](https://github.com/frilo-eth/kby-feed/blob/main/README.md#disconnect-icon)
+
+Try it: [`/feed?flow=account`](https://kby-feed.vercel.app/feed?flow=account) — 36×36 control on the animal-name row.
+
+> **What this is *not*:** a pathLength draw, an icon swap, or a whole-button translate.  
+> **What it is:** one 16×16 Central-style logout glyph. The door/bracket stays; the arrow group slides **2px** on hover/focus. The hit fills with a **12% semantic red wash**. Press scales the button `.94` (same as the other identity 36px hits).
+
+| Piece | Detail |
+|-------|--------|
+| Host | `#signOutBtn` · `.wallet-signout` · 36×36 · `border-radius:10px` · same row as the animal name |
+| SVG | viewBox `0 0 16 16` · stroke `1.5` · `stroke-linecap="square"` · `currentColor` |
+| Color | `--signout: #B50023` (dark `#FF6A63`) |
+| Hover / `:focus-visible` | `background: color-mix(in srgb, var(--signout) 12%, transparent)` · arrow `translateX(2px)` |
+| Press | `scale(.94)` · `.12s` `--ease-out` |
+| Tip | **Disconnect** (`data-tip-title`, empty body) — same info tip as Edit profile |
+| Timing | wash + arrow `.16s` `var(--ease-out)` |
+| A11y | `@media (prefers-reduced-motion: no-preference)` gates the arrow slide; tint still runs |
+
+**States**
+
+| State | Wash | Arrow | Tip |
+|-------|------|-------|-----|
+| **Rest** | transparent | `translateX(0)` | — |
+| **Hover / focus-visible** | 12% `--signout` | `translateX(2px)` | Disconnect |
+| **Press** | same as hover | same as hover | — |
+| **Reduced motion** | 12% `--signout` | stays at `0` | Disconnect |
+
+**Markup (copy as-is)**
+
+```html
+<button type="button" class="wallet-signout" id="signOutBtn"
+  aria-label="Disconnect" data-tip-title="Disconnect" data-tip-body="">
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <path d="M6.33207 13.6663H2.33207V2.33301H6.33207" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
+    <g class="wallet-signout-arrow">
+      <path d="M5.66541 8H13.3321" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
+      <path d="M10.6654 11L13.6654 8L10.6654 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="square"/>
+    </g>
+  </svg>
+</button>
+```
+
+**CSS (minimum to port)**
+
+```css
+.wallet-signout{
+  --signout:#B50023;
+  width:36px;height:36px;border:none;border-radius:10px;
+  background:transparent;color:var(--signout);
+  display:grid;place-items:center;cursor:pointer;
+  transition:background .16s var(--ease-out), transform .12s var(--ease-out);
+}
+html.dark .wallet-signout{ --signout:#FF6A63; }
+.wallet-signout:hover,
+.wallet-signout:focus-visible{
+  background:color-mix(in srgb, var(--signout) 12%, transparent);
+}
+.wallet-signout:active{ transform:scale(.94); }
+.wallet-signout-arrow{ transform:translateX(0); }
+@media (prefers-reduced-motion: no-preference){
+  .wallet-signout-arrow{ transition:transform .16s var(--ease-out); }
+  .wallet-signout:hover .wallet-signout-arrow,
+  .wallet-signout:focus-visible .wallet-signout-arrow{ transform:translateX(2px); }
+}
+```
+
+Do **not** translate or scale the whole button on hover. Do **not** swap to a second SVG. Door path stays static; only `.wallet-signout-arrow` moves.
 
 ---
 

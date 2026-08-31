@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Feedback
+- Account **Disconnect** uses the handed 16×16 logout glyph (`#B50023`). Hover tints the 36×36 hit with a 12% semantic wash and slides the arrow 2px (`160ms` `--ease-out`); reduced motion keeps the tint only.
 - Trade and Buy to tip composers show the current bag balance under the token chip (`#tradeBagBal` / `#b2tBagBal`, exact token amount, `0` when empty).
 - Buy to tip: Keep portion sits above the You’ll tip accordion.
 - `/flows` **Buy to tip** adds [`tip-split`](https://kby-feed.vercel.app/feed?flow=tip-split) — Sheet → Tip $1 → Split tip.
@@ -23,6 +24,7 @@
 - Tips require a **bought** position in the creator token. Seeded demo bags don't count. `session.hasGas` is independent of cash balance: no token + gas → Buy to tip sheet; no token + no gas → **same sheet** with `Top up to tip`; has token → tip fires on tap (wallet login confirms in MetaMask). Keep portion is off by default, hidden at $0, and morphs the sheet height when on. CTA is green `#3DDC97` (`Tip 1 USDm`), not orange. After a buy, later tips spend that holding. The button stays orange after the first tip; you can keep tipping until the bag is empty. Empty after a tip stays orange — no broke tooltip.
 
 ### Docs
+- README [#disconnect-icon](https://github.com/frilo-eth/kby-feed/blob/main/README.md#disconnect-icon): Account header logout glyph — 12% `#B50023` wash, arrow `translateX(2px)`, markup + CSS.
 - README [#wallet-copy-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#wallet-copy-morph): Account identity copy icon (social = **Your account address** sibling; EOA = pill tail). All states (rest / hover / copied / exit), path `d` snippets, markup, tween recipe.
 - README [#tipping](https://github.com/frilo-eth/kby-feed/blob/main/README.md#tipping): three pathways, `session.hasGas`, Buy to tip sheet (Keep portion above You’ll tip), keep portion slider, `tip-p1` / `tip-p2` / `tip-p3` / `tip-split`. Happy-path tip chain and friction hide. Stakeholder flows + deposit `buyToTip` step.
 - README [#haptic-sound-map](https://github.com/frilo-eth/kby-feed/blob/main/README.md#haptic-sound-map): full preset → WebHaptics → sound recipe catalog; curated export IDs; recipe-only audio + haptic-only swipe/pull rules.
