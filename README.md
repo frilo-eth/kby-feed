@@ -21,6 +21,7 @@ Porting / review: open the heading, not the whole README. Production: [https://k
 | [Token page](#token-page) (`/token` — ticker + View token) | [README.md#token-page](https://github.com/frilo-eth/kby-feed/blob/main/README.md#token-page) |
 | [Profile page](#profile-page) (`/profile` — handle + View my profile) | [README.md#profile-page](https://github.com/frilo-eth/kby-feed/blob/main/README.md#profile-page) |
 | [Auth (Option 4)](#auth) — social vs EOA · wallet popup / `?autosig` | [README.md#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth) |
+| [Wallet copy morph](#wallet-copy-morph) (Account identity · balance → copy → check) | [README.md#wallet-copy-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#wallet-copy-morph) |
 | [Sheet morph](#sheet-morph) (`morphSheet` ~320ms) | [README.md#sheet-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#sheet-morph) |
 | [Deposit](#deposit) (Cash vs Crypto, unified QR) | [README.md#deposit](https://github.com/frilo-eth/kby-feed/blob/main/README.md#deposit) |
 | [Send](#send) | [README.md#send](https://github.com/frilo-eth/kby-feed/blob/main/README.md#send) |
@@ -175,6 +176,7 @@ Most motion reuses a small set of curves. Durations are wall-clock; doomscroll s
 | **Reaction rail** | outside: `#FAFAFA→#FFF` / dark `#130A07→#251D18`; on-media glass tint; active `brightness(1.06)` | `brightness(.94)` | bg/color `.22s` |
 | Reaction count | ink / white | — | color `.2s` |
 | **Mute / unmute** | pathLength draw morph — see below | — | `.2s` ease-in-out (+`.1s` outer) |
+| **Wallet copy morph** | [Wallet copy morph](#wallet-copy-morph) — Account identity icon: wallet → copy → check | `scale(.94)` on the 32px hit | `320 / 280 / 340ms` cubic ease-in-out |
 | **Buy $ticker** (floating pill) | desktop + mobile; cadence show → tuck → re-engage (≤3× / post); shared enter/exit spring; `inset(… round 999px)` wipe; hotzone wake = pill only (`is-hover-wake`) | brightness | clip/transform spring |
 | **Hover cards** | user + token + **`>>` quote** portals (no Buy CTA); desktop `pointer:fine` only | — | show `.18s`, delay 180–280ms |
 | New posts pill | brightness `.98`; soft-dismiss after 2 settled swipes | `scale(.95)` | opacity `.28s`, transform `.34s` pop |
@@ -1570,7 +1572,7 @@ Copy in the prototype: header and login modal **Sign up / Log in**. Account **US
 
 ### 13. Auth (Option 4)
 
-**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth)
+**Share this section:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth](https://github.com/frilo-eth/kby-feed/blob/main/README.md#auth) · **Copy morph only:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#wallet-copy-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#wallet-copy-morph)
 
 One login, one paying wallet. Prototype only — no real keys.
 
@@ -1587,20 +1589,21 @@ Identity is three layers that must not be derived from each other:
 |-------|--------------|--------------|
 | **Username** | Generated animal handle (header + Profile). Same on every path. Not an email. | Same generated animal handle. |
 | **Login credential** | A realistic Google / Apple / email / social (e.g. `maya.chen.92@gmail.com`). Never `swiftsunnystoat@gmail.com` from the handle. | The EOA you connected. |
-| **Receive address** | Minted embedded **Account** (`kind:'embedded'`). Copy lives on the USD balance row — not a later-linked MetaMask. | **That same EOA.** No second wallet is minted. Copy on the USD balance row is the address you signed in with. |
+| **Receive address** | Minted embedded **Account** (`kind:'embedded'`). Copy is the morphing icon next to the login method — not a later-linked MetaMask. | **That same EOA.** No second wallet is minted. The identity pill itself copies the address you signed in with. |
 
-Account opens with a large blockie (seeded from that receive address, classic blockies palette) and the animal name. The 36×36 pencil sits immediately after the username (same control as copy). Under the name: login icon + email / @handle on social, or the shortened EOA on wallet login — click copies (full address or login) with the same check / **Copied** tip as the USD-balance copy control. Changing the username does **not** retint the blockie. The 36×36 copy control sits next to **USD Balance**; the address is tooltip-only while the dollar balance value remains fixed. Tabs are **Tokens**, **Activity**, **Tips**, **Profile**, **Settings**. Crypto wallets live on **Settings**, below **Login connections** and **Passkey** — not on the default Tokens view. Settings lists only what is already connected. Wallet settings rows are borderless (no divider lines). **Connect account** opens the same Sign up / Log in methods (email, Google / X / TikTok, More options — no Phone) and the same verifying / connected wait. **Connect wallet** is a full-row button that opens the picker (same pattern as Top up methods). Connect and Disconnect show on hover. Social users see the embedded wallet labeled **Account**; wallet-login users see only the wallet they signed in with (plus any they connect later). Linked wallets: **Rename**, **Copy address**, **Remove**. Account hero is **USD Balance**; the CTA is **Top up**. Send short uses **Top up to send** only from the social Account cash pot. Deposit hub title is **Top up**. **View my profile** is a ghost button to [`/profile`](#profile-page).
+Account opens with a large blockie (seeded from that receive address, classic blockies palette) and the animal name. Under the name: login icon + email / @handle on social, or the shortened EOA on wallet login. Social keeps a separate 32px copy control whose tip is **Your account address** — that control is the [wallet copy morph](#wallet-copy-morph) (wallet glyph → copy → check). Wallet login morphs the copy glyph in the pill’s tail on click. Changing the username does **not** retint the blockie. **USD Balance** is the dollar figure only — the address is tooltip-only on the identity copy control. Tabs are **Tokens**, **Activity**, **Tips**, **Profile**, **Settings**. Crypto wallets live on **Settings**, below **Login connections** and **Passkey** — not on the default Tokens view. Settings lists only what is already connected. Wallet settings rows are borderless (no divider lines). **Connect account** opens the same Sign up / Log in methods (email, Google / X / TikTok, More options — no Phone) and the same verifying / connected wait. **Connect wallet** is a full-row button that opens the picker (same pattern as Top up methods). Connect and Disconnect show on hover. Social users see the embedded wallet labeled **Account**; wallet-login users see only the wallet they signed in with (plus any they connect later). Linked wallets: **Rename**, **Copy address**, **Remove**. Account hero is **USD Balance**; the CTA is **Top up**. Send short uses **Top up to send** only from the social Account cash pot. Deposit hub title is **Top up**. **View my profile** is a ghost button to [`/profile`](#profile-page).
 
 Default login sheet: email, Google / X / TikTok, Crypto wallet, Passkey, More options. Title **Sign up / Log in**. Wallet lives on the main sheet only — not under More. Present the stripped sheet with [`?minimal`](https://kby-feed.vercel.app/feed?minimal) (or `?flow=first&minimal`): icons first, email, Crypto wallet, More options (Passkey hidden). Click-through index: [`/flows`](https://kby-feed.vercel.app/flows).
 
-The USD balance label has the copy control beside it. The address is not visible at rest — hover the copy control for **Your account address**, a MegaETH explainer, then the address. Social login still keeps that address off the identity row (email / @handle lives under the name).
+The address is not visible at rest. Hover the identity copy control for **Your account address**, a MegaETH explainer, then the address. Social login still keeps that address off the identity *label* (email / @handle lives under the name; copy is the sibling icon). Full morph states + snippets: [wallet copy morph](#wallet-copy-morph).
 
 EOA connect and spend always open a fake extension popup (`#walletExt`, top-right on desktop). Connect is **Cancel / Connect**; signatures are **Cancel / Confirm**. Social stays **sponsored** (no popup). Skip the popup with [`?autosig`](https://kby-feed.vercel.app/feed?autosig). Cancel **morphs the wait sheet** to **Connection rejected** / **Signature rejected** + Try again — not a toast. [`/feed?sig`](https://kby-feed.vercel.app/feed?sig) lands on wait + Connect and funds `$250` after confirm. [`/feed?flow=buy-wallet`](https://kby-feed.vercel.app/feed?flow=buy-wallet) opens the trade confirm + Confirm popup.
 
 | Demo URL | Lands on |
 |----------|----------|
 | [`/feed?sig`](https://kby-feed.vercel.app/feed?sig) | EOA login wait + Connect popup |
-| [`/feed?flow=wallet`](https://kby-feed.vercel.app/feed?flow=wallet) | Connect, then Account |
+| [`/feed?flow=account`](https://kby-feed.vercel.app/feed?flow=account) | Social Account — identity copy morph (**Your account address**) |
+| [`/feed?flow=wallet`](https://kby-feed.vercel.app/feed?flow=wallet) | Connect, then Account (EOA copy morph in the pill tail) |
 | [`/feed?flow=buy-wallet`](https://kby-feed.vercel.app/feed?flow=buy-wallet) | Trade confirm + Confirm popup |
 | [`/feed?error=sig`](https://kby-feed.vercel.app/feed?error=sig) / [`?flow=sig-reject`](https://kby-feed.vercel.app/feed?flow=sig-reject) | Popup, then cancel → **Connection rejected** |
 | [`/feed?autosig`](https://kby-feed.vercel.app/feed?autosig) | Skip hatch — EOA auto-completes |
@@ -1614,10 +1617,165 @@ Hash aliases: `#sig`, `#error-sig`, `#error-funds`, `#error-short`. Deposit erro
 | Open / close overlay | `.modal` Vaul slide · `.44s` `(.32,.72,0,1)` |
 | Panel switch (login ↔ wallets ↔ email ↔ funds) | [`morphSheet`](#sheet-morph) `.32s` |
 | Icon / row press | `scale(.97)` · `.12s` |
+| Identity copy icon | [Wallet copy morph](#wallet-copy-morph) · `scale(.94)` press on `.wallet-id-method-copy-icon` |
 | Hover on `--card` controls | `color-mix(in srgb, var(--card) 62%, white)` — not `--bg` |
 | Signed-in feedback | short “You’re signed in.” hold, then `afterAuth`. Overlay fades on the success sheet — does **not** reprint login while closing, does **not** auto-open funds |
 
 API: `completeLogin` · `requireAuth` · `requireSpend` · `requestSignature` · `showWalletExt` · `paintAuthChrome`.
+
+#### Wallet copy morph
+
+**Share this morph only:** [https://github.com/frilo-eth/kby-feed/blob/main/README.md#wallet-copy-morph](https://github.com/frilo-eth/kby-feed/blob/main/README.md#wallet-copy-morph)
+
+Try it: social Account [`/feed?flow=account`](https://kby-feed.vercel.app/feed?flow=account) (copy icon next to Google / email) · wallet Account [`/feed?flow=wallet`](https://kby-feed.vercel.app/feed?flow=wallet) (copy lives in the pill tail).
+
+> **What this is *not*:** a pathLength draw (mute / padlock), an icon swap, or SMIL / MorphSVG / flubber.  
+> **What it is:** one 16×16 SVG with **four** stroke paths. Each glyph (`balance`, `copy`, `check`) is four `d` strings. At runtime the prototype samples every path at **64** points, aligns start/direction so interpolation doesn’t cross, then tweens point coordinates + per-path opacity with cubic ease-in-out.
+
+| Piece | Detail |
+|-------|--------|
+| SVG | `.wallet-copy-morph-svg` · viewBox `0 0 16 16` · stroke `1.5` · round cap/join · `currentColor` |
+| Host (social) | `#walletCopyMethodIcon` · `.wallet-id-method-copy-icon` · 32×32 · next to login method |
+| Host (EOA) | `#walletCopyMethod` tail · `.wallet-id-method-tail` · 22×22 |
+| API | `WALLET_COPY_MORPH_PATHS` · `walletCopyMorphFrames()` · `setWalletCopyMorphState(svg, state, dur)` · `armWalletCopyMethodIcon` · `armWalletMethodMorph` |
+| Durations | `WALLET_MORPH_DUR` · in **320** · out **280** · success **340** (ms) |
+| Ease | cubic ease-in-out: `t<0.5 ? 4t³ : 1−(−2t+2)³/2` |
+| Success pop | `.is-copied` → `@keyframes walletCopySuccessPop` `scale(1→1.04→1)` · `.26s` `(.22,1,.28,1)` |
+| Feedback | haptic `copyAddr` on click · tip **Address copied** for 1200ms |
+| Hover gate | `copyAddrFineHover()` = `(hover:hover) and (pointer:fine)` — touch does not pre-morph to copy |
+| A11y | prototype does **not** skip the tween; port should snap (`dur = 0`) under `prefers-reduced-motion: reduce` |
+
+**States — social** (Google / Apple / email / X… · `#walletCopyMethodIcon`)
+
+Rest glyph is the **wallet / balance** mark. Tip title is **Your account address**; body is *This is your balance address on the MegaETH network.* Login method (icon + email / @handle) does **not** morph — `armWalletMethodInfo` only.
+
+| State | Morph | Tip title | Tip body | Trigger |
+|-------|-------|-----------|----------|---------|
+| **Rest** | `balance` | Your account address | MegaETH explainer | default |
+| **Hover** | `copy` | same | same | `pointerenter` (fine hover only) |
+| **Copied** | `check` + `.is-copied` | Address copied | *(empty)* | click · lock 1200ms |
+| **Exit** | `balance` | rest restored | rest restored | leave (if not copied) · after 1200ms |
+
+**States — wallet login** (MetaMask / … · `#walletCopyMethod` tail)
+
+Rest glyph is already **copy**. Hover does **not** change the icon. Click copies the EOA and morphs to check.
+
+| State | Morph | Tip title | Trigger |
+|-------|-------|-----------|---------|
+| **Rest** | `copy` | Logged in with {wallet} | default |
+| **Hover** | `copy` (no change) | same | fine hover |
+| **Copied** | `check` + `.is-copied` | Address copied | click · lock 1200ms |
+| **Exit** | `copy` | rest restored | after 1200ms (stay on check only while still hovering) |
+
+**Glyphs (copy as-is)** — path index 2 and 3 are dummy collapsing strokes; opacity hides them on `copy` / `check`.
+
+```js
+const WALLET_COPY_MORPH_PATHS = {
+  balance: [
+    "M2.3333 7.1228V4A1.6667 1.6667 0 0 1 4 2.3333H11V5.6667H13.6667V13.6667H8.3333",
+    "M11 5.6667H4A1.6667 1.6667 0 0 1 2.3333 4",
+    "M2.4167 11.5A1.5833 1.5833 0 0 1 5.5833 11.5A1.5833 1.5833 0 0 1 2.4167 11.5",
+    "M9.9583 9.6667A0.375 0.375 0 0 1 10.7083 9.6667A0.375 0.375 0 0 1 9.9583 9.6667"
+  ],
+  copy: [
+    "M5.3737 9.8537V13.8537H14.0403V5.187H10.0403V9.8537H5.3737Z",
+    "M10.0403 9.8537H1.3737V1.187H10.0403V9.8537Z",
+    "M5.3737 11.5L5.3737 11.5",
+    "M10.0403 9.8537L10.0403 9.8537"
+  ],
+  check: [
+    "M8 1.6667C11.4978 1.6667 14.3333 4.5022 14.3333 8C14.3333 11.4978 11.4978 14.3333 8 14.3333C4.5022 14.3333 1.6667 11.4978 1.6667 8C1.6667 4.5022 4.5022 1.6667 8 1.6667Z",
+    "M10 6.3333L7 10L5.6667 8.6667",
+    "M8 14.3333L8 14.3333",
+    "M7 10L7 10"
+  ]
+};
+const WALLET_COPY_MORPH_OPACITY = {
+  balance: [1, 1, 1, 1],
+  copy:    [1, 1, 0, 0],
+  check:   [1, 1, 0, 0]
+};
+```
+
+**Markup (copy as-is)** — four empty paths; JS writes `d` + `opacity`. Same SVG in both hosts.
+
+```html
+<svg class="wallet-copy-morph-svg" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+  <path data-morph-path="0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path data-morph-path="1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path data-morph-path="2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+  <path data-morph-path="3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+```
+
+Social identity row (login stays put; morph is the sibling copy hit):
+
+```html
+<div class="wallet-id-method-group">
+  <button type="button" class="wallet-id-method is-social" id="walletCopyMethod"
+    data-tip-title="Logged in with Google" aria-label="Login method">
+    <span class="wallet-id-method-ic"><span class="wallet-id-method-auth"><!-- provider mark --></span></span>
+    <span class="wallet-id-method-lab-wrap">
+      <span class="wallet-id-method-lab">maya.chen.92@gmail.com</span>
+    </span>
+  </button>
+  <button type="button" class="wallet-id-method-copy-icon" id="walletCopyMethodIcon"
+    data-addr="0x…" data-tip-title="Your account address"
+    data-tip-body="This is your balance address on the MegaETH network."
+    aria-label="Copy account address">
+    <!-- wallet-copy-morph-svg -->
+  </button>
+</div>
+```
+
+EOA identity pill (morph in `.wallet-id-method-tail`):
+
+```html
+<button type="button" class="wallet-id-method is-eoa" id="walletCopyMethod"
+  data-auth-kind="eoa" data-addr="0x…" data-tip-title="Logged in with MetaMask"
+  aria-label="Copy account address">
+  <span class="wallet-id-method-ic"><span class="wallet-id-method-auth"><!-- MetaMask --></span></span>
+  <span class="wallet-id-method-lab-wrap">
+    <span class="wallet-id-method-lab">0xA1b2…9f3c</span>
+  </span>
+  <span class="wallet-id-method-tail" aria-hidden="true"><!-- wallet-copy-morph-svg --></span>
+</button>
+```
+
+**Tween (minimum to port)**
+
+```js
+function sampleMorphPath(d, n){ /* SVGPathElement.getPointAtLength, n=64 */ }
+function alignMorphPoints(pts, target){ /* try reverse + closed-path rotations; pick min squared distance */ }
+function tweenWalletCopyMorph(svg, toState, duration){
+  const ease = (t)=> t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+  // lerp each path’s 64 points + opacity; paint `d` as M/L polyline while in flight
+  // on complete: snap back to the canonical `WALLET_COPY_MORPH_PATHS[toState]` `d`
+}
+```
+
+Do **not** swap three SVGs. Do **not** use `pathLength` draw here — the glyphs don’t share a silhouette the way mute waves / the padlock shackle do. Cache sampled frames (`walletCopyMorphFrames`). Interrupt in-flight tweens (`cancelAnimationFrame`) when hover/click overlap.
+
+**CSS (copied-state color + pop)**
+
+```css
+.wallet-id-method-copy-icon .wallet-copy-morph-svg{ width:16px; height:16px; display:block; }
+.wallet-id-method-tail .wallet-copy-morph-svg{ width:15px; height:15px; display:block; }
+.wallet-id-method.is-copied .wallet-id-method-tail,
+.wallet-id-method-copy-icon.is-copied{
+  color: color-mix(in srgb, var(--green) 68%, var(--ink-soft));
+}
+.wallet-id-method.is-copied .wallet-id-method-tail .wallet-copy-morph-svg,
+.wallet-id-method-copy-icon.is-copied .wallet-copy-morph-svg{
+  animation: walletCopySuccessPop .26s cubic-bezier(.22,1,.28,1);
+  transform-origin: 50% 50%;
+}
+@keyframes walletCopySuccessPop{
+  0%{ transform:scale(1); }
+  50%{ transform:scale(1.04); }
+  100%{ transform:scale(1); }
+}
+```
 
 ---
 
